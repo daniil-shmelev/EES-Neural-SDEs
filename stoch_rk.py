@@ -10,6 +10,10 @@ import warnings
 
 import numpy as np
 import matplotlib.pyplot as plt
+import kauri as kr
+
+def from_kauri(method : kr.RK):
+    return StochRK(method.a, method.b, method.name)
 
 class StochRK:
     def __init__(self, a, b, name = None):

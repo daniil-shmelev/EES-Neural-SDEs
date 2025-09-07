@@ -1,5 +1,6 @@
-This directory reproduces the results found in [[Redmann & Riedel, 2020](#reference)] by applying Heun's method
-to the RDE
+This directory contains code reproducing the results found in the paper
+"Runge-Kutta methods for rough differential equations" [[Redmann & Riedel, 2020](#reference)]. 
+The authors apply Heun's method to the RDE
 
 ```math
 dy(t) = \cos(y(t)) d\mathbf{X}^1(t) + \sin(y(t))d\mathbf{X}^2(t), \quad y(0) = 1, \quad t \in [0,T].
@@ -12,11 +13,11 @@ with independent components and Hurst index H. The error
 \mathcal{E}(h) := \max_{k = 0, \ldots, N} |y(t_k) - y_k^h|
 ```
 is then evaluated for different choices of the step size $h$, and
-the trends are compared against the expected order of convergence, $2H = 0.5$.
+the trends are compared against the expected order of convergence, $2H - 0.5$.
 For more details, see [[Redmann & Riedel, 2020](#reference)].
 
 <p align="center">
-<img src="rde_example.png" width="500">
+<img src="rde_example.png" width="800">
 </p>
 
 ## References
