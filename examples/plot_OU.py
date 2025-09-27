@@ -2,6 +2,7 @@
 Plot the training loss after running OU.py
 """
 
+import os
 import pickle
 import matplotlib.pyplot as plt
 from utils import set_plotting_params
@@ -9,16 +10,23 @@ from utils import set_plotting_params
 set_plotting_params(11, 12, 13)
 
 if __name__ == "__main__":
+    plt.figure(figsize=(4, 3))
 
-    with open('plots/ees25/mse.pickle', 'rb') as handle:
-        ees25 = pickle.load(handle)
+    if os.path.isfile('plots/reversible_heun/mse.pickle'):
+        with open('plots/reversible_heun/mse.pickle', 'rb') as handle:
+            reversible_heun = pickle.load(handle)
+        plt.plot(reversible_heun, label = "Reversible Heun", color="blue", linestyle = "--", zorder = 2)
 
-    with open('plots/reversible_heun/mse.pickle', 'rb') as handle:
-        reversible_heun = pickle.load(handle)
+    if os.path.isfile('plots/ees25/mse.pickle'):
+        with open('plots/ees25/mse.pickle', 'rb') as handle:
+            ees25 = pickle.load(handle)
+        plt.plot(ees25, label="EES(2,5)", color="red", zorder = 1)
 
-    plt.figure(figsize=(4,3))
-    plt.plot(ees25, label = "EES(2,5)", color = "red")
-    plt.plot(reversible_heun, label = "Reversible Heun", color="blue", linestyle = "--")
+    if os.path.isfile('plots/ees27/mse.pickle'):
+        with open('plots/ees27/mse.pickle', 'rb') as handle:
+            ees27 = pickle.load(handle)
+        plt.plot(ees27, label="EES(2,7)", color="green", zorder = 0)
+
     plt.xlabel("Epoch")
     plt.ylabel("MSE")
     plt.legend()

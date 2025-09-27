@@ -40,7 +40,6 @@ def BS_call(S, K, T, r, sigma):
 
     d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * np.sqrt(T))
     d2 = d1 - sigma * np.sqrt(T)
-    # return S * scipy.stats.norm.cdf(d1) - K * np.exp(-r*T)* scipy.stats.norm.cdf(d2)
     return np.exp(r * T) * S * scipy.stats.norm.cdf(d1) - K * scipy.stats.norm.cdf(d2)
 
 def options_data(config):
@@ -170,8 +169,6 @@ def compare_distributions(true_data, pred_data, points, num_bins=50):
         ax.hist([round(v, 5) for v in pred_values], bins=bins, alpha=0.5, label='Pred', color='b')
         ax.set_title(f'{int(point * 100)}% Point\nKL: {kl_div:.4f}')
         ax.set_xlabel('Value')
-        # ax.set_xlim(-0.75, 1.25)
-        # ax.set_xticks([-0.5, 0.0, 0.5, 1.0])
         if ax == axes[0]:
             ax.set_ylabel('Frequency')
         ax.legend()
@@ -189,7 +186,7 @@ if __name__ == "__main__":
 
     # Parameters
     config = {
-        'method': "ees25", # "reversible_heun" or "ees25"
+        'method': "reversible_heun", # "reversible_heun" or "ees25" or "ees27"
         'num_samples': 250000,
         'T': 25.0,
         'r': 0.5,

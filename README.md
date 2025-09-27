@@ -36,3 +36,13 @@ applied to SDEs.
 concerning convergence rates of RDE schemes. We apply this example to test the convergence rates of EES(2,5). In addition
 to the discretisation error, we evaluate the error in recovering the initial condition y_0.
 - The directory `examples` contains two examples of Neural SDEs trained using Reversible Heun and EES(2,5).
+
+## Citation
+```bibtex    
+@article{shmelev2025neural,
+  title={Explicit and Effectively Symmetric Schemes for Neural SDEs},
+  author={Shmelev, Daniil and Salvi, Cristopher},
+  journal={arXiv preprint arXiv:2509.20599},
+  year={2025}
+}
+```
