@@ -1,12 +1,16 @@
 """
-Runge-Kutta Schemes
-"""
+This module provides a basic implementation of stochastic Runge--Kutta methods, based on
+the implementation in:
 
-# Adapted from https://github.com/daniil-shmelev/kauri/blob/main/kauri/rk.py
+https://github.com/daniil-shmelev/kauri/blob/main/kauri/rk.py
+
+This implementation is purely for experimentation. For an efficient implementation of
+EES schemes, see the forks of diffrax and torchsde linked in the README file of this
+directory.
+"""
 
 import copy
 from typing import Union, Callable, Tuple
-import warnings
 
 import numpy as np
 import matplotlib.pyplot as plt
