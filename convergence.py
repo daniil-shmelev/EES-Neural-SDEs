@@ -25,16 +25,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.markers as mkr
 
+from utils.stoch_rk_methods import EES25, EES27
+from utils import plotting_params
+
 np.random.seed(0)
 
-from stoch_rk_methods import EES25, EES27
-import plotting_params
 plotting_params.set_plotting_params(9, 10, 12)
 
-def get_2d_fbm(n, H = 0.75, length = 0.25):
-    f = FBM(n=n, hurst=H, length=length, method='daviesharte')
-    X1 = f.fbm()
-    X2 = f.fbm()
+def get_2d_fbm(n, H, length):
+    f_ = FBM(n=n, hurst=H, length=length, method='daviesharte')
+    X1 = f_.fbm()
+    X2 = f_.fbm()
     return np.array([[a, b] for a, b in zip(X1, X2)])
 
 def get_error(y_exact, y_vals, T):
@@ -81,16 +82,16 @@ def plot(f, method, H, T, rate, ax, N = 10, backward = False):
     ax.set_ylabel(err_label)
     ax.set_title(r'$H = $' + str(np.round(H,1)))
 
-def plot_grid(f, T, H, rates, methods, titles):
-    fig, ax = plt.subplots(2, 2, figsize=(10 * (2/3), 10 * (2/3)))
+def plot_grid(f_, T_, H_, rates_, methods_, titles_):
+    _, ax = plt.subplots(2, 2, figsize=(10 * (2/3), 10 * (2/3)))
     for i in range(2):
         for j in range(2):
-            plot(f, methods[i], H, T, rates[i*2 + j](H), ax[i][j], backward = bool(j))
-            ax[i][j].set_title(titles[i * 2 + j])
+            plot(f_, methods_[i], H_, T_, rates_[i*2 + j](H_), ax[i][j], backward = bool(j))
+            ax[i][j].set_title(titles_[i * 2 + j])
 
     plt.tight_layout()
-    plt.savefig("rde_example_ees" + str(int(H * 100)) + ".png")
-    plt.savefig("rde_example_ees" + str(int(H * 100)) + ".pdf")
+    plt.savefig("rde_example_ees" + str(int(H_ * 100)) + ".png")
+    plt.savefig("rde_example_ees" + str(int(H_ * 100)) + ".pdf")
 
 
 if __name__ == "__main__":

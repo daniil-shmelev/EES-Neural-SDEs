@@ -6,7 +6,7 @@ EES schemes, see the forks of diffrax and torchsde linked in the README file of 
 directory.
 """
 
-from stoch_rk import StochRK, from_kauri
+from utils.stoch_rk import StochRK, from_kauri
 import kauri as kr
 
 heun_rk3 = StochRK([[0, 0, 0],

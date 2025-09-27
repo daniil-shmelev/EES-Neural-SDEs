@@ -1,9 +1,13 @@
-METHOD = "ees25"
-DIR = "plots/options_" + METHOD
+"""
+This file contains code fitting a Neural SDE to option prices derived from high
+volatility geometric Brownian motion dynamics. The code is largely based on the repository:
 
-import os
-if not os.path.exists(DIR):
-    os.makedirs(DIR)
+https://github.com/yongkyung-oh/Stable-Neural-SDEs
+
+supporting the paper "Stable Neural Stochastic Differential Equations in Analyzing Irregular Time Series Data".
+
+Once this file is run for both reversible_heun and ees25, the training loss can be plotted using plot_GBM.py
+"""
 
 import os
 import random
@@ -15,6 +19,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torchsde
+from scipy.stats import entropy
 
 # Setup seed for reproducibility
 def seed_everything(seed):
@@ -28,62 +33,27 @@ def seed_everything(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = True
 
-use_cuda = torch.cuda.is_available()
-device = torch.device("cuda" if use_cuda else "cpu")
-
-# Parameters
-NUM_SAMPLES = 250000
-T = 25.0
-R = 0.5
-SIGMA = 1.5
-S0 = 100.
-STRIKES = np.linspace(90, 110, 20)
-MATURITIES = np.linspace(0, T, 100)
-BATCH_SIZE = 125000
-SEED = 42
-EPOCHS = 250
-
-N = len(MATURITIES)
-DT = T / N
-
 def BS_call(S, K, T, r, sigma):
 
     if T == 0.:
         return max(S - K, 0.)
 
-    d1 = (np.log(S/K) + (r + sigma**2/2)*T) / (sigma*np.sqrt(T))
+    d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * np.sqrt(T))
     d2 = d1 - sigma * np.sqrt(T)
-    #return S * scipy.stats.norm.cdf(d1) - K * np.exp(-r*T)* scipy.stats.norm.cdf(d2)
+    # return S * scipy.stats.norm.cdf(d1) - K * np.exp(-r*T)* scipy.stats.norm.cdf(d2)
     return np.exp(r * T) * S * scipy.stats.norm.cdf(d1) - K * scipy.stats.norm.cdf(d2)
 
-def options_data(S0, strikes, maturities, r, sigma):
-    """
-    Simulate the GBM
+def options_data(config):
+    m = len(config['strikes'])
+    n = len(config['maturities'])
 
-    Parameters:
-    T (float): Total time.
-    N (int): Number of time steps.
-    mu (float): Long-term mean.
-    sigma (float): Volatility.
-    X0 (float): Initial value.
+    calls = torch.empty((m, n))
 
-    Returns:
-    np.ndarray: Simulated values of the OU process.
-    """
-    calls = torch.empty((len(strikes), len(maturities)))
-
-    for i in range(len(strikes)):
-        for j in range(len(maturities)):
-            calls[i,j] = BS_call(S0, strikes[i], maturities[j], r, sigma)
+    for i in range(m):
+        for j in range(n):
+            calls[i, j] = BS_call(config['S0'], config['strikes'][i], config['maturities'][j], config['r'], config['sigma'])
 
     return calls
-
-# Ensure reproducibility
-seed_everything(SEED)
-
-# Generate data
-call_data = options_data(S0, STRIKES, MATURITIES, R, SIGMA)
-
 
 class LipSwish(nn.Module):
     def forward(self, x):
@@ -92,7 +62,6 @@ class LipSwish(nn.Module):
 class Sigmoid(nn.Module):
     def forward(self, x):
         return torch.nn.functional.sigmoid(x)
-
 
 class MLP(nn.Module):
     def __init__(self, in_size, out_size, hidden_dim, num_layers, tanh=False, activation='lipswish'):
@@ -117,11 +86,10 @@ class MLP(nn.Module):
     def forward(self, x):
         return self._model(x)
 
-
 class NeuralSDEFunc(nn.Module):
     def __init__(self, input_dim, hidden_dim, num_layers, activation='lipswish'):
         super(NeuralSDEFunc, self).__init__()
-        self.sde_type = "stratonovich" # NSDE will learn the ito correction
+        self.sde_type = "stratonovich"  # NSDE will learn the ito correction
         self.noise_type = "diagonal"  # or "scalar"
 
         self.f_net = MLP(input_dim + 1, input_dim, hidden_dim, num_layers, activation=activation)
@@ -137,105 +105,41 @@ class NeuralSDEFunc(nn.Module):
             t = torch.full_like(y[:, 0], fill_value=t).unsqueeze(-1)
         return self.g_net(torch.cat((t, y), dim=-1))
 
-
 class NDE_model(nn.Module):
-    def __init__(self, input_dim, hidden_dim, num_layers, activation='lipswish', vector_field=None):
+    def __init__(self, input_dim, hidden_dim, num_layers, config, activation='lipswish', vector_field=None):
         super(NDE_model, self).__init__()
         self.func = vector_field(input_dim, hidden_dim, num_layers, activation=activation)
+        self.config = config
 
     def forward(self, batch, times):
-        y0 = torch.tensor([[S0]] * batch).to(times.device)
+        y0 = torch.tensor([[self.config['S0']]] * batch).to(times.device)
 
         z = torchsde.sdeint(sde=self.func,
                             y0=y0,
                             ts=times,
-                            dt=DT,
-                            method=METHOD)
+                            dt=self.config['dt'],
+                            method=self.config['method'])
 
         return z.permute(1, 0, 2)
 
-input_dim = 1
-hidden_dim = 8
-num_layers = 2
+def my_loss(pred_paths, call_data, config):
+    m = len(config['strikes'])
+    n = len(config['maturities'])
 
-model = NDE_model(input_dim=input_dim, hidden_dim=hidden_dim, num_layers=num_layers, vector_field=NeuralSDEFunc, activation="lipswish").to(device)
+    # pred_paths of shape (batch, T, dim)
+    pred_calls = torch.empty(size=(m,n))
 
-num_epochs = EPOCHS
-lr = 1e-2
+    assert (n == pred_paths.shape[1])
 
-optimizer = optim.Adam(model.parameters(), lr=lr)
-scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.99)  # decay factor
-
-
-def my_loss(pred_paths, call_data):
-    #pred_paths of shape (batch, T, dim)
-    pred_calls = torch.empty(size = (len(STRIKES), len(MATURITIES)))
-
-    assert (len(MATURITIES) == pred_paths.shape[1])
-
-    for i in range(len(STRIKES)):
-        for j in range(len(MATURITIES)):
-            pred_calls[i,j] = torch.relu(pred_paths[:, j] - STRIKES[i]).mean()
+    for i in range(m):
+        for j in range(n):
+            pred_calls[i, j] = torch.relu(pred_paths[:, j] - config['strikes'][i]).mean()
 
     loss = pred_calls - call_data
-    loss *= torch.exp(-R * torch.tensor(MATURITIES))
+    loss *= torch.exp(-config['r'] * torch.tensor(config['maturities']))
     loss = loss[:, ::10]
     loss = loss ** 2
     return loss.mean() / 2.
-
-
-
-mse_loss = []
-
-for epoch in range(1, num_epochs + 1):
-    model.train()
-
-    num_batches = NUM_SAMPLES // BATCH_SIZE
-    total_loss = 0
-    all_preds = []
-
-    for i in range(num_batches):
-        times = torch.linspace(0, 1, len(MATURITIES)).to(device)
-
-        optimizer.zero_grad()
-        pred = model(BATCH_SIZE, times).squeeze(-1)
-        loss = my_loss(pred, call_data)
-        loss.backward()
-        optimizer.step()
-
-        total_loss += loss
-        all_preds.append(pred.detach().cpu())
-
-    mse_loss.append(total_loss.detach().cpu())
-
-    # decay LR once per epoch
-    scheduler.step()
-
-    # monitor current LR
-    current_lr = scheduler.get_last_lr()[0]
-    print(f"Epoch {epoch}, Loss: {total_loss:.6f}, LR: {current_lr:.6e}")
-
-    if epoch % 10 == 0:
-        plt.figure(figsize=(8, 4))
-        for i in range(100):
-            plt.plot(times.cpu(), pred.detach().cpu()[i, :], color='r', alpha = 0.1)
-        plt.xlabel('Time')
-        plt.ylabel('Value')
-        plt.title('Model Predictions at epoch ' + str(epoch))
-        plt.savefig(DIR + "/model_pred_" + str(epoch) + ".png")
-        plt.clf()
-
-
-import pickle
-with open(DIR + '/mse.pickle', 'wb') as handle:
-    pickle.dump(mse_loss, handle)
-
-plt.plot(mse_loss)
-plt.savefig(DIR + "/loss.png")
-plt.clf()
-
-from scipy.stats import entropy
-
 
 def calculate_kl_divergence(true_values, pred_values, num_bins=50):
     # Compute histogram for true and predicted values
@@ -249,7 +153,6 @@ def calculate_kl_divergence(true_values, pred_values, num_bins=50):
     # Calculate KL divergence
     kl_div = entropy(hist_true, hist_pred)
     return kl_div
-
 
 def compare_distributions(true_data, pred_data, points, num_bins=50):
     time_points = [int(p * true_data.shape[1]) for p in points]
@@ -280,21 +183,121 @@ def compare_distributions(true_data, pred_data, points, num_bins=50):
     plt.savefig(DIR + "/distr.eps")
     plt.clf()
 
-W = np.cumsum(
-    np.random.normal(0., np.sqrt(DT), size=(NUM_SAMPLES, N)),
-    axis = 1
-)
-t = np.linspace(0, T, N)
-t = np.tile(t, (NUM_SAMPLES, 1))
-all_trues = S0 * np.exp(
-    (R - 0.5 * SIGMA**2) * t + SIGMA * W
-)
+if __name__ == "__main__":
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda" if use_cuda else "cpu")
 
-all_preds = torch.cat(all_preds, axis = 0)
-all_preds = np.array(all_preds)
+    # Parameters
+    config = {
+        'method': "ees25", # "reversible_heun" or "ees25"
+        'num_samples': 250000,
+        'T': 25.0,
+        'r': 0.5,
+        'sigma': 1.5,
+        'S0': 100.,
+        'strikes': np.linspace(90, 110, 20),
+        'train_ratio': 0.8,
+        'batch_size': 125000,
+        'seed': 42,
+        'num_epochs': 250,
+        'input_dim': 1,
+        'hidden_dim': 8,
+        'num_layers': 2,
+        'lr': 1e-2,
+        'gamma': 0.99
+    }
 
-points_to_compare = [0.2, 0.4, 0.6, 0.8]
-compare_distributions(all_trues, all_preds, points_to_compare)
+    config['maturities'] = np.linspace(0, config['T'], 100)
+    config['N'] = len(config['maturities'])
+    config['dt'] = config['T'] / config['N']
 
-with open(DIR + '/distr.pickle', 'wb') as handle:
-    pickle.dump((all_trues, all_preds), handle)
+    DIR = "plots/options_" + config['method']
+
+    if not os.path.exists(DIR):
+        os.makedirs(DIR)
+
+    # Ensure reproducibility
+    seed_everything(config['seed'])
+
+    # Generate data
+    call_data = options_data(config)
+
+    model = NDE_model(input_dim=config['input_dim'], hidden_dim=config['hidden_dim'],
+                      num_layers=config['num_layers'], vector_field=NeuralSDEFunc,
+                      config = config, activation="lipswish").to(device)
+
+    optimizer = optim.Adam(model.parameters(), lr=config['lr'])
+    scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=config['gamma'])  # decay factor
+
+
+
+    mse_loss = []
+
+    for epoch in range(1, config['num_epochs'] + 1):
+        model.train()
+
+        num_batches = config['num_samples'] // config['batch_size']
+        total_loss = 0
+        all_preds = []
+
+        for i in range(num_batches):
+            times = torch.linspace(0, 1, len(config['maturities'])).to(device)
+
+            optimizer.zero_grad()
+            pred = model(config['batch_size'], times).squeeze(-1)
+            loss = my_loss(pred, call_data, config)
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss
+            all_preds.append(pred.detach().cpu())
+
+        mse_loss.append(total_loss.detach().cpu())
+
+        # decay LR once per epoch
+        scheduler.step()
+
+        # monitor current LR
+        current_lr = scheduler.get_last_lr()[0]
+        print(f"Epoch {epoch}, Loss: {total_loss:.6f}, LR: {current_lr:.6e}")
+
+        if epoch % 10 == 0:
+            plt.figure(figsize=(8, 4))
+            for i in range(100):
+                plt.plot(times.cpu(), pred.detach().cpu()[i, :], color='r', alpha = 0.1)
+            plt.xlabel('Time')
+            plt.ylabel('Value')
+            plt.title('Model Predictions at epoch ' + str(epoch))
+            plt.savefig(DIR + "/model_pred_" + str(epoch) + ".png")
+            plt.clf()
+
+
+    import pickle
+    with open(DIR + '/mse.pickle', 'wb') as handle:
+        pickle.dump(mse_loss, handle)
+
+    plt.plot(mse_loss)
+    plt.savefig(DIR + "/loss.png")
+    plt.clf()
+
+
+
+
+    W = np.cumsum(
+        np.random.normal(0., np.sqrt(config['dt']), size=(config['num_samples'], config['N'])),
+        axis = 1
+    )
+    t = np.linspace(0, config['T'], config['N'])
+    t = np.tile(t, (config['num_samples'], 1))
+    all_trues = config['S0'] * np.exp(
+        (config['r'] - 0.5 * config['sigma']**2) * t + config['sigma'] * W
+    )
+
+    all_preds = torch.cat(all_preds, axis = 0)
+    all_preds = np.array(all_preds)
+
+    points_to_compare = [0.2, 0.4, 0.6, 0.8]
+    compare_distributions(all_trues, all_preds, points_to_compare)
+
+    with open(DIR + '/distr.pickle', 'wb') as handle:
+        pickle.dump((all_trues, all_preds), handle)

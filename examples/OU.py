@@ -1,24 +1,28 @@
-METHOD = "reversible_heun"
-DIR = "plots/" + METHOD
+"""
+This file contains code fitting a Neural Langevin SDE (LSDE) to high volatility
+Ornstein-Uhlenbeck dynamics. The code is largely based on the repository:
 
-import os
-if not os.path.exists(DIR):
-    os.makedirs(DIR)
+https://github.com/yongkyung-oh/Stable-Neural-SDEs/blob/main/tutorial/simple%20OU%20process%20-%20Neural%20LSDE.ipynb
+
+supporting the paper "Stable Neural Stochastic Differential Equations in Analyzing Irregular Time Series Data".
+
+Once this file is run for both reversible_heun and ees25, the training loss can be plotted using plot_OU.py
+"""
 
 import os
 import random
+import pickle
+
 import numpy as np
 import matplotlib.pyplot as plt
-from tqdm import tqdm
-
 import torch
-import torch.nn as nn
-import torch.optim as optim
+from torch import nn
+from torch import optim
 import torchcde
 import torchsde
 from torch.utils.data import Dataset, DataLoader
+from scipy.stats import entropy
 
-# Setup seed for reproducibility
 def seed_everything(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
     np.random.seed(seed)
@@ -30,24 +34,7 @@ def seed_everything(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = True
 
-use_cuda = torch.cuda.is_available()
-device = torch.device("cuda" if use_cuda else "cpu")
-
 def ou_process(T, N, theta, mu, sigma, X0):
-    """
-    Simulate the Ornstein-Uhlenbeck process.
-
-    Parameters:
-    T (float): Total time.
-    N (int): Number of time steps.
-    theta (float): Rate of mean reversion.
-    mu (float): Long-term mean.
-    sigma (float): Volatility.
-    X0 (float): Initial value.
-
-    Returns:
-    np.ndarray: Simulated values of the OU process.
-    """
     dt = T / N
     t = np.linspace(0, T, N)
     X = np.zeros(N)
@@ -59,10 +46,10 @@ def ou_process(T, N, theta, mu, sigma, X0):
 
     return t, X
 
-def generate_data(num_samples, T, N, theta, mu, sigma, X0):
+def generate_data(config):
     data_list = []
-    for _ in range(num_samples):
-        t, X = ou_process(T, N, theta, mu, sigma, X0)
+    for _ in range(config['num_samples']):
+        t, X = ou_process(config['T'], config['N'], config['theta'], config['mu'], config['sigma'], config['X0'])
         data_list.append([t, X])
 
     total_data = torch.Tensor(np.array(data_list))  # [Batch size, Dimension, Length]
@@ -111,61 +98,9 @@ def create_data_loaders(train_data, train_coeffs, test_data, test_coeffs, batch_
 
     return train_loader, test_loader
 
-# Parameters
-config = {
-    'num_samples': 50000,
-    'T': 10.0,
-    'N': 20,
-    'theta': 0.2,
-    'mu': 0.1,
-    'sigma': 2.0,
-    'X0': 1.0,
-    'train_ratio': 0.8,
-    'batch_size': 50000,
-    'seed': 42,
-}
-
-# Ensure reproducibility
-seed_everything(config['seed'])
-
-# Generate data
-total_data, coeffs, times = generate_data(config['num_samples'], config['T'], config['N'], config['theta'], config['mu'], config['sigma'], config['X0'])
-
-# Split data
-train_data, train_coeffs, test_data, test_coeffs = split_data(total_data, coeffs, config['train_ratio'])
-
-# Create data loaders
-train_loader, test_loader = create_data_loaders(train_data, train_coeffs, test_data, test_coeffs, config['batch_size'])
-
-# Plot the first sample for verification
-plt.plot(times.numpy(), total_data[0, :, 1].numpy())
-plt.xlabel('Time')
-plt.ylabel('Value')
-plt.title('OU Process Sample Path')
-plt.grid('on')
-plt.savefig(DIR + "/sample_path.png")
-plt.savefig(DIR + "/sample_path.pdf")
-plt.savefig(DIR + "/sample_path.eps")
-plt.clf()
-
-# Plot the whole samples for verification
-for data in total_data:
-    plt.plot(times.numpy(), data[:,1].numpy(), alpha=0.05)
-plt.plot(times.numpy(), total_data[0, :, 1].numpy(), color='k')
-plt.xlabel('Time')
-plt.ylabel('Value')
-plt.title('OU Process Total Sample Path')
-plt.grid('on')
-plt.savefig(DIR + "/total_sample_path.png")
-plt.savefig(DIR + "/total_sample_path.pdf")
-plt.savefig(DIR + "/total_sample_path.eps")
-plt.clf()
-
-
 class LipSwish(nn.Module):
     def forward(self, x):
         return 0.909 * torch.nn.functional.silu(x)
-
 
 class MLP(nn.Module):
     def __init__(self, in_size, out_size, hidden_dim, num_layers, tanh=False, activation='lipswish'):
@@ -188,14 +123,12 @@ class MLP(nn.Module):
     def forward(self, x):
         return self._model(x)
 
-
 class NeuralLSDEFunc(nn.Module):
     def __init__(self, input_dim, hidden_dim, hidden_hidden_dim, num_layers, activation='lipswish'):
-        super(NeuralLSDEFunc, self).__init__()
+        super().__init__()
         self.sde_type = "stratonovich"
         self.noise_type = "diagonal"  # or "scalar"
 
-        # self.linear_in = nn.Linear(hidden_dim + 1, hidden_dim)
         self.linear_X = nn.Linear(input_dim, hidden_dim)
         self.emb = nn.Linear(hidden_dim * 2, hidden_dim)
         self.f_net = MLP(hidden_dim, hidden_dim, hidden_hidden_dim, num_layers, activation=activation)
@@ -211,11 +144,6 @@ class NeuralLSDEFunc(nn.Module):
     def f(self, t, y):
         Xt = self.X.evaluate(t)
         Xt = self.linear_X(Xt)
-
-        if t.dim() == 0:
-            t = torch.full_like(y[:, 0], fill_value=t).unsqueeze(-1)
-        # yy = self.linear_in(torch.cat((torch.sin(t), torch.cos(t), y), dim=-1))
-        # yy = self.linear_in(torch.cat((t, y), dim=-1))
         z = self.emb(torch.cat([y, Xt], dim=-1))
         z = self.f_net(z)
         return self.linear_out(z)
@@ -223,17 +151,17 @@ class NeuralLSDEFunc(nn.Module):
     def g(self, t, y):
         if t.dim() == 0:
             t = torch.full_like(y[:, 0], fill_value=t).unsqueeze(-1)
-        # tt = self.noise_in(torch.cat((torch.sin(t), torch.cos(t)), dim=-1))
+
         tt = self.noise_in(t)
         return self.g_net(tt)
 
-
 class NDE_model(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, activation='lipswish', vector_field=None):
-        super(NDE_model, self).__init__()
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, method, activation='lipswish', vector_field=None):
+        super().__init__()
         self.func = vector_field(input_dim, hidden_dim, hidden_dim, num_layers, activation=activation)
         self.initial = nn.Linear(input_dim, hidden_dim)
         self.decoder = nn.Linear(hidden_dim, output_dim)
+        self.method = method
 
     def forward(self, coeffs, times):
         # control module
@@ -246,135 +174,9 @@ class NDE_model(nn.Module):
                             y0=y0,
                             ts=times,
                             dt=0.05,
-                            method=METHOD)
+                            method=self.method)
         z = z.permute(1, 0, 2)
         return self.decoder(z)
-
-input_dim = 2
-output_dim = 1
-hidden_dim = 32
-num_layers = 1
-
-model = NDE_model(input_dim=input_dim, hidden_dim=hidden_dim, output_dim=output_dim, num_layers=num_layers,
-                  vector_field=NeuralLSDEFunc).to(device)
-
-num_epochs = 250
-lr = 1e-3
-
-optimizer = optim.Adam(model.parameters(), lr=lr)
-criterion = torch.nn.MSELoss()
-
-model.eval()
-total_loss = 0
-all_preds = []
-all_trues = []
-with torch.no_grad():
-    for batch in test_loader:
-        coeffs = batch[1].to(device)
-        times = torch.linspace(0, 1, batch[0].shape[1]).to(device)
-
-        true = batch[0][:,:,1].to(device)
-        pred = model(coeffs, times).squeeze(-1)
-        loss = criterion(pred, true)
-        total_loss += loss.item()
-
-        all_preds.append(pred.cpu())
-        all_trues.append(true.cpu())
-
-avg_loss = total_loss / len(test_loader)
-print(f'Test Loss: {avg_loss}')
-
-all_preds = torch.cat(all_preds, dim=0)
-all_trues = torch.cat(all_trues, dim=0)
-
-##
-num_samples = 5
-
-plt.figure(figsize=(8, 4))
-for i in range(num_samples):
-    plt.plot(all_trues[i].numpy(), color='r')
-    plt.plot(all_preds[i].numpy(), color='b')
-plt.xlabel('Time')
-plt.ylabel('Value')
-plt.ylim(-0.75,1.25)
-plt.title('Model Predictions vs True Values')
-plt.savefig(DIR + "/model_pred.png")
-plt.savefig(DIR + "/model_pred.pdf")
-plt.savefig(DIR + "/model_pred.eps")
-plt.clf()
-
-mse_loss = []
-
-for epoch in range(1, num_epochs + 1):
-    model.train()
-    total_loss = 0
-    for batch in train_loader:
-        coeffs = batch[1].to(device)
-        times = torch.linspace(0, 1, batch[0].shape[1]).to(device)
-
-        optimizer.zero_grad()
-        true = batch[0][:, :, 1].to(device)
-        pred = model(coeffs, times).squeeze(-1)
-        loss = criterion(pred, true)
-        loss.backward()
-        optimizer.step()
-
-        total_loss += loss.item()
-    mse_loss.append(total_loss)
-
-    if epoch % 10 == 0:
-        avg_loss = total_loss / len(train_loader)
-        print(f'Epoch {epoch}, Loss: {avg_loss}')
-
-        ##
-        model.eval()
-        total_loss = 0
-        all_preds = []
-        all_trues = []
-        with torch.no_grad():
-            for batch in test_loader:
-                coeffs = batch[1].to(device)
-                times = torch.linspace(0, 1, batch[0].shape[1]).to(device)
-
-                true = batch[0][:, :, 1].to(device)
-                pred = model(coeffs, times).squeeze(-1)
-                loss = criterion(pred, true)
-                total_loss += loss.item()
-
-                all_preds.append(pred.cpu())
-                all_trues.append(true.cpu())
-
-        avg_loss = total_loss / len(test_loader)
-        print(f'Test Loss: {avg_loss}')
-
-        all_preds = torch.cat(all_preds, dim=0)
-        all_trues = torch.cat(all_trues, dim=0)
-
-        ##
-        plt.figure(figsize=(8, 4))
-        for i in range(num_samples):
-            plt.plot(all_trues[i].numpy(), color='r')
-            plt.plot(all_preds[i].numpy(), color='b')
-        plt.xlabel('Time')
-        plt.ylabel('Value')
-        plt.ylim(-0.75, 1.25)
-        plt.title('Model Predictions vs True Values')
-        plt.savefig(DIR + "/model_pred" + str(epoch) + ".png")
-        plt.savefig(DIR + "/model_pred" + str(epoch) + ".pdf")
-        plt.savefig(DIR + "/model_pred" + str(epoch) + ".eps")
-        plt.clf()
-
-
-import pickle
-with open(DIR + '/mse.pickle', 'wb') as handle:
-    pickle.dump(mse_loss, handle)
-
-plt.plot(mse_loss)
-plt.savefig(DIR + "/loss.png")
-plt.clf()
-
-from scipy.stats import entropy
-
 
 def calculate_kl_divergence(true_values, pred_values, num_bins=50):
     # Compute histogram for true and predicted values
@@ -389,11 +191,10 @@ def calculate_kl_divergence(true_values, pred_values, num_bins=50):
     kl_div = entropy(hist_true, hist_pred)
     return kl_div
 
-
-def compare_distributions(true_data, pred_data, points, num_bins=50):
+def compare_distributions(true_data, pred_data, points, dir_, num_bins=50):
     time_points = [int(p * true_data.shape[1]) for p in points]
 
-    fig, axes = plt.subplots(1, len(points), figsize=(20, 5), sharey=True)
+    _, axes = plt.subplots(1, len(points), figsize=(20, 5), sharey=True)
 
     for ax, point, time_point in zip(axes, points, time_points):
         true_values = true_data[:, time_point].numpy()
@@ -405,19 +206,196 @@ def compare_distributions(true_data, pred_data, points, num_bins=50):
         ax.hist([round(v, 5) for v in pred_values], bins=num_bins, alpha=0.5, label='Pred', color='b')
         ax.set_title(f'{int(point * 100)}% Point\nKL: {kl_div:.4f}')
         ax.set_xlabel('Value')
-        # ax.set_xlim(-0.75, 1.25)
-        # ax.set_xticks([-0.5, 0.0, 0.5, 1.0])
         if ax == axes[0]:
             ax.set_ylabel('Frequency')
         ax.legend()
 
     plt.suptitle('Distribution Comparison at Specific Points')
     plt.tight_layout(rect=[0, 0, 1, 0.95])
-    plt.savefig(DIR + "/distr.png")
-    plt.savefig(DIR + "/distr.pdf")
-    plt.savefig(DIR + "/distr.eps")
+    plt.savefig(dir_ + "/distr.png")
+    plt.savefig(dir_ + "/distr.pdf")
+    plt.savefig(dir_ + "/distr.eps")
+    plt.clf()
+
+if __name__ == "__main__":
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda" if use_cuda else "cpu")
+
+    # Parameters
+    config = {
+        'method': "reversible_heun", # "reversible_heun" or "ees25"
+        'num_samples': 50000,
+        'T': 10.0,
+        'N': 20,
+        'theta': 0.2,
+        'mu': 0.1,
+        'sigma': 2.0,
+        'X0': 1.0,
+        'train_ratio': 0.8,
+        'batch_size': 50000,
+        'seed': 42,
+        'num_epochs': 250,
+        'input_dim': 2,
+        'output_dim': 1,
+        'hidden_dim': 32,
+        'num_layers': 1,
+        'lr': 1e-3
+    }
+
+    DIR = "plots/" + config['method']
+
+    if not os.path.exists(DIR):
+        os.makedirs(DIR)
+
+    seed_everything(config['seed'])
+
+    # Generate data
+    total_data, coeffs, times = generate_data(config)
+
+    # Split data
+    train_data, train_coeffs, test_data, test_coeffs = split_data(total_data, coeffs, config['train_ratio'])
+
+    # Create data loaders
+    train_loader, test_loader = create_data_loaders(train_data, train_coeffs, test_data, test_coeffs, config['batch_size'])
+
+    # Plot the first sample for verification
+    plt.plot(times.numpy(), total_data[0, :, 1].numpy())
+    plt.xlabel('Time')
+    plt.ylabel('Value')
+    plt.title('OU Process Sample Path')
+    plt.grid(True)
+    plt.savefig(DIR + "/sample_path.png")
+    plt.savefig(DIR + "/sample_path.pdf")
+    plt.savefig(DIR + "/sample_path.eps")
+    plt.clf()
+
+    # Plot the whole samples for verification
+    for data in total_data:
+        plt.plot(times.numpy(), data[:,1].numpy(), alpha=0.05)
+    plt.plot(times.numpy(), total_data[0, :, 1].numpy(), color='k')
+    plt.xlabel('Time')
+    plt.ylabel('Value')
+    plt.title('OU Process Total Sample Path')
+    plt.grid(True)
+    plt.savefig(DIR + "/total_sample_path.png")
+    plt.savefig(DIR + "/total_sample_path.pdf")
+    plt.savefig(DIR + "/total_sample_path.eps")
     plt.clf()
 
 
-points_to_compare = [0.2, 0.4, 0.6, 0.8]
-compare_distributions(all_trues, all_preds, points_to_compare)
+    model = NDE_model(input_dim=config['input_dim'], hidden_dim=config['hidden_dim'], output_dim=config['output_dim'],
+                      num_layers=config['num_layers'], method = config['method'], vector_field=NeuralLSDEFunc).to(device)
+
+    optimizer = optim.Adam(model.parameters(), lr=config['lr'])
+    criterion = torch.nn.MSELoss()
+
+    model.eval()
+    total_loss = 0
+    all_preds = []
+    all_trues = []
+    with torch.no_grad():
+        for batch in test_loader:
+            coeffs = batch[1].to(device)
+            times = torch.linspace(0, 1, batch[0].shape[1]).to(device)
+
+            true = batch[0][:,:,1].to(device)
+            pred = model(coeffs, times).squeeze(-1)
+            loss = criterion(pred, true)
+            total_loss += loss.item()
+
+            all_preds.append(pred.cpu())
+            all_trues.append(true.cpu())
+
+    avg_loss = total_loss / len(test_loader)
+    print(f'Test Loss: {avg_loss}')
+
+    all_preds = torch.cat(all_preds, dim=0)
+    all_trues = torch.cat(all_trues, dim=0)
+
+    num_samples = 5
+
+    plt.figure(figsize=(8, 4))
+    for i in range(num_samples):
+        plt.plot(all_trues[i].numpy(), color='r')
+        plt.plot(all_preds[i].numpy(), color='b')
+    plt.xlabel('Time')
+    plt.ylabel('Value')
+    plt.ylim(-0.75,1.25)
+    plt.title('Model Predictions vs True Values')
+    plt.savefig(DIR + "/model_pred.png")
+    plt.savefig(DIR + "/model_pred.pdf")
+    plt.savefig(DIR + "/model_pred.eps")
+    plt.clf()
+
+    mse_loss = []
+
+    for epoch in range(1, config['num_epochs'] + 1):
+        model.train()
+        total_loss = 0
+        for batch in train_loader:
+            coeffs = batch[1].to(device)
+            times = torch.linspace(0, 1, batch[0].shape[1]).to(device)
+
+            optimizer.zero_grad()
+            true = batch[0][:, :, 1].to(device)
+            pred = model(coeffs, times).squeeze(-1)
+            loss = criterion(pred, true)
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss.item()
+        mse_loss.append(total_loss)
+
+        if epoch % 10 == 0:
+            avg_loss = total_loss / len(train_loader)
+            print(f'Epoch {epoch}, Loss: {avg_loss}')
+
+            ##
+            model.eval()
+            total_loss = 0
+            all_preds = []
+            all_trues = []
+            with torch.no_grad():
+                for batch in test_loader:
+                    coeffs = batch[1].to(device)
+                    times = torch.linspace(0, 1, batch[0].shape[1]).to(device)
+
+                    true = batch[0][:, :, 1].to(device)
+                    pred = model(coeffs, times).squeeze(-1)
+                    loss = criterion(pred, true)
+                    total_loss += loss.item()
+
+                    all_preds.append(pred.cpu())
+                    all_trues.append(true.cpu())
+
+            avg_loss = total_loss / len(test_loader)
+            print(f'Test Loss: {avg_loss}')
+
+            all_preds = torch.cat(all_preds, dim=0)
+            all_trues = torch.cat(all_trues, dim=0)
+
+            ##
+            plt.figure(figsize=(8, 4))
+            for i in range(num_samples):
+                plt.plot(all_trues[i].numpy(), color='r')
+                plt.plot(all_preds[i].numpy(), color='b')
+            plt.xlabel('Time')
+            plt.ylabel('Value')
+            plt.ylim(-0.75, 1.25)
+            plt.title('Model Predictions vs True Values')
+            plt.savefig(DIR + "/model_pred" + str(epoch) + ".png")
+            plt.savefig(DIR + "/model_pred" + str(epoch) + ".pdf")
+            plt.savefig(DIR + "/model_pred" + str(epoch) + ".eps")
+            plt.clf()
+
+
+
+    with open(DIR + '/mse.pickle', 'wb') as handle:
+        pickle.dump(mse_loss, handle)
+
+    plt.plot(mse_loss)
+    plt.savefig(DIR + "/loss.png")
+    plt.clf()
+
+    points_to_compare = [0.2, 0.4, 0.6, 0.8]
+    compare_distributions(all_trues, all_preds, points_to_compare, DIR)

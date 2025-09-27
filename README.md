@@ -5,15 +5,15 @@ We implement and test Explicit and Effectively Symmetric (EES) Runge-Kutta schem
 
 ## Implementations of EES Schemes
 
-The following repositories contain implementations of EES schemes.
-<span style="color:red">To run the code in the `examples` directory, please
-pip install `diffrax` and/or `torchsde` directly from the forks below.</span>
+The following repositories contain implementations of EES schemes. 
+To run the code in the `examples` directory, please
+pip install `diffrax` and/or `torchsde` directly from the forks below.
 
 ### Diffrax
 
 A fork of the `diffrax` repository supporting EES schemes is available at:
 
-```python
+```
 https://github.com/daniil-shmelev/diffrax
 ```
 
@@ -22,7 +22,7 @@ https://github.com/daniil-shmelev/diffrax
 A fork of the `torchsde` repository implementing EES schemes as Stratonovich SDE solvers
 is available at:
 
-```python
+```
 https://github.com/daniil-shmelev/torchsde
 ```
 
@@ -34,4 +34,5 @@ This repository contains code reproducing the following experiments:
 applied to SDEs.
 - `convergence.py` reproduces an example from the paper "Runge-Kutta methods for rough differential equations" (Redmann & Riedel, 2020)
 concerning convergence rates of RDE schemes. We apply this example to test the convergence rates of EES(2,5). In addition
-to the discretisation error, we evaluate the error in recovering the initial condition, y_0.
+to the discretisation error, we evaluate the error in recovering the initial condition y_0.
+- The directory `examples` contains two examples of Neural SDEs trained using Reversible Heun and EES(2,5).
