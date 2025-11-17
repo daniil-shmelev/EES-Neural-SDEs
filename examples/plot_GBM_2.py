@@ -16,6 +16,7 @@ if __name__ == "__main__":
     if os.path.isfile('plots/gbm_reversible_heun/mse.pickle'):
         with open('plots/gbm_reversible_heun/mse.pickle', 'rb') as handle:
             reversible_heun = pickle.load(handle)
+        print(reversible_heun[-1])
         plt.plot(reversible_heun, label = "Reversible Heun", color="blue", linestyle = "--", zorder = 4)
 
     if os.path.isfile('plots/gbm_mcf_euler/mse.pickle'):
@@ -33,18 +34,20 @@ if __name__ == "__main__":
     if os.path.isfile('plots/gbm_ees25/mse.pickle'):
         with open('plots/gbm_ees25/mse.pickle', 'rb') as handle:
             ees25 = pickle.load(handle)
+        print(ees25[-1])
         plt.plot(ees25, label="EES(2,5)", color="red", zorder = 1)
 
-    if os.path.isfile('plots/gbm_ees27/mse.pickle'):
-        with open('plots/gbm_ees27/mse.pickle', 'rb') as handle:
-            ees27 = pickle.load(handle)
-        plt.plot(ees27, label="EES(2,7)", color="green", zorder = 0)
+    # if os.path.isfile('plots/gbm_ees27/mse.pickle'):
+    #     with open('plots/gbm_ees27/mse.pickle', 'rb') as handle:
+    #         ees27 = pickle.load(handle)
+    #     print(ees27[-1])
+    #     plt.plot(ees27, label="EES(2,7)", color="green", zorder = 0)
 
     ees25 = np.array(ees25)
 
     plt.xlabel("Epoch")
     plt.ylabel("MSE")
-    #plt.ylim(ees25.min() * 0.5, ees25.max() * 2)
+    plt.ylim(ees25.min() * 0.5, ees25.max() * 2)
     plt.legend()
     plt.yscale("log")
     plt.tight_layout()

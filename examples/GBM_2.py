@@ -392,17 +392,17 @@ if __name__ == "__main__":
 
     # Parameters
     config = {  # "reversible_heun" or "ees25"
-        'num_samples': 1000,
+        'num_samples': 10000,
         'T': 1.0,
         'N': 100,
         'K': 20,
-        'A_range' : (-100, 0),
+        'A_range' : (-20, 0),
         'sigma': 0.1,
         'X0': 1.0,
         'train_ratio': 0.8,
-        'batch_size': 1000,
+        'batch_size': 5000,
         'seed': 42,
-        'num_epochs': 250,
+        'num_epochs': 1000,
         'input_dim': dim + 1,
         'output_dim': dim,
         'hidden_dim': 32,
