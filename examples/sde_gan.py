@@ -242,10 +242,16 @@ def get_data(batch_size, device):
             y_clamped = torch.clamp(y, min=0.0)
             return self.sigma * torch.sqrt(y_clamped).reshape((y.size(0), 1, 1))
 
-    ou_sde = CIRSDE(kappa=0.2, theta=0.1, sigma=2.0).to(device)
-    y0 = torch.rand(dataset_size, device=device).unsqueeze(-1) * 2 - 1
+    ou_sde = CIRSDE(kappa=0.2, theta=0.1, sigma=0.5).to(device)
+    y0 = torch.rand(dataset_size, device=device).unsqueeze(-1)
     ts = torch.linspace(0, t_size - 1, t_size, device=device)
     ys = torchsde.sdeint(ou_sde, y0, ts, dt=1e-1)
+
+    # ys_ = ys.cpu().squeeze().T
+    # for i in range(100):
+    #     plt.plot(ys_[i, :])
+    # plt.show()
+    # raise
 
     ###################
     # To demonstrate how to handle irregular data, then here we additionally drop some of the data (by setting it to
