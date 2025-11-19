@@ -23,6 +23,7 @@ import torchsde
 from torch.utils.data import Dataset, DataLoader
 from scipy.stats import entropy
 import timeit
+torch.set_default_dtype(torch.float32)
 
 def seed_everything(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -36,7 +37,6 @@ def seed_everything(seed):
     torch.backends.cudnn.benchmark = True
 
 def ou_process(batch_size, T, N, theta, mu, sigma, X0):
-    t_size = 11
 
     class OrnsteinUhlenbeckSDE(torch.nn.Module):
         sde_type = 'ito'
@@ -55,34 +55,15 @@ def ou_process(batch_size, T, N, theta, mu, sigma, X0):
             return self.sigma.expand(y.size(0), 1, 1)
 
     ou_sde = OrnsteinUhlenbeckSDE(mu=mu, theta=theta, sigma=sigma)
-    ts = torch.linspace(0, t_size-1, t_size)
+    ts = torch.linspace(0, T, N)
     ys = torchsde.sdeint(ou_sde, torch.tensor([[X0]] * batch_size), ts, dt=1e-1).squeeze()
     return ts, ys
 
-# def ou_process(T, N, theta, mu, sigma, X0):
-#     dt = T / (N-1)
-#     t = np.linspace(0, T, N)
-#     X = np.zeros(N)
-#     X[0] = X0
-#
-#     for i in range(1, N):
-#         dW = np.random.normal(0, np.sqrt(dt))
-#         X[i] = X[i-1] + theta * (mu - X[i-1]) * dt + sigma * dW
-#
-#     return t, X
-
 def generate_data(config):
-    data_list = []
     t, X = ou_process(config['num_samples'], config['T'], config['N'], config['theta'], config['mu'], config['sigma'], config['X0'])
     X = X.T.unsqueeze(-1)
     t = torch.tile(t, (config['num_samples'], 1)).unsqueeze(-1)
     total_data = torch.concatenate((t, X), dim=-1)
-    # for _ in range(config['num_samples']):
-    #     t, X = ou_process(config['T'], config['N'], config['theta'], config['mu'], config['sigma'], config['X0'])
-    #     data_list.append([t, X])
-
-    # total_data = torch.Tensor(np.array(data_list))  # [Batch size, Dimension, Length]
-    # total_data = total_data.permute(0, 2, 1)  # [Batch size, Length, Dimension]
 
     max_len = total_data.shape[1]
     times = torch.linspace(0, config['T'], max_len)
@@ -193,21 +174,31 @@ class NDE_model(nn.Module):
         self.method = method
         self.options = options
 
-    def forward(self, coeffs, times, dt):
+    def forward(self, coeffs, times, dt, bm, checkpointing = False):
         # control module
         self.func.set_X(coeffs, times)
 
         y0 = self.func.X.evaluate(times)
         y0 = self.initial(y0)[:, 0, :]
 
-        z = torchsde.sdeint_adjoint(sde=self.func,
-                            y0=y0,
-                            ts=times,
-                            dt=dt,
-                            method=self.method,
-                            adjoint_method="adjoint_" + self.method,
-                            options=self.options,
-                            adjoint_options=self.options)
+        if checkpointing:
+            z = torchsde.sdeint(sde=self.func,
+                                        y0=y0,
+                                        ts=times,
+                                        dt=dt,
+                                        bm=bm,
+                                        method=self.method,
+                                        options=self.options)
+        else:
+            z = torchsde.sdeint_adjoint(sde=self.func,
+                                y0=y0,
+                                ts=times,
+                                dt=dt,
+                                bm=bm,
+                                method=self.method,
+                                adjoint_method="adjoint_" + self.method,
+                                options=self.options,
+                                adjoint_options=self.options)
         z = z.permute(1, 0, 2)
         return self.decoder(z)
 
@@ -310,8 +301,12 @@ def main(METHOD, DT, config, total_data, coeffs, times):
             coeffs = batch[1].to(device)
             times = torch.linspace(0, config['T'], batch[0].shape[1]).to(device)
 
+            bm = torchsde.BrownianInterval(
+                t0=0., t1=config['T'], size=(coeffs.shape[0], config['hidden_dim']), device=device
+            )
+
             true = batch[0][:,:,1].to(device)
-            pred = model(coeffs, times, DT).squeeze(-1)
+            pred = model(coeffs, times, DT, bm).squeeze(-1)
             loss = criterion(pred, true)
             total_loss += loss.item()
 
@@ -340,25 +335,49 @@ def main(METHOD, DT, config, total_data, coeffs, times):
     plt.clf()
 
     mse_loss = []
+    grad_mse = []
 
     start = timeit.default_timer()
 
     for epoch in range(1, config['num_epochs'] + 1):
         model.train()
         total_loss = 0
+        total_grad_err = 0
         for batch in train_loader:
             coeffs = batch[1].to(device)
             times = torch.linspace(0, config['T'], batch[0].shape[1]).to(device)
 
+            bm = torchsde.BrownianInterval(
+                t0=0., t1=config['T'], size=(coeffs.shape[0], config['hidden_dim']), device=device
+            )
+
             optimizer.zero_grad()
             true = batch[0][:, :, 1].to(device)
-            pred = model(coeffs, times, DT).squeeze(-1)
+
+            if config['get_grad_err']:
+                pred = model(coeffs, times, DT, bm, True).squeeze(-1)
+                loss = criterion(pred, true)
+                loss.backward(retain_graph=True)
+                model_params_ = []
+                for p_ in model.parameters():
+                    model_params_.append(p_.grad.clone())
+
+            optimizer.zero_grad()
+            pred = model(coeffs, times, DT, bm).squeeze(-1)
             loss = criterion(pred, true)
             loss.backward()
+
+            if config['get_grad_err']:
+                for p, p_grad_ in zip(model.parameters(), model_params_):
+                    if p is None or p_grad_ is None:
+                        continue
+                    total_grad_err += ((p.grad - p_grad_)**2).mean().cpu()
+
             optimizer.step()
 
             total_loss += loss.item()
         mse_loss.append(total_loss)
+        grad_mse.append(float(total_grad_err / len(train_loader)))
 
         if epoch % 10 == 0:
             avg_loss = total_loss / len(train_loader)
@@ -374,8 +393,13 @@ def main(METHOD, DT, config, total_data, coeffs, times):
                     coeffs = batch[1].to(device)
                     times = torch.linspace(0, config['T'], batch[0].shape[1]).to(device)
 
+                    bm = torchsde.BrownianInterval(
+                        t0=0., t1=config['T'], size=(coeffs.shape[0], config['hidden_dim']),
+                        device=device
+                    )
+
                     true = batch[0][:, :, 1].to(device)
-                    pred = model(coeffs, times, DT).squeeze(-1)
+                    pred = model(coeffs, times, DT, bm).squeeze(-1)
                     loss = criterion(pred, true)
                     total_loss += loss.item()
 
@@ -414,6 +438,14 @@ def main(METHOD, DT, config, total_data, coeffs, times):
     plt.savefig(DIR + "/loss.png")
     plt.clf()
 
+    if config['get_grad_err']:
+        with open(DIR + '/grad_err.pickle', 'wb') as handle:
+            pickle.dump(grad_mse, handle)
+
+        plt.plot(grad_mse)
+        plt.savefig(DIR + "/grad_err.png")
+        plt.clf()
+
     points_to_compare = [0.2, 0.4, 0.6, 0.8]
     compare_distributions(all_trues, all_preds, points_to_compare, DIR)
 
@@ -421,6 +453,7 @@ if __name__ == "__main__":
 
     # Parameters
     config = {
+        'get_grad_err': True,
         'num_samples': 50000,
         'T': 10.0,
         'N': 11,
