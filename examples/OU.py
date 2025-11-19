@@ -22,6 +22,7 @@ import torchcde
 import torchsde
 from torch.utils.data import Dataset, DataLoader
 from scipy.stats import entropy
+import timeit
 
 def seed_everything(seed):
     os.environ['PYTHONHASHSEED'] = str(seed)
@@ -34,29 +35,57 @@ def seed_everything(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = True
 
-def ou_process(T, N, theta, mu, sigma, X0):
-    dt = T / N
-    t = np.linspace(0, T, N)
-    X = np.zeros(N)
-    X[0] = X0
+def ou_process(batch_size, T, N, theta, mu, sigma, X0):
+    t_size = 11
 
-    for i in range(1, N):
-        dW = np.random.normal(0, np.sqrt(dt))
-        X[i] = X[i-1] + theta * (mu - X[i-1]) * dt + sigma * dW
+    class OrnsteinUhlenbeckSDE(torch.nn.Module):
+        sde_type = 'ito'
+        noise_type = 'scalar'
 
-    return t, X
+        def __init__(self, mu, theta, sigma):
+            super().__init__()
+            self.register_buffer('mu', torch.as_tensor(mu))
+            self.register_buffer('theta', torch.as_tensor(theta))
+            self.register_buffer('sigma', torch.as_tensor(sigma))
+
+        def f(self, t, y):
+            return self.mu * t - self.theta * y
+
+        def g(self, t, y):
+            return self.sigma.expand(y.size(0), 1, 1)
+
+    ou_sde = OrnsteinUhlenbeckSDE(mu=mu, theta=theta, sigma=sigma)
+    ts = torch.linspace(0, t_size-1, t_size)
+    ys = torchsde.sdeint(ou_sde, torch.tensor([[X0]] * batch_size), ts, dt=1e-1).squeeze()
+    return ts, ys
+
+# def ou_process(T, N, theta, mu, sigma, X0):
+#     dt = T / (N-1)
+#     t = np.linspace(0, T, N)
+#     X = np.zeros(N)
+#     X[0] = X0
+#
+#     for i in range(1, N):
+#         dW = np.random.normal(0, np.sqrt(dt))
+#         X[i] = X[i-1] + theta * (mu - X[i-1]) * dt + sigma * dW
+#
+#     return t, X
 
 def generate_data(config):
     data_list = []
-    for _ in range(config['num_samples']):
-        t, X = ou_process(config['T'], config['N'], config['theta'], config['mu'], config['sigma'], config['X0'])
-        data_list.append([t, X])
+    t, X = ou_process(config['num_samples'], config['T'], config['N'], config['theta'], config['mu'], config['sigma'], config['X0'])
+    X = X.T.unsqueeze(-1)
+    t = torch.tile(t, (config['num_samples'], 1)).unsqueeze(-1)
+    total_data = torch.concatenate((t, X), dim=-1)
+    # for _ in range(config['num_samples']):
+    #     t, X = ou_process(config['T'], config['N'], config['theta'], config['mu'], config['sigma'], config['X0'])
+    #     data_list.append([t, X])
 
-    total_data = torch.Tensor(np.array(data_list))  # [Batch size, Dimension, Length]
-    total_data = total_data.permute(0, 2, 1)  # [Batch size, Length, Dimension]
+    # total_data = torch.Tensor(np.array(data_list))  # [Batch size, Dimension, Length]
+    # total_data = total_data.permute(0, 2, 1)  # [Batch size, Length, Dimension]
 
     max_len = total_data.shape[1]
-    times = torch.linspace(0, 1, max_len)
+    times = torch.linspace(0, config['T'], max_len)
     coeffs = torchcde.hermite_cubic_coefficients_with_backward_differences(total_data, times)
 
     return total_data, coeffs, times
@@ -156,25 +185,29 @@ class NeuralLSDEFunc(nn.Module):
         return self.g_net(tt)
 
 class NDE_model(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, method, activation='lipswish', vector_field=None):
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, method, activation='lipswish', vector_field=None, options=None):
         super().__init__()
         self.func = vector_field(input_dim, hidden_dim, hidden_dim, num_layers, activation=activation)
         self.initial = nn.Linear(input_dim, hidden_dim)
         self.decoder = nn.Linear(hidden_dim, output_dim)
         self.method = method
+        self.options = options
 
-    def forward(self, coeffs, times):
+    def forward(self, coeffs, times, dt):
         # control module
         self.func.set_X(coeffs, times)
 
         y0 = self.func.X.evaluate(times)
         y0 = self.initial(y0)[:, 0, :]
 
-        z = torchsde.sdeint(sde=self.func,
+        z = torchsde.sdeint_adjoint(sde=self.func,
                             y0=y0,
                             ts=times,
-                            dt=0.05,
-                            method=self.method)
+                            dt=dt,
+                            method=self.method,
+                            adjoint_method="adjoint_" + self.method,
+                            options=self.options,
+                            adjoint_options=self.options)
         z = z.permute(1, 0, 2)
         return self.decoder(z)
 
@@ -217,30 +250,12 @@ def compare_distributions(true_data, pred_data, points, dir_, num_bins=50):
     plt.savefig(dir_ + "/distr.eps")
     plt.clf()
 
-if __name__ == "__main__":
+def main(METHOD, DT, config, total_data, coeffs, times):
+    config['method'] = METHOD
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
 
-    # Parameters
-    config = {
-        'method': "reversible_heun", # "reversible_heun" or "ees25"
-        'num_samples': 50000,
-        'T': 10.0,
-        'N': 20,
-        'theta': 0.2,
-        'mu': 0.1,
-        'sigma': 2.0,
-        'X0': 1.0,
-        'train_ratio': 0.8,
-        'batch_size': 50000,
-        'seed': 42,
-        'num_epochs': 250,
-        'input_dim': 2,
-        'output_dim': 1,
-        'hidden_dim': 32,
-        'num_layers': 1,
-        'lr': 1e-3
-    }
+    options = {'lam' : 0.99}
 
     DIR = "plots/" + config['method']
 
@@ -248,9 +263,6 @@ if __name__ == "__main__":
         os.makedirs(DIR)
 
     seed_everything(config['seed'])
-
-    # Generate data
-    total_data, coeffs, times = generate_data(config)
 
     # Split data
     train_data, train_coeffs, test_data, test_coeffs = split_data(total_data, coeffs, config['train_ratio'])
@@ -284,7 +296,7 @@ if __name__ == "__main__":
 
 
     model = NDE_model(input_dim=config['input_dim'], hidden_dim=config['hidden_dim'], output_dim=config['output_dim'],
-                      num_layers=config['num_layers'], method = config['method'], vector_field=NeuralLSDEFunc).to(device)
+                      num_layers=config['num_layers'], method = config['method'], vector_field=NeuralLSDEFunc, options=options).to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=config['lr'])
     criterion = torch.nn.MSELoss()
@@ -296,10 +308,10 @@ if __name__ == "__main__":
     with torch.no_grad():
         for batch in test_loader:
             coeffs = batch[1].to(device)
-            times = torch.linspace(0, 1, batch[0].shape[1]).to(device)
+            times = torch.linspace(0, config['T'], batch[0].shape[1]).to(device)
 
             true = batch[0][:,:,1].to(device)
-            pred = model(coeffs, times).squeeze(-1)
+            pred = model(coeffs, times, DT).squeeze(-1)
             loss = criterion(pred, true)
             total_loss += loss.item()
 
@@ -320,7 +332,7 @@ if __name__ == "__main__":
         plt.plot(all_preds[i].numpy(), color='b')
     plt.xlabel('Time')
     plt.ylabel('Value')
-    plt.ylim(-0.75,1.25)
+    #plt.ylim(-0.75,1.25)
     plt.title('Model Predictions vs True Values')
     plt.savefig(DIR + "/model_pred.png")
     plt.savefig(DIR + "/model_pred.pdf")
@@ -329,16 +341,18 @@ if __name__ == "__main__":
 
     mse_loss = []
 
+    start = timeit.default_timer()
+
     for epoch in range(1, config['num_epochs'] + 1):
         model.train()
         total_loss = 0
         for batch in train_loader:
             coeffs = batch[1].to(device)
-            times = torch.linspace(0, 1, batch[0].shape[1]).to(device)
+            times = torch.linspace(0, config['T'], batch[0].shape[1]).to(device)
 
             optimizer.zero_grad()
             true = batch[0][:, :, 1].to(device)
-            pred = model(coeffs, times).squeeze(-1)
+            pred = model(coeffs, times, DT).squeeze(-1)
             loss = criterion(pred, true)
             loss.backward()
             optimizer.step()
@@ -358,10 +372,10 @@ if __name__ == "__main__":
             with torch.no_grad():
                 for batch in test_loader:
                     coeffs = batch[1].to(device)
-                    times = torch.linspace(0, 1, batch[0].shape[1]).to(device)
+                    times = torch.linspace(0, config['T'], batch[0].shape[1]).to(device)
 
                     true = batch[0][:, :, 1].to(device)
-                    pred = model(coeffs, times).squeeze(-1)
+                    pred = model(coeffs, times, DT).squeeze(-1)
                     loss = criterion(pred, true)
                     total_loss += loss.item()
 
@@ -381,14 +395,17 @@ if __name__ == "__main__":
                 plt.plot(all_preds[i].numpy(), color='b')
             plt.xlabel('Time')
             plt.ylabel('Value')
-            plt.ylim(-0.75, 1.25)
+            #plt.ylim(-0.75, 1.25)
             plt.title('Model Predictions vs True Values')
             plt.savefig(DIR + "/model_pred" + str(epoch) + ".png")
             plt.savefig(DIR + "/model_pred" + str(epoch) + ".pdf")
             plt.savefig(DIR + "/model_pred" + str(epoch) + ".eps")
             plt.clf()
 
+    end = timeit.default_timer()
 
+    with open(DIR + "/time.txt", "w") as f:
+        f.write(str(end - start))
 
     with open(DIR + '/mse.pickle', 'wb') as handle:
         pickle.dump(mse_loss, handle)
@@ -399,3 +416,43 @@ if __name__ == "__main__":
 
     points_to_compare = [0.2, 0.4, 0.6, 0.8]
     compare_distributions(all_trues, all_preds, points_to_compare, DIR)
+
+if __name__ == "__main__":
+
+    # Parameters
+    config = {
+        'num_samples': 50000,
+        'T': 10.0,
+        'N': 11,
+        'theta': 0.2,
+        'mu': 0.1,
+        'sigma': 2.0,
+        'X0': 1.0,
+        'train_ratio': 0.8,
+        'batch_size': 50000,
+        'seed': 42,
+        'num_epochs': 250,
+        'input_dim': 2,
+        'output_dim': 1,
+        'hidden_dim': 32,
+        'num_layers': 1,
+        'lr': 1e-3
+    }
+
+    data = generate_data(config)
+
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--method", type=str, required=True)
+    args = parser.parse_args()
+
+    dt = {
+        "reversible_heun": 1. / 12,
+        "ees25": 1. / 4,
+        "ees27": 1. / 3,
+        "mcf_euler": 1. / 6,
+        "mcf_midpoint": 1. / 3
+    }[args.method]
+
+    main(args.method, dt, config, *data)

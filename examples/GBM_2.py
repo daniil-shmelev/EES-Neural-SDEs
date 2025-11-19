@@ -53,7 +53,7 @@ def get_A(dim_, A_range, seed=42):
 def gbm_process(T, N, A, K, sigma, X0_):
     d = config['input_dim'] - 1
     X0 = np.ones(d) * X0_
-    dt = T / (N * K)
+    dt = T / ((N-1) * K)
     t = np.linspace(0, T, N)
     X = np.zeros((N, d))
     X[0] = X0
@@ -198,12 +198,14 @@ class NDE_model(nn.Module):
         y0 = self.func.X.evaluate(times[0])
         y0 = self.initial(y0)
 
-        z = torchsde.sdeint(sde=self.func,
+        z = torchsde.sdeint_adjoint(sde=self.func,
                             y0=y0,
                             ts=times,
                             dt=dt,
                             method=self.method,
-                            options=self.options)
+                            adjoint_method="adjoint_" + self.method,
+                            options=self.options,
+                            adjoint_options=self.options)
         z = z.permute(1, 0, 2)
         return self.decoder(z)
 
@@ -394,8 +396,8 @@ if __name__ == "__main__":
     config = {  # "reversible_heun" or "ees25"
         'num_samples': 10000,
         'T': 1.0,
-        'N': 100,
-        'K': 20,
+        'N': 11,
+        'K': 200,
         'A_range' : (-20, 0),
         'sigma': 0.1,
         'X0': 1.0,
