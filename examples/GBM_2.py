@@ -352,13 +352,13 @@ def main(METHOD, DT, config, total_data, coeffs, times):
                 for p, p_grad_ in zip(model.parameters(), model_params_):
                     if p is None or p_grad_ is None:
                         continue
-                    total_grad_err += ((p.grad - p_grad_)**2).mean()
+                    total_grad_err += ((p.grad - p_grad_)**2).mean().cpu()
 
             optimizer.step()
 
             total_loss += loss.item()
         mse_loss.append(total_loss)
-        grad_mse.append(float((total_grad_err / len(train_loader)).cpu()))
+        grad_mse.append(float(total_grad_err / len(train_loader)))
 
         if epoch % 10 == 0:
             avg_loss = total_loss / len(train_loader)
