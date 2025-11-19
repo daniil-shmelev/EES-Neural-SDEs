@@ -25,6 +25,7 @@ from scipy.stats import entropy
 import timeit
 from tqdm import tqdm
 from scipy.linalg import qr
+import copy
 torch.set_default_dtype(torch.float64)
 
 def seed_everything(seed):
@@ -191,21 +192,28 @@ class NDE_model(nn.Module):
         self.method = method
         self.options = options
 
-    def forward(self, coeffs, times, dt):
+    def forward(self, coeffs, times, dt, checkpointing=False):
         # control module
         self.func.set_X(coeffs, times)
 
         y0 = self.func.X.evaluate(times[0])
         y0 = self.initial(y0)
-
-        z = torchsde.sdeint_adjoint(sde=self.func,
-                            y0=y0,
-                            ts=times,
-                            dt=dt,
-                            method=self.method,
-                            adjoint_method="adjoint_" + self.method,
-                            options=self.options,
-                            adjoint_options=self.options)
+        if checkpointing:
+            z = torchsde.sdeint(sde=self.func,
+                                y0=y0,
+                                ts=times,
+                                dt=dt,
+                                method=self.method,
+                                options=self.options)
+        else:
+            z = torchsde.sdeint_adjoint(sde=self.func,
+                                        y0=y0,
+                                        ts=times,
+                                        dt=dt,
+                                        method=self.method,
+                                        adjoint_method="adjoint_" + self.method,
+                                        options=self.options,
+                                        adjoint_options=self.options)
         z = z.permute(1, 0, 2)
         return self.decoder(z)
 
@@ -312,25 +320,45 @@ def main(METHOD, DT, config, total_data, coeffs, times):
     plt.clf()
 
     mse_loss = []
+    grad_mse = []
 
     start = timeit.default_timer()
 
     for epoch in range(1, config['num_epochs'] + 1):
         model.train()
         total_loss = 0
+        total_grad_err = 0
         for batch in train_loader:
             coeffs = batch[1].to(device)
             times = torch.linspace(0, config['T'], batch[0].shape[1]).to(device)
 
             optimizer.zero_grad()
             true = batch[0][:, :, 1:].to(device)
+
+            if config['get_grad_err']:
+                pred = model(coeffs, times, DT, True)
+                loss = criterion(pred, true)
+                loss.backward(retain_graph=True)
+                model_params_ = []
+                for p_ in model.parameters():
+                    model_params_.append(copy.deepcopy(p_.grad))
+
+
             pred = model(coeffs, times, DT)
             loss = criterion(pred, true)
             loss.backward()
+
+            if config['get_grad_err']:
+                for p, p_grad_ in zip(model.parameters(), model_params_):
+                    if p is None or p_grad_ is None:
+                        continue
+                    total_grad_err += ((p.grad - p_grad_)**2).mean()
+
             optimizer.step()
 
             total_loss += loss.item()
         mse_loss.append(total_loss)
+        grad_mse.append(float((total_grad_err / len(train_loader)).cpu()))
 
         if epoch % 10 == 0:
             avg_loss = total_loss / len(train_loader)
@@ -386,7 +414,13 @@ def main(METHOD, DT, config, total_data, coeffs, times):
     plt.savefig(DIR + "/loss.png")
     plt.clf()
 
-    points_to_compare = [0.2, 0.4, 0.6, 0.8]
+    if config['get_grad_err']:
+        with open(DIR + '/grad_err.pickle', 'wb') as handle:
+            pickle.dump(grad_mse, handle)
+
+        plt.plot(grad_mse)
+        plt.savefig(DIR + "/grad_err.png")
+        plt.clf()
 
 if __name__ == "__main__":
 
@@ -394,6 +428,7 @@ if __name__ == "__main__":
 
     # Parameters
     config = {  # "reversible_heun" or "ees25"
+        'get_grad_err': True,
         'num_samples': 10000,
         'T': 1.0,
         'N': 11,
@@ -421,17 +456,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     dt = {
-        "reversible_heun" : 2. / 120,
-        "ees25" : 2. / 40,
-        "ees27" : 2. / 30,
-        "mcf_euler" : 2. / 60,
-        "mcf_midpoint" : 2. / 30
+        "reversible_heun" : 1. / 120,
+        "ees25" : 1. / 40,
+        "ees27" : 1. / 30,
+        "mcf_euler" : 1. / 60,
+        "mcf_midpoint" : 1. / 30
     }[args.method]
 
     main(args.method, dt, config, *data)
-
-    # main("reversible_heun", 2. / 120, config, *args)
-    # main("ees25", 2. / 40, config, *args)
-    # main("mcf_midpoint", 2. / 30, config, *args)
-    # main("ees27", 2. / 30, config, *args)
-    # main("mcf_euler", 2. / 60, config, *args)
