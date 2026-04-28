@@ -1,0 +1,39 @@
+{
+  "config": {
+    "batch_size": 32,
+    "dt": 0.05,
+    "epochs": 10,
+    "hidden_dim": 128,
+    "learning_rate": 0.001,
+    "n_steps": 20,
+    "n_train": 21536,
+    "num_angles": 7,
+    "residues_per_state": 1,
+    "seed": 0,
+    "solver": "cfees25"
+  },
+  "config_mismatches": {},
+  "runs": [
+    {
+      "adjoint": "reversible",
+      "run_dir": "results/rna_retrain_adjoint/reversible",
+      "test_loss": 0.7228564607336166,
+      "test_wrapped_mae": 0.5302087068557739,
+      "train_walltime_s": 868.0320329666138
+    },
+    {
+      "adjoint": "checkpoint_full",
+      "run_dir": "results/rna_retrain_adjoint/checkpoint_full",
+      "test_loss": 0.5610268368048871,
+      "test_wrapped_mae": 0.45657405257225037,
+      "train_walltime_s": 637.88365650177
+    },
+    {
+      "adjoint": "checkpoint_recursive",
+      "run_dir": "results/rna_retrain_adjoint/checkpoint_recursive",
+      "test_loss": 0.5859312492799251,
+      "test_wrapped_mae": 0.4769120216369629,
+      "train_walltime_s": 805.1475846767426
+    }
+  ]
+}

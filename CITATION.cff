@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the paper below."
+title: "Explicit and Effectively Symmetric Schemes for Neural SDEs"
+authors:
+  - family-names: Shmelev
+    given-names: Daniil
+    affiliation: Imperial College London
+    email: daniil.shmelev23@imperial.ac.uk
+  - family-names: Thompson
+    given-names: Luke
+    affiliation: University of Sydney
+  - family-names: Salvi
+    given-names: Cristopher
+    affiliation: Imperial College London
+preferred-citation:
+  type: conference-paper
+  authors:
+    - family-names: Shmelev
+      given-names: Daniil
+    - family-names: Thompson
+      given-names: Luke
+    - family-names: Salvi
+      given-names: Cristopher
+  title: "Explicit and Effectively Symmetric Schemes for Neural SDEs"
+  conference:
+    name: "Advances in Neural Information Processing Systems"
+  year: 2026
+references:
+  - type: article
+    authors:
+      - family-names: Shmelev
+        given-names: Daniil
+      - family-names: Salvi
+        given-names: Cristopher
+    title: "Explicit and Effectively Symmetric Schemes for Neural SDEs"
+    journal: "arXiv preprint arXiv:2509.20599"
+    year: 2025

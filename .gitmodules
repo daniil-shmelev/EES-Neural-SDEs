@@ -1,0 +1,3 @@
+[submodule "experiments/sphere_latent_sde"]
+	path = experiments/sphere_latent_sde
+	url = https://github.com/daniil-shmelev/EES-LatentSDEonHS.git

@@ -1,0 +1,27 @@
+{
+  "adjoint": "reversible",
+  "batch_size": 32,
+  "context_length": 20,
+  "ctx_dim": 64,
+  "dt": 0.0001,
+  "grad_max_abs": 56.887020111083984,
+  "grad_n_params": 663416,
+  "grad_norm": 472.8106994628906,
+  "grad_sumsq": 223552.44546499665,
+  "hidden_dim": 128,
+  "loss_value": 37089.49609375,
+  "n_steps": 10000,
+  "npy_path": "results/rna_benchmark_ref_gradient.npy",
+  "num_angles": 350,
+  "seeds": {
+    "bases": 2,
+    "ctx": 1,
+    "model": 0,
+    "reps": 42,
+    "targets": 3
+  },
+  "sha256": "076ee2788990ed75d43d5c0aab22708d27ef23ccf9ff558e3324e84f2bc9074d",
+  "solver": "cfees25",
+  "t1": 1.0,
+  "warmup_s": 78.91301107406616
+}

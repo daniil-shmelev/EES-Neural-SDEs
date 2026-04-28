@@ -1,0 +1,101 @@
+[project]
+name = "ees-neural-sdes"
+version = "0.1.0"
+description = "Code for 'Explicit and Effectively Symmetric Schemes for Neural SDEs' (NeurIPS 2026)"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+
+# Core (numpy/matplotlib): enough to run experiments/stability and
+# experiments/convergence_fbm. JAX/Torch experiments install via extras below.
+dependencies = [
+    "numpy>=1.26",
+    "matplotlib>=3.8",
+    "scipy>=1.11",
+    "fbm>=0.3.0",
+]
+
+[project.optional-dependencies]
+
+# Symbolic Butcher / Hopf-algebra verification
+algebra = [
+    "kauri @ git+https://github.com/daniil-shmelev/kauri.git@0af3219a40249d33efc45591669cc6415e6270e2",
+    "sympy>=1.13",
+]
+
+# Shared base for all modern JAX experiments (RNA, SO(3), and Luke-owned placeholders)
+jax-base = [
+    "jax[cuda12]>=0.10.0 ; platform_system=='Linux'",
+    "jax>=0.10.0 ; platform_system!='Linux'",
+    "equinox>=0.13.6",
+    "optax>=0.2.0",
+    "jaxtyping>=0.2.36",
+    # diffrax fork by sammccallum (the version pinned by every modern experiment in this paper)
+    "diffrax @ git+https://github.com/sammccallum/diffrax.git@aeb1335b5a6278e85a270231e0f97b8db4453ae6",
+    "diffrax-lowstorage @ git+https://github.com/luke-a-thompson/diffrax-lowstorage.git@74fd4dba492d96dcfd6148ad7d2f71f2a72f77ee",
+    "georax @ git+https://github.com/luke-a-thompson/georax.git@30ecbb9bb45806e0bf6ecf24bcf6da1de9173aea",
+    "cyreal @ git+https://github.com/luke-a-thompson/cyreal_dynamics.git@88f02657989fc4f9c85df0afb1452085fc3f2f8b",
+    "seali>=0.2.0",
+]
+
+# Numerical fBm convergence (Euclidean is core-only; SO(3) RDE scripts need JAX + georax)
+convergence-fbm = [
+    "ees-neural-sdes[jax-base]",
+]
+
+# Symbolic Lie–Butcher / MKW order-condition verification (sympy + kauri)
+order-verification = [
+    "ees-neural-sdes[algebra]",
+]
+
+# RNA torus experiment
+rna = [
+    "ees-neural-sdes[jax-base]",
+    "biotite>=1.0",
+    "requests>=2.31",
+    "psutil>=5.9",
+]
+
+# Sphere latent SDE — Zeng et al. 2023 PyTorch baseline + CFEES integrator
+sphere = [
+    "torch>=2.4",
+    "torchdiffeq>=0.2.5",
+    "scikit-learn>=1.4",
+    "tqdm>=4.66",
+    "pandas>=2.2",
+]
+
+# Shared torchsde base — Daniil's `mcf` fork adds EES25/EES27 and MCF reversible solvers
+torchsde = [
+    "torch>=2.0",
+    "torchsde @ git+https://github.com/daniil-shmelev/torchsde.git@a0b71269538197f15b11792400fb77e26737211d",
+    "torchcde>=0.2.5",
+]
+
+# Stiff GBM neural SDE — torchsde-based options-pricing experiment (paper §3.4)
+stiff-gbm = [
+    "ees-neural-sdes[torchsde]",
+    "scipy>=1.11",
+]
+
+# OU latent SDE — torchsde-based companion
+ou = [
+    "ees-neural-sdes[torchsde]",
+    "scipy>=1.11",
+]
+
+all = [
+    "ees-neural-sdes[convergence-fbm,order-verification,rna,sphere,stiff-gbm,ou]",
+]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+    "pyright>=1.1.380",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ees_core", "experiments"]
