@@ -21,6 +21,4 @@ python experiments/ou/plot_OU.py
 
 ## Results committed
 
-| File | Backs |
-|---|---|
-| `results/OU_mse.pdf` | (companion plot) |
+None — the OU experiment is not directly cited in the NeurIPS 2026 manuscript. Rerun the scripts above to generate `results/OU_mse.pdf` locally.

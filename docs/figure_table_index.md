@@ -10,7 +10,7 @@ Manuscript: `EES_Neural_SDEs_Overleaf/neurips2026/ees_neurips_manuscript.tex`.
 |---|---|---|---|
 | `fig:ees25_stability` | EES(2,5) stability domain vs Kutta's RK3/RK4 | (from prior paper Shmelev & Salvi 2025; figure file in the manuscript repo) | — (not regenerated here) |
 | `fig:ees_stoch_stability` | Mean-square stability cross-sections | `experiments/stability/stability.py` | `experiments/stability/results/stoch_stability.pdf` |
-| `fig:gbm`, `fig:gbm_grad` | Stiff GBM training/gradient MSE | `experiments/stiff_gbm/GBM.py` + `plot_GBM.py` | `experiments/stiff_gbm/results/GBM_mse.pdf` |
+| `fig:gbm`, `fig:gbm_grad` | Stiff GBM training/gradient MSE | `experiments/stiff_gbm/GBM.py` + `plot_GBM.py` | (rerun to regenerate) |
 | `fig:torus_trajectory` | T² stochastic trajectory | `experiments/rna/scripts/run_rna_sweep.py` (visualisation in `plots.py`) | `experiments/rna/results/fig_trajectory_compact.pdf` |
 | `fig:torus_bar` / `fig:torus_side_by_side` | Per-angle wrapped MAE | `experiments/rna/scripts/train_and_save_predictions_demo.py` + `plots.py` | `experiments/rna/results/fig_predictions_bar.pdf`, `rna_predictions_demo.npz` |
 | `fig:torus_scaling` | Memory scaling curves | `experiments/rna/scripts/run_rna_hlo_sweep.py` + `plots.py` | `experiments/rna/results/fig_scaling_compact_nogrid.pdf`, `rna_benchmark_scaling*.json`, `rna_hlo_*.json` |
@@ -22,7 +22,7 @@ Manuscript: `EES_Neural_SDEs_Overleaf/neurips2026/ees_neurips_manuscript.tex`.
 
 | Table label | Caption | Script | Committed result(s) |
 |---|---|---|---|
-| `table:gbm` | Stiff GBM metrics | `experiments/stiff_gbm/GBM.py` | `experiments/stiff_gbm/results/GBM_mse.pdf` |
+| `table:gbm` | Stiff GBM metrics | `experiments/stiff_gbm/GBM.py` | (rerun to regenerate) |
 | `table:rough_bergomi` (first block) | Rough Bergomi runtime/MSE | not yet on this machine (Luke owns) | — |
 | `table:rough_bergomi` (second block, log-NCDE/B-NRDE) | log-NCDE & B-NRDE PID-step comparison | not yet on this machine (Luke owns) | — |
 | `tab:exp_counts` | Per-step compute/memory of Lie-group integrators | derivation only — no script | — |

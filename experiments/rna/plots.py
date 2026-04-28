@@ -1,4 +1,4 @@
-"""Paper-quality visualization for covariance forecasting results."""
+"""Paper-quality visualization for RNA torus training results."""
 
 from pathlib import Path
 
@@ -16,55 +16,6 @@ plt.rcParams.update({
     "savefig.dpi": 300,
     "savefig.bbox": "tight",
 })
-
-
-def plot_riemannian_distance(
-    distances: dict[str, np.ndarray],
-    save_path: Path,
-) -> None:
-    """Per-day Riemannian distance for all models."""
-    fig, ax = plt.subplots()
-    for name, d in distances.items():
-        d = np.asarray(d)
-        # Rolling average for readability
-        window = min(20, len(d) // 5)
-        if window > 1:
-            smooth = np.convolve(d, np.ones(window) / window, mode="valid")
-            ax.plot(smooth, label=name, linewidth=1.0)
-        else:
-            ax.plot(d, label=name, linewidth=1.0)
-
-    ax.set_xlabel("Trading Day")
-    ax.set_ylabel("AIRM Distance")
-    ax.set_title("Riemannian Distance: Predicted vs True Covariance")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    fig.savefig(save_path)
-    plt.close(fig)
-
-
-def plot_eigenvalue_spectrum(
-    predicted: np.ndarray,
-    actual: np.ndarray,
-    save_path: Path,
-    model_name: str = "Model",
-) -> None:
-    """Compare eigenvalue distributions of predicted vs actual covariances."""
-    predicted = np.asarray(predicted)
-    actual = np.asarray(actual)
-    eigs_pred = np.linalg.eigvalsh(predicted).flatten()
-    eigs_actual = np.linalg.eigvalsh(actual).flatten()
-
-    fig, ax = plt.subplots()
-    ax.hist(eigs_actual, bins=50, alpha=0.6, label="Actual", density=True)
-    ax.hist(eigs_pred, bins=50, alpha=0.6, label=model_name, density=True)
-    ax.set_xlabel("Eigenvalue")
-    ax.set_ylabel("Density")
-    ax.set_title("Eigenvalue Spectrum: Predicted vs Actual")
-    ax.legend()
-    ax.grid(True, alpha=0.3)
-    fig.savefig(save_path)
-    plt.close(fig)
 
 
 def plot_training_curves(

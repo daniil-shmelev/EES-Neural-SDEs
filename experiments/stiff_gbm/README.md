@@ -24,6 +24,4 @@ python experiments/stiff_gbm/plot_GBM.py
 
 ## Results committed
 
-| File | Backs |
-|---|---|
-| `results/GBM_mse.pdf` | `fig:gbm` |
+None — rerun the scripts above to generate `results/GBM_mse.pdf` locally.
