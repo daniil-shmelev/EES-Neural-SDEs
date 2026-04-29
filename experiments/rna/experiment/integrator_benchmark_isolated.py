@@ -24,7 +24,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List, Tuple
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
 
 def run_subprocess(
@@ -45,7 +45,7 @@ def run_subprocess(
     cmd = [
         python_bin,
         "-m",
-        "experiment.integrator_benchmark_single",
+        "experiments.rna.experiment.integrator_benchmark_single",
         "--num-angles", str(num_angles),
         "--n-steps", str(n_steps),
         "--solver", solver,

@@ -41,6 +41,9 @@ python -m experiments.rna.scripts.compute_reference_gradient
 
 # Demo predictions for tab:torus_mae
 python -m experiments.rna.scripts.train_and_save_predictions_demo
+
+# Regenerate fig:torus_bar from the saved npz (no retraining)
+python -m experiments.rna.plots
 ```
 
 ## Results committed
