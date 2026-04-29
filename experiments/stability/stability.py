@@ -126,9 +126,9 @@ if __name__ == "__main__":
         ax.set_title(title_, pad = 25)
 
     # proxy artists for legend
-    line1 = mlines.Line2D([], [], color='black', linewidth=3, label=r"$\mathrm{EES}_{\mathcal{R}}(2,5)$")
-    line2 = mlines.Line2D([], [], color='black', linewidth=3, linestyle="--", label=r"$\mathcal{R}(\text{RK3})$")
-    line3 = mlines.Line2D([], [], color='black', linewidth=3, linestyle=":", label=r"$\mathcal{R}(\text{RK4})$")
+    line1 = mlines.Line2D([], [], color='black', linewidth=3, label=r"$\mathrm{EES}(2,5)$")
+    line2 = mlines.Line2D([], [], color='black', linewidth=3, linestyle="--", label=r"$\mathrm{RK3}$")
+    line3 = mlines.Line2D([], [], color='black', linewidth=3, linestyle=":", label=r"$\mathrm{RK4}$")
 
     axes[1].legend(handles = [line1, line2, line3], loc='upper center',
                  bbox_to_anchor=(1.15, -0.2),fancybox=False, shadow=False, ncol=3)
