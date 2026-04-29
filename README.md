@@ -9,6 +9,7 @@ This umbrella repository reproduces every experiment, figure, and table in the p
 ```
 ees_core/                       Pure-numpy EES Butcher tableaux + RK driver (paper §3 numerics)
 experiments/
+  stability_ode/                ODE stability domains for EES(2,5;1/10) vs RK3/RK4 (Fig. fig:ees25_stability)
   stability/                    Mean-square stability cross-sections (Fig. fig:ees_stoch_stability)
   convergence_fbm/              Euclidean and SO(3) fBm convergence rates (Figs fig:onvergence_4-6 + fig:cf_convergence_4-6)
   order_verification/           Symbolic Lie–Butcher / MKW order-condition verification (Tab tab:alpha-cf-ees25-x)
@@ -40,7 +41,8 @@ Available extras:
 | Extra | What it pulls in | Experiment(s) |
 |---|---|---|
 | (no extras) | numpy, matplotlib, scipy, fbm | `stability/`, `convergence_fbm/` |
-| `algebra` | + kauri, sympy | `order_verification/` |
+| `algebra` | + kauri, sympy | `order_verification/`, `stability_ode/` |
+| `stability-ode` | + kauri | `stability_ode/` (alias for `algebra`) |
 | `jax-base` | + jax 0.10, equinox, optax, sammccallum/diffrax fork, georax, cyreal, diffrax-lowstorage, seali | shared base for all JAX experiments |
 | `convergence-fbm` | jax-base | `convergence_fbm/scripts/` (SO(3) RDE convergence) |
 | `order-verification` | algebra | `order_verification/` |
@@ -68,7 +70,10 @@ Available extras:
 Quick start commands per experiment:
 
 ```bash
-# §3 stability cross-sections (Fig fig:ees_stoch_stability)
+# §3 ODE stability domains (Fig fig:ees25_stability)
+python experiments/stability_ode/stability_regions.py
+
+# §3 SDE mean-square stability cross-sections (Fig fig:ees_stoch_stability)
 python experiments/stability/stability.py
 
 # §3 fBm convergence (Figs fig:onvergence_4/5/6)

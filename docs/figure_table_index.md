@@ -8,7 +8,7 @@ Manuscript: `EES_Neural_SDEs_Overleaf/neurips2026/ees_neurips_manuscript.tex`.
 
 | Figure label | Caption | Script | Committed result(s) |
 |---|---|---|---|
-| `fig:ees25_stability` | EES(2,5) stability domain vs Kutta's RK3/RK4 | (from prior paper Shmelev & Salvi 2025; figure file in the manuscript repo) | — (not regenerated here) |
+| `fig:ees25_stability` | EES(2,5) stability domain vs Kutta's RK3/RK4 | `experiments/stability_ode/stability_regions.py` | `experiments/stability_ode/results/stability_regions_1.pdf` |
 | `fig:ees_stoch_stability` | Mean-square stability cross-sections | `experiments/stability/stability.py` | `experiments/stability/results/stoch_stability.pdf` |
 | `fig:gbm`, `fig:gbm_grad` | Stiff GBM training/gradient MSE | `experiments/stiff_gbm/GBM.py` + `plot_GBM.py` | (rerun to regenerate) |
 | `fig:torus_trajectory` | T² stochastic trajectory | `experiments/rna/scripts/run_rna_sweep.py` (visualisation in `plots.py`) | `experiments/rna/results/fig_trajectory_compact.pdf` |

@@ -48,6 +48,11 @@ order-verification = [
     "ees-neural-sdes[algebra]",
 ]
 
+# ODE stability regions (Fig fig:ees25_stability) — uses kauri for tableaux
+stability-ode = [
+    "ees-neural-sdes[algebra]",
+]
+
 # RNA torus experiment
 rna = [
     "ees-neural-sdes[jax-base]",
@@ -85,7 +90,7 @@ ou = [
 ]
 
 all = [
-    "ees-neural-sdes[convergence-fbm,order-verification,rna,sphere,stiff-gbm,ou]",
+    "ees-neural-sdes[convergence-fbm,order-verification,stability-ode,rna,sphere,stiff-gbm,ou]",
 ]
 dev = [
     "pytest>=8",
