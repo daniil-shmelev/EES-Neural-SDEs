@@ -14,6 +14,7 @@ import equinox as eqx
 import jax
 import jax.numpy as jnp
 import numpy as np
+from tqdm.auto import tqdm
 
 from experiments.stochastic_volatility.experiment.config import (
     Devices,
@@ -107,64 +108,72 @@ def fit(
     interrupted = False
 
     try:
-        for epoch in range(config.epochs):
-            train_loss = 0.0
-            for _ in range(train_loader.steps_per_epoch):
-                key, step_key = jax.random.split(key)
-                batch, train_state, mask = train_loader_next(train_state)
-                model, loss = train_step(model, batch, mask, step_key)
-                train_loss += float(loss)
-            train_loss /= train_loader.steps_per_epoch
-            history["train_loss"].append(train_loss)
+        progress_desc = f"{config.experiment}/{config.solver}"
+        with tqdm(
+            range(config.epochs),
+            desc=progress_desc,
+            unit="epoch",
+            dynamic_ncols=True,
+        ) as epochs:
+            for epoch in epochs:
+                train_loss = 0.0
+                for _ in range(train_loader.steps_per_epoch):
+                    key, step_key = jax.random.split(key)
+                    batch, train_state, mask = train_loader_next(train_state)
+                    model, loss = train_step(model, batch, mask, step_key)
+                    train_loss += float(loss)
+                train_loss /= train_loader.steps_per_epoch
+                history["train_loss"].append(train_loss)
 
-            log_line = f"epoch={epoch + 1}/{config.epochs} train_loss={train_loss:.3e}"
+                val_loss = 0.0
+                val_metric = 0.0
+                last_batch = None
+                last_mask = None
+                for _ in range(val_loader.steps_per_epoch):
+                    key, step_key = jax.random.split(key)
+                    batch, val_state, mask = val_loader_next(val_state)
+                    val_loss += float(eval_step(model, batch, mask, step_key))
+                    last_batch = batch
+                    last_mask = mask
+                    if metric_step is not None:
+                        key, metric_key = jax.random.split(key)
+                        val_metric += float(
+                            metric_step(model, batch, mask, metric_key)
+                        )
+                val_loss /= val_loader.steps_per_epoch
+                history["val_loss"].append(val_loss)
 
-            val_loss = 0.0
-            val_metric = 0.0
-            last_batch = None
-            last_mask = None
-            for _ in range(val_loader.steps_per_epoch):
-                key, step_key = jax.random.split(key)
-                batch, val_state, mask = val_loader_next(val_state)
-                val_loss += float(eval_step(model, batch, mask, step_key))
-                last_batch = batch
-                last_mask = mask
+                if (
+                    sample_step is not None
+                    and last_batch is not None
+                    and last_mask is not None
+                    and epoch == config.epochs - 1
+                ):
+                    key, sample_key = jax.random.split(key)
+                    predictions, targets = sample_step(
+                        model, last_batch, last_mask, sample_key
+                    )
+                    latest_epoch_batch = _to_numpy_epoch_batch(
+                        predictions,
+                        targets,
+                        last_mask,
+                        epoch=epoch + 1,
+                    )
+
+                score = val_loss
+                postfix = f"train={train_loss:.3e} val={val_loss:.3e}"
                 if metric_step is not None:
-                    key, metric_key = jax.random.split(key)
-                    val_metric += float(metric_step(model, batch, mask, metric_key))
-            val_loss /= val_loader.steps_per_epoch
-            history["val_loss"].append(val_loss)
-            log_line += f" val_loss={val_loss:.3e}"
+                    val_metric /= val_loader.steps_per_epoch
+                    history[val_metric_name].append(val_metric)
+                    postfix += f" {val_metric_name}={val_metric:.6f}"
+                    score = val_metric
 
-            if (
-                sample_step is not None
-                and last_batch is not None
-                and last_mask is not None
-            ):
-                key, sample_key = jax.random.split(key)
-                predictions, targets = sample_step(
-                    model, last_batch, last_mask, sample_key
-                )
-                latest_epoch_batch = _to_numpy_epoch_batch(
-                    predictions,
-                    targets,
-                    last_mask,
-                    epoch=epoch + 1,
-                )
+                if score < float(best_score):
+                    best_score = jnp.asarray(score)
+                    best_model = model
 
-            score = val_loss
-            if metric_step is not None:
-                val_metric /= val_loader.steps_per_epoch
-                history[val_metric_name].append(val_metric)
-                log_line += f" {val_metric_name}={val_metric:.6f}"
-                score = val_metric
-
-            if score < float(best_score):
-                best_score = jnp.asarray(score)
-                best_model = model
-
-            completed_epochs = epoch + 1
-            print(log_line, flush=True)
+                completed_epochs = epoch + 1
+                epochs.set_postfix_str(postfix)
     except KeyboardInterrupt:
         interrupted = True
         print(

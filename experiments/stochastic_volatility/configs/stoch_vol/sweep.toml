@@ -9,12 +9,13 @@ learning_rate = 1e-3
 seed = 0
 device = "gpu"
 hidden_dim = 16
-nfe_budget = 504
+nfe_budget = 132
 total_time = 1.0
 diffusion_scale = 0.2
 skip_plots = false
 
 [sweep]
+seed = [0, 1, 2]
 experiment = [
     "black_scholes",
     "heston",

@@ -63,10 +63,10 @@ def truncated_sig_loss(
         phi_pred = jax.vmap(_phi)(pred)
         phi_target = jax.vmap(_phi)(target)
 
-        # Biased MMD^2 with dot-product kernel: E[k(X,X')] + E[k(Y,Y')] - 2 E[k(X,Y)]
-        k_pp = jnp.mean(phi_pred @ phi_pred.T)
-        k_tt = jnp.mean(phi_target @ phi_target.T)
-        k_pt = jnp.mean(phi_pred @ phi_target.T)
-        return k_pp + k_tt - 2.0 * k_pt
+        # Biased MMD^2 with a dot-product kernel is exactly the squared
+        # distance between empirical mean feature vectors. This avoids forming
+        # batch x batch Gram matrices.
+        mean_diff = jnp.mean(phi_pred, axis=0) - jnp.mean(phi_target, axis=0)
+        return jnp.vdot(mean_diff, mean_diff)
 
     return loss

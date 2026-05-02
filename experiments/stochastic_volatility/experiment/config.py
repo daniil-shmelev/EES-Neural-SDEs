@@ -30,21 +30,15 @@ class Solvers(StrEnum):
     MCF_MIDPOINT = "mcf_midpoint"
     REVERSIBLE_HEUN = "reversible_heun"
 
-    GL2 = "gl2"
-    CFEES25 = "cfees25"
-
     def build(self):
         from diffrax import Euler, Midpoint, ReversibleHeun
         from diffrax_lowstorage import EES25
-        from georax import CFEES25, CG2
 
         return {
             "ees25": EES25,
             "mcf_euler": Euler,
             "mcf_midpoint": Midpoint,
             "reversible_heun": ReversibleHeun,
-            "gl2": CG2,
-            "cfees25": CFEES25,
         }[self]()
 
 
@@ -224,7 +218,7 @@ def main(
     hidden_dim: int = 128,
     nfe_budget: int = 5,
     total_time: float = 1.0,
-    solver: Solvers = Solvers.CFEES25,
+    solver: Solvers = Solvers.EES25,
     diffusion_scale: float = 1.0,
     skip_plots: bool = False,
     output: Path | None = None,

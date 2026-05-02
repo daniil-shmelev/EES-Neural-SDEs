@@ -26,7 +26,6 @@ SOLVER_NFE_PER_STEP = {
     "Euler": 2,
     "Midpoint": 4,
     "EES25": 3,
-    "CFEES25": 3,
     "CG2": 2,
     "ReversibleHeun": 1,
 }
