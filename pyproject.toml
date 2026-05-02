@@ -32,10 +32,16 @@ jax-base = [
     "jaxtyping>=0.2.36",
     # diffrax fork by sammccallum (the version pinned by every modern experiment in this paper)
     "diffrax @ git+https://github.com/sammccallum/diffrax.git@aeb1335b5a6278e85a270231e0f97b8db4453ae6",
-    "diffrax-lowstorage @ git+https://github.com/luke-a-thompson/diffrax-lowstorage.git@74fd4dba492d96dcfd6148ad7d2f71f2a72f77ee",
     "georax @ git+https://github.com/luke-a-thompson/georax.git@30ecbb9bb45806e0bf6ecf24bcf6da1de9173aea",
     "cyreal @ git+https://github.com/luke-a-thompson/cyreal_dynamics.git@88f02657989fc4f9c85df0afb1452085fc3f2f8b",
     "seali>=0.2.0",
+]
+
+# Stochastic-volatility experiment — adds the diffrax-lowstorage fork on top of jax-base.
+# Pinned to a commit that requires Python >= 3.13, so it's intentionally isolated here.
+stochastic-volatility = [
+    "ees-neural-sdes[jax-base]",
+    "diffrax-lowstorage @ git+https://github.com/luke-a-thompson/diffrax-lowstorage.git@74fd4dba492d96dcfd6148ad7d2f71f2a72f77ee",
 ]
 
 # Numerical fBm convergence (Euclidean is core-only; SO(3) RDE scripts need JAX + georax)
