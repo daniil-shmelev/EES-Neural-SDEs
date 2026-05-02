@@ -104,3 +104,6 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["ees_core", "experiments"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
