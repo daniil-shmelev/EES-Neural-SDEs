@@ -1,0 +1,28 @@
+# Sweep config: Cartesian product of [sweep] axes applied on top of [base] defaults.
+# Total runs = product of lengths of all sweep lists.
+# Usage: python -m experiment.train configs/stoch_vol/sweep.toml --index N
+
+[base]
+epochs = 100
+batch_size = 4096
+learning_rate = 1e-3
+seed = 0
+device = "gpu"
+hidden_dim = 16
+nfe_budget = 132
+total_time = 1.0
+diffusion_scale = 0.2
+skip_plots = false
+
+[sweep]
+seed = [0, 1, 2]
+experiment = [
+    "black_scholes",
+    "heston",
+    "rough_heston",
+    "local_stoch_vol",
+    "bergomi",
+    "rough_bergomi",
+    "quadratic_rough_heston",
+]
+solver = ["ees25", "reversible_heun", "mcf_euler", "mcf_midpoint"]
