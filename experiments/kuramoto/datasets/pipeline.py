@@ -1,4 +1,4 @@
-"""Reusable simulation + persistence pipeline for the pendulum dataset.
+"""Reusable simulation + persistence pipeline for the Kuramoto dataset.
 
 Wraps the lower-level `simulator.py` calls in a JIT-compiled batched form
 and a save-to-disk helper, so the CLI orchestrator stays thin.
@@ -16,10 +16,9 @@ import jax.numpy as jnp
 import jax.random as jr
 import numpy as np
 
-from experiments.pendulum.datasets.lagrangian import PendulumParams
-from experiments.pendulum.datasets.simulator import (
+from experiments.kuramoto.datasets.kuramoto import KuramotoParams, critical_coupling
+from experiments.kuramoto.datasets.simulator import (
     SimConfig,
-    chaos_onset_energy_scale,
     sample_initial_conditions,
     simulate_one,
 )
@@ -27,10 +26,10 @@ from experiments.pendulum.datasets.simulator import (
 
 @eqx.filter_jit
 def simulate_batch_jit(
-    params: PendulumParams,
+    params: KuramotoParams,
     cfg: SimConfig,
     theta0: jnp.ndarray,
-    p0: jnp.ndarray,
+    omega0: jnp.ndarray,
     keys: jr.PRNGKeyArray,
 ) -> tuple[jnp.ndarray, jnp.ndarray]:
     """JIT-compiled batched simulator.
@@ -40,22 +39,21 @@ def simulate_batch_jit(
     the batch axis size constant except for a possible smaller final chunk.
     """
     return jax.vmap(simulate_one, in_axes=(None, None, 0, 0, 0))(
-        params, cfg, theta0, p0, keys
+        params, cfg, theta0, omega0, keys
     )
 
 
 def simulate_split(
-    params: PendulumParams,
+    params: KuramotoParams,
     cfg: SimConfig,
     n_traj: int,
-    energy_low: float,
-    energy_high: float,
+    omega_scale: float,
     key: jr.PRNGKeyArray,
     batch_sim: int,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Sample initial conditions and simulate `n_traj` trajectories in chunks of `batch_sim`."""
     k_ic, k_sim = jr.split(key)
-    theta0, p0 = sample_initial_conditions(params, n_traj, energy_low, energy_high, k_ic)
+    theta0, omega0 = sample_initial_conditions(params, n_traj, omega_scale, k_ic)
     sim_keys = jr.split(k_sim, n_traj)
 
     theta_chunks: list[np.ndarray] = []
@@ -63,7 +61,7 @@ def simulate_split(
     for start in range(0, n_traj, batch_sim):
         end = min(start + batch_sim, n_traj)
         th_b, om_b = simulate_batch_jit(
-            params, cfg, theta0[start:end], p0[start:end], sim_keys[start:end]
+            params, cfg, theta0[start:end], omega0[start:end], sim_keys[start:end]
         )
         theta_chunks.append(np.asarray(th_b))
         omega_chunks.append(np.asarray(om_b))
@@ -104,7 +102,10 @@ def save_split(
 
 
 def generate_one_n(
-    n: int,
+    N: int,
+    P: float,
+    K: float,
+    m: float,
     cfg: SimConfig,
     n_train: int,
     n_val: int,
@@ -112,20 +113,20 @@ def generate_one_n(
     seed: int,
     batch_sim: int,
     out_dir: Path,
+    omega_scale: float,
     render_gif: bool,
     gif_fps: int,
     gif_trail: int,
 ) -> Path:
-    """Generate a single $n$-link dataset and persist it (with optional GIF)."""
-    params = PendulumParams.uniform(n=n)
-    energy_scale = float(chaos_onset_energy_scale(params))
-    energy_low, energy_high = 1.0 * energy_scale, 1.5 * energy_scale
+    """Generate a single $N$-oscillator dataset and persist it (with optional GIF)."""
+    params = KuramotoParams.bimodal(N=N, P=P, K=K, m=m)
+    K_c = float(critical_coupling(P))
 
     print(
-        f"\n[pipeline] === generate n={n} dt_fine={cfg.dt_fine:.3e} "
-        f"E_scale={energy_scale:.2f} ==="
+        f"\n[pipeline] === generate N={N} dt_fine={cfg.dt_fine:.3e} "
+        f"K={K:.3f} (K_c≈{K_c:.3f}) P={P} D={cfg.D} ==="
     )
-    master = jr.PRNGKey(seed + n)
+    master = jr.PRNGKey(seed + N)
     k_train, k_val, k_test = jr.split(master, 3)
 
     splits: dict[str, tuple[np.ndarray, np.ndarray]] = {}
@@ -136,7 +137,7 @@ def generate_one_n(
     ]:
         t0 = time.perf_counter()
         theta, omega = simulate_split(
-            params, cfg, n_split, energy_low, energy_high, key, batch_sim
+            params, cfg, n_split, omega_scale, key, batch_sim
         )
         print(
             f"[pipeline] split={name} n={n_split} shape={theta.shape} "
@@ -145,25 +146,26 @@ def generate_one_n(
         splits[name] = (theta, omega)
 
     t_grid = np.linspace(0.0, cfg.T, cfg.n_obs)
-    out_path = out_dir / f"pendulum_n{n}_seed{seed}.npz"
+    out_path = out_dir / f"kuramoto_N{N}_seed{seed}.npz"
     meta = {
-        "n": n, "n_train": n_train, "n_val": n_val, "n_test": n_test,
-        "sigma": cfg.sigma, "gamma": cfg.gamma, "T": cfg.T,
-        "n_fine": cfg.n_fine, "n_obs": cfg.n_obs, "seed": seed,
-        "energy_low": energy_low, "energy_high": energy_high,
-        "energy_scale": energy_scale,
+        "model": "stochastic_second_order_kuramoto",
+        "reference": "Olmi & Torcini 2024 eq.(1) with K2=0; "
+                     "deterministic part following Filatrella, Nielsen & Pedersen 2008.",
+        "N": N, "P": P, "K": K, "m": m, "K_c_estimate": K_c,
+        "n_train": n_train, "n_val": n_val, "n_test": n_test,
+        "D": cfg.D, "T": cfg.T, "n_fine": cfg.n_fine, "n_obs": cfg.n_obs,
+        "seed": seed, "omega_scale": omega_scale,
         "library_versions": library_versions(),
     }
     save_split(out_path, splits, t_grid, meta)
     print(f"[pipeline] wrote {out_path} ({out_path.stat().st_size / 2**20:.1f} MiB)")
 
     if render_gif:
-        from experiments.pendulum.datasets.visualize import render_trajectory_gif
+        from experiments.kuramoto.datasets.visualize import render_trajectory_gif
 
-        gif_path = out_dir / f"pendulum_n{n}_seed{seed}.gif"
+        gif_path = out_dir / f"kuramoto_N{N}_seed{seed}.gif"
         render_trajectory_gif(
             theta=splits["test"][0][0],
-            params=params,
             t_grid=t_grid,
             out_path=gif_path,
             fps=gif_fps,

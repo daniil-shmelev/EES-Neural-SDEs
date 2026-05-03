@@ -1,19 +1,34 @@
-# Chaotic n-link Pendulum Neural SDE on $T\mathbb{T}^n$
+# Stochastic 2nd-order Kuramoto Neural SDE on $T\mathbb{T}^N$
 
 Replacement for the RNA torsion experiment. Trains a neural SDE on the
-product Lie group $T\mathbb{T}^n = \mathbb{T}^n \times \mathbb{R}^n$ to
-forecast trajectories of a chaotic n-link planar pendulum driven by an
-underdamped Langevin SDE on the cotangent bundle.
+product Lie group $T\mathbb{T}^N = \mathbb{T}^N \times \mathbb{R}^N$ to
+forecast trajectories of a stochastic Kuramoto-with-inertia network — the
+canonical model of power-grid frequency stability (Filatrella, Nielsen &
+Pedersen 2008; Schäfer et al. 2018; Olmi & Torcini 2024).
 
-Plan: `~/.claude/plans/ok-carefully-plan-how-sequential-cerf.md` (locally on
-the dev machine).
+Plan: `~/.claude/plans/ok-carefully-plan-how-sequential-cerf.md`.
+
+## Dynamics
+
+We integrate the canonical second-order Kuramoto SDE (Olmi & Torcini 2024
+eq. (1) with $K_2 = 0$; deterministic part from Filatrella, Nielsen &
+Pedersen 2008; noise term as in Schmietendorf et al. 2014 / Schäfer et al.
+2018):
+
+$$m\,\ddot{\theta}_i = -\dot{\theta}_i + \Omega_i
+    + \frac{K}{N}\sum_j \sin(\theta_j - \theta_i) + \xi_i(t),
+    \qquad \langle\xi_i(t)\xi_j(s)\rangle = 2D\,\delta_{ij}\delta(t-s).$$
+
+Bimodal natural frequencies $\Omega_i \in \{+P, -P\}$ (Filatrella generator
+/ consumer balance). The state for SDE integration is
+$(\theta, \omega) \in \mathbb{R}^{2N}$ on the cotangent bundle
+$T\mathbb{T}^N$.
 
 ## Workflow
 
 Heavy compute (data generation, GPU sweeps, training) runs on a separate,
 more powerful machine. Implementation happens locally. Each milestone ends
-with a portable orchestrator script. Results return as JSON / NPZ; plotting
-and analysis run locally on returned artifacts.
+with a portable orchestrator script.
 
 | Milestone | Status | Hand-off |
 | --- | --- | --- |
@@ -28,96 +43,75 @@ and analysis run locally on returned artifacts.
 
 Implemented:
 
-- `datasets/lagrangian.py` — closed-form $L(\theta, \dot\theta)$, $T$, $V$,
-  $H$ for an n-link planar pendulum. Mass matrix and gradients via JAX
-  autodiff. Drift functions for the underdamped Langevin SDE.
-- `datasets/simulator.py` — diffrax `Heun` simulator on
-  $(\theta, p) \in \mathbb{R}^{2n}$ with `MultiTerm(ODETerm,
-  ControlTerm)` and `VirtualBrownianTree`. Vectorised batch simulator.
-  Includes a symplectic-Verlet sub-routine for $\sigma=0$ sanity checks.
-- `datasets/visualize.py` — matplotlib animation helper that renders an
-  n-link pendulum trajectory to a GIF (used by the data generator to
-  produce a sanity-check animation of the first test trajectory).
-- `datasets/pipeline.py` — JIT-compiled batched simulator + persistence
-  helpers (`simulate_batch_jit`, `simulate_split`, `save_split`,
-  `generate_one_n`, `library_versions`).
-- `datasets/verification.py` — `hamiltonian_drift_study`,
-  `stationarity_study`, and `run_verification` driver.
-- `scripts/run_m1.py` — single CLI orchestrator that runs verification
-  then generates data for `--n-list` (default `2 4 8`).
-- `tests/test_lagrangian.py` — unit tests on the JAX-derived mass matrix
-  ($n=1$ scalar formula and $n=2$ analytic formula) and a smoke test of
-  the SDE simulator.
+- `datasets/kuramoto.py` — `KuramotoParams` (`eqx.Module`), drift function
+  (vectorised mean-field $\sin(\theta_j-\theta_i)$ coupling), Brownian
+  diffusion factory, complex order parameter.
+- `datasets/simulator.py` — diffrax `Heun` simulator on $(\theta, \omega)
+  \in \mathbb{R}^{2N}$ with `MultiTerm(ODETerm, ControlTerm)` and
+  `VirtualBrownianTree`. Reuses `wrap_to_pi` from `experiments/rna/models/torus.py`.
+- `datasets/pipeline.py` — JIT-compiled batched simulator
+  (`simulate_batch_jit`), chunked simulation (`simulate_split`),
+  persistence (`save_split`), and per-$N$ orchestration (`generate_one_n`).
+- `datasets/verification.py` — analytic two-oscillator phase-lock study
+  (deterministic limit, $D=0$) and SDE order-parameter stationarity study.
+- `datasets/visualize.py` — phase-circle GIF: $N$ oscillators on the unit
+  circle plus the complex order-parameter arrow $r e^{i\Psi}$.
+- `scripts/run_m1.py` — single CLI orchestrator.
+- `tests/test_kuramoto.py` — unit tests on `KuramotoParams`, the drift
+  function, the analytic 2-oscillator phase-lock, and the order parameter.
 
-Choice of solver: diffrax has first-class `UnderdampedLangevinDriftTerm` /
-`UnderdampedLangevinDiffusionTerm` and Foster–Langevin SRKs (`ALIGN`,
-`ShOULD`, `SPaRK`, `QUICSORT`), but those assume a *constant* diagonal
-inverse-mass $u$. Our $M(\theta)$ is configuration-dependent, so we use a
-generic `MultiTerm(ODETerm, ControlTerm)` with `Heun` at fine $dt$ instead.
-This is the same pattern the RNA NSDE uses
-(`experiments/rna/models/torus_nsde.py:308-322`).
+Choice of solver: `Heun` at fine $dt$ (Stratonovich strong order 0.5,
+weak order 1). Diffusion is constant additive noise on $\omega$, so
+Stratonovich and Itô coincide and `Heun` gives a clean reference
+trajectory at sub-second wall-clock per chunk.
 
 ### Local smoke
 
-The local Windows environment currently has a broken JAX / jaxlib pin
-(jaxlib 0.9.2 vs equinox 0.11.12 expecting `jaxlib.xla_extension`). `uv sync`
-also fails on the current `requires-python` ≥ 3.10 vs the diffrax fork
-needing 3.11. Until that's untangled, local validation is restricted to
-`py_compile` (which has been run and passes for all M1 modules). The
-remote machine is the source of truth for functional testing.
+The local Windows environment currently has a broken JAX / jaxlib pin;
+local validation is restricted to `py_compile`. Functional testing
+happens on the remote machine.
 
-If you fix the local env first, the smoke command is:
+If you fix the local env:
 
 ```
-python -m experiments.pendulum.scripts.run_m1 --smoke
+python -m experiments.kuramoto.scripts.run_m1 --smoke
 ```
 
 ### Remote hand-off (single command)
 
-On the powerful machine, with the project installed
-(`pip install -e .[jax-base]` should suffice; pyproject pulls in the diffrax
-+ georax forks):
-
 ```bash
 cd /path/to/EES-Neural-SDEs
 git pull
-python -m experiments.pendulum.scripts.run_m1
+python -m experiments.kuramoto.scripts.run_m1
 ```
 
-That's it — one orchestrator runs the simulator verification for $n=2$ and
-generates training data for $n \in \{2, 4, 8\}$. A GIF of the first test
-trajectory at the smallest $n$ in the list is rendered automatically into
-the data directory.
+Defaults match the plan: $N \in \{2, 4, 8\}$, $P=0.5$, $K=2.0$
+(deterministic 2-oscillator phase-lock $\arcsin(2P/K) \approx 0.524$),
+$m=1$, $D=0.05$, $T=5\,\text{s}$, $n_\text{fine}=16384$,
+$n_\text{obs}=200$, 5000/1000/1000 train/val/test.
+Override any subset with the matching CLI flag. To customise the network
+sizes: `--n-list 2 4 8`. To skip verification: `--skip-verify`. To
+disable the GIF: `--no-gif`.
 
-The orchestrator's defaults match the plan
-(`--sigma 0.3 --gamma 0.05 --T 2.0 --n-fine 16384 --n-obs 200
---n-train 5000 --n-val 1000 --n-test 1000 --seed 0`); override any subset
-with the matching CLI flag. To customise the link counts:
-`--n-list 2 4 8` (space-separated, `nargs='+'`). To skip verification:
-`--skip-verify`. To disable the GIF: `--no-gif`.
-
-Expected wall-clock on a single A100 / H100: a few minutes for verification,
-~30 min total for the three data splits, ~30 s for the GIF render. NPZ sizes
-~3-15 MiB each, GIF ~1-3 MiB.
+Expected wall-clock on a single A100 / H100: ~3 min verification, ~30 min
+total data gen, ~30 s GIF render. NPZ sizes ~3-15 MiB each, GIF ~1-3 MiB.
 
 ### What to send back
 
-- `experiments/pendulum/results/simulator_verification_n2.{json,npz}` (small)
-- `experiments/pendulum/data/pendulum_n{2,4,8}_seed0.{npz,json}` (large; rsync / scp)
-- `experiments/pendulum/data/pendulum_n2_seed0.gif` (small, useful for the
-  manuscript / slide visuals)
+- `experiments/kuramoto/results/simulator_verification.{json,npz}` (small)
+- `experiments/kuramoto/data/kuramoto_N{2,4,8}_seed0.{npz,json}` (large)
+- `experiments/kuramoto/data/kuramoto_N2_seed0.gif` (small, demo)
 
 ### Pass criterion
 
-- The `Heun` curve in the verification JSON drifts at most ~$10^{-3}$
-  relative energy at $n_{\text{fine}}=16384$ over $T=2$s; the Verlet
-  reference stays at machine epsilon. If `Heun` drift exceeds $10^{-2}$,
-  bump $n_{\text{fine}}$ and re-run before generating data.
-- The stationarity study should show the per-trajectory energy mean
-  saturating to a roughly constant value over time (the stationary
-  distribution); the spread should not blow up.
-- The GIF should show recognisable (chaotic) double-pendulum motion: a
-  visibly random swing trajectory, not all-zeros, not blowing up.
+- Phase-lock relative error in the verification JSON drops below ~$10^{-3}$
+  by $n_\text{fine} = 16384$ (`Heun` converges to the analytic
+  $\Delta\theta_\infty = \arcsin(2P/K)$).
+- Order-parameter stationary mean is finite and the std doesn't grow
+  with time (no integration blow-up).
+- The GIF shows partial-sync dynamics: $N$ phase points on the unit
+  circle, the order-parameter arrow $re^{i\Psi}$ wandering with
+  intermediate length $r \in (0.3, 0.9)$.
 
-If all three pass, M2 (model + training scaffolding) starts on the dev box
-and will not need remote compute again until M3.
+If all three pass, M2 (model + training scaffolding) starts on the dev
+box and will not need remote compute again until M3.
