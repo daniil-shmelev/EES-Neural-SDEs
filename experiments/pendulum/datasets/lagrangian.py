@@ -15,25 +15,40 @@ $\\theta = 0$ has all links hanging straight down.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from typing import Callable
 
+import equinox as eqx
 import jax
 import jax.numpy as jnp
 from jaxtyping import Array, Float
 
 
-@dataclass(frozen=True)
-class PendulumParams:
+class PendulumParams(eqx.Module):
     """Physical parameters of an n-link planar pendulum.
 
-    All length-n vectors. Gravity is a single scalar.
+    `eqx.Module` (a registered JAX pytree) so that `eqx.filter_jit` can
+    partition array fields (dynamic) from non-array fields (static) when
+    the params are passed through `jit`/`vmap`. A plain `@dataclass` would
+    be opaque to the pytree machinery, sending the whole object — arrays
+    included — into the static-arg cache key, which then fails to hash.
     """
 
-    n: int
-    masses: Float[Array, "n"]
-    lengths: Float[Array, "n"]
-    g: float
+    n: int = eqx.field(static=True)
+    masses: Float[Array, " n"]
+    lengths: Float[Array, " n"]
+    g: float = eqx.field(static=True)
+
+    def __init__(
+        self,
+        n: int,
+        masses: Float[Array, " n"],
+        lengths: Float[Array, " n"],
+        g: float,
+    ):
+        self.n = int(n)
+        self.masses = jnp.asarray(masses)
+        self.lengths = jnp.asarray(lengths)
+        self.g = float(g)
 
     @staticmethod
     def uniform(n: int, mass: float = 1.0, length: float = 1.0, g: float = 9.81) -> "PendulumParams":
