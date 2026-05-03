@@ -16,6 +16,7 @@ from diffrax import (
     ControlTerm,
     DirectAdjoint,
     MultiTerm,
+    RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
     SaveAt,
     VirtualBrownianTree,
@@ -24,9 +25,18 @@ from diffrax import (
 from georax import CFEES25, GeometricEuler, GeometricTerm
 from jaxtyping import Array
 
+from experiments.sphere_latent_nsde.custom_vbt import (
+    cfees25_integrate_reversible,
+    step_noise,
+)
 from experiments.sphere_latent_nsde.dataset import INPUT_DIM, NUM_CLASSES, NUM_TIMEPOINTS
 from experiments.sphere_latent_nsde.distributions import PowerSpherical
-from experiments.sphere_latent_nsde.geometry import Sphere, normalize, vec_to_matrix
+from experiments.sphere_latent_nsde.geometry import (
+    Sphere,
+    SphereTaylorChart,
+    normalize,
+    vec_to_matrix,
+)
 
 
 def apply_linear(linear: eqx.nn.Linear, x: Array) -> Array:
@@ -46,10 +56,12 @@ def build_solver(name: Literal["geometric_euler", "cfees25"]) -> AbstractSolver:
 
 def build_adjoint(
     solver: AbstractSolver,
-    name: Literal["auto", "direct", "reversible"] = "auto",
+    name: Literal["auto", "direct", "recursive_checkpoint", "reversible"] = "auto",
 ) -> AbstractAdjoint:
     if name == "direct":
         return DirectAdjoint()
+    if name == "recursive_checkpoint":
+        return RecursiveCheckpointAdjoint()
     if name == "reversible":
         return ReversibleAdjoint()
     if isinstance(solver, AbstractReversibleSolver):
@@ -341,47 +353,6 @@ class PathEncoder(eqx.Module):
         drift = jax.vmap(lambda one_h: self.posterior_drift(one_h, times))(flat_h)
         return drift.reshape(h.shape[:-1] + drift.shape[1:])
 
-    def integrate_path(
-        self,
-        h: Array,
-        z0: Array,
-        key: Array,
-        *,
-        times: Array,
-        solver: AbstractSolver,
-        adjoint: AbstractAdjoint,
-    ) -> Array:
-        dt = times[1] - times[0]
-        t0 = times[0]
-        t1 = times[-1]
-        driver_dim = self.geometry.dimension
-        solve_args = (self.time_fn, h, self.sigma.astype(z0.dtype))
-
-        brownian = VirtualBrownianTree(
-            t0=t0,
-            t1=t1,
-            tol=dt / 4.0,
-            shape=(driver_dim,),
-            key=key,
-        )
-        term = MultiTerm(
-            GeometricTerm(_sphere_drift_coeffs, self.geometry),
-            ControlTerm(_sphere_diffusion_coeffs, brownian),
-        )
-        sol = diffeqsolve(
-            term,
-            solver,
-            t0=t0,
-            t1=t1,
-            dt0=dt,
-            y0=self.geometry.project(z0),
-            args=solve_args,
-            saveat=SaveAt(ts=times),
-            adjoint=adjoint,
-            max_steps=int(times.shape[0]) + 8,
-        )
-        return sol.ys
-
     def integrate_paths(
         self,
         h: Array,
@@ -397,6 +368,11 @@ class PathEncoder(eqx.Module):
         ``z0`` is shaped ``(mc, batch, z_dim)`` and the returned path is shaped
         ``(mc, batch, time, z_dim)``.
         """
+
+        if isinstance(solver, GeometricEuler):
+            return self._integrate_paths_geometric_euler(h, z0, key, times=times)
+        if isinstance(solver, CFEES25):
+            return self._integrate_paths_cfees25(h, z0, key, times=times)
 
         dt = times[1] - times[0]
         t0 = times[0]
@@ -429,6 +405,55 @@ class PathEncoder(eqx.Module):
             max_steps=int(times.shape[0]) + 8,
         )
         return jnp.moveaxis(sol.ys, 0, 2)
+
+    def _integrate_paths_geometric_euler(
+        self,
+        h: Array,
+        z0: Array,
+        key: Array,
+        *,
+        times: Array,
+    ) -> Array:
+        """Fixed-grid geometric Euler with replayable independent increments."""
+
+        dt = jnp.diff(times)
+        z0 = self.geometry.project(z0)
+        driver_dim = self.geometry.dimension
+        drift = self._posterior_drift_batched(h, times[:-1])
+        drift = jnp.broadcast_to(drift, z0.shape[:-1] + drift.shape[-2:])
+        drift = jnp.moveaxis(drift, -2, 0)
+        sigma = self.sigma.astype(z0.dtype)
+        chart = SphereTaylorChart(2)
+        noise_shape = z0.shape[:-1] + (driver_dim,)
+
+        def step(z, inputs):
+            step_index, dt_i, drift_i = inputs
+            noise = step_noise(key, step_index, noise_shape, z.dtype)
+            increment = drift_i * dt_i + sigma * jnp.sqrt(dt_i) * noise
+            z_next = chart.apply(z, increment, self.geometry)
+            return z_next, z_next
+
+        step_indices = jnp.arange(times.shape[0] - 1)
+        _, zs = jax.lax.scan(step, z0, (step_indices, dt, drift))
+        zs = jnp.concatenate([z0[None], zs], axis=0)
+        return jnp.moveaxis(zs, 0, 2)
+
+    def _integrate_paths_cfees25(
+        self,
+        h: Array,
+        z0: Array,
+        key: Array,
+        *,
+        times: Array,
+    ) -> Array:
+        """Fixed-grid CFEES25 with replayable Brownian increments."""
+
+        return cfees25_integrate_reversible(
+            (self.time_fn, h, z0, self.sigma.astype(z0.dtype)),
+            times,
+            self.geometry.basis,
+            key,
+        )
 
     def path_kl(self, paths: Array, h: Array, times: Array) -> Array:
         grid = times[:-1]
@@ -486,7 +511,9 @@ class ActivityLatentSDE(eqx.Module):
         z_dim: int = 16,
         n_deg: int = 4,
         solver_name: Literal["geometric_euler", "cfees25"] = "geometric_euler",
-        adjoint_name: Literal["auto", "direct", "reversible"] = "auto",
+        adjoint_name: Literal[
+            "auto", "direct", "recursive_checkpoint", "reversible"
+        ] = "auto",
         learnable_prior: bool = False,
         use_atanh: bool = False,
         key: Array,
@@ -519,25 +546,6 @@ class ActivityLatentSDE(eqx.Module):
 
     def desired_times(self, dtype=jnp.float32) -> Array:
         return jnp.linspace(0.0, self.time_end, self.num_timepoints, dtype=dtype)
-
-    def _single_encode_and_sample(self, obs: Array, msk: Array, tps: Array, key: Array, mc_samples: int):
-        h = self.recog_net(obs, msk, tps)
-        posterior = self.path_encoder.posterior_initial(h)
-        k_z0, k_path = jax.random.split(key)
-        z0 = posterior.rsample(k_z0, (mc_samples,))
-        path_keys = jax.random.split(k_path, mc_samples)
-        times = self.desired_times(dtype=obs.dtype)
-        paths = jax.vmap(
-            lambda one_z0, one_key: self.path_encoder.integrate_path(
-                h,
-                one_z0,
-                one_key,
-                times=times,
-                solver=self.solver,
-                adjoint=self.adjoint,
-            )
-        )(z0, path_keys)
-        return h, paths, posterior.kl_to_uniform(), self.path_encoder.path_kl(paths, h, times)
 
     def __call__(self, batch: dict[str, Array], key: Array, *, mc_samples: int = 1) -> LatentSDEOutput:
         h = jax.vmap(self.recog_net)(
