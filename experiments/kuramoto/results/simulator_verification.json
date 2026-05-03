@@ -1,0 +1,45 @@
+{
+  "N": 8,
+  "P": 0.5,
+  "K": 2.0,
+  "m": 1.0,
+  "D": 0.05,
+  "T": 5.0,
+  "phase_lock_target": 0.5235987901687622,
+  "phase_lock": {
+    "1024": {
+      "dt": 0.0048828125,
+      "delta_theta_final": 0.4830131530761719,
+      "delta_theta_target": 0.5235987901687622,
+      "relative_error": 0.07751285498484267
+    },
+    "2048": {
+      "dt": 0.00244140625,
+      "delta_theta_final": 0.48301172256469727,
+      "delta_theta_target": 0.5235987901687622,
+      "relative_error": 0.07751558706043465
+    },
+    "4096": {
+      "dt": 0.001220703125,
+      "delta_theta_final": 0.48301172256469727,
+      "delta_theta_target": 0.5235987901687622,
+      "relative_error": 0.07751558706043465
+    },
+    "8192": {
+      "dt": 0.0006103515625,
+      "delta_theta_final": 0.48301076889038086,
+      "delta_theta_target": 0.5235987901687622,
+      "relative_error": 0.07751740844416263
+    },
+    "16384": {
+      "dt": 0.00030517578125,
+      "delta_theta_final": 0.4830312728881836,
+      "delta_theta_target": 0.5235987901687622,
+      "relative_error": 0.07747824869401095
+    }
+  },
+  "stationarity": {
+    "r_stationary_mean": 0.7044295072555542,
+    "r_stationary_std": 0.23516762256622314
+  }
+}

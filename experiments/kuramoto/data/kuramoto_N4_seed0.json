@@ -1,0 +1,24 @@
+{
+  "model": "stochastic_second_order_kuramoto",
+  "reference": "Olmi & Torcini 2024 eq.(1) with K2=0; deterministic part following Filatrella, Nielsen & Pedersen 2008.",
+  "N": 4,
+  "P": 0.5,
+  "K": 2.0,
+  "m": 1.0,
+  "K_c_estimate": 1.154700517654419,
+  "n_train": 5000,
+  "n_val": 1000,
+  "n_test": 1000,
+  "D": 0.05,
+  "T": 5.0,
+  "n_fine": 16384,
+  "n_obs": 200,
+  "seed": 0,
+  "omega_scale": 0.5,
+  "library_versions": {
+    "jax": "0.10.0",
+    "jaxlib": "0.10.0",
+    "diffrax": "0.7.1",
+    "equinox": "0.13.7"
+  }
+}
