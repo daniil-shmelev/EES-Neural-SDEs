@@ -36,39 +36,31 @@ Run a small end-to-end smoke train:
 
 ```bash
 uv run python -m experiments.sphere_latent_nsde.train_activity \
-  --smoke \
-  --data-source raw \
-  --solver geometric_euler \
-  --output-dir /tmp/activity_jax_smoke
+  experiments/sphere_latent_nsde/configs/activity/smoke.toml
 ```
 
-For the intended solver comparison, set `--solver cfees25 --adjoint reversible`
-or keep `--solver geometric_euler`.
+Run the full two-entry solver sweep:
+
+```bash
+uv run python -m experiments.sphere_latent_nsde.train_activity \
+  experiments/sphere_latent_nsde/configs/activity/sweep.toml
+```
+
+Run one sweep entry:
+
+```bash
+uv run python -m experiments.sphere_latent_nsde.train_activity \
+  experiments/sphere_latent_nsde/configs/activity/sweep.toml --index 0
+```
 
 The exact original output grid has 228 points. For faster JAX development runs,
-use `--num-timepoints 64` or `--num-timepoints 32`; the dataloader remaps
-reconstruction/classification time IDs onto that grid. Omit this flag for the
-full original grid.
+set `num_timepoints = 64` or `num_timepoints = 32` in a TOML config; the
+dataloader remaps reconstruction/classification time IDs onto that grid.
 
+Each run writes a timestamped directory under
+`experiments/sphere_latent_nsde/results/activity__<solver>_<adjoint>__seed<N>__<timestamp>/`
+containing `config.toml`, `nsde.eqx`, `history.json`, and `metrics.json`.
 
-```bash
-uv run python -m experiments.sphere_latent_nsde.train_activity \
-  --data-source raw \
-  --solver geometric_euler \
-  --adjoint direct \
-  --epochs 100 \
-  --batch-size 64 \
-  --num-timepoints 64 \
-  --output-dir experiments/sphere_latent_nsde/results/geometric_euler_activity
-```
-
-```bash
-uv run python -m experiments.sphere_latent_nsde.train_activity \
-  --data-source raw \
-  --solver cfees25 \
-  --adjoint reversible \
-  --epochs 100 \
-  --batch-size 64 \
-  --num-timepoints 64 \
-  --output-dir experiments/sphere_latent_nsde/results/cfees25_activity
-```
+Training selects the best checkpoint by validation accuracy, then evaluates the
+test split once at the end. That final test accuracy is recorded as
+`test_acc_at_best_val_pct` in `metrics.json`.

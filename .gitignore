@@ -76,6 +76,8 @@ data/cache/
 # === Logs ===
 **/*.log
 **/stdout.log
+experiments/stochastic_volatility/results
+experiments/sphere_latent_nsde/results
 
 # === BUT keep result files (whitelist) ===
 !experiments/**/results/**/*.json

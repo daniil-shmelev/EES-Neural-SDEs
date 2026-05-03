@@ -38,21 +38,6 @@ class SphereExpChart(LocalChart):
         return jnp.einsum("...ij,...j->...i", q, x)
 
 
-class SphereCayleyChart(LocalChart):
-    """Second-order Cayley chart for the ``SO(n)`` action on the sphere."""
-
-    order: RealScalarLike = 2
-    inverse_order: RealScalarLike = 2
-
-    @override
-    def apply(self, x: Array, a: Array, geometry: "Sphere") -> Array:
-        omega = geometry.coords_to_alg(a, dtype=x.dtype)
-        ident = jnp.eye(geometry.n, dtype=x.dtype)
-        rhs = jnp.einsum("...ij,...j->...i", ident + 0.5 * omega, x)
-        y = jnp.linalg.solve(ident - 0.5 * omega, rhs[..., None])[..., 0]
-        return normalize(y)
-
-
 class SphereTaylorChart(LocalChart):
     """Taylor action chart followed by projection back to the sphere."""
 
@@ -144,10 +129,7 @@ class Sphere(Manifold):
 
     @override
     def select_chart(self, required_order: RealScalarLike) -> LocalChart:
-        if required_order <= 2:
-            chart: LocalChart = SphereCayleyChart()
-        else:
-            chart = SphereTaylorChart(int(required_order))
+        chart: LocalChart = SphereTaylorChart(int(required_order))
         object.__setattr__(self, "chart", chart)
         return chart
 

@@ -5,18 +5,37 @@ from __future__ import annotations
 import argparse
 import json
 import time
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
 import equinox as eqx
 import jax
+import jax.numpy as jnp
 import numpy as np
 import optax
 from tqdm.auto import tqdm
 
-from experiments.sphere_latent_nsde.config import ActivityConfig, load_config, replace_config, to_json
+from experiments.sphere_latent_nsde.config import (
+    ActivityConfig,
+    is_sweep_config,
+    load_config,
+    sweep_config_at,
+    sweep_len,
+    to_toml,
+)
 from experiments.sphere_latent_nsde.factories import make_dataset, make_loader, make_model
 from experiments.sphere_latent_nsde.losses import activity_loss_value, activity_metrics_value
+
+PROJECT_ROOT = Path(__file__).resolve().parent
+
+
+@dataclass
+class TrainResult:
+    best_model: eqx.Module
+    history: dict[str, list[dict[str, float]]]
+    completed_epochs: int
 
 
 def _count_parameters(model: eqx.Module) -> int:
@@ -32,7 +51,7 @@ def _tree_float_dict(metrics: dict[str, Any]) -> dict[str, float]:
     return {key: float(value) for key, value in metrics.items()}
 
 
-def fit(model: eqx.Module, config: ActivityConfig) -> tuple[eqx.Module, dict[str, list[dict[str, float]]]]:
+def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
     train_loader = make_loader(config, "train")
     val_loader = make_loader(config, "val")
     test_loader = make_loader(config, "test")
@@ -84,6 +103,26 @@ def fit(model: eqx.Module, config: ActivityConfig) -> tuple[eqx.Module, dict[str
 
     eval_step = eqx.filter_jit(metrics_fn)
 
+    def eval_split(current_model, loader_next, state, steps, key, aux_mul):
+        totals: dict[str, float] = {}
+        for _ in range(steps):
+            key, step_key = jax.random.split(key)
+            batch, state, mask = loader_next(state)
+            metrics = _tree_float_dict(
+                eval_step(
+                    current_model,
+                    batch,
+                    mask,
+                    step_key,
+                    aux_mul,
+                    config.mc_eval_samples,
+                )
+            )
+            for metric_name, metric_value in metrics.items():
+                totals[metric_name] = totals.get(metric_name, 0.0) + metric_value
+        averaged = {name: value / max(steps, 1) for name, value in totals.items()}
+        return averaged, state, key
+
     key = jax.random.key(config.seed)
     key, train_key, val_key, test_key = jax.random.split(key, 4)
     train_state = train_loader.init_state(train_key)
@@ -99,166 +138,199 @@ def fit(model: eqx.Module, config: ActivityConfig) -> tuple[eqx.Module, dict[str
     history: dict[str, list[dict[str, float]]] = {"train": [], "val": [], "test": []}
     best_model = model
     best_val_acc = -np.inf
+    best_epoch = 0
 
-    for epoch in tqdm(range(1, config.epochs + 1), desc="activity", unit="epoch"):
-        aux_mul = (epoch / 60.0) ** 2 if epoch < 60 else 1.0
+    with tqdm(
+        range(1, config.epochs + 1),
+        desc=f"{config.experiment}/{config.method}",
+        unit="epoch",
+        dynamic_ncols=True,
+    ) as epochs:
+        for epoch in epochs:
+            aux_mul_value = (epoch / 60.0) ** 2 if epoch < 60 else 1.0
+            aux_mul = jnp.asarray(aux_mul_value, dtype=jnp.float32)
 
-        train_loss = 0.0
-        for _ in range(train_steps):
-            key, step_key = jax.random.split(key)
-            batch, train_state, mask = train_next(train_state)
-            model, opt_state, loss = train_step(
-                model, opt_state, batch, mask, step_key, aux_mul
-            )
-            train_loss += float(loss)
-        train_loss /= max(train_steps, 1)
-        train_metrics = {"loss": train_loss}
-
-        split_metrics: dict[str, dict[str, float]] = {}
-        for split, loader_next, state, steps in (
-            ("val", val_next, val_state, eval_steps["val"]),
-            ("test", test_next, test_state, eval_steps["test"]),
-        ):
-            totals: dict[str, float] = {}
-            for _ in range(steps):
+            train_loss = 0.0
+            for _ in range(train_steps):
                 key, step_key = jax.random.split(key)
-                batch, state, mask = loader_next(state)
-                metrics = _tree_float_dict(
-                    eval_step(
-                        model,
-                        batch,
-                        mask,
-                        step_key,
-                        aux_mul,
-                        config.mc_eval_samples,
-                    )
+                batch, train_state, mask = train_next(train_state)
+                model, opt_state, loss = train_step(
+                    model, opt_state, batch, mask, step_key, aux_mul
                 )
-                for metric_name, metric_value in metrics.items():
-                    totals[metric_name] = totals.get(metric_name, 0.0) + metric_value
-            split_metrics[split] = {
-                metric_name: metric_value / max(steps, 1)
-                for metric_name, metric_value in totals.items()
-            }
-            if split == "val":
-                val_state = state
-            else:
-                test_state = state
+                train_loss += float(loss)
+            train_metrics = {"loss": train_loss / max(train_steps, 1)}
 
-        if split_metrics["val"]["aux_acc"] > best_val_acc:
-            best_val_acc = split_metrics["val"]["aux_acc"]
-            best_model = model
-        split_metrics["val"]["aux_acc*"] = best_val_acc
-
-        history["train"].append(train_metrics)
-        history["val"].append(split_metrics["val"])
-        history["test"].append(split_metrics["test"])
-
-        tqdm.write(
-            "epoch={:04d} train_loss={:.6f} val_acc={:.2f}% test_acc={:.2f}%".format(
-                epoch,
-                train_metrics["loss"],
-                split_metrics["val"]["aux_acc_pct"],
-                split_metrics["test"]["aux_acc_pct"],
+            val_metrics, val_state, key = eval_split(
+                model, val_next, val_state, eval_steps["val"], key, aux_mul
             )
-        )
+            if val_metrics["aux_acc"] > best_val_acc:
+                best_val_acc = val_metrics["aux_acc"]
+                best_epoch = epoch
+                best_model = model
+            val_metrics["aux_acc*"] = best_val_acc
+            val_metrics["aux_acc_pct*"] = 100.0 * best_val_acc
+            val_metrics["best_val_epoch"] = float(best_epoch)
 
-    return best_model, history
+            history["train"].append(train_metrics)
+            history["val"].append(val_metrics)
+            epochs.set_postfix_str(
+                "train={:.3e} val_acc*={:.2f}% best_epoch={}".format(
+                    train_metrics["loss"],
+                    val_metrics["aux_acc_pct*"],
+                    best_epoch,
+                )
+            )
 
-
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--config", type=Path, default=None)
-    parser.add_argument("--output-dir", type=Path, default=Path("experiments/sphere_latent_nsde/results"))
-    parser.add_argument("--data-dir", type=Path, default=None)
-    parser.add_argument("--epochs", type=int, default=None)
-    parser.add_argument("--batch-size", type=int, default=None)
-    parser.add_argument("--lr", type=float, default=None)
-    parser.add_argument("--seed", type=int, default=None)
-    parser.add_argument("--h-dim", type=int, default=None)
-    parser.add_argument("--z-dim", type=int, default=None)
-    parser.add_argument("--n-deg", type=int, default=None)
-    parser.add_argument("--num-timepoints", type=int, default=None)
-    parser.add_argument("--mc-train-samples", type=int, default=None)
-    parser.add_argument("--mc-eval-samples", type=int, default=None)
-    parser.add_argument("--solver", choices=("geometric_euler", "cfees25"), default=None)
-    parser.add_argument("--adjoint", choices=("auto", "direct", "reversible"), default=None)
-    parser.add_argument("--data-source", choices=("auto", "raw", "torch"), default=None)
-    parser.add_argument("--split-strategy", choices=("auto", "numpy", "torch"), default=None)
-    parser.add_argument("--max-train-batches", type=int, default=None)
-    parser.add_argument("--max-eval-batches", type=int, default=None)
-    parser.add_argument("--smoke", action="store_true")
-    args = parser.parse_args()
-
-    config = load_config(args.config) if args.config is not None else ActivityConfig()
-    config = replace_config(
-        config,
-        data_dir=args.data_dir,
-        epochs=args.epochs,
-        batch_size=args.batch_size,
-        learning_rate=args.lr,
-        seed=args.seed,
-        h_dim=args.h_dim,
-        z_dim=args.z_dim,
-        n_deg=args.n_deg,
-        num_timepoints=args.num_timepoints,
-        solver=args.solver,
-        adjoint=args.adjoint,
-        data_source=args.data_source,
-        split_strategy=args.split_strategy,
-        mc_train_samples=args.mc_train_samples,
-        mc_eval_samples=args.mc_eval_samples,
-        max_train_batches=args.max_train_batches,
-        max_eval_batches=args.max_eval_batches,
+    test_metrics, _, key = eval_split(
+        best_model,
+        test_next,
+        test_state,
+        eval_steps["test"],
+        key,
+        1.0,
     )
-    if args.smoke:
-        config = replace_config(
-            config,
-            epochs=1,
-            batch_size=2,
-            h_dim=4,
-            z_dim=3,
-            n_deg=2,
-            num_timepoints=32,
-            mc_train_samples=1,
-            mc_eval_samples=1,
-            max_train_batches=1,
-            max_eval_batches=1,
-        )
+    test_metrics["aux_acc*"] = test_metrics["aux_acc"]
+    test_metrics["aux_acc_pct*"] = test_metrics["aux_acc_pct"]
+    test_metrics["best_val_epoch"] = float(best_epoch)
+    history["test"].append(test_metrics)
 
+    return TrainResult(best_model, history, config.epochs)
+
+
+def _save_json(path: Path, payload: dict[str, Any]) -> None:
+    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def _make_output_dir(config: ActivityConfig) -> Path:
+    timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
+    slug = f"{config.experiment}__{config.method}__seed{config.seed}__{timestamp}"
+    return PROJECT_ROOT / "results" / slug
+
+
+def _configure_runtime(config: ActivityConfig) -> ActivityConfig:
+    if config.device == "cpu":
+        jax.config.update("jax_platform_name", "cpu")
+    return config
+
+
+def _metrics_payload(
+    *,
+    config: ActivityConfig,
+    parameter_count: int,
+    train_size: int,
+    val_size: int,
+    test_size: int,
+    train_result: TrainResult,
+    train_time_s: float,
+) -> dict[str, Any]:
+    history = train_result.history
+    final_test = history["test"][-1]
+    final_val = history["val"][-1]
+    return {
+        "completed_epochs": int(train_result.completed_epochs),
+        "parameters": int(parameter_count),
+        "train_size": int(train_size),
+        "val_size": int(val_size),
+        "test_size": int(test_size),
+        "train_time_s": round(train_time_s, 2),
+        "best_epoch": int(final_test["best_val_epoch"]),
+        "best_val_acc": float(final_val["aux_acc*"]),
+        "best_val_acc_pct": float(final_val["aux_acc_pct*"]),
+        "test_acc_at_best_val": float(final_test["aux_acc*"]),
+        "test_acc_at_best_val_pct": float(final_test["aux_acc_pct*"]),
+        "final_test_acc": float(final_test["aux_acc"]),
+        "final_test_acc_pct": float(final_test["aux_acc_pct"]),
+        "num_timepoints": int(config.num_timepoints),
+        "solver": config.solver,
+        "adjoint": config.adjoint,
+    }
+
+
+def _save_artifacts(
+    *,
+    output_dir: Path,
+    config: ActivityConfig,
+    train_result: TrainResult,
+    metrics: dict[str, Any],
+) -> None:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "config.toml").write_text(to_toml(config), encoding="utf-8")
+    eqx.tree_serialise_leaves(output_dir / "nsde.eqx", train_result.best_model)
+    _save_json(output_dir / "history.json", train_result.history)
+    _save_json(output_dir / "metrics.json", metrics)
+
+
+def _run_single_config(config: ActivityConfig) -> int:
+    output_dir = _make_output_dir(config)
     train_dataset = make_dataset(config, "train")
+    val_dataset = make_dataset(config, "val")
+    test_dataset = make_dataset(config, "test")
     print(
-        f"dataset sizes: train={len(train_dataset)} "
-        f"val={len(make_dataset(config, 'val'))} test={len(make_dataset(config, 'test'))}",
+        f"experiment={config.experiment}",
+        f"method={config.method}",
+        f"train={len(train_dataset)}",
+        f"val={len(val_dataset)}",
+        f"test={len(test_dataset)}",
+        f"h_dim={config.h_dim}",
+        f"z_dim={config.z_dim}",
+        f"num_timepoints={config.num_timepoints}",
         flush=True,
     )
 
     key = jax.random.key(config.seed)
     model = make_model(config, key)
-    print(f"parameters={_count_parameters(model)}", flush=True)
+    parameter_count = _count_parameters(model)
+    print(f"parameters={parameter_count}", flush=True)
 
-    args.output_dir.mkdir(parents=True, exist_ok=True)
     start = time.perf_counter()
-    best_model, history = fit(model, config)
+    train_result = fit(model, config)
     train_time_s = time.perf_counter() - start
 
-    eqx.tree_serialise_leaves(args.output_dir / "activity_model.eqx", best_model)
-    payload = {
-        "config": json.loads(to_json(config)),
-        "history": history,
-        "final": {
-            "train_time_s": train_time_s,
-            "best_val_acc": max(row["aux_acc"] for row in history["val"]),
-            "best_val_acc_pct": 100.0 * max(row["aux_acc"] for row in history["val"]),
-            "final_test_acc": history["test"][-1]["aux_acc"],
-            "final_test_acc_pct": history["test"][-1]["aux_acc_pct"],
-        },
-    }
-    (args.output_dir / "activity_history.json").write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+    metrics = _metrics_payload(
+        config=config,
+        parameter_count=parameter_count,
+        train_size=len(train_dataset),
+        val_size=len(val_dataset),
+        test_size=len(test_dataset),
+        train_result=train_result,
+        train_time_s=train_time_s,
     )
-    print(args.output_dir, flush=True)
+    _save_artifacts(
+        output_dir=output_dir,
+        config=config,
+        train_result=train_result,
+        metrics=metrics,
+    )
+    print(f"saved artifacts to {output_dir}", flush=True)
+    print(
+        "best_epoch={best_epoch} val_acc={best_val_acc_pct:.2f}% "
+        "test_acc={test_acc_at_best_val_pct:.2f}%".format(**metrics),
+        flush=True,
+    )
     return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("config", type=Path, help="Path to TOML config or sweep")
+    parser.add_argument("--index", type=int, default=None, help="Sweep index to run")
+    args = parser.parse_args()
+
+    if args.index is not None:
+        print(f"running sweep_index={args.index}", flush=True)
+        return _run_single_config(_configure_runtime(sweep_config_at(args.config, args.index)))
+
+    if is_sweep_config(args.config):
+        total = sweep_len(args.config)
+        print(f"running sweep with {total} configurations", flush=True)
+        for index in range(total):
+            print(f"sweep_run={index + 1}/{total} sweep_index={index}", flush=True)
+            status = _run_single_config(_configure_runtime(sweep_config_at(args.config, index)))
+            if status != 0:
+                return status
+        return 0
+
+    return _run_single_config(_configure_runtime(load_config(args.config)))
 
 
 if __name__ == "__main__":
