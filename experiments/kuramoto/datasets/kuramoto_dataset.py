@@ -13,13 +13,14 @@ import json
 from pathlib import Path
 from typing import Literal
 
+import jax
 import jax.numpy as jnp
 import numpy as np
-from cyreal.loader import ArraySource
+from cyreal.sources import ArraySource
 
 
 class KuramotoDataset:
-    """Wrap one $N$-oscillator NPZ split into a numpy array source."""
+    """Wrap one $N$-oscillator NPZ split into a cyreal-compatible array source."""
 
     def __init__(
         self,
@@ -46,6 +47,7 @@ class KuramotoDataset:
         self.split = split
         self.N = int(self.meta["N"])
         self.n_obs = int(self.theta.shape[1])
+        self.ordering = "shuffle" if split == "train" else "sequential"
 
     def __len__(self) -> int:
         return self.theta.shape[0]
@@ -59,16 +61,18 @@ class KuramotoDataset:
             **{k: v for k, v in self.meta.items() if k not in ("library_versions",)},
         }
 
+    def as_array_dict(self) -> dict[str, jax.Array]:
+        """Return the per-trajectory arrays keyed by name."""
+        return {
+            "theta0": jnp.asarray(self.theta[:, 0]),
+            "omega0": jnp.asarray(self.omega[:, 0]),
+            "theta_traj": jnp.asarray(self.theta),
+            "omega_traj": jnp.asarray(self.omega),
+        }
+
     def make_array_source(self) -> ArraySource:
         """Return a cyreal `ArraySource` keyed for the training loop."""
-        return ArraySource(
-            {
-                "theta0": jnp.asarray(self.theta[:, 0]),
-                "omega0": jnp.asarray(self.omega[:, 0]),
-                "theta_traj": jnp.asarray(self.theta),
-                "omega_traj": jnp.asarray(self.omega),
-            }
-        )
+        return ArraySource(self.as_array_dict(), ordering=self.ordering)
 
 
 def default_npz_path(data_dir: Path, N: int, seed: int = 0) -> Path:

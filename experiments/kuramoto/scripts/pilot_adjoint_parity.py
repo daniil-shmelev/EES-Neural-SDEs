@@ -107,14 +107,9 @@ def gradient_fidelity_one(
         solver=solver, diffusion_scale=0.3, adjoint=adjoint, key=model_key,
     )
 
-    src = dataset.make_array_source()
+    arrays = dataset.as_array_dict()
     n_take = batch_size
-    batch = {
-        "theta0": jnp.asarray(src.arrays["theta0"][:n_take]),
-        "omega0": jnp.asarray(src.arrays["omega0"][:n_take]),
-        "theta_traj": jnp.asarray(src.arrays["theta_traj"][:n_take]),
-        "omega_traj": jnp.asarray(src.arrays["omega_traj"][:n_take]),
-    }
+    batch = {k: jnp.asarray(v[:n_take]) for k, v in arrays.items()}
     loss_fn = make_multi_horizon_energy_score(n_samples=4)
 
     @eqx.filter_jit
