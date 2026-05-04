@@ -156,8 +156,8 @@ class KuramotoNSDE(eqx.Module):
 
     N: int = eqx.field(static=True)
     n_steps: int = eqx.field(static=True)
+    n_obs: int = eqx.field(static=True)
     dt: float = eqx.field(static=True)
-    t_save: jax.Array = eqx.field(static=False)
     solver: AbstractSolver = eqx.field(static=True)
     adjoint: AbstractAdjoint | None = eqx.field(static=True)
 
@@ -188,11 +188,8 @@ class KuramotoNSDE(eqx.Module):
         self.name = "kuramoto_nsde"
         self.N = N
         self.n_steps = n_steps
+        self.n_obs = n_obs
         self.dt = dt
-        # Save-at times uniformly spaced in [0, n_steps*dt], matching the
-        # data observation cadence. Stored as a static array so jit doesn't
-        # retrace each call.
-        self.t_save = jnp.linspace(0.0, n_steps * dt, n_obs)
         self.solver = solver
         self.adjoint = adjoint
 
@@ -226,6 +223,7 @@ class KuramotoNSDE(eqx.Module):
         """
         N = self.N
         t1 = float(self.n_steps * self.dt)
+        t_save = jnp.linspace(0.0, t1, self.n_obs)
 
         y0 = jnp.concatenate([theta0, omega0])
         brownian_path = VirtualBrownianTree(
@@ -248,7 +246,7 @@ class KuramotoNSDE(eqx.Module):
 
         sol = diffeqsolve(
             term, self.solver, t0=0.0, t1=t1, dt0=self.dt, y0=y0,
-            saveat=SaveAt(ts=self.t_save), adjoint=adjoint,
+            saveat=SaveAt(ts=t_save), adjoint=adjoint,
             max_steps=self.n_steps + 16,
         )
         ys = sol.ys  # (n_obs, 2N)

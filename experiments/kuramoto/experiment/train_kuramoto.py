@@ -103,9 +103,12 @@ def fit(
     @eqx.filter_jit
     def train_step(current_model, opt_state, batch, mask, key):
         loss, grads = eqx.filter_value_and_grad(loss_fn)(current_model, batch, mask, key)
+        # Global gradient L2 norm (pre-clip) for diagnostics.
+        flat_grads = jax.tree.leaves(eqx.filter(grads, eqx.is_array))
+        grad_norm = jnp.sqrt(sum(jnp.sum(g * g) for g in flat_grads))
         updates, new_opt_state = optim.update(grads, opt_state, current_model)
         new_model = eqx.apply_updates(current_model, updates)
-        return new_model, new_opt_state, loss
+        return new_model, new_opt_state, loss, grad_norm
 
     eval_step = eqx.filter_jit(loss_fn)
 
@@ -115,28 +118,69 @@ def fit(
     val_state = val_loader.init_state(val_key)
     test_state = test_loader.init_state(test_key)
 
-    history: dict[str, list[float]] = {
+    n_params = sum(int(x.size) for x in jax.tree.leaves(eqx.filter(model, eqx.is_array)))
+
+    history: dict = {
+        # Per-epoch reductions
         "train_loss": [], "val_loss": [], "test_loss": [],
         "epoch_walltime_s": [],
         "val_theta_mae_mean": [], "val_omega_mae_mean": [],
         "test_theta_mae_mean": [], "test_omega_mae_mean": [],
         "val_theta_mae_per_horizon": [], "val_omega_mae_per_horizon": [],
         "test_theta_mae_per_horizon": [], "test_omega_mae_per_horizon": [],
+        "epoch_train_loss_std": [], "epoch_grad_norm_mean": [],
+        "epoch_grad_norm_max": [], "epoch_grad_norm_p95": [],
+        "epoch_step_time_mean_s": [], "epoch_step_time_p95_s": [],
+        "epoch_peak_bytes": [], "epoch_bytes_in_use": [],
+        # Fine-grained per-step traces (one entry per training step, every epoch)
+        "step_train_loss": [], "step_grad_norm": [], "step_time_s": [],
+        "step_epoch_index": [],
+        # Constants
+        "n_params": n_params, "n_train_steps_per_epoch": train_loader.steps_per_epoch,
     }
 
     best_model = model
     best_val_loss = float("inf")
+    device = jax.devices()[0]
+
+    def _peak_mem() -> tuple[int | None, int | None]:
+        try:
+            ms = device.memory_stats() or {}
+            return (int(ms.get("peak_bytes_in_use", 0)) or None,
+                    int(ms.get("bytes_in_use", 0)) or None)
+        except Exception:
+            return None, None
 
     for epoch in range(config.epochs):
         epoch_t0 = time.time()
-        train_loss = 0.0
+        per_step_loss: list[float] = []
+        per_step_grad: list[float] = []
+        per_step_time: list[float] = []
+
         for _ in range(train_loader.steps_per_epoch):
             key, step_key = jax.random.split(key)
             batch, train_state, mask = train_next(train_state)
-            model, opt_state, loss = train_step(model, opt_state, batch, mask, step_key)
-            train_loss += float(loss)
-        train_loss /= train_loader.steps_per_epoch
+            t_step = time.perf_counter()
+            model, opt_state, loss, gnorm = train_step(model, opt_state, batch, mask, step_key)
+            jax.block_until_ready(loss)
+            dt_step = time.perf_counter() - t_step
+
+            per_step_loss.append(float(loss))
+            per_step_grad.append(float(gnorm))
+            per_step_time.append(dt_step)
+
+        train_loss = float(np.mean(per_step_loss))
         history["train_loss"].append(train_loss)
+        history["epoch_train_loss_std"].append(float(np.std(per_step_loss)))
+        history["epoch_grad_norm_mean"].append(float(np.mean(per_step_grad)))
+        history["epoch_grad_norm_max"].append(float(np.max(per_step_grad)))
+        history["epoch_grad_norm_p95"].append(float(np.percentile(per_step_grad, 95)))
+        history["epoch_step_time_mean_s"].append(float(np.mean(per_step_time)))
+        history["epoch_step_time_p95_s"].append(float(np.percentile(per_step_time, 95)))
+        history["step_train_loss"].extend(per_step_loss)
+        history["step_grad_norm"].extend(per_step_grad)
+        history["step_time_s"].extend(per_step_time)
+        history["step_epoch_index"].extend([epoch] * len(per_step_loss))
 
         val_loss, val_metrics, key, val_state = _eval_split(
             model, val_loader, val_next, eval_step, metric_fn, val_state, key,
@@ -156,6 +200,10 @@ def fit(
         history["test_theta_mae_per_horizon"].append(test_metrics["theta_mae_per_horizon"])
         history["test_omega_mae_per_horizon"].append(test_metrics["omega_mae_per_horizon"])
 
+        peak, in_use = _peak_mem()
+        history["epoch_peak_bytes"].append(peak)
+        history["epoch_bytes_in_use"].append(in_use)
+
         epoch_walltime = float(time.time() - epoch_t0)
         history["epoch_walltime_s"].append(epoch_walltime)
 
@@ -163,24 +211,33 @@ def fit(
             best_val_loss = val_loss
             best_model = model
             eqx.tree_serialise_leaves(output_dir / "model_best.eqx", best_model)
+            eqx.tree_serialise_leaves(output_dir / "opt_state_best.eqx", opt_state)
 
         if config.save_every_epoch:
             eqx.tree_serialise_leaves(
                 output_dir / f"model_epoch_{epoch:03d}.eqx", model
             )
+            # Resumability: keep only the most-recent opt_state to save disk.
+            eqx.tree_serialise_leaves(
+                output_dir / "opt_state_latest.eqx", opt_state
+            )
 
         save_json(output_dir / "history.json", history)
 
+        peak_mib = (peak / 2**20) if peak else float("nan")
         print(
             f"epoch={epoch + 1}/{config.epochs} "
-            f"train={train_loss:.4f} val={val_loss:.4f} test={test_loss:.4f} "
+            f"train={train_loss:.4f}±{history['epoch_train_loss_std'][-1]:.3f} "
+            f"val={val_loss:.4f} test={test_loss:.4f} "
+            f"|g|={history['epoch_grad_norm_mean'][-1]:.3f} "
             f"theta_mae={val_metrics['theta_mae_mean']:.4f} "
             f"omega_mae={val_metrics['omega_mae_mean']:.4f} "
-            f"time={epoch_walltime:.1f}s",
+            f"peak={peak_mib:.0f}MiB time={epoch_walltime:.1f}s",
             flush=True,
         )
 
     eqx.tree_serialise_leaves(output_dir / "model_final.eqx", model)
+    eqx.tree_serialise_leaves(output_dir / "opt_state_final.eqx", opt_state)
     return best_model, history
 
 
