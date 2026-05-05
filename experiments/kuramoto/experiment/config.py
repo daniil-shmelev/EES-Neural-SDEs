@@ -49,6 +49,15 @@ class ExperimentConfig:
     activation: str = "silu"
     diffusion_scale: float = 0.3
     couple_theta_omega: bool = False
+    drift_kind: str = "mean_field"
+    # Options:
+    #   "mean_field"          — moments + node MLP, default; O(N), perm-equivariant.
+    #   "indexed_mean_field"  — mean_field + per-osc embedding; matches the
+    #                           dataset's index-pinned Omega assignment but
+    #                           breaks pure equivariance.
+    #   "equivariant"         — full DeepSets phi(z_ij) -> mean-pool; O(N^2),
+    #                           viable only at N <= ~64 on consumer GPUs.
+    #   "mlp"                 — legacy 3N->2N MLP; retained for old checkpoints.
 
     # SDE integrator
     solver: Solvers = Solvers.CFEES25

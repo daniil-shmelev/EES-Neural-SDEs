@@ -123,6 +123,7 @@ def make_model(
             drift_depth=config.drift_depth,
             diffusion_depth=config.diffusion_depth,
             couple_theta_omega=config.couple_theta_omega,
+            drift_kind=config.drift_kind,
             key=key,
         )
     if config.model is ModelKind.EUCLIDEAN_BASELINE:

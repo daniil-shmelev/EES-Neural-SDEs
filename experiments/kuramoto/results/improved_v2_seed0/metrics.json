@@ -1,0 +1,20 @@
+{
+  "train_walltime_s": 11332.532938718796,
+  "best_val_loss": 800.9296020507812,
+  "final_train_loss": 789.5320673403533,
+  "final_val_loss": 800.9296020507812,
+  "final_test_loss": 800.6549499511718,
+  "final_test_theta_mae_mean": 0.6691111326217651,
+  "final_test_omega_mae_mean": 0.47266149520874023,
+  "config": {
+    "N": 1000,
+    "model": "kuramoto_nsde",
+    "solver": "cfees25",
+    "adjoint": "reversible",
+    "n_steps": 500,
+    "epochs": 10,
+    "batch_size": 32,
+    "seed": 0,
+    "learning_rate": 0.001
+  }
+}

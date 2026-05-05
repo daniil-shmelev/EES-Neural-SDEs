@@ -64,11 +64,28 @@ def _kuramoto_predict_batch(
     return jax.vmap(model)(theta0, omega0, sample_keys)
 
 
+def _order_parameter(theta: jax.Array) -> jax.Array:
+    r"""Kuramoto order parameter $r(t) = |\tfrac{1}{N}\sum_j e^{i\theta_j}|$.
+
+    Reduces over the trailing oscillator axis. Broadcasts across any
+    leading batch / time / sample axes.
+    """
+    return jnp.abs(jnp.mean(jnp.exp(1j * theta), axis=-1))
+
+
 def make_multi_horizon_energy_score(
     horizons: Sequence[float] = (0.125, 0.25, 0.5, 1.0),
     n_samples: int = 4,
+    aux_r_weight: float = 0.1,
 ) -> LossFn:
-    """Average energy score across multiple horizons of the trajectory."""
+    """Average energy score across multiple horizons of the trajectory.
+
+    If ``aux_r_weight > 0`` an auxiliary moment-matching term is added
+    that drives the sample-mean Kuramoto order parameter $r(t)$ toward
+    the data-mean $r(t)$ at each horizon. The strictly-proper energy
+    score is moment-blind, so without this auxiliary term the slow
+    synchronisation onset is invisible to the gradient signal.
+    """
     horizons_t = jnp.asarray(horizons, dtype=jnp.float32)
 
     def loss_fn(model, batch, mask, key):
@@ -114,7 +131,18 @@ def make_multi_horizon_energy_score(
         diversity = 0.5 * jnp.mean(pairwise, axis=(0, 1))  # (B, H)
 
         per_example_per_horizon = divergence - diversity  # (B, H)
-        return jnp.mean(per_example_per_horizon)
+        main = jnp.mean(per_example_per_horizon)
+
+        if aux_r_weight == 0.0:
+            return main
+
+        # Auxiliary moment-matching: per-horizon mean order parameter.
+        r_sample = _order_parameter(per_horizon_theta_s)  # (S, B, H)
+        r_target = _order_parameter(per_horizon_theta_t)  # (B, H)
+        r_pred_mean = jnp.mean(r_sample, axis=(0, 1))  # (H,)
+        r_data_mean = jnp.mean(r_target, axis=0)  # (H,)
+        aux = jnp.sum((r_pred_mean - r_data_mean) ** 2)
+        return main + aux_r_weight * aux
 
     return loss_fn
 

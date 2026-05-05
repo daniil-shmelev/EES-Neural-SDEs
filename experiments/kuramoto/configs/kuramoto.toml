@@ -14,8 +14,9 @@ hidden_dim = 128
 drift_depth = 3
 diffusion_depth = 2
 activation = "silu"
-diffusion_scale = 0.3
+diffusion_scale = 0.1
 couple_theta_omega = false
+drift_kind = "mean_field"  # "mean_field" (default, O(N)), "equivariant" (DeepSets, O(N^2)), or "mlp" (legacy)
 
 solver = "cfees25"
 n_steps = 200
