@@ -1,6 +1,6 @@
 # Explicit and Effectively Symmetric Schemes for Neural SDEs
 
-Code for the NeurIPS 2026 paper *"Explicit and Effectively Symmetric Schemes for Neural SDEs"* by Daniil Shmelev, Luke Thompson, and Cristopher Salvi.
+Code for the paper *"Explicit and Effectively Symmetric Schemes for Neural SDEs"*
 
 This umbrella repository reproduces every experiment, figure, and table in the paper. Each subdirectory under `experiments/` is self-contained: its own `README.md`, configs, data-fetch scripts, training/evaluation scripts, and result files that back the manuscript figures/tables.
 
