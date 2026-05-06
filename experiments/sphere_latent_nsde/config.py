@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import itertools
+import math
 import tomllib
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
@@ -17,7 +18,15 @@ METHODS = {
         "recursive_checkpoint",
     ),
     "cfees25_reversible": ("cfees25", "reversible"),
+    "cg2_direct": ("cg2", "direct"),
 }
+
+SOLVER_NFE_PER_STEP = {
+    "geometric_euler": 1,
+    "cg2": 2,
+    "cfees25": 3,
+}
+COMMON_NFE_GRANULARITY = math.lcm(*SOLVER_NFE_PER_STEP.values())
 
 
 @dataclass(frozen=True)
@@ -27,13 +36,17 @@ class ActivityConfig:
     epochs: int = 10
     batch_size: int = 64
     learning_rate: float = 1e-3
+    lr_schedule: Literal["constant", "cosine"] = "constant"
+    lr_restart: int = 30
+    lr_min_ratio: float = 0.0
     seed: int = 0
     device: Literal["cpu", "gpu"] = "gpu"
     h_dim: int = 32
     z_dim: int = 16
     n_deg: int = 4
     num_timepoints: int = NUM_TIMEPOINTS
-    solver: Literal["geometric_euler", "cfees25"] = "geometric_euler"
+    nfe_budget: int | None = None
+    solver: Literal["geometric_euler", "cg2", "cfees25"] = "geometric_euler"
     adjoint: Literal["auto", "direct", "recursive_checkpoint", "reversible"] = "auto"
     learnable_prior: bool = False
     use_atanh: bool = False
@@ -54,6 +67,34 @@ class ActivityConfig:
     @property
     def method(self) -> str:
         return f"{self.solver}_{self.adjoint}"
+
+    @property
+    def nfe_per_step(self) -> int:
+        return SOLVER_NFE_PER_STEP[self.solver]
+
+    @property
+    def effective_nfe_budget(self) -> int:
+        if self.nfe_budget is not None:
+            return int(self.nfe_budget)
+        output_intervals = int(self.num_timepoints) - 1
+        budget = output_intervals - (output_intervals % COMMON_NFE_GRANULARITY)
+        if budget <= 0:
+            raise ValueError(
+                "num_timepoints must provide at least one common NFE interval; "
+                "set nfe_budget explicitly for very small grids."
+            )
+        return budget
+
+    @property
+    def solve_n_steps(self) -> int:
+        budget = self.effective_nfe_budget
+        nfe_per_step = self.nfe_per_step
+        if budget % nfe_per_step != 0:
+            raise ValueError(
+                f"nfe_budget={budget} must be divisible by {nfe_per_step} "
+                f"for solver={self.solver!r}."
+            )
+        return budget // nfe_per_step
 
 
 def load_config(path: Path) -> ActivityConfig:
@@ -97,12 +138,16 @@ def to_toml(config: ActivityConfig) -> str:
         "epochs",
         "batch_size",
         "learning_rate",
+        "lr_schedule",
+        "lr_restart",
+        "lr_min_ratio",
         "seed",
         "device",
         "h_dim",
         "z_dim",
         "n_deg",
         "num_timepoints",
+        "nfe_budget",
         "solver",
         "adjoint",
         "learnable_prior",
