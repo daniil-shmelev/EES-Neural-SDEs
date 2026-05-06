@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Literal
 
@@ -22,18 +23,18 @@ from diffrax import (
     VirtualBrownianTree,
     diffeqsolve,
 )
-from georax import CFEES25, GeometricEuler, GeometricTerm
+from georax import CFEES25, CG2, GeometricEuler, GeometricTerm
 from jaxtyping import Array
 
 from experiments.sphere_latent_nsde.custom_vbt import (
     cfees25_integrate_reversible,
     step_noise,
 )
+from experiments.sphere_latent_nsde.config import SOLVER_NFE_PER_STEP
 from experiments.sphere_latent_nsde.dataset import INPUT_DIM, NUM_CLASSES, NUM_TIMEPOINTS
 from experiments.sphere_latent_nsde.distributions import PowerSpherical
 from experiments.sphere_latent_nsde.geometry import (
     Sphere,
-    SphereTaylorChart,
     normalize,
     vec_to_matrix,
 )
@@ -46,9 +47,40 @@ def apply_linear(linear: eqx.nn.Linear, x: Array) -> Array:
     return y
 
 
-def build_solver(name: Literal["geometric_euler", "cfees25"]) -> AbstractSolver:
+_BBC_SQRT177 = math.sqrt(177.0)
+_BBC_X1 = 1.0
+_BBC_X2 = 0.25
+_BBC_X3 = (-1.0 + _BBC_SQRT177) / 2.0
+_BBC_X5 = 11.0 / 630.0
+_BBC_X7 = 1.0 / 2520.0
+_BBC_X4 = 1.0 / 6.0 - _BBC_X5 * _BBC_X3
+_BBC_X6 = (10.0 - _BBC_X3) / 2520.0
+_BBC_Y2 = 0.5 - _BBC_X3 * _BBC_X4
+
+
+def _bbc_expm_8(a: Array) -> Array:
+    """BBC/Sastre matrix-exponential polynomial used by the Torch baseline."""
+
+    ident = jnp.eye(a.shape[-1], dtype=a.dtype)
+    a2 = a @ a
+    a4 = a2 @ (_BBC_X1 * a + _BBC_X2 * a2)
+    a8 = (_BBC_X3 * a2 + a4) @ (
+        _BBC_X4 * ident + _BBC_X5 * a + _BBC_X6 * a2 + _BBC_X7 * a4
+    )
+    return ident + a + _BBC_Y2 * a2 + a8
+
+
+def _apply_bbc_increment(z: Array, coeffs: Array, basis: Array) -> Array:
+    omega = vec_to_matrix(coeffs, basis)
+    q = _bbc_expm_8(omega)
+    return jnp.einsum("...ij,...j->...i", q, z)
+
+
+def build_solver(name: Literal["geometric_euler", "cg2", "cfees25"]) -> AbstractSolver:
     if name == "geometric_euler":
         return GeometricEuler()
+    if name == "cg2":
+        return CG2()
     if name == "cfees25":
         return CFEES25()
     raise ValueError(f"unknown solver {name!r}")
@@ -67,6 +99,26 @@ def build_adjoint(
     if isinstance(solver, AbstractReversibleSolver):
         return ReversibleAdjoint()
     return DirectAdjoint()
+
+
+def _interpolate_paths_to_grid(
+    paths: Array,
+    source_times: Array,
+    target_times: Array,
+    geometry: Sphere,
+) -> Array:
+    """Linearly interpolate ambient coordinates, then project to the sphere."""
+
+    paths_by_time = jnp.moveaxis(paths, 2, 0)
+    flat_paths = paths_by_time.reshape((paths_by_time.shape[0], -1))
+    flat_interp = jax.vmap(
+        lambda values: jnp.interp(target_times, source_times, values),
+        in_axes=1,
+        out_axes=1,
+    )(flat_paths)
+    out = flat_interp.reshape((target_times.shape[0],) + paths_by_time.shape[1:])
+    out = jnp.moveaxis(out, 0, 2)
+    return geometry.project(out)
 
 
 def _sphere_drift_coeffs(t, y, args):
@@ -143,9 +195,58 @@ class MultiTimeAttention(eqx.Module):
         return apply_linear(self.out_linear, attended)
 
 
+class TorchGRUCell(eqx.Module):
+    """GRU cell with PyTorch's two-bias parameterization and gate equations."""
+
+    weight_ih: Array
+    weight_hh: Array
+    bias_ih: Array
+    bias_hh: Array
+    input_size: int = eqx.field(static=True)
+    hidden_size: int = eqx.field(static=True)
+
+    def __init__(self, input_size: int, hidden_size: int, *, key: Array) -> None:
+        k1, k2, k3, k4 = jax.random.split(key, 4)
+        limit = math.sqrt(1.0 / hidden_size)
+        self.weight_ih = jax.random.uniform(
+            k1,
+            (3 * hidden_size, input_size),
+            minval=-limit,
+            maxval=limit,
+        )
+        self.weight_hh = jax.random.uniform(
+            k2,
+            (3 * hidden_size, hidden_size),
+            minval=-limit,
+            maxval=limit,
+        )
+        self.bias_ih = jax.random.uniform(
+            k3,
+            (3 * hidden_size,),
+            minval=-limit,
+            maxval=limit,
+        )
+        self.bias_hh = jax.random.uniform(
+            k4,
+            (3 * hidden_size,),
+            minval=-limit,
+            maxval=limit,
+        )
+        self.input_size = int(input_size)
+        self.hidden_size = int(hidden_size)
+
+    def __call__(self, x: Array, h: Array) -> Array:
+        i_r, i_z, i_n = jnp.split(self.weight_ih @ x + self.bias_ih, 3)
+        h_r, h_z, h_n = jnp.split(self.weight_hh @ h + self.bias_hh, 3)
+        reset = jax.nn.sigmoid(i_r + h_r)
+        update = jax.nn.sigmoid(i_z + h_z)
+        new = jnp.tanh(i_n + reset * h_n)
+        return new + update * (h - new)
+
+
 class MTANEncoder(eqx.Module):
     attention: MultiTimeAttention
-    gru_cell: eqx.nn.GRUCell
+    gru_cell: TorchGRUCell
     linear_time: eqx.nn.Linear
     periodic_time: eqx.nn.Linear
     input_dim: int = eqx.field(static=True)
@@ -173,7 +274,7 @@ class MTANEncoder(eqx.Module):
             num_heads=num_heads,
             key=k1,
         )
-        self.gru_cell = eqx.nn.GRUCell(hidden_dim, hidden_dim, key=k2)
+        self.gru_cell = TorchGRUCell(hidden_dim, hidden_dim, key=k2)
         self.linear_time = eqx.nn.Linear(1, 1, key=k3)
         self.periodic_time = eqx.nn.Linear(1, embed_time - 1, key=k4)
         self.input_dim = input_dim
@@ -423,14 +524,13 @@ class PathEncoder(eqx.Module):
         drift = jnp.broadcast_to(drift, z0.shape[:-1] + drift.shape[-2:])
         drift = jnp.moveaxis(drift, -2, 0)
         sigma = self.sigma.astype(z0.dtype)
-        chart = SphereTaylorChart(2)
         noise_shape = z0.shape[:-1] + (driver_dim,)
 
         def step(z, inputs):
             step_index, dt_i, drift_i = inputs
             noise = step_noise(key, step_index, noise_shape, z.dtype)
             increment = drift_i * dt_i + sigma * jnp.sqrt(dt_i) * noise
-            z_next = chart.apply(z, increment, self.geometry)
+            z_next = _apply_bbc_increment(z, increment, self.geometry.basis)
             return z_next, z_next
 
         step_indices = jnp.arange(times.shape[0] - 1)
@@ -498,6 +598,10 @@ class ActivityLatentSDE(eqx.Module):
     adjoint: AbstractAdjoint = eqx.field(static=True)
     z_dim: int = eqx.field(static=True)
     num_timepoints: int = eqx.field(static=True)
+    nfe_budget: int = eqx.field(static=True)
+    nfe_per_step: int = eqx.field(static=True)
+    solve_n_steps: int = eqx.field(static=True)
+    solve_num_timepoints: int = eqx.field(static=True)
     time_end: float = eqx.field(static=True)
     recon_sigma: Array
 
@@ -510,7 +614,8 @@ class ActivityLatentSDE(eqx.Module):
         h_dim: int = 32,
         z_dim: int = 16,
         n_deg: int = 4,
-        solver_name: Literal["geometric_euler", "cfees25"] = "geometric_euler",
+        nfe_budget: int | None = None,
+        solver_name: Literal["geometric_euler", "cg2", "cfees25"] = "geometric_euler",
         adjoint_name: Literal[
             "auto", "direct", "recursive_checkpoint", "reversible"
         ] = "auto",
@@ -520,6 +625,16 @@ class ActivityLatentSDE(eqx.Module):
     ) -> None:
         k1, k2, k3, k4 = jax.random.split(key, 4)
         solver = build_solver(solver_name)
+        if nfe_budget is None:
+            nfe_budget = int(num_timepoints) - 1
+        nfe_per_step = SOLVER_NFE_PER_STEP[solver_name]
+        if nfe_budget <= 0:
+            raise ValueError("nfe_budget must be positive.")
+        if nfe_budget % nfe_per_step != 0:
+            raise ValueError(
+                f"nfe_budget={nfe_budget} must be divisible by {nfe_per_step} "
+                f"for solver={solver_name!r}."
+            )
         self.recog_net = ActivityRecogNetwork(
             input_dim=input_dim,
             hidden_dim=h_dim,
@@ -541,11 +656,18 @@ class ActivityLatentSDE(eqx.Module):
         self.adjoint = build_adjoint(solver, adjoint_name)
         self.z_dim = z_dim
         self.num_timepoints = int(num_timepoints)
+        self.nfe_budget = int(nfe_budget)
+        self.nfe_per_step = int(nfe_per_step)
+        self.solve_n_steps = int(nfe_budget) // int(nfe_per_step)
+        self.solve_num_timepoints = self.solve_n_steps + 1
         self.time_end = 0.99
         self.recon_sigma = jnp.asarray(1.0, dtype=jnp.float32)
 
     def desired_times(self, dtype=jnp.float32) -> Array:
         return jnp.linspace(0.0, self.time_end, self.num_timepoints, dtype=dtype)
+
+    def solve_times(self, dtype=jnp.float32) -> Array:
+        return jnp.linspace(0.0, self.time_end, self.solve_num_timepoints, dtype=dtype)
 
     def __call__(self, batch: dict[str, Array], key: Array, *, mc_samples: int = 1) -> LatentSDEOutput:
         h = jax.vmap(self.recog_net)(
@@ -554,17 +676,27 @@ class ActivityLatentSDE(eqx.Module):
         posterior = self.path_encoder.posterior_initial(h)
         k_z0, k_path = jax.random.split(key)
         z0 = posterior.rsample(k_z0, (mc_samples,))
-        times = self.desired_times(dtype=batch["inp_obs"].dtype)
-        paths = self.path_encoder.integrate_paths(
+        output_times = self.desired_times(dtype=batch["inp_obs"].dtype)
+        solve_times = self.solve_times(dtype=batch["inp_obs"].dtype)
+        solve_paths = self.path_encoder.integrate_paths(
             h,
             z0,
             k_path,
-            times=times,
+            times=solve_times,
             solver=self.solver,
             adjoint=self.adjoint,
         )
         kl0 = posterior.kl_to_uniform()
-        klp = self.path_encoder.path_kl(paths, h, times)
+        klp = self.path_encoder.path_kl(solve_paths, h, solve_times)
+        if self.solve_num_timepoints == self.num_timepoints:
+            paths = solve_paths
+        else:
+            paths = _interpolate_paths_to_grid(
+                solve_paths,
+                solve_times,
+                output_times,
+                self.path_encoder.geometry,
+            )
         recon_mu = apply_linear(self.recon_net, paths)
         aux_logits = apply_linear(self.aux_net, paths)
         return LatentSDEOutput(

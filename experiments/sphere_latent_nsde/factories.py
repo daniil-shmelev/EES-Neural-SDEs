@@ -49,6 +49,7 @@ def make_model(config: ActivityConfig, key: jax.Array) -> ActivityLatentSDE:
         z_dim=config.z_dim,
         n_deg=config.n_deg,
         num_timepoints=config.num_timepoints,
+        nfe_budget=config.effective_nfe_budget,
         solver_name=config.solver,
         adjoint_name=config.adjoint,
         learnable_prior=config.learnable_prior,

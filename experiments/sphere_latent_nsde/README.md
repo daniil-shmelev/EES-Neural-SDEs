@@ -39,7 +39,7 @@ uv run python -m experiments.sphere_latent_nsde.train_activity \
   experiments/sphere_latent_nsde/configs/activity/smoke.toml
 ```
 
-Run the full two-entry solver sweep:
+Run the full three-entry solver sweep:
 
 ```bash
 uv run python -m experiments.sphere_latent_nsde.train_activity \
@@ -56,6 +56,13 @@ uv run python -m experiments.sphere_latent_nsde.train_activity \
 The exact original output grid has 228 points. For faster JAX development runs,
 set `num_timepoints = 64` or `num_timepoints = 32` in a TOML config; the
 dataloader remaps reconstruction/classification time IDs onto that grid.
+
+The SDE solve is NFE-normalised across solvers: `nfe_budget` counts forward
+drift evaluations, geometric Euler costs 1 FE per solver step, CG2 costs 2 FEs
+per solver step, and CFEES25 costs 3 FEs per solver step. If `nfe_budget` is
+omitted, the largest common multiple of 6 not exceeding `num_timepoints - 1` is
+used, and the latent path is interpolated back to the configured output grid for
+reconstruction and classification losses.
 
 Each run writes a timestamped directory under
 `experiments/sphere_latent_nsde/results/activity__<solver>_<adjoint>__seed<N>__<timestamp>/`

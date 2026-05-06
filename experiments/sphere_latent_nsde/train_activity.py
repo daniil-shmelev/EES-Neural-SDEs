@@ -51,6 +51,23 @@ def _tree_float_dict(metrics: dict[str, Any]) -> dict[str, float]:
     return {key: float(value) for key, value in metrics.items()}
 
 
+def _learning_rate(config: ActivityConfig, steps_per_lr_epoch: int):
+    if config.lr_schedule == "constant":
+        return config.learning_rate
+    if config.lr_schedule == "cosine":
+        steps_per_lr_epoch = max(int(steps_per_lr_epoch), 1)
+        lr_min = config.learning_rate * config.lr_min_ratio
+        restart = max(int(config.lr_restart), 1)
+
+        def schedule(count):
+            epoch = count // steps_per_lr_epoch
+            cosine = 0.5 * (1.0 + jnp.cos(jnp.pi * epoch / restart))
+            return lr_min + (config.learning_rate - lr_min) * cosine
+
+        return schedule
+    raise ValueError(f"unknown lr_schedule {config.lr_schedule!r}")
+
+
 def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
     train_loader = make_loader(config, "train")
     val_loader = make_loader(config, "val")
@@ -59,7 +76,13 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
     val_next = jax.jit(val_loader.next)
     test_next = jax.jit(test_loader.next)
 
-    optimizer = optax.adam(config.learning_rate)
+    train_steps = _limit_steps(train_loader.steps_per_epoch, config.max_train_batches)
+    eval_steps = {
+        "val": _limit_steps(val_loader.steps_per_epoch, config.max_eval_batches),
+        "test": _limit_steps(test_loader.steps_per_epoch, config.max_eval_batches),
+    }
+
+    optimizer = optax.adam(_learning_rate(config, train_loader.steps_per_epoch))
     opt_state = optimizer.init(eqx.filter(model, eqx.is_array))
 
     def loss_fn(current_model, batch, mask, key, aux_mul):
@@ -128,12 +151,6 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
     train_state = train_loader.init_state(train_key)
     val_state = val_loader.init_state(val_key)
     test_state = test_loader.init_state(test_key)
-
-    train_steps = _limit_steps(train_loader.steps_per_epoch, config.max_train_batches)
-    eval_steps = {
-        "val": _limit_steps(val_loader.steps_per_epoch, config.max_eval_batches),
-        "test": _limit_steps(test_loader.steps_per_epoch, config.max_eval_batches),
-    }
 
     history: dict[str, list[dict[str, float]]] = {"train": [], "val": [], "test": []}
     best_model = model
@@ -233,6 +250,10 @@ def _metrics_payload(
         "val_size": int(val_size),
         "test_size": int(test_size),
         "train_time_s": round(train_time_s, 2),
+        "learning_rate": float(config.learning_rate),
+        "lr_schedule": config.lr_schedule,
+        "lr_restart": int(config.lr_restart),
+        "lr_min_ratio": float(config.lr_min_ratio),
         "best_epoch": int(final_test["best_val_epoch"]),
         "best_val_acc": float(final_val["aux_acc*"]),
         "best_val_acc_pct": float(final_val["aux_acc_pct*"]),
@@ -241,6 +262,11 @@ def _metrics_payload(
         "final_test_acc": float(final_test["aux_acc"]),
         "final_test_acc_pct": float(final_test["aux_acc_pct"]),
         "num_timepoints": int(config.num_timepoints),
+        "nfe_budget": int(config.effective_nfe_budget),
+        "nfe_per_step": int(config.nfe_per_step),
+        "solve_n_steps": int(config.solve_n_steps),
+        "solve_num_timepoints": int(config.solve_n_steps + 1),
+        "actual_forward_nfe": int(config.solve_n_steps * config.nfe_per_step),
         "solver": config.solver,
         "adjoint": config.adjoint,
     }
@@ -273,7 +299,13 @@ def _run_single_config(config: ActivityConfig) -> int:
         f"test={len(test_dataset)}",
         f"h_dim={config.h_dim}",
         f"z_dim={config.z_dim}",
+        f"lr={config.learning_rate}",
+        f"lr_schedule={config.lr_schedule}",
+        f"lr_restart={config.lr_restart}",
         f"num_timepoints={config.num_timepoints}",
+        f"nfe_budget={config.effective_nfe_budget}",
+        f"nfe_per_step={config.nfe_per_step}",
+        f"solve_n_steps={config.solve_n_steps}",
         flush=True,
     )
 
@@ -304,7 +336,8 @@ def _run_single_config(config: ActivityConfig) -> int:
     print(f"saved artifacts to {output_dir}", flush=True)
     print(
         "best_epoch={best_epoch} val_acc={best_val_acc_pct:.2f}% "
-        "test_acc={test_acc_at_best_val_pct:.2f}%".format(**metrics),
+        "test_acc={test_acc_at_best_val_pct:.2f}% "
+        "nfe_budget={nfe_budget} solve_n_steps={solve_n_steps}".format(**metrics),
         flush=True,
     )
     return 0
