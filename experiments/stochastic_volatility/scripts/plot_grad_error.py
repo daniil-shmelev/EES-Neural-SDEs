@@ -2,15 +2,13 @@
 
 Reads ``summary.json`` from ``grad_error_sweep.py`` and emits one PDF per
 sweep + a cross-experiment overlay. Uses the project's standard plot style
-(STIXGeneral, sizes 11/12/13, figsize (4, 3)) and auto-publishes to the
-Overleaf-synced ``figures/`` dir.
+(STIXGeneral, sizes 11/12/13, figsize (4, 3)).
 """
 
 from __future__ import annotations
 
 import argparse
 import json
-import shutil
 from pathlib import Path
 
 import matplotlib
@@ -20,19 +18,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from ees_core.plotting_params import set_plotting_params
-
-PAPER_FIGURES_DIR = Path(
-    "/mnt/c/Users/Shmelev/source/overleaf/EES_Neural_SDEs_Overleaf/figures"
-)
-
-
-def _publish_to_paper(local_pdf: Path, paper_name: str) -> None:
-    if not PAPER_FIGURES_DIR.is_dir():
-        print(f"[publish] {PAPER_FIGURES_DIR} not present — skipping.")
-        return
-    dst = PAPER_FIGURES_DIR / paper_name
-    shutil.copy2(local_pdf, dst)
-    print(f"[publish] copied {local_pdf} -> {dst}")
 
 
 def _power_law_fit(
@@ -51,8 +36,6 @@ def main(argv: list[str] | None = None) -> int:
                    default=Path("experiments/stochastic_volatility/results/grad_error/single_step/summary.json"))
     p.add_argument("--output", type=Path,
                    default=Path("experiments/stochastic_volatility/results/grad_error/single_step/StochVol_grad_error.pdf"))
-    p.add_argument("--paper-name", type=str, default="StochVol_grad_error.pdf")
-    p.add_argument("--no-publish", action="store_true")
     p.add_argument("--no-fit", action="store_true")
     p.add_argument("--fit-y-min", type=float, default=1e-6)
     p.add_argument("--fit-y-max", type=float, default=1.0)
@@ -127,10 +110,6 @@ def main(argv: list[str] | None = None) -> int:
     fig.savefig(args.output.with_suffix(".png"), dpi=300, bbox_inches="tight", pad_inches=0.04)
     plt.close(fig)
     print(f"[plot] wrote {args.output}")
-
-    if not args.no_publish:
-        _publish_to_paper(args.output, args.paper_name)
-
     return 0
 
 
