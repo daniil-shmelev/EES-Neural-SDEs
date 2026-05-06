@@ -115,11 +115,11 @@ def fit(
     # first 200 steps, then cosine decay to 1e-5 across the rest of
     # training. Mitigates early-step gradient blow-up that occasionally
     # produced ``grad_norm = inf`` in M5.
-    schedule_steps = max(1, config.epochs * train_loader.steps_per_epoch)
+    schedule_steps = max(2, config.epochs * train_loader.steps_per_epoch)
     schedule = optax.warmup_cosine_decay_schedule(
         init_value=1e-5,
         peak_value=config.learning_rate,
-        warmup_steps=min(200, schedule_steps),
+        warmup_steps=min(200, max(1, schedule_steps // 2)),
         decay_steps=schedule_steps,
         end_value=1e-5,
     )

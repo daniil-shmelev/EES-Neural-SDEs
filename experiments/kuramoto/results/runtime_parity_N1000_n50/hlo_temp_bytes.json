@@ -1,0 +1,50 @@
+[
+  {
+    "label": "CG2 Rec n=75",
+    "solver": "cg2",
+    "adjoint": "checkpoint_recursive",
+    "n_steps": 75,
+    "temp_bytes": 606029272,
+    "temp_mib": 577.9545516967773
+  },
+  {
+    "label": "CG2 Rec n=150",
+    "solver": "cg2",
+    "adjoint": "checkpoint_recursive",
+    "n_steps": 150,
+    "temp_bytes": 607053272,
+    "temp_mib": 578.9311141967773
+  },
+  {
+    "label": "CG2 Rec n=300",
+    "solver": "cg2",
+    "adjoint": "checkpoint_recursive",
+    "n_steps": 300,
+    "temp_bytes": 608845272,
+    "temp_mib": 580.6400985717773
+  },
+  {
+    "label": "CG2 Rec n=600",
+    "solver": "cg2",
+    "adjoint": "checkpoint_recursive",
+    "n_steps": 600,
+    "temp_bytes": 611405272,
+    "temp_mib": 583.0815048217773
+  },
+  {
+    "label": "CG2 Rec n=1500",
+    "solver": "cg2",
+    "adjoint": "checkpoint_recursive",
+    "n_steps": 1500,
+    "temp_bytes": 616525272,
+    "temp_mib": 587.9643173217773
+  },
+  {
+    "label": "CG2 Rec n=5000",
+    "solver": "cg2",
+    "adjoint": "checkpoint_recursive",
+    "n_steps": 5000,
+    "temp_bytes": 628049624,
+    "temp_mib": 598.9547958374023
+  }
+]
