@@ -24,17 +24,7 @@ docs/figure_table_index.md      Manuscript figure/table → script crossref
 
 We recommend [`uv`](https://docs.astral.sh/uv/) and Python 3.13 (Python 3.10 is enough for the pure-numpy figures only).
 
-```bash
-# Clone with submodules (the sphere experiment lives in a fork of plus-rkwitt/LatentSDEonHS)
-git clone --recursive https://github.com/daniil-shmelev/EES-Neural-SDEs.git
-# Or, if already cloned:
-git submodule update --init --recursive
 
-uv venv -p 3.13
-uv pip install -e ".[convergence-fbm,rna]"   # pick the experiments you need
-# Or everything:
-uv pip install -e ".[all]"
-```
 
 Available extras:
 
@@ -48,7 +38,7 @@ Available extras:
 | `order-verification` | algebra | `order_verification/` |
 | `rna` | jax-base + biotite | `rna/` |
 | `sphere` | torch + torchdiffeq + sklearn + tqdm | `sphere_latent_sde/` |
-| `torchsde` | torch + Daniil's torchsde fork (`mcf` branch) + torchcde | `stiff_gbm/`, `ou/` |
+| `torchsde` | torch + torchsde fork (`mcf` branch) + torchcde | `stiff_gbm/`, `ou/` |
 | `all` | all of the above | everything |
 | `dev` | pytest, ruff, pyright | development |
 
@@ -122,21 +112,7 @@ Raw data is **not** shipped. Each experiment's `datasets/` (or `data/`) module f
 
 ## Citation
 
-```bibtex
-@inproceedings{shmelev2026ees,
-  title  = {Explicit and Effectively Symmetric Schemes for Neural SDEs},
-  author = {Shmelev, Daniil and Thompson, Luke and Salvi, Cristopher},
-  booktitle = {Advances in Neural Information Processing Systems},
-  year   = {2026}
-}
-
-@article{shmelev2025neural,
-  title  = {Explicit and Effectively Symmetric Schemes for Neural SDEs},
-  author = {Shmelev, Daniil and Salvi, Cristopher},
-  journal= {arXiv preprint arXiv:2509.20599},
-  year   = {2025}
-}
-```
+Anonymised
 
 ## License
 
