@@ -100,8 +100,8 @@ class EuclideanKuramotoNSDE(eqx.Module):
     name: str = eqx.field(static=True)
     N: int = eqx.field(static=True)
     n_steps: int = eqx.field(static=True)
+    n_obs: int = eqx.field(static=True)
     dt: float = eqx.field(static=True)
-    t_save: jax.Array = eqx.field(static=False)
     adjoint: AbstractAdjoint | None = eqx.field(static=True)
 
     def __init__(
@@ -125,8 +125,8 @@ class EuclideanKuramotoNSDE(eqx.Module):
         self.name = "euclidean_kuramoto_nsde"
         self.N = N
         self.n_steps = n_steps
+        self.n_obs = n_obs
         self.dt = dt
-        self.t_save = jnp.linspace(0.0, n_steps * dt, n_obs)
         self.adjoint = adjoint
 
         self.drift_field = EuclideanDriftField(
@@ -150,6 +150,7 @@ class EuclideanKuramotoNSDE(eqx.Module):
         """
         N = self.N
         t1 = float(self.n_steps * self.dt)
+        t_save = jnp.linspace(0.0, t1, self.n_obs)
         # Embed initial condition.
         y0 = jnp.concatenate([jnp.sin(theta0), jnp.cos(theta0), omega0])
 
@@ -164,7 +165,7 @@ class EuclideanKuramotoNSDE(eqx.Module):
 
         sol = diffeqsolve(
             term, Heun(), t0=0.0, t1=t1, dt0=self.dt, y0=y0,
-            saveat=SaveAt(ts=self.t_save), adjoint=adjoint,
+            saveat=SaveAt(ts=t_save), adjoint=adjoint,
             max_steps=self.n_steps + 16,
         )
         ys = sol.ys  # (n_obs, 3N)

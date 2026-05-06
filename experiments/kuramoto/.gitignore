@@ -1,0 +1,14 @@
+# Regenerable simulator data (multi-GB; regen via scripts/run_m1.py)
+data/*.npz
+
+# Model checkpoints — regenerable by re-training
+results/**/model_*.eqx
+results/**/opt_state_*.eqx
+
+# Bulk-array result files (predictions_demo, fine-grained traces).
+# Track the .json metrics + history files, not the heavy npz arrays.
+results/**/*.npz
+
+# Tape / cache files
+**/__pycache__/
+*.pyc

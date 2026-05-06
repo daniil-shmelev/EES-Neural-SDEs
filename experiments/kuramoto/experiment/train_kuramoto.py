@@ -1,5 +1,11 @@
 """Training entrypoint for the Kuramoto NSDE.
 
+Supports resuming training from a previous run via ``--resume-from <dir>``:
+the model, optimiser state, and history are loaded from the specified
+directory, and ``--epochs`` is interpreted as the *total* (resumed +
+new) epoch count, so the warmup-cosine LR schedule lines up correctly.
+The new output directory must differ from the resume source.
+
 The fit loop persists everything we might want to plot later:
 
 - per-epoch train and val loss (energy score)
@@ -86,7 +92,18 @@ def fit(
     metric_fn,
     config: ExperimentConfig,
     output_dir: Path,
+    resume_from: Path | None = None,
 ) -> tuple[eqx.Module, dict[str, list[float]]]:
+    """Train ``model`` for ``config.epochs`` epochs total.
+
+    If ``resume_from`` is given, load ``model_final.eqx``,
+    ``opt_state_final.eqx``, and ``history.json`` from that directory and
+    pick up where they left off. ``config.epochs`` is interpreted as the
+    *total* (resumed + new) epoch count; the warmup-cosine LR schedule
+    is built with ``decay_steps = total_epochs * steps_per_epoch`` so
+    the loaded optimiser state's step counter continues to index into
+    the same schedule curve.
+    """
     train_loader, _ = make_loader(config, "train")
     val_loader, _ = make_loader(config, "val")
     test_loader, _ = make_loader(config, "test")
@@ -94,18 +111,55 @@ def fit(
     val_next = jax.jit(val_loader.next)
     test_next = jax.jit(test_loader.next)
 
+    # Warmup-cosine LR schedule: linear ramp from 1e-5 -> peak across the
+    # first 200 steps, then cosine decay to 1e-5 across the rest of
+    # training. Mitigates early-step gradient blow-up that occasionally
+    # produced ``grad_norm = inf`` in M5.
+    schedule_steps = max(2, config.epochs * train_loader.steps_per_epoch)
+    schedule = optax.warmup_cosine_decay_schedule(
+        init_value=1e-5,
+        peak_value=config.learning_rate,
+        warmup_steps=min(200, max(1, schedule_steps // 2)),
+        decay_steps=schedule_steps,
+        end_value=1e-5,
+    )
     optim = optax.chain(
         optax.clip_by_global_norm(config.grad_clip_norm),
-        optax.adam(config.learning_rate),
+        optax.adam(schedule),
     )
-    opt_state = optim.init(eqx.filter(model, eqx.is_array))
+
+    if resume_from is not None:
+        model = eqx.tree_deserialise_leaves(resume_from / "model_final.eqx", model)
+        opt_state_template = optim.init(eqx.filter(model, eqx.is_array))
+        opt_state = eqx.tree_deserialise_leaves(
+            resume_from / "opt_state_final.eqx", opt_state_template,
+        )
+    else:
+        opt_state = optim.init(eqx.filter(model, eqx.is_array))
 
     @eqx.filter_jit
     def train_step(current_model, opt_state, batch, mask, key):
         loss, grads = eqx.filter_value_and_grad(loss_fn)(current_model, batch, mask, key)
-        updates, new_opt_state = optim.update(grads, opt_state, current_model)
-        new_model = eqx.apply_updates(current_model, updates)
-        return new_model, new_opt_state, loss
+        # Global gradient L2 norm (pre-clip) for diagnostics.
+        flat_grads = jax.tree.leaves(eqx.filter(grads, eqx.is_array))
+        grad_norm = jnp.sqrt(sum(jnp.sum(g * g) for g in flat_grads))
+        update_ok = jnp.isfinite(grad_norm)
+        updates, candidate_opt_state = optim.update(grads, opt_state, current_model)
+        candidate_model = eqx.apply_updates(current_model, updates)
+        # If the gradient is non-finite, leave model + opt_state unchanged
+        # (skip the step). Operates over the array partitions so the
+        # static fields of the equinox modules are passed through verbatim.
+        cand_arr, model_static = eqx.partition(candidate_model, eqx.is_array)
+        cur_arr, _ = eqx.partition(current_model, eqx.is_array)
+        merged_arr = jax.tree.map(
+            lambda new, old: jnp.where(update_ok, new, old), cand_arr, cur_arr,
+        )
+        new_model = eqx.combine(merged_arr, model_static)
+        new_opt_state = jax.tree.map(
+            lambda new, old: jnp.where(update_ok, new, old),
+            candidate_opt_state, opt_state,
+        )
+        return new_model, new_opt_state, loss, grad_norm
 
     eval_step = eqx.filter_jit(loss_fn)
 
@@ -115,28 +169,91 @@ def fit(
     val_state = val_loader.init_state(val_key)
     test_state = test_loader.init_state(test_key)
 
-    history: dict[str, list[float]] = {
-        "train_loss": [], "val_loss": [], "test_loss": [],
-        "epoch_walltime_s": [],
-        "val_theta_mae_mean": [], "val_omega_mae_mean": [],
-        "test_theta_mae_mean": [], "test_omega_mae_mean": [],
-        "val_theta_mae_per_horizon": [], "val_omega_mae_per_horizon": [],
-        "test_theta_mae_per_horizon": [], "test_omega_mae_per_horizon": [],
-    }
+    n_params = sum(int(x.size) for x in jax.tree.leaves(eqx.filter(model, eqx.is_array)))
+
+    if resume_from is not None:
+        import json as _json
+        with (resume_from / "history.json").open() as f:
+            history = _json.load(f)
+        epoch_offset = len(history.get("train_loss", []))
+        prior_val = history.get("val_loss", []) or [float("inf")]
+        best_val_loss = float(min(prior_val))
+        history["n_params"] = n_params
+        history["n_train_steps_per_epoch"] = train_loader.steps_per_epoch
+        history.setdefault("resumed_from", []).append(str(resume_from))
+        print(
+            f"resuming from {resume_from} (prior epochs: {epoch_offset}, "
+            f"prior best val loss: {best_val_loss:.4f})",
+            flush=True,
+        )
+    else:
+        history = {
+            # Per-epoch reductions
+            "train_loss": [], "val_loss": [], "test_loss": [],
+            "epoch_walltime_s": [],
+            "val_theta_mae_mean": [], "val_omega_mae_mean": [],
+            "test_theta_mae_mean": [], "test_omega_mae_mean": [],
+            "val_theta_mae_per_horizon": [], "val_omega_mae_per_horizon": [],
+            "test_theta_mae_per_horizon": [], "test_omega_mae_per_horizon": [],
+            "epoch_train_loss_std": [], "epoch_grad_norm_mean": [],
+            "epoch_grad_norm_max": [], "epoch_grad_norm_p95": [],
+            "epoch_step_time_mean_s": [], "epoch_step_time_p95_s": [],
+            "epoch_peak_bytes": [], "epoch_bytes_in_use": [],
+            # Fine-grained per-step traces (one entry per training step, every epoch)
+            "step_train_loss": [], "step_grad_norm": [], "step_time_s": [],
+            "step_epoch_index": [],
+            # Constants
+            "n_params": n_params, "n_train_steps_per_epoch": train_loader.steps_per_epoch,
+        }
+        epoch_offset = 0
+        best_val_loss = float("inf")
 
     best_model = model
-    best_val_loss = float("inf")
+    device = jax.devices()[0]
 
-    for epoch in range(config.epochs):
+    def _peak_mem() -> tuple[int | None, int | None]:
+        try:
+            ms = device.memory_stats() or {}
+            return (int(ms.get("peak_bytes_in_use", 0)) or None,
+                    int(ms.get("bytes_in_use", 0)) or None)
+        except Exception:
+            return None, None
+
+    if epoch_offset >= config.epochs:
+        raise ValueError(
+            f"resume target ({epoch_offset} prior epochs) is already at or "
+            f"beyond config.epochs={config.epochs}; bump --epochs to extend."
+        )
+    for epoch in range(epoch_offset, config.epochs):
         epoch_t0 = time.time()
-        train_loss = 0.0
+        per_step_loss: list[float] = []
+        per_step_grad: list[float] = []
+        per_step_time: list[float] = []
+
         for _ in range(train_loader.steps_per_epoch):
             key, step_key = jax.random.split(key)
             batch, train_state, mask = train_next(train_state)
-            model, opt_state, loss = train_step(model, opt_state, batch, mask, step_key)
-            train_loss += float(loss)
-        train_loss /= train_loader.steps_per_epoch
+            t_step = time.perf_counter()
+            model, opt_state, loss, gnorm = train_step(model, opt_state, batch, mask, step_key)
+            jax.block_until_ready(loss)
+            dt_step = time.perf_counter() - t_step
+
+            per_step_loss.append(float(loss))
+            per_step_grad.append(float(gnorm))
+            per_step_time.append(dt_step)
+
+        train_loss = float(np.mean(per_step_loss))
         history["train_loss"].append(train_loss)
+        history["epoch_train_loss_std"].append(float(np.std(per_step_loss)))
+        history["epoch_grad_norm_mean"].append(float(np.mean(per_step_grad)))
+        history["epoch_grad_norm_max"].append(float(np.max(per_step_grad)))
+        history["epoch_grad_norm_p95"].append(float(np.percentile(per_step_grad, 95)))
+        history["epoch_step_time_mean_s"].append(float(np.mean(per_step_time)))
+        history["epoch_step_time_p95_s"].append(float(np.percentile(per_step_time, 95)))
+        history["step_train_loss"].extend(per_step_loss)
+        history["step_grad_norm"].extend(per_step_grad)
+        history["step_time_s"].extend(per_step_time)
+        history["step_epoch_index"].extend([epoch] * len(per_step_loss))
 
         val_loss, val_metrics, key, val_state = _eval_split(
             model, val_loader, val_next, eval_step, metric_fn, val_state, key,
@@ -156,6 +273,10 @@ def fit(
         history["test_theta_mae_per_horizon"].append(test_metrics["theta_mae_per_horizon"])
         history["test_omega_mae_per_horizon"].append(test_metrics["omega_mae_per_horizon"])
 
+        peak, in_use = _peak_mem()
+        history["epoch_peak_bytes"].append(peak)
+        history["epoch_bytes_in_use"].append(in_use)
+
         epoch_walltime = float(time.time() - epoch_t0)
         history["epoch_walltime_s"].append(epoch_walltime)
 
@@ -163,24 +284,33 @@ def fit(
             best_val_loss = val_loss
             best_model = model
             eqx.tree_serialise_leaves(output_dir / "model_best.eqx", best_model)
+            eqx.tree_serialise_leaves(output_dir / "opt_state_best.eqx", opt_state)
 
         if config.save_every_epoch:
             eqx.tree_serialise_leaves(
                 output_dir / f"model_epoch_{epoch:03d}.eqx", model
             )
+            # Resumability: keep only the most-recent opt_state to save disk.
+            eqx.tree_serialise_leaves(
+                output_dir / "opt_state_latest.eqx", opt_state
+            )
 
         save_json(output_dir / "history.json", history)
 
+        peak_mib = (peak / 2**20) if peak else float("nan")
         print(
             f"epoch={epoch + 1}/{config.epochs} "
-            f"train={train_loss:.4f} val={val_loss:.4f} test={test_loss:.4f} "
+            f"train={train_loss:.4f}±{history['epoch_train_loss_std'][-1]:.3f} "
+            f"val={val_loss:.4f} test={test_loss:.4f} "
+            f"|g|={history['epoch_grad_norm_mean'][-1]:.3f} "
             f"theta_mae={val_metrics['theta_mae_mean']:.4f} "
             f"omega_mae={val_metrics['omega_mae_mean']:.4f} "
-            f"time={epoch_walltime:.1f}s",
+            f"peak={peak_mib:.0f}MiB time={epoch_walltime:.1f}s",
             flush=True,
         )
 
     eqx.tree_serialise_leaves(output_dir / "model_final.eqx", model)
+    eqx.tree_serialise_leaves(output_dir / "opt_state_final.eqx", opt_state)
     return best_model, history
 
 
@@ -273,6 +403,11 @@ def main() -> int:
         choices=("kuramoto_nsde", "euclidean_baseline"),
     )
     parser.add_argument("--lr", type=float, default=None)
+    parser.add_argument(
+        "--resume-from", type=Path, default=None,
+        help="Resume from a prior run dir's model_final.eqx + opt_state_final.eqx + "
+             "history.json. Interpret --epochs as the *total* (resumed + new) count.",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -309,11 +444,18 @@ def main() -> int:
     )
     print(f"output_dir: {output_dir}", flush=True)
 
+    if args.resume_from is not None and args.resume_from.resolve() == output_dir.resolve():
+        raise ValueError(
+            "--resume-from must point to a different directory than --output-dir; "
+            "training overwrites model_final.eqx etc. in the output dir."
+        )
+
     train_t0 = time.time()
     best_model, history = fit(
         model,
         loss_fn=loss_fn, metric_fn=metric_fn,
         config=config, output_dir=output_dir,
+        resume_from=args.resume_from,
     )
     train_walltime_s = float(time.time() - train_t0)
 
