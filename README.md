@@ -2,7 +2,10 @@
 
 Code for the paper *"Explicit and Effectively Symmetric Schemes for Neural SDEs"*.
 
-This umbrella repository contains the implementations, scripts, committed result files, and submodules used to reproduce the manuscript figures and tables. Each experiment under `experiments/` has its own README with setup notes, command lines, and result-file provenance.
+This umbrella repository contains the implementations, scripts, committed
+result files, and submodules used to reproduce the paper figures and tables.
+Each experiment under `experiments/` has its own README with setup notes,
+command lines, and result-file provenance.
 
 ## Repository Layout
 
@@ -21,7 +24,7 @@ experiments/
   sphere_latent_nsde/           JAX/georax HumanActivity sphere latent NSDE
   sphere_latent_sde/            Submodule: PyTorch HumanActivity sphere latent SDE
   ees_dynamical_fitting/        Submodule: molecular-dynamics fitting benchmark
-docs/figure_table_index.md      Manuscript figure/table to code cross-reference
+PAPER_RESULTS.md                Paper figure/table to code cross-reference
 ```
 
 ## Install
@@ -69,7 +72,7 @@ Pinned direct references are declared in `pyproject.toml`.
 
 ## Reproducing the Paper
 
-Use `docs/figure_table_index.md` as the canonical manuscript-to-script map. Common entrypoints:
+Use `PAPER_RESULTS.md` as the canonical paper-to-script map. Common entrypoints:
 
 ```bash
 # Stability and convergence

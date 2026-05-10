@@ -1,7 +1,8 @@
 # Stiff GBM
 
 TorchSDE experiment on high-volatility geometric Brownian motion, fitted to
-European call prices. It supports `table:gbm`, `fig:gbm`, and `fig:gbm_grad`.
+European call prices. It supports the paper's stiff-GBM metrics, loss figure,
+and gradient-MSE figure.
 
 The integrator is selected via the `method` field in the in-script config
 (`reversible_heun`, `ees25`, or `ees27`).

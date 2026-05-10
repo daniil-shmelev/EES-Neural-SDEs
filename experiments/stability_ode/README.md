@@ -1,8 +1,8 @@
 # ODE Stability Regions
 
-Reproduces `fig:ees25_stability`: the stability domain for `EES(2,5;1/10)`
-compared with RK methods, McCallum-Foster reversible variants, and Reversible
-Heun on the scalar linear ODE test problem.
+Reproduces the paper's ODE stability-region figure: the stability domain for
+`EES(2,5;1/10)` compared with RK methods, McCallum-Foster reversible variants,
+and Reversible Heun on the scalar linear ODE test problem.
 
 ## Setup
 

@@ -1,6 +1,6 @@
 # Mean-Square Stability
 
-Plots `fig:ees_stoch_stability`: cross-sections of the mean-square stability
+Plots the paper's mean-square stability figure: cross-sections of the stability
 domains for RK3, RK4, and EES(2,5) on the linear SDE test equation
 `dy = lambda y dt + mu y dW`.
 

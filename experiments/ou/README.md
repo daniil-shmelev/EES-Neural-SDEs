@@ -1,9 +1,8 @@
 # OU Latent SDE
 
 Neural Latent SDE experiment on high-volatility Ornstein-Uhlenbeck dynamics.
-This supports the manuscript OU/LSDE figure and table (`fig:lsde`,
-`table:lsde`) and the appendix gradient-error comparison
-(`fig:ees25_vs_27_grad_error`).
+This supports the paper's OU/LSDE figure and table, plus the appendix
+gradient-error comparison between EES(2,5) and EES(2,7).
 
 The training loop is based on `torchsde`; the integrator is selected by the
 `method` field in the in-script config.

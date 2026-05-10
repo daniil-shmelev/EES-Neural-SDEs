@@ -127,12 +127,12 @@ def classical_rk_character(A, b):
 def williamson_2N_coeffs(x):
     """Explicit 2N Williamson coefficients for EES(2,5;x).
 
-    Per main manuscript Proposition C.1 (the 2N tableau), for EES(2,5;x):
+    Per the 2N tableau derivation in the paper, for EES(2,5;x):
         A_2 = (coefficient)
         A_3 = (coefficient)
         B_1, B_2, B_3 = (coefficients)
     For x = 1/10, these are A_2=-7/15, A_3=-35/32, B_1=1/3, B_2=15/16,
-    B_3=2/5 (from the manuscript).
+    B_3=2/5.
 
     Derivation: given classical a21, a31, a32, b1, b2, b3, solve the
     recurrence

@@ -1,4 +1,4 @@
-"""Reproduce Figure 1 of the manuscript (`fig:ees25_stability`).
+"""Reproduce the paper's ODE stability-region figure.
 
 Stability domain for EES(2,5;1/10) and EES(2,7) compared to RK4, the
 McCallum--Foster reversible variant of Euler, and Reversible Heun on the
@@ -38,8 +38,8 @@ import numpy as np
 
 from ees_core.plotting_params import set_plotting_params
 
-# Larger sizes than the kauri default — the figure is reproduced at
-# `width=0.4\textwidth` in the manuscript, so labels need to survive a ~50% scale-down.
+# Larger sizes than the kauri default; the figure is intended for compact
+# paper-column rendering, so labels need to survive a substantial scale-down.
 set_plotting_params(16, 18, 20)
 
 

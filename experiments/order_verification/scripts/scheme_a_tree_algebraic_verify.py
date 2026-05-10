@@ -156,7 +156,7 @@ def exp_action_on_state(V: LieChar, state: StateChar, max_h: int) -> StateChar:
 
 
 # ============================================================================
-# CF-EES(2,5; 1/10) beta weights (identical to main manuscript)
+# CF-EES(2,5; 1/10) beta weights used in the paper
 # ============================================================================
 
 BETA = [

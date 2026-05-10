@@ -2,7 +2,7 @@
 
 Legacy torus-valued neural SDE experiment for one-step-ahead RNA backbone
 torsion forecasting. This was the original `T^7` benchmark; the current main
-manuscript torus experiment is the Kuramoto study in `experiments/kuramoto/`.
+paper torus experiment is the Kuramoto study in `experiments/kuramoto/`.
 RNA results are still used for the intro memory-scaling figure and remain
 useful as a biological torus benchmark.
 
@@ -11,16 +11,15 @@ context window. Drift and diffusion are MLPs conditioned on a GRU encoding of
 `sin(theta)`, `cos(theta)`, and one-hot base features. Integration uses
 `CF-EES(2,5)` with reversible adjoints where appropriate.
 
-## What This Backs
+## Paper Results
 
-| Manuscript item | Result |
+| Paper item | Result |
 |---|---|
-| `fig:torus_scaling` | `results/fig_scaling_compact_nogrid.pdf` |
-| `tab:torus_intro_memory_data` | `results/rna_hlo_sweep.json`, `rna_benchmark_scaling*.json` |
+| Intro memory-scaling curve | `results/fig_scaling_compact_nogrid.pdf` |
+| RNA torus memory raw data | `results/rna_hlo_sweep.json`, `rna_benchmark_scaling*.json` |
 
-The older appendix labels `tab:torus_scaling`, `tab:torus_runtime_error`,
-`tab:torus_adjoint_retrain`, and `tab:torus_mae` are currently commented out in
-the manuscript, but their supporting outputs remain committed here.
+Older RNA runtime, adjoint-retrain, and prediction-demo outputs remain
+committed for regression checks.
 
 ## Setup
 

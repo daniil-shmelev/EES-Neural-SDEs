@@ -2,8 +2,8 @@
 
 This experiment trains a neural SDE on the product state space
 `T T^N = T^N x R^N` for stochastic second-order Kuramoto dynamics with
-inertia. It is the current torus-valued experiment in the manuscript, replacing
-the earlier RNA torsion benchmark as the main Lie-group memory-scaling study.
+inertia. It is the torus-valued experiment used for the paper's Lie-group
+memory-scaling study.
 
 The simulator uses the standard power-grid form
 
@@ -14,15 +14,15 @@ m theta_i'' = -theta_i' + Omega_i + (K/N) sum_j sin(theta_j - theta_i) + xi_i(t)
 with bimodal natural frequencies `Omega_i in {+P, -P}`. The state is
 `(theta, omega)`, with `theta` wrapped on the torus and `omega` Euclidean.
 
-## What This Backs
+## Paper Results
 
-| Manuscript item | Script/result |
+| Paper item | Script/result |
 |---|---|
-| `fig:kuramoto_trajectory` | `experiments/kuramoto/data/kuramoto_N2_seed0.gif`, exported to the manuscript figure |
-| `fig:kuramoto_memory_scaling` | `python -m experiments.kuramoto.scripts.plot_memory_sweep` |
-| `tab:kuramoto_quality` | runtime-parity training outputs in `results/runtime_parity_N1000_n50/` |
-| `tab:kuramoto_pilot` | pilot outputs in `results/pilot/` |
-| `tab:kuramoto_memory_data` | `results/memory_sweep_N1000.json` and `results/memory_sweep_cells_N1000/` |
+| Kuramoto phase-circle trajectory | `experiments/kuramoto/data/kuramoto_N2_seed0.gif`; export a PDF copy for the paper |
+| Kuramoto adjoint memory scaling | `python -m experiments.kuramoto.scripts.plot_memory_sweep` |
+| Kuramoto runtime/error comparison | runtime-parity training outputs in `results/runtime_parity_N1000_n50/` |
+| Kuramoto pilot diagnostics | pilot outputs in `results/pilot/` |
+| Kuramoto memory-sweep raw data | `results/memory_sweep_N1000.json` and `results/memory_sweep_cells_N1000/` |
 
 ## Setup
 
@@ -60,7 +60,7 @@ python -m experiments.kuramoto.scripts.plot_memory_sweep
 ```
 
 The memory plot writes `experiments/kuramoto/results/fig_kuramoto_memory_scaling.pdf`
-by default. Pass `--output <path>` when exporting directly to Overleaf.
+by default. Pass `--output <path>` when exporting a publication-ready copy.
 
 ## Result Files
 

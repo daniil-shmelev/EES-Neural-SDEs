@@ -18,7 +18,7 @@ intrinsic MKW order, we would see fitted slope 4H - 1:
 
 If instead it is governed by the AMBIENT BCK order (via the embedding
 SO(3) subset GL(3,R) subset R^{3x3} and the ambient flat torsion-free
-connection, per scheme_a_order_preservation.tex Lemma 2.3), the rate
+connection, as in the paper's order-preservation argument), the rate
 is 6H - 1:
   H = 0.4  ->  slope 1.4
   H = 0.5  ->  slope 2.0

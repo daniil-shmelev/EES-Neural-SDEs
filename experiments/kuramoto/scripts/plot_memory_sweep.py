@@ -1,7 +1,7 @@
 """Render the M4 memory-scaling figure from `memory_sweep_N{N}.json`.
 
 Style matches `experiments/rna/plots.py:fig_torus_scaling` (the original
-torus figure in the manuscript): STIX fonts, 3.2 x 2.2 in, log-log axes,
+RNA torus memory plot: STIX fonts, 3.2 x 2.2 in, log-log axes,
 $\\Delta$ Memory on the y-axis (each curve baseline-subtracted to isolate
 the saved-tape contribution), reference slope annotations.
 """

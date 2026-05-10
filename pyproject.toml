@@ -54,7 +54,7 @@ order-verification = [
     "ees-neural-sdes[algebra]",
 ]
 
-# ODE stability regions (Fig fig:ees25_stability) - uses kauri for tableaux
+# ODE stability-region figure - uses kauri for tableaux
 stability-ode = [
     "ees-neural-sdes[algebra]",
 ]

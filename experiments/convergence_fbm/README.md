@@ -8,15 +8,15 @@ driven by fractional Brownian motion at Hurst indices `H in {0.4, 0.5, 0.6}`.
 - `scripts/so3_*.py`: the same test problem lifted to an SO(3) RDE, verifying
   forward and antisymmetric-order rates for `CF-EES(2,5)`.
 
-## Manuscript Mapping
+## Paper Results
 
-| Label | Result |
+| Paper item | Result |
 |---|---|
-| `fig:ees_convergence_12` | `results/ees_stochastic_convergence_H{40,50,60}.pdf` |
-| `fig:cfees_convergence_12` | `results/cfees_stochastic_convergence_H{40,50,60}.pdf`, `results/so3_reversibility_results.json` |
+| EES fBm convergence summary | `results/ees_stochastic_convergence_H{40,50,60}.pdf` |
+| CF-EES SO(3) convergence summary | `results/cfees_stochastic_convergence_H{40,50,60}.pdf`, `results/so3_reversibility_results.json` |
 
-The older per-H labels are still present as comments in the manuscript; the
-active manuscript uses the two summary labels above.
+Older per-H plots remain committed in `results/` and are useful for regression
+checks.
 
 ## Setup
 

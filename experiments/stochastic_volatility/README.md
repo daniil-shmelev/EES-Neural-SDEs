@@ -15,13 +15,13 @@ a fixed forward-NFE budget. The shipped solver set is:
 The loss is a truncated path-signature MMD objective on time-augmented paths.
 Evaluation reports held-out loss and optional diagnostic predictions.
 
-## What This Backs
+## Paper Results
 
-| Manuscript item | Code/result |
+| Paper item | Code/result |
 |---|---|
-| `table:rough_bergomi` | rough-Bergomi slice of the sweep |
-| `tab:further_stoch_vol` | full seven-model sweep |
-| `tab:rough-volatility-parameters` | model/dataset parameter definitions |
+| Rough Bergomi runtime/MSE | rough-Bergomi slice of the sweep |
+| Seven-model stochastic-volatility sweep | full seven-model sweep |
+| Stochastic-volatility model parameters | model/dataset parameter definitions |
 
 ## Setup
 
@@ -30,8 +30,8 @@ uv pip install -e ".[stochastic-volatility]"
 ```
 
 This extra deliberately installs `diffrax-lowstorage`, pinned in
-`pyproject.toml` to the Python 3.13-compatible revision used for the
-manuscript experiments.
+`pyproject.toml` to the Python 3.13-compatible revision used for the paper
+experiments.
 
 ## Data
 

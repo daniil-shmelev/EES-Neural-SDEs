@@ -7,16 +7,16 @@ The latent state lives on `S^{z_dim-1}`. The model uses the georax manifold
 implementation in `geometry.py`; frame coordinates match the original
 lower-triangular `so(n)` convention used by the PyTorch code.
 
-## What This Backs
+## Paper Results
 
-| Manuscript item | Code/result |
+| Paper item | Code/result |
 |---|---|
-| `fig:sphere_memory` | PyTorch submodule memory sweep and `experiments/sphere_latent_sde/figures/memory.pdf` |
-| `tab:sphere_parity` | `experiments/sphere_latent_sde/results/compute_parity.csv` |
-| `tab:sphere_memory_data` | submodule memory-sweep CSVs |
+| Sphere latent SDE memory scaling | PyTorch submodule memory sweep and `experiments/sphere_latent_sde/figures/memory.pdf` |
+| HumanActivity accuracy at compute parity | `experiments/sphere_latent_sde/results/compute_parity.csv` |
+| Sphere memory raw data | submodule memory-sweep CSVs |
 
 This JAX version is the parity/reimplementation path used for georax solver
-experimentation; the committed manuscript memory figures are produced by the
+experimentation; the committed paper memory figures are produced by the
 PyTorch submodule.
 
 ## Setup
