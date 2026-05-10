@@ -1,5 +1,5 @@
 {
-  "benchmark": "random_torus_nsde",
+  "benchmark": "torus_nsde",
   "cells": [
     {
       "adjoint": "reversible",
@@ -662,5 +662,5 @@
       "temp_bytes": 746037336
     }
   ],
-  "description": "Peak XLA scratch-memory measurements for a generic random neural SDE on the 7-torus."
+  "description": "Peak XLA scratch-memory measurements for a generic neural SDE on the 7-torus."
 }

@@ -1,4 +1,4 @@
-"""Run the random torus memory sweep used by the intro figure."""
+"""Run the torus memory sweep used by the intro figure."""
 
 from __future__ import annotations
 
@@ -100,10 +100,10 @@ def main(argv: list[str] | None = None) -> int:
             cells.append(_run_cell(args, solver, adjoint, n_steps))
 
     payload = {
-        "benchmark": "random_torus_nsde",
+        "benchmark": "torus_nsde",
         "description": (
-            "Peak XLA scratch-memory measurements for a generic random "
-            "neural SDE on the 7-torus."
+            "Peak XLA scratch-memory measurements for a generic neural SDE "
+            "on the 7-torus."
         ),
         "cells": cells,
     }

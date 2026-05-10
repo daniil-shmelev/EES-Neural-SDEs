@@ -64,7 +64,7 @@ stability-ode = [
     "ees-neural-sdes[algebra]",
 ]
 
-# Generic random torus memory benchmark
+# Torus memory benchmark
 torus = [
     "ees-neural-sdes[jax-base]",
 ]

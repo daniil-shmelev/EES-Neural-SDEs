@@ -47,7 +47,7 @@ Available extras:
 | `convergence-fbm` | `lowstorage` | Euclidean and SO(3) convergence scripts |
 | `order-verification` | `algebra` | symbolic order scripts |
 | `stability-ode` | `algebra` | ODE stability domains |
-| `torus` | `jax-base` | random torus memory benchmark |
+| `torus` | `jax-base` | Torus memory benchmark |
 | `kuramoto` | `jax-base` | Kuramoto |
 | `sphere-jax` | `jax-base` | JAX/georax sphere latent NSDE |
 | `stochastic-volatility` | `jax-base`, `lowstorage` | stochastic-volatility benchmark |

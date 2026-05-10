@@ -159,7 +159,7 @@ class TorusDiffusionField(eqx.Module):
         return self.geometry.frame(theta) * scales[None, :]
 
 
-class RandomTorusSDEField(eqx.Module):
+class TorusSDEField(eqx.Module):
     """Drift plus a fixed random noise path for one sampled SDE trajectory."""
 
     drift: TorusDriftField
@@ -179,11 +179,11 @@ class RandomTorusSDEField(eqx.Module):
         return drift + diffusion @ noise[idx]
 
 
-class RandomTorusNeuralSDE(eqx.Module):
-    """Randomly initialised neural SDE on T^d."""
+class TorusNeuralSDE(eqx.Module):
+    """Synthetic neural SDE on T^d."""
 
     encoder: GRUEncoder
-    vector_field: RandomTorusSDEField
+    vector_field: TorusSDEField
     name: str = eqx.field(static=True)
 
     d: int = eqx.field(static=True)
@@ -210,7 +210,7 @@ class RandomTorusNeuralSDE(eqx.Module):
         k1, k2, k3 = jax.random.split(key, 3)
         geometry = Torus(num_angles)
         label_dim = labels_per_state * NUM_LABELS
-        self.name = "random_torus_nsde"
+        self.name = "torus_nsde"
         self.d = geometry.dimension
         self.labels_per_state = labels_per_state
         self.n_steps = n_steps
@@ -226,7 +226,7 @@ class RandomTorusNeuralSDE(eqx.Module):
             diffusion_scale,
             key=k3,
         )
-        self.vector_field = RandomTorusSDEField(drift_field, diffusion_field, dt)
+        self.vector_field = TorusSDEField(drift_field, diffusion_field, dt)
 
     def __call__(
         self,

@@ -1,10 +1,7 @@
-# Random Torus `T^7` Memory Benchmark
+# Torus `T^7` Memory Benchmark
 
 This experiment reproduces the intro memory-scaling figure using a generic
-random neural SDE on the flat 7-torus. It is deliberately independent of any
-domain dataset: the model is initialised from fixed PRNG seeds, the context
-sequence is synthetic, and the auxiliary categorical features are random labels
-with no scientific meaning.
+neural SDE on the flat 7-torus.
 
 The benchmark measures peak XLA scratch memory for one forward-and-backward
 solve as the number of solver steps grows. It compares `CF-EES(2,5)` with a
@@ -15,7 +12,7 @@ reversible adjoint against `CG2` with full and recursive checkpoint adjoints.
 | Paper item | Result |
 |---|---|
 | Intro memory-scaling curve | `results/fig_scaling_compact_nogrid.pdf` |
-| Random torus memory raw data | `results/torus_memory_scaling.json` |
+| Torus memory raw data | `results/torus_memory_scaling.json` |
 
 ## Setup
 

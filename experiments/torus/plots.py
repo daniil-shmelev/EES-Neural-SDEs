@@ -80,7 +80,7 @@ def fig_torus_scaling(
     show_reference_slopes: bool = False,
     subtract_baseline: bool = False,
 ) -> None:
-    """Plot peak scratch-memory scaling from a random torus NSDE sweep."""
+    """Plot peak scratch-memory scaling from a torus NSDE sweep."""
     if modes is None:
         modes = [
             "cfees25:reversible",

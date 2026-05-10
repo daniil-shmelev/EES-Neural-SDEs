@@ -1,4 +1,4 @@
-"""Run one random torus memory benchmark cell."""
+"""Run one torus memory benchmark cell."""
 
 from __future__ import annotations
 
@@ -12,7 +12,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-from experiments.torus.models import RandomTorusNeuralSDE
+from experiments.torus.models import TorusNeuralSDE
 from experiments.torus.solvers import Solvers, build_adjoint, build_solver
 
 
@@ -34,7 +34,7 @@ def run(
     seed_target_labels: int,
     seed_reps: int,
 ) -> dict:
-    model = RandomTorusNeuralSDE(
+    model = TorusNeuralSDE(
         num_angles=num_angles,
         hidden_dim=hidden_dim,
         ctx_dim=ctx_dim,
