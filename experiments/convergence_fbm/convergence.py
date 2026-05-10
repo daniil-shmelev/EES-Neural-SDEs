@@ -87,7 +87,7 @@ def plot(f, solver, H, T, rate, ax, N = 10, backward = False):
                 y_vals = solve_path(
                     solver, f, [y_vals[-1]], X[::step][::-1], T
                 ).flatten()
-                error.append(abs(y_exact[0] - y_vals[-1][0]))
+                error.append(abs(y_exact[0] - y_vals[-1]))
 
         y += np.log10(error)
 
@@ -126,10 +126,10 @@ def plot_grid(f_, T_, H_, rates_, methods_, titles_):
 if __name__ == "__main__":
     methods = [EES25(), EES27()]
     titles = [
-        r'$\mathcal{E}(h)$ for $\mathrm{EES}_\mathcal{R}(2,5)$',
-        r'$\overleftarrow{\mathcal{E}}(h)$ for $\mathrm{EES}_\mathcal{R}(2,5)$',
-        r'$\mathcal{E}(h)$ for $\mathrm{EES}_\mathcal{R}(2,7)$',
-        r'$\overleftarrow{\mathcal{E}}(h)$ for $\mathrm{EES}_\mathcal{R}(2,7)$'
+        r'$\mathcal{E}(h)$ for $\mathrm{EES}(2,5)$',
+        r'$\overleftarrow{\mathcal{E}}(h)$ for $\mathrm{EES}(2,5)$',
+        r'$\mathcal{E}(h)$ for $\mathrm{EES}(2,7)$',
+        r'$\overleftarrow{\mathcal{E}}(h)$ for $\mathrm{EES}(2,7)$'
     ]
     rates = [
         lambda x : 2 * x - 0.5,

@@ -44,9 +44,3 @@ the relevant script with `--output` to choose an export path.
 | Kuramoto memory-sweep raw data | `python -m experiments.kuramoto.scripts.memory_sweep` | `experiments/kuramoto/results/memory_sweep_N1000.json`, `memory_sweep_cells_N1000/*.json` |
 | Sphere memory raw data | submodule memory-sweep scripts | `experiments/sphere_latent_sde/results/memory_sweep*.csv` |
 | RNA torus memory raw data | `python -m experiments.rna.scripts.run_rna_hlo_sweep` | `experiments/rna/results/rna_hlo_sweep.json`, `rna_benchmark_scaling*.json` |
-
-## Supplementary/Legacy Outputs
-
-Some older RNA torus and per-H convergence outputs remain committed as
-historical regression checks. They live under `experiments/rna/results/` and
-`experiments/convergence_fbm/results/`.

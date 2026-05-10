@@ -18,9 +18,6 @@ context window. Drift and diffusion are MLPs conditioned on a GRU encoding of
 | Intro memory-scaling curve | `results/fig_scaling_compact_nogrid.pdf` |
 | RNA torus memory raw data | `results/rna_hlo_sweep.json`, `rna_benchmark_scaling*.json` |
 
-Older RNA runtime, adjoint-retrain, and prediction-demo outputs remain
-committed for regression checks.
-
 ## Setup
 
 ```bash
