@@ -17,7 +17,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ees_core.plotting_params import set_plotting_params
+from experiments.plotting import set_plotting_params
 
 
 def _power_law_fit(

@@ -10,7 +10,6 @@ command lines, and result-file provenance.
 ## Repository Layout
 
 ```text
-ees_core/                       Pure-numpy EES tableaux and RK driver
 experiments/
   stability_ode/                ODE stability domains for EES(2,5) vs RK3/RK4
   stability/                    Mean-square SDE stability cross-sections
@@ -24,12 +23,14 @@ experiments/
   sphere_latent_nsde/           JAX/georax HumanActivity sphere latent NSDE
   sphere_latent_sde/            Submodule: PyTorch HumanActivity sphere latent SDE
   ees_dynamical_fitting/        Submodule: molecular-dynamics fitting benchmark
+  plotting.py                   Shared Matplotlib styling for paper figures
 PAPER_RESULTS.md                Paper figure/table to code cross-reference
 ```
 
 ## Install
 
-We recommend [`uv`](https://docs.astral.sh/uv/) and Python 3.13. Python 3.10 is enough for the pure-numpy figures.
+We recommend [`uv`](https://docs.astral.sh/uv/) and Python 3.13. Python 3.13
+is required by the pinned JAX/Diffrax/georax solver stack.
 
 ```bash
 uv pip install -e ".[dev]"
@@ -39,16 +40,17 @@ Available extras:
 
 | Extra | What it pulls in | Experiment(s) |
 |---|---|---|
-| no extras | numpy, matplotlib, scipy, fbm | `stability/`, Euclidean `convergence_fbm/` |
+| no extras | numpy, matplotlib, scipy, fbm | `stability/` |
 | `algebra` | kauri, sympy | `order_verification/`, `stability_ode/` |
 | `jax-base` | jax, equinox, optax, pinned diffrax build, georax, cyreal, seali | shared JAX base |
-| `convergence-fbm` | `jax-base` | SO(3) convergence scripts |
+| `lowstorage` | pinned diffrax and diffrax-lowstorage builds | shared EES(2,5)/EES(2,7) low-storage solvers |
+| `convergence-fbm` | `lowstorage` | Euclidean and SO(3) convergence scripts |
 | `order-verification` | `algebra` | symbolic order scripts |
 | `stability-ode` | `algebra` | ODE stability domains |
 | `rna` | `jax-base`, biotite, requests, psutil | RNA torus |
 | `kuramoto` | `jax-base` | Kuramoto |
 | `sphere-jax` | `jax-base` | JAX/georax sphere latent NSDE |
-| `stochastic-volatility` | `jax-base`, pinned diffrax-lowstorage build | stochastic-volatility benchmark |
+| `stochastic-volatility` | `jax-base`, `lowstorage` | stochastic-volatility benchmark |
 | `sphere` | torch, torchdiffeq, sklearn, tqdm, pandas | PyTorch sphere submodule |
 | `torchsde` | torch, patched torchsde build, torchcde | OU and stiff GBM base |
 | `stiff-gbm` | `torchsde`, scipy | stiff GBM |
@@ -63,7 +65,7 @@ Pinned direct references are declared in `pyproject.toml`.
 | Library | Source | Pinned at |
 |---|---|---|
 | `diffrax` | `github.com/sammccallum/diffrax` | `aeb1335b` |
-| `diffrax-lowstorage` | `github.com/luke-a-thompson/diffrax-lowstorage` | `74fd4dba` |
+| `diffrax-lowstorage` | `github.com/luke-a-thompson/diffrax-lowstorage` | `6bca5807` |
 | `georax` | `github.com/luke-a-thompson/georax` | `30ecbb9b` |
 | `cyreal` | `github.com/luke-a-thompson/cyreal_dynamics` | `88f02657` |
 | `pySigLib` | `github.com/daniil-shmelev/pySigLib` | `v3.0.0` (`2beb2541`) |

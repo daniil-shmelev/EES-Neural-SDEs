@@ -21,10 +21,6 @@ checks.
 ## Setup
 
 ```bash
-# Euclidean only
-uv pip install -e .
-
-# SO(3) scripts
 uv pip install -e ".[convergence-fbm]"
 ```
 

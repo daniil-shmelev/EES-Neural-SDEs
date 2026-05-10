@@ -20,18 +20,22 @@ condition, y_0.
 """
 
 import os
-from math import sqrt
 from fbm import FBM
+import diffrax
+import jax
+import jax.numpy as jnp
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.markers as mkr
+from diffrax_lowstorage import EES25, EES27
 
-from ees_core.stoch_rk_methods import EES25, EES27
-from ees_core import plotting_params
+from experiments.plotting import set_plotting_params
+
+jax.config.update("jax_enable_x64", True)
 
 np.random.seed(0)
 
-plotting_params.set_plotting_params(9, 10, 12)
+set_plotting_params(9, 10, 12)
 
 def get_2d_fbm(n, H, length):
     f_ = FBM(n=n, hurst=H, length=length, method='daviesharte')
@@ -45,25 +49,44 @@ def get_error(y_exact, y_vals, T):
     true_vals = np.interp(t, t_exact, y_exact)
     return np.max(np.abs(true_vals - y_vals))
 
-def plot(f, method, H, T, rate, ax, N = 10, backward = False):
+def solve_path(solver, vector_field, y0, X, T):
+    ts = jnp.linspace(0.0, T, len(X))
+    control = diffrax.LinearInterpolation(ts, jnp.asarray(X, dtype=jnp.float64))
+    term = diffrax.ControlTerm(vector_field, control)
+    sol = diffrax.diffeqsolve(
+        term,
+        solver,
+        t0=ts[0],
+        t1=ts[-1],
+        dt0=None,
+        y0=jnp.asarray(y0, dtype=jnp.float64),
+        saveat=diffrax.SaveAt(ts=ts),
+        stepsize_controller=diffrax.StepTo(ts=ts),
+        max_steps=len(X) + 8,
+        throw=True,
+    )
+    return np.asarray(sol.ys)
+
+
+def plot(f, solver, H, T, rate, ax, N = 10, backward = False):
     n = int(T * 2 ** 16)
     h = [2 ** (-i) for i in range(4, 14)]
     y = np.zeros(len(h))
     for i in range(N):
         X = get_2d_fbm(n, H=H, length=T)
-        y_exact = method.run([1], f, X)
-        y_exact = np.array(y_exact).flatten()
+        y_exact = solve_path(solver, f, [1.0], X, T).flatten()
 
         error = []
         for h_ in h:
             step = int(n * h_)
             if not backward:
-                y_vals = method.run([1], f, X[::step])
-                y_vals = np.array(y_vals).flatten()
+                y_vals = solve_path(solver, f, [1.0], X[::step], T).flatten()
                 error.append(get_error(y_exact, y_vals, T))
             else:
-                y_vals = method.run([1], f, X[::step])
-                y_vals = method.run(y_vals[-1], f, X[::step][::-1])
+                y_vals = solve_path(solver, f, [1.0], X[::step], T).flatten()
+                y_vals = solve_path(
+                    solver, f, [y_vals[-1]], X[::step][::-1], T
+                ).flatten()
                 error.append(abs(y_exact[0] - y_vals[-1][0]))
 
         y += np.log10(error)
@@ -101,8 +124,7 @@ def plot_grid(f_, T_, H_, rates_, methods_, titles_):
 
 
 if __name__ == "__main__":
-    EES27_param = (5 - 3 * sqrt(2)) / 14
-    methods = [EES25, EES27]
+    methods = [EES25(), EES27()]
     titles = [
         r'$\mathcal{E}(h)$ for $\mathrm{EES}_\mathcal{R}(2,5)$',
         r'$\overleftarrow{\mathcal{E}}(h)$ for $\mathrm{EES}_\mathcal{R}(2,5)$',
@@ -116,8 +138,9 @@ if __name__ == "__main__":
         lambda x: 8 * x - 1
     ]
 
-    def f(y):
-        return [np.cos(y[0]), np.sin(y[0])]
+    def f(t, y, args):
+        del t, args
+        return jnp.array([[jnp.cos(y[0]), jnp.sin(y[0])]], dtype=y.dtype)
 
     T = 1.
 

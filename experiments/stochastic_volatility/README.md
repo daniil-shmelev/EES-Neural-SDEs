@@ -29,9 +29,9 @@ Evaluation reports held-out loss and optional diagnostic predictions.
 uv pip install -e ".[stochastic-volatility]"
 ```
 
-This extra deliberately installs `diffrax-lowstorage`, pinned in
-`pyproject.toml` to the Python 3.13-compatible revision used for the paper
-experiments.
+This extra installs the pinned `diffrax-lowstorage` fork declared in
+`pyproject.toml`, including the EES(2,5) low-storage solver used by this
+experiment.
 
 ## Data
 

@@ -5,7 +5,7 @@ Plot the training loss after running OU.py
 import os
 import pickle
 import matplotlib.pyplot as plt
-from ees_core import set_plotting_params
+from experiments.plotting import set_plotting_params
 
 set_plotting_params(11, 12, 13)
 

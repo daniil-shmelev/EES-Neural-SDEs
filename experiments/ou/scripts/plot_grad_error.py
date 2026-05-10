@@ -12,7 +12,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ees_core.plotting_params import set_plotting_params
+from experiments.plotting import set_plotting_params
 
 STYLE = {
     "ees25": dict(color="red", marker="o", markersize=4, label="EES(2,5)"),

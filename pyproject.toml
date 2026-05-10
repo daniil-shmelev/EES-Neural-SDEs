@@ -4,10 +4,10 @@ version = "0.1.0"
 description = "Code for 'Explicit and Effectively Symmetric Schemes for Neural SDEs' (NeurIPS 2026)"
 readme = "README.md"
 license = { file = "LICENSE" }
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 
-# Core (numpy/matplotlib): enough to run experiments/stability and
-# experiments/convergence_fbm. JAX/Torch experiments install via extras below.
+# Core (numpy/matplotlib): enough to run experiments/stability. JAX/Torch
+# experiments and low-storage solver checks install via extras below.
 dependencies = [
     "numpy>=1.26",
     "matplotlib>=3.8",
@@ -37,16 +37,21 @@ jax-base = [
     "seali>=0.2.0",
 ]
 
-# Stochastic-volatility experiment - adds diffrax-lowstorage on top of jax-base.
-# Pinned to a commit that requires Python >= 3.13, so it's intentionally isolated here.
-stochastic-volatility = [
-    "ees-neural-sdes[jax-base]",
-    "diffrax-lowstorage @ git+https://github.com/luke-a-thompson/diffrax-lowstorage.git@74fd4dba492d96dcfd6148ad7d2f71f2a72f77ee",
+# Low-storage EES solvers shared by Euclidean fBm and stochastic-volatility experiments.
+lowstorage = [
+    "diffrax @ git+https://github.com/sammccallum/diffrax.git@aeb1335b5a6278e85a270231e0f97b8db4453ae6",
+    "diffrax-lowstorage @ git+https://github.com/luke-a-thompson/diffrax-lowstorage.git@6bca580732583a492742bc39dc4b65072c8427bf",
 ]
 
-# Numerical fBm convergence (Euclidean is core-only; SO(3) RDE scripts need JAX + georax)
-convergence-fbm = [
+# Stochastic-volatility experiment - adds diffrax-lowstorage on top of jax-base.
+stochastic-volatility = [
     "ees-neural-sdes[jax-base]",
+    "ees-neural-sdes[lowstorage]",
+]
+
+# Numerical fBm convergence checks use low-storage EES tableaux and NumPy/SciPy.
+convergence-fbm = [
+    "ees-neural-sdes[lowstorage]",
 ]
 
 # Symbolic Lie–Butcher / MKW order-condition verification (sympy + kauri)
@@ -119,7 +124,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["ees_core", "experiments"]
+packages = ["experiments"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

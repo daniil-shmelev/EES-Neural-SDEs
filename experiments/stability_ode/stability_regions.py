@@ -36,7 +36,7 @@ import matplotlib.lines as mlines
 import matplotlib.pyplot as plt
 import numpy as np
 
-from ees_core.plotting_params import set_plotting_params
+from experiments.plotting import set_plotting_params
 
 # Larger sizes than the kauri default; the figure is intended for compact
 # paper-column rendering, so labels need to survive a substantial scale-down.
