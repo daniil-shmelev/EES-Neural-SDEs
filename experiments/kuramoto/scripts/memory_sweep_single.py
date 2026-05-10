@@ -1,8 +1,6 @@
-"""Single-cell memory benchmark for one (solver, adjoint, n_steps) cell of the
-Kuramoto memory sweep.
+"""Single-cell memory benchmark for one Kuramoto memory-sweep cell.
 
-Mirrors the subprocess-isolation pattern of
-`experiments/rna/experiment/integrator_benchmark_single.py`. Each cell:
+Each cell runs in its own subprocess so JAX state is isolated:
 
   1. Builds a fresh Kuramoto NSDE at the requested config (random init).
   2. Runs one forward+backward of a synthetic energy-score loss on a random

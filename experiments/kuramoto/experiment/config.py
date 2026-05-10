@@ -1,8 +1,4 @@
-"""Frozen-dataclass + TOML config for the Kuramoto NSDE experiment.
-
-Mirrors the convention of `experiments/rna/experiment/config.py` so that
-solver / adjoint / training-loop helpers carry over with minimal rewiring.
-"""
+"""Frozen-dataclass + TOML config for the Kuramoto NSDE experiment."""
 
 from __future__ import annotations
 

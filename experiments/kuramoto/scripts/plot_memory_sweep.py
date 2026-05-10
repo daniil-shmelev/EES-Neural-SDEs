@@ -1,9 +1,8 @@
-"""Render the M4 memory-scaling figure from `memory_sweep_N{N}.json`.
+"""Render the Kuramoto memory-scaling figure from `memory_sweep_N{N}.json`.
 
-Style matches `experiments/rna/plots.py:fig_torus_scaling` (the original
-RNA torus memory plot: STIX fonts, 3.2 x 2.2 in, log-log axes,
-$\\Delta$ Memory on the y-axis (each curve baseline-subtracted to isolate
-the saved-tape contribution), reference slope annotations.
+The figure uses STIX fonts, 3.2 x 2.2 in sizing, log-log axes,
+$\\Delta$ Memory on the y-axis, and optional reference slope annotations.
+Each curve is baseline-subtracted to isolate the saved-tape contribution.
 """
 
 from __future__ import annotations

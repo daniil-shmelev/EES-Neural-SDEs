@@ -6,9 +6,6 @@ elementwise wrap on the first $N$ components and identity-add on the
 last $N$ — matching the structure of the underlying SDE on the cotangent
 bundle of the $N$-torus.
 
-Mirrors the local `Torus` class in `experiments/rna/models/torus.py`,
-but lifted to the product space so a single neural-SDE solve advances
-both phases and angular velocities through the same `GeometricTerm`.
 """
 
 from __future__ import annotations
@@ -21,7 +18,7 @@ from diffrax._custom_types import RealScalarLike
 from georax._geometry.base import LieGroup, LocalFlow, flow_order
 from jaxtyping import Array
 
-from experiments.rna.models.torus import wrap_to_pi
+from experiments.kuramoto.geometry import wrap_to_pi
 
 
 def wrap_first_half(x: Array, N: int) -> Array:

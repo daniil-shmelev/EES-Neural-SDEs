@@ -37,6 +37,22 @@ That directory is ignored by git. The loader first tries the processed Torch
 artifact `PersonActivity/processed/data.pt` if `torch` is importable; otherwise
 it rebuilds arrays from `PersonActivity/raw/ConfLongDemo_JSI.txt`.
 
+To download and preprocess the UCI Human Activity file with the PyTorch
+provider:
+
+```bash
+cd experiments/sphere_latent_sde
+python -c "from data.activity_provider import HumanActivityProvider; HumanActivityProvider('data_dir', download=True)"
+```
+
+This fetches `ConfLongDemo_JSI.txt` from the UCI Machine Learning Repository and
+writes both the raw file and the processed `data.pt` artifact under
+`data_dir/PersonActivity/`. For a JAX-only setup, it is enough to place the raw
+file at
+`experiments/sphere_latent_sde/data_dir/PersonActivity/raw/ConfLongDemo_JSI.txt`;
+the raw URL is
+`https://archive.ics.uci.edu/ml/machine-learning-databases/00196/ConfLongDemo_JSI.txt`.
+
 ## Checks And Runs
 
 ```bash

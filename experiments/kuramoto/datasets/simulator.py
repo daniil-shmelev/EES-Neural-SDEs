@@ -13,8 +13,7 @@ The diffrax solver of choice is `Heun` (Stratonovich, strong order 0.5,
 weak order 1). Because the diffusion is constant additive noise on
 $\omega$, Stratonovich and Itô coincide.
 
-We use `VirtualBrownianTree` for refinement-consistent Brownian paths,
-matching the pattern in `experiments/rna/models/torus_nsde.py`.
+We use `VirtualBrownianTree` for refinement-consistent Brownian paths.
 """
 
 from __future__ import annotations
@@ -32,7 +31,7 @@ from experiments.kuramoto.datasets.kuramoto import (
     make_state_diffusion,
     make_state_drift,
 )
-from experiments.rna.models.torus import wrap_to_pi
+from experiments.kuramoto.geometry import wrap_to_pi
 
 
 class SimConfig(NamedTuple):
@@ -56,7 +55,7 @@ def simulate_one(
     """Simulate a single trajectory.
 
     Returns (theta, omega) sampled at n_obs uniform points in [0, T].
-    Theta is wrapped to (-pi, pi].
+    Theta is wrapped to [-pi, pi).
     """
     drift = make_state_drift(params)
     diffusion = make_state_diffusion(params, D=cfg.D)

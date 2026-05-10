@@ -4,8 +4,6 @@ Runs one forward+backward of the Kuramoto NSDE at a fine integration
 resolution under CFEES25 + ReversibleAdjoint, producing a "truth"
 gradient vector that the M3 pilot compares against to measure
 discretization-plus-adjoint fidelity.
-
-Following the pattern of `experiments/rna/scripts/compute_reference_gradient.py`.
 """
 
 from __future__ import annotations

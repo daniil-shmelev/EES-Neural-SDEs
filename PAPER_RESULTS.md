@@ -16,7 +16,7 @@ the relevant script with `--output` to choose an export path.
 | EES(2,5) ODE stability domain | `python experiments/stability_ode/stability_regions.py` | `experiments/stability_ode/results/stability_regions_1.pdf` |
 | Mean-square SDE stability cross-sections | `python experiments/stability/stability.py` | `experiments/stability/results/stoch_stability.pdf` |
 | OU/LSDE training loss | `python experiments/ou/OU.py`, `python experiments/ou/plot_OU.py` | rerun to regenerate `OU_mse.pdf` |
-| Kuramoto phase-circle trajectory | `python -m experiments.kuramoto.datasets.visualize` or the data-generation pipeline | `experiments/kuramoto/data/kuramoto_N2_seed0.gif`; export a PDF copy for the paper |
+| Kuramoto phase-circle trajectory | `python -m experiments.kuramoto.datasets.visualize` or the data-generation pipeline | `experiments/kuramoto/data/kuramoto_N2_seed0.gif` |
 | Kuramoto adjoint memory scaling | `python -m experiments.kuramoto.scripts.plot_memory_sweep` | `experiments/kuramoto/results/memory_sweep_N1000.json`; PDF generated to `experiments/kuramoto/results/fig_kuramoto_memory_scaling.pdf` by default |
 | Sphere latent SDE memory scaling | `experiments/sphere_latent_sde/scripts/memory_sweep_integrator.py`, `plot_figures.py` | `experiments/sphere_latent_sde/figures/memory.pdf`, `results/memory_sweep_integrator.csv` |
 | EES fBm convergence summary | `python experiments/convergence_fbm/convergence.py` | `experiments/convergence_fbm/results/ees_stochastic_convergence_H{40,50,60}.pdf` |
@@ -43,4 +43,4 @@ the relevant script with `--output` to choose an export path.
 | Kuramoto pilot diagnostics | `python -m experiments.kuramoto.scripts.pilot_adjoint_parity` | `experiments/kuramoto/results/pilot/**` |
 | Kuramoto memory-sweep raw data | `python -m experiments.kuramoto.scripts.memory_sweep` | `experiments/kuramoto/results/memory_sweep_N1000.json`, `memory_sweep_cells_N1000/*.json` |
 | Sphere memory raw data | submodule memory-sweep scripts | `experiments/sphere_latent_sde/results/memory_sweep*.csv` |
-| Random torus memory raw data | `python -m experiments.torus.scripts.run_memory_sweep` | `experiments/torus/results/torus_memory_scaling.json` |
+| Torus memory raw data | `python -m experiments.torus.scripts.run_memory_sweep` | `experiments/torus/results/torus_memory_scaling.json` |

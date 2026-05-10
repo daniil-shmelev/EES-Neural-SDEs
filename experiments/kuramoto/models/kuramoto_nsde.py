@@ -7,7 +7,6 @@ diffrax `MultiTerm(ODETerm, ControlTerm)` wrapped in a georax
 `GeometricTerm` so that CFEES (or any other georax solver) advances the
 state on the product Lie group with one exponential per stage.
 
-Mirrors the structure of `experiments/rna/models/torus_nsde.py`.
 """
 
 from __future__ import annotations

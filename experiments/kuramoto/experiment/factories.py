@@ -1,8 +1,4 @@
-"""Factory helpers for the Kuramoto experiment.
-
-Mirrors `experiments/rna/experiment/factories.py` for the solver / adjoint
-dispatch and adds a model branch for the Euclidean baseline.
-"""
+"""Factory helpers for Kuramoto solver, adjoint, data, and model dispatch."""
 
 from __future__ import annotations
 

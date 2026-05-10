@@ -18,8 +18,6 @@ The fit loop persists everything we might want to plot later:
 - the final model (`model_final.eqx`)
 - a JSON history dump (`history.json`) and a sidecar config (`config.json`)
 - a sample of test predictions (`predictions_demo.npz`) for plotting
-
-Mirrors the shape of `experiments/rna/experiment/train_rna.py`.
 """
 
 from __future__ import annotations

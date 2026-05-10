@@ -57,8 +57,6 @@ Thumbs.db
 .pdm-build/
 
 # === Datasets ===
-experiments/rna/data/
-experiments/rna/datasets/cache/
 experiments/sphere_latent_sde/data_dir/
 data/cache/
 **/*.cif

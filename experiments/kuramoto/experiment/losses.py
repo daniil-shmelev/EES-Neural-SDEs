@@ -15,9 +15,7 @@ with the wrapped-on-$\theta$, plain-on-$\omega$ distance
         \sum_i |\mathrm{wrap}(\theta_a^i - \theta_b^i)| +
         \sum_i |\omega_a^i - \omega_b^i|.
 
-The total loss is a uniform mean across horizons. This generalises the
-single-horizon energy score in
-`experiments/rna/experiment/rna_losses.py:68-100`.
+The total loss is a uniform mean across horizons.
 """
 
 from __future__ import annotations
@@ -28,7 +26,7 @@ import equinox as eqx
 import jax
 import jax.numpy as jnp
 
-from experiments.rna.models.torus import wrap_to_pi
+from experiments.kuramoto.geometry import wrap_to_pi
 
 PyTree = Any
 LossFn = Callable[[eqx.Module, PyTree, jax.Array, jax.Array], jax.Array]

@@ -1,7 +1,7 @@
-# Stochastic Kuramoto Neural SDE on `T T^N`
+# Stochastic Kuramoto Neural SDE on `T^N x R^N`
 
 This experiment trains a neural SDE on the product state space
-`T T^N = T^N x R^N` for stochastic second-order Kuramoto dynamics with
+`T^N x R^N` for stochastic second-order Kuramoto dynamics with
 inertia. It is the torus-valued experiment used for the paper's Lie-group
 memory-scaling study.
 
@@ -18,7 +18,7 @@ with bimodal natural frequencies `Omega_i in {+P, -P}`. The state is
 
 | Paper item | Script/result |
 |---|---|
-| Kuramoto phase-circle trajectory | `experiments/kuramoto/data/kuramoto_N2_seed0.gif`; export a PDF copy for the paper |
+| Kuramoto phase-circle trajectory | `experiments/kuramoto/data/kuramoto_N2_seed0.gif` |
 | Kuramoto adjoint memory scaling | `python -m experiments.kuramoto.scripts.plot_memory_sweep` |
 | Kuramoto runtime/error comparison | runtime-parity training outputs in `results/runtime_parity_N1000_n50/` |
 | Kuramoto pilot diagnostics | pilot outputs in `results/pilot/` |
@@ -60,7 +60,7 @@ python -m experiments.kuramoto.scripts.plot_memory_sweep
 ```
 
 The memory plot writes `experiments/kuramoto/results/fig_kuramoto_memory_scaling.pdf`
-by default. Pass `--output <path>` when exporting a publication-ready copy.
+by default. Use `--output <path>` to write the PDF somewhere else.
 
 ## Result Files
 
