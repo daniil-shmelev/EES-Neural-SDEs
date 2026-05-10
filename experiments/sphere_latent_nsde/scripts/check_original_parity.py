@@ -14,6 +14,7 @@ from __future__ import annotations
 import argparse
 import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -28,9 +29,20 @@ from experiments.sphere_latent_nsde.losses import _cross_entropy_per_time, gathe
 from experiments.sphere_latent_nsde.models import Chebyshev
 
 
-ORIGINAL_REPO = Path("/home/luke/EES-LatentSDEonHS")
-ORIGINAL_PYTHON = ORIGINAL_REPO / ".venv" / "bin" / "python"
+ORIGINAL_REPO = Path("experiments/sphere_latent_sde").resolve()
+ORIGINAL_PYTHON = Path(sys.executable)
 DATA_DIR = ORIGINAL_REPO / "data_dir"
+
+
+def _default_original_python(repo: Path) -> Path:
+    candidates = [
+        repo / ".venv" / "bin" / "python",
+        repo / ".venv" / "Scripts" / "python.exe",
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+    return Path(sys.executable)
 
 
 def _run_original(code: str, out_file: Path) -> None:
@@ -178,9 +190,26 @@ np.savez(sys.argv[1], logits=logits.numpy(), target=target.numpy(), tids=tids.nu
 
 
 def main() -> int:
+    global ORIGINAL_REPO, ORIGINAL_PYTHON, DATA_DIR
+
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--original-repo", type=Path, default=ORIGINAL_REPO)
+    parser.add_argument("--original-python", type=Path, default=None)
+    parser.add_argument("--data-dir", type=Path, default=None)
     parser.add_argument("--skip-dataset", action="store_true")
     args = parser.parse_args()
+
+    ORIGINAL_REPO = args.original_repo.resolve()
+    ORIGINAL_PYTHON = (
+        args.original_python.resolve()
+        if args.original_python is not None
+        else _default_original_python(ORIGINAL_REPO)
+    )
+    DATA_DIR = (
+        args.data_dir.resolve()
+        if args.data_dir is not None
+        else ORIGINAL_REPO / "data_dir"
+    )
 
     if not ORIGINAL_PYTHON.exists():
         raise FileNotFoundError(f"Original repo Python not found: {ORIGINAL_PYTHON}")

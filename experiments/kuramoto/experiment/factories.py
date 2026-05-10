@@ -103,7 +103,7 @@ def make_model(
 ) -> eqx.Module:
     N = int(metadata["N"])
     n_obs = int(metadata["n_obs"])
-    T = float(metadata.get("T", config.n_steps * (T_default := 0.025)))
+    T = float(metadata.get("T", config.n_steps * 0.025))
     dt = T / config.n_steps
     adjoint = build_adjoint(config.adjoint, config.n_steps)
 

@@ -1,73 +1,70 @@
 # Sphere Latent NSDE Activity Classification
 
-JAX/Equinox reimplementation of the HumanActivity experiment from
-`/home/luke/EES-LatentSDEonHS/activity_classification.py`.
+JAX/Equinox/georax reimplementation of the HumanActivity latent SDE benchmark
+from the PyTorch submodule at `experiments/sphere_latent_sde/`.
 
-The latent state lives on `S^{z_dim-1}` and is integrated through a georax
-`Manifold` implementation in `geometry.py`. Its frame coordinates match the
-original PyTorch lower-triangular `so(n)` convention. Training uses cheap
-Cayley/Taylor charts selected by the georax solver; the parity script uses the
-exact exponential chart to reproduce the baseline homogeneous-space action.
+The latent state lives on `S^{z_dim-1}`. The model uses the georax manifold
+implementation in `geometry.py`; frame coordinates match the original
+lower-triangular `so(n)` convention used by the PyTorch code.
+
+## What This Backs
+
+| Manuscript item | Code/result |
+|---|---|
+| `fig:sphere_memory` | PyTorch submodule memory sweep and `experiments/sphere_latent_sde/figures/memory.pdf` |
+| `tab:sphere_parity` | `experiments/sphere_latent_sde/results/compute_parity.csv` |
+| `tab:sphere_memory_data` | submodule memory-sweep CSVs |
+
+This JAX version is the parity/reimplementation path used for georax solver
+experimentation; the committed manuscript memory figures are produced by the
+PyTorch submodule.
+
+## Setup
+
+```bash
+uv pip install -e ".[sphere-jax]"
+```
 
 ## Data
 
-The cyreal dataset reads the PersonActivity data from:
+By default, configs look for the UCI Human Activity data at:
 
-```bash
-/home/luke/EES-LatentSDEonHS/data_dir
+```text
+experiments/sphere_latent_sde/data_dir
 ```
 
-It first tries the processed Torch `data.pt` if `torch` is importable. In the
-JAX-only environment it rebuilds the same arrays from the raw text file. The
-parity script confirms that this raw NumPy preprocessing is exactly equal to
-the original processed artifact. Split strategy defaults to `auto`: exact Torch
-`random_split` when `torch` is importable, otherwise a deterministic NumPy split
-with the same split sizes.
+That directory is ignored by git. The loader first tries the processed Torch
+artifact `PersonActivity/processed/data.pt` if `torch` is importable; otherwise
+it rebuilds arrays from `PersonActivity/raw/ConfLongDemo_JSI.txt`.
 
-## Checks
-
-Compare behavior against the original Torch repo:
+## Checks And Runs
 
 ```bash
+# Compare preprocessing against the original PyTorch repo layout
 uv run python experiments/sphere_latent_nsde/scripts/check_original_parity.py
-```
 
-Run a small end-to-end smoke train:
-
-```bash
+# One-batch CPU smoke run
 uv run python -m experiments.sphere_latent_nsde.train_activity \
   experiments/sphere_latent_nsde/configs/activity/smoke.toml
-```
 
-Run the full three-entry solver sweep:
-
-```bash
+# Full solver/seed sweep
 uv run python -m experiments.sphere_latent_nsde.train_activity \
   experiments/sphere_latent_nsde/configs/activity/sweep.toml
-```
 
-Run one sweep entry:
-
-```bash
+# One sweep entry
 uv run python -m experiments.sphere_latent_nsde.train_activity \
   experiments/sphere_latent_nsde/configs/activity/sweep.toml --index 0
 ```
 
-The exact original output grid has 228 points. For faster JAX development runs,
-set `num_timepoints = 64` or `num_timepoints = 32` in a TOML config; the
-dataloader remaps reconstruction/classification time IDs onto that grid.
+The original output grid has 228 points. For faster JAX development runs, set
+`num_timepoints = 64` or `32`; reconstruction and classification time IDs are
+remapped onto that grid.
 
-The SDE solve is NFE-normalised across solvers: `nfe_budget` counts forward
-drift evaluations, geometric Euler costs 1 FE per solver step, CG2 costs 2 FEs
-per solver step, and CFEES25 costs 3 FEs per solver step. If `nfe_budget` is
-omitted, the largest common multiple of 6 not exceeding `num_timepoints - 1` is
-used, and the latent path is interpolated back to the configured output grid for
-reconstruction and classification losses.
+`nfe_budget` counts forward drift evaluations. Geometric Euler costs 1 FE per
+step, CG2 costs 2 FEs per step, and CFEES25 costs 3 FEs per step. If
+`nfe_budget` is omitted, the config chooses the largest common multiple of 6 not
+exceeding `num_timepoints - 1`.
 
-Each run writes a timestamped directory under
+Each run writes to
 `experiments/sphere_latent_nsde/results/activity__<solver>_<adjoint>__seed<N>__<timestamp>/`
-containing `config.toml`, `nsde.eqx`, `history.json`, and `metrics.json`.
-
-Training selects the best checkpoint by validation accuracy, then evaluates the
-test split once at the end. That final test accuracy is recorded as
-`test_acc_at_best_val_pct` in `metrics.json`.
+with `config.toml`, `nsde.eqx`, `history.json`, and `metrics.json`.

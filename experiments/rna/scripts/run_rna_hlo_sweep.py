@@ -3,7 +3,7 @@
 For each ``(solver, n_steps, residues_per_state)`` cell we lower the
 forward+backward graph of one training step and read
 ``compiled.compiled.memory_analysis().temp_size_in_bytes``. This is the
-XLA scratch buffer that the compiled JIT region pre-allocates — a clean
+XLA scratch buffer that the compiled JIT region pre-allocates - a clean
 measurement that excludes weights, optimiser state, and dataset buffers.
 Each cell runs in its own subprocess so that nothing carries over
 between cells.
@@ -38,10 +38,10 @@ def _measure_one_cell_inproc(
     import jax
     import jax.numpy as jnp
 
-    from experiment.factories import build_solver, make_prediction_fn
-    from experiment.rna_losses import make_wrapped_mse_loss
-    from experiment.config import Solvers
-    from models.torus_nsde import TorusNeuralSDE
+    from experiments.rna.experiment.config import Solvers
+    from experiments.rna.experiment.factories import build_solver
+    from experiments.rna.experiment.rna_losses import make_wrapped_mse_loss
+    from experiments.rna.models.torus_nsde import TorusNeuralSDE
 
     num_angles = 7 * residues_per_state
     key = jax.random.key(seed)
@@ -56,15 +56,26 @@ def _measure_one_cell_inproc(
         key=key,
     )
 
-    prediction_fn = make_prediction_fn()
-    loss_fn = make_wrapped_mse_loss(
-        input_key="context_angles",
-        target_key="target_angles",
-        prediction_fn=prediction_fn,
-    )
+    loss_fn = make_wrapped_mse_loss(target_key="target_angles")
 
     batch = {
-        "context_angles": jnp.zeros((batch_size, context_length, num_angles), dtype=jnp.float32),
+        "context_angles": jnp.zeros(
+            (batch_size, context_length, num_angles),
+            dtype=jnp.float32,
+        ),
+        "context_bases": jnp.zeros(
+            (batch_size, context_length, residues_per_state),
+            dtype=jnp.int32,
+        ),
+        "target_bases": jnp.zeros(
+            (batch_size, residues_per_state),
+            dtype=jnp.int32,
+        ),
+        "future_bases": jnp.zeros(
+            (batch_size, 0, residues_per_state),
+            dtype=jnp.int32,
+        ),
+        "future_mask": jnp.zeros((batch_size, 0), dtype=jnp.bool_),
         "target_angles": jnp.zeros((batch_size, num_angles), dtype=jnp.float32),
     }
     mask = jnp.ones((batch_size,), dtype=jnp.bool_)
@@ -106,7 +117,7 @@ def _run_subprocess(
 ) -> dict:
     code = (
         "import json, sys\n"
-        "from scripts.run_rna_hlo_sweep import _measure_one_cell_inproc\n"
+        "from experiments.rna.scripts.run_rna_hlo_sweep import _measure_one_cell_inproc\n"
         f"out = _measure_one_cell_inproc({solver!r}, {n_steps}, {residues_per_state},"
         f" batch_size={batch_size}, context_length={context_length},"
         f" hidden_dim={hidden_dim}, ctx_dim={ctx_dim}, seed={seed}, dt={dt})\n"
@@ -114,7 +125,7 @@ def _run_subprocess(
     )
     result = subprocess.run(
         [sys.executable, "-c", code],
-        cwd=PROJECT_ROOT,
+        cwd=PROJECT_ROOT.parent.parent,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         text=True,

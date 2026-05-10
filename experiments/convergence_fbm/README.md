@@ -1,36 +1,38 @@
-# fBm convergence (paper §3, Figs `fig:onvergence_4`–`6` + Figs `fig:cf_convergence_4`–`6`)
+# fBm/RDE Convergence
 
-Numerical verification of the global error rates of EES-class schemes on RDEs driven by fractional Brownian motion at Hurst index $H \in \{0.4, 0.5, 0.6\}$. Two settings:
+Numerical verification of global error rates for EES-class schemes on RDEs
+driven by fractional Brownian motion at Hurst indices `H in {0.4, 0.5, 0.6}`.
 
-- **Euclidean fBm** (`convergence.py`) — reproduces the Redmann–Riedel (2020) example for $\mathrm{EES}_{\mathcal R}(2,5)$ and $\mathrm{EES}_{\mathcal R}(2,7)$. Reports both the discretization error $\mathcal E(h)$ and the backward (initial-condition recovery) error $\overleftarrow{\mathcal E}(h)$.
-- **SO(3) RDE** (`scripts/so3_*.py`) — same Redmann–Riedel test bed, lifted to a Lie-group RDE driven by 2-dimensional fBm. Verifies the predicted $(p+1)\alpha - 1$ forward and antisymmetric-order rates of $\mathrm{CF\text{-}EES}(2,5)$.
+- `convergence.py`: Euclidean Redmann-Riedel test problem for `EES_R(2,5)`
+  and `EES_R(2,7)`.
+- `scripts/so3_*.py`: the same test problem lifted to an SO(3) RDE, verifying
+  forward and antisymmetric-order rates for `CF-EES(2,5)`.
 
-## Run
+## Manuscript Mapping
 
-```bash
-# Euclidean (no extras needed)
-python experiments/convergence_fbm/convergence.py
+| Label | Result |
+|---|---|
+| `fig:ees_convergence_12` | `results/ees_stochastic_convergence_H{40,50,60}.pdf` |
+| `fig:cfees_convergence_12` | `results/cfees_stochastic_convergence_H{40,50,60}.pdf`, `results/so3_reversibility_results.json` |
 
-# SO(3) numerical convergence + reversibility sweep
-python -m experiments.convergence_fbm.scripts.so3_local_order_verify
-python -m experiments.convergence_fbm.scripts.so3_reversibility_verify
-python -m experiments.convergence_fbm.scripts.so3_reversibility_plot       # writes the CF-EES SO(3) PDFs
-```
+The older per-H labels are still present as comments in the manuscript; the
+active manuscript uses the two summary labels above.
 
 ## Setup
 
 ```bash
-# Euclidean only (numpy + matplotlib + fbm)
+# Euclidean only
 uv pip install -e .
 
-# SO(3) scripts need JAX + georax + diffrax fork
+# SO(3) scripts
 uv pip install -e ".[convergence-fbm]"
 ```
 
-## Results committed
+## Run
 
-| File | Backs |
-|---|---|
-| `results/ees_stochastic_convergence_H{40,50,60}.pdf` | Figs `fig:onvergence_4/5/6` |
-| `results/cfees_stochastic_convergence_H{40,50,60}.pdf` | Figs `fig:cf_convergence_4/5/6` |
-| `results/so3_reversibility_results.json` | data backing the CF-EES SO(3) figures |
+```bash
+python experiments/convergence_fbm/convergence.py
+python -m experiments.convergence_fbm.scripts.so3_local_order_verify
+python -m experiments.convergence_fbm.scripts.so3_reversibility_verify
+python -m experiments.convergence_fbm.scripts.so3_reversibility_plot
+```

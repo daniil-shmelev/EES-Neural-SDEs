@@ -1,0 +1,21 @@
+[base]
+experiment = "activity"
+data_dir = "experiments/sphere_latent_sde/data_dir"
+epochs = 30
+batch_size = 64
+learning_rate = 0.001
+seed = 0
+device = "gpu"
+h_dim = 32
+z_dim = 16
+n_deg = 4
+num_timepoints = 64
+nfe_budget = 30
+
+[sweep]
+method = [
+    "geometric_euler_direct",
+    "cg2_direct",
+    "cfees25_reversible",
+]
+seed = [0, 1, 2]

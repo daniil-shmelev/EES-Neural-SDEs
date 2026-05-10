@@ -4,9 +4,9 @@ the implementation in:
 
 https://github.com/daniil-shmelev/kauri/blob/main/kauri/rk.py
 
-This implementation is purely for experimentation. For an efficient implementation of
-EES schemes, see the forks of diffrax and torchsde linked in the README file of this
-directory.
+This implementation is purely for experimentation. For efficient EES
+implementations, see the patched diffrax and torchsde builds linked in the
+repository README.
 """
 
 import copy

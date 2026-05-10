@@ -308,7 +308,7 @@ def load_activity_arrays(
 @dataclass
 class HumanActivityDataset(DatasetProtocol):
     split: Literal["train", "val", "test"] = "train"
-    data_dir: Path = Path("/home/luke/EES-LatentSDEonHS/data_dir")
+    data_dir: Path = Path("experiments/sphere_latent_sde/data_dir")
     seed: int = 42
     source: Literal["auto", "raw", "torch"] = "auto"
     split_strategy: Literal["auto", "numpy", "torch"] = "auto"

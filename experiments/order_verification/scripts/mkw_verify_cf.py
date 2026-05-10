@@ -28,13 +28,22 @@ from typing import Iterator, Optional
 
 import sympy as sp
 
-from mkw_verify import (  # reuse helpers
-    LEAF, PTree, PForest, EMPTY_FOREST, Nil,
-    planar_trees_of_weight,
-    lac_coproduct_terms,
-    convolve,
-    eval_forest, eval_tree_or_nil,
-)
+try:
+    from .mkw_verify import (  # type: ignore[import-not-found]
+        LEAF, PTree, PForest, EMPTY_FOREST, Nil,
+        planar_trees_of_weight,
+        lac_coproduct_terms,
+        convolve,
+        eval_forest, eval_tree_or_nil,
+    )
+except ImportError:  # pragma: no cover - supports direct script execution.
+    from mkw_verify import (
+        LEAF, PTree, PForest, EMPTY_FOREST, Nil,
+        planar_trees_of_weight,
+        lac_coproduct_terms,
+        convolve,
+        eval_forest, eval_tree_or_nil,
+    )
 
 
 # ============================================================================

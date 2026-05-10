@@ -12,10 +12,16 @@ import sympy as sp
 from sympy import Matrix, Rational, Symbol, eye, zeros, factorial
 import random
 
-from scheme_a_algebraic_verify import (
-    scheme_a_step, xi, random_rational_matrix, BETA, N as _ignore,
-    truncate_matrix_in_h, h, expm_series
-)
+try:
+    from .scheme_a_algebraic_verify import (  # type: ignore[import-not-found]
+        scheme_a_step, xi, random_rational_matrix, BETA, N as _ignore,
+        truncate_matrix_in_h, h, expm_series
+    )
+except ImportError:  # pragma: no cover - supports direct script execution.
+    from scheme_a_algebraic_verify import (
+        scheme_a_step, xi, random_rational_matrix, BETA, N as _ignore,
+        truncate_matrix_in_h, h, expm_series
+    )
 
 # Override N to 3 for speed
 N = 3

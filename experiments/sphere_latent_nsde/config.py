@@ -32,7 +32,7 @@ COMMON_NFE_GRANULARITY = math.lcm(*SOLVER_NFE_PER_STEP.values())
 @dataclass(frozen=True)
 class ActivityConfig:
     experiment: str = "activity"
-    data_dir: Path = Path("/home/luke/EES-LatentSDEonHS/data_dir")
+    data_dir: Path = Path("experiments/sphere_latent_sde/data_dir")
     epochs: int = 10
     batch_size: int = 64
     learning_rate: float = 1e-3

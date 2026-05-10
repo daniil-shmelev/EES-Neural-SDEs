@@ -1,8 +1,12 @@
-# OU latent SDE
+# OU Latent SDE
 
-Trains a Neural Latent SDE (LSDE) on high-volatility Ornstein–Uhlenbeck dynamics. Compares Reversible Heun against EES(2,5) on a `torchsde`-based pipeline. Adapted from the [Stable Neural SDEs](https://github.com/yongkyung-oh/Stable-Neural-SDEs) tutorial.
+Neural Latent SDE experiment on high-volatility Ornstein-Uhlenbeck dynamics.
+This supports the manuscript OU/LSDE figure and table (`fig:lsde`,
+`table:lsde`) and the appendix gradient-error comparison
+(`fig:ees25_vs_27_grad_error`).
 
-The integrator is selected via the `method` field in the in-script `config` dict.
+The training loop is based on `torchsde`; the integrator is selected by the
+`method` field in the in-script config.
 
 ## Setup
 
@@ -10,7 +14,8 @@ The integrator is selected via the `method` field in the in-script `config` dict
 uv pip install -e ".[ou]"
 ```
 
-Pulls Daniil's `torchsde` fork (`mcf` branch) plus `torchcde`.
+This pulls the patched `torchsde` build with EES/MCF solver support plus
+`torchcde`.
 
 ## Run
 
@@ -19,6 +24,6 @@ python experiments/ou/OU.py
 python experiments/ou/plot_OU.py
 ```
 
-## Results committed
-
-None — the OU experiment is not directly cited in the NeurIPS 2026 manuscript. Rerun the scripts above to generate `results/OU_mse.pdf` locally.
+Committed gradient-error artifacts live in
+`experiments/ou/results/grad_error/single_step/`. Rerun the scripts above to
+regenerate training-loss figures such as `OU_mse.pdf`.

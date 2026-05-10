@@ -1,6 +1,7 @@
 # Sweep config: Cartesian product of [sweep] axes applied on top of [base] defaults.
 # Total runs = product of lengths of all sweep lists.
-# Usage: python -m experiment.train configs/stoch_vol/sweep.toml --index N
+# Usage:
+#   python -m experiments.stochastic_volatility.experiment.train experiments/stochastic_volatility/configs/stoch_vol/sweep.toml --index N
 
 [base]
 epochs = 100

@@ -23,21 +23,21 @@ algebra = [
     "sympy>=1.13",
 ]
 
-# Shared base for all modern JAX experiments (RNA, SO(3), and Luke-owned placeholders)
+# Shared base for modern JAX experiments (RNA, SO(3), Kuramoto, and JAX sphere)
 jax-base = [
     "jax[cuda12]>=0.10.0 ; platform_system=='Linux'",
     "jax>=0.10.0 ; platform_system!='Linux'",
     "equinox>=0.13.6",
     "optax>=0.2.0",
     "jaxtyping>=0.2.36",
-    # diffrax fork by sammccallum (the version pinned by every modern experiment in this paper)
+    # Pinned diffrax build used by the JAX experiments in this paper.
     "diffrax @ git+https://github.com/sammccallum/diffrax.git@aeb1335b5a6278e85a270231e0f97b8db4453ae6",
     "georax @ git+https://github.com/luke-a-thompson/georax.git@30ecbb9bb45806e0bf6ecf24bcf6da1de9173aea",
     "cyreal @ git+https://github.com/luke-a-thompson/cyreal_dynamics.git@88f02657989fc4f9c85df0afb1452085fc3f2f8b",
     "seali>=0.2.0",
 ]
 
-# Stochastic-volatility experiment — adds the diffrax-lowstorage fork on top of jax-base.
+# Stochastic-volatility experiment - adds diffrax-lowstorage on top of jax-base.
 # Pinned to a commit that requires Python >= 3.13, so it's intentionally isolated here.
 stochastic-volatility = [
     "ees-neural-sdes[jax-base]",
@@ -54,7 +54,7 @@ order-verification = [
     "ees-neural-sdes[algebra]",
 ]
 
-# ODE stability regions (Fig fig:ees25_stability) — uses kauri for tableaux
+# ODE stability regions (Fig fig:ees25_stability) - uses kauri for tableaux
 stability-ode = [
     "ees-neural-sdes[algebra]",
 ]
@@ -67,7 +67,17 @@ rna = [
     "psutil>=5.9",
 ]
 
-# Sphere latent SDE — Zeng et al. 2023 PyTorch baseline + CFEES integrator
+# Kuramoto experiment on T T^N
+kuramoto = [
+    "ees-neural-sdes[jax-base]",
+]
+
+# JAX/georax reimplementation of the sphere latent SDE experiment
+sphere-jax = [
+    "ees-neural-sdes[jax-base]",
+]
+
+# Sphere latent SDE - Zeng et al. 2023 PyTorch baseline + CFEES integrator
 sphere = [
     "torch>=2.4",
     "torchdiffeq>=0.2.5",
@@ -76,27 +86,27 @@ sphere = [
     "pandas>=2.2",
 ]
 
-# Shared torchsde base — Daniil's `mcf` fork adds EES25/EES27 and MCF reversible solvers
+# Shared torchsde base with EES25/EES27 and MCF reversible solvers
 torchsde = [
     "torch>=2.0",
     "torchsde @ git+https://github.com/daniil-shmelev/torchsde.git@a0b71269538197f15b11792400fb77e26737211d",
     "torchcde>=0.2.5",
 ]
 
-# Stiff GBM neural SDE — torchsde-based options-pricing experiment (paper §3.4)
+# Stiff GBM neural SDE - torchsde-based options-pricing experiment
 stiff-gbm = [
     "ees-neural-sdes[torchsde]",
     "scipy>=1.11",
 ]
 
-# OU latent SDE — torchsde-based companion
+# OU latent SDE - torchsde-based companion
 ou = [
     "ees-neural-sdes[torchsde]",
     "scipy>=1.11",
 ]
 
 all = [
-    "ees-neural-sdes[convergence-fbm,order-verification,stability-ode,rna,sphere,stiff-gbm,ou]",
+    "ees-neural-sdes[convergence-fbm,order-verification,stability-ode,rna,kuramoto,sphere,sphere-jax,stochastic-volatility,stiff-gbm,ou]",
 ]
 dev = [
     "pytest>=8",

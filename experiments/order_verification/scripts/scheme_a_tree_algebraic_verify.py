@@ -44,12 +44,20 @@ from fractions import Fraction
 from math import factorial
 from typing import Dict, Tuple
 
-from mkw_verify import (
-    LEAF, PTree, PForest, EMPTY_FOREST, Nil,
-    planar_trees_of_weight,
-    lac_coproduct_terms,
-    eval_forest, eval_tree_or_nil,
-)
+try:
+    from .mkw_verify import (  # type: ignore[import-not-found]
+        LEAF, PTree, PForest, EMPTY_FOREST, Nil,
+        planar_trees_of_weight,
+        lac_coproduct_terms,
+        eval_forest, eval_tree_or_nil,
+    )
+except ImportError:  # pragma: no cover - supports direct script execution.
+    from mkw_verify import (
+        LEAF, PTree, PForest, EMPTY_FOREST, Nil,
+        planar_trees_of_weight,
+        lac_coproduct_terms,
+        eval_forest, eval_tree_or_nil,
+    )
 
 
 # ============================================================================
@@ -300,7 +308,7 @@ def main():
         product_tree = phi_tree.get(t1, Fraction(0)) * phi_tree.get(t2, Fraction(0))
         # For tau1==tau2, shuffle gives 2*concat so single value = phi(tau)^2 / 2
         if t1 == t2:
-            expected = product_tree  # phi(t) * phi(t) = phi(t ⊔ t) = 2 * phi(tt) so phi(tt) = prod/2
+            expected = product_tree  # phi(t) * phi(t) = phi(t shuffle t) = 2 * phi(tt) so phi(tt) = prod/2
             actual = v12  # single concatenation
             check = "OK" if actual == product_tree / 2 else f"MISMATCH (should be {product_tree}/2 = {product_tree/2})"
             print(f"    tau={t1!r}: phi(tau tau) = {actual}, phi(tau)^2/2 = {product_tree/2}  [{check}]")
@@ -312,26 +320,26 @@ def main():
     # Show phi_A values on low-weight trees
     print("  Values of phi_A on selected planar trees and forests:")
     selected_trees = [
-        (LEAF, "•"),
-        (PTree((LEAF,)), "[•]"),
-        (PTree((LEAF, LEAF)), "[•,•]"),
-        (PTree((PTree((LEAF,)),)), "[[•]]"),
+        (LEAF, "leaf"),
+        (PTree((LEAF,)), "[leaf]"),
+        (PTree((LEAF, LEAF)), "[leaf,leaf]"),
+        (PTree((PTree((LEAF,)),)), "[[leaf]]"),
     ]
     for tau, sym in selected_trees:
         print(f"    phi_A({sym:>8}) = {phi_tree.get(tau, Fraction(0))}")
     selected_forests = [
-        (PForest((LEAF, LEAF)), "• •   (forest of two leaves)"),
-        (PForest((LEAF, PTree((LEAF,)))), "• [•]   (forest)"),
+        (PForest((LEAF, LEAF)), "leaf leaf   (forest of two leaves)"),
+        (PForest((LEAF, PTree((LEAF,)))), "leaf [leaf]   (forest)"),
     ]
     for omega, sym in selected_forests:
         print(f"    phi_A({sym:<30}) = {phi_on_forest(state, omega)}")
     print()
 
     # Classical-order check against exact-flow character on planar trees:
-    #   phi_exp(•) = 1, phi_exp([•]) = 1/2.
+    #   phi_exp(leaf) = 1, phi_exp([leaf]) = 1/2.
     print("  Classical order check (phi_A vs exact-flow character):")
     expected = {LEAF: Fraction(1), PTree((LEAF,)): Fraction(1, 2)}
-    for tau, sym in [(LEAF, "•"), (PTree((LEAF,)), "[•]")]:
+    for tau, sym in [(LEAF, "leaf"), (PTree((LEAF,)), "[leaf]")]:
         got = phi_tree.get(tau, Fraction(0))
         exp_ = expected[tau]
         match = "OK" if got == exp_ else f"MISMATCH (expected {exp_})"

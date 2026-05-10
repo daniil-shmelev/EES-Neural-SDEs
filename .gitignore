@@ -56,7 +56,7 @@ Thumbs.db
 .pdm-python
 .pdm-build/
 
-# === Datasets — NEVER ship ===
+# === Datasets ===
 experiments/rna/data/
 experiments/rna/datasets/cache/
 experiments/sphere_latent_sde/data_dir/
@@ -66,7 +66,7 @@ data/cache/
 **/*.pdb
 **/*.parquet
 
-# === Model checkpoints — NEVER ship ===
+# === Model checkpoints ===
 *.eqx
 *.pt
 *.pth
@@ -79,7 +79,7 @@ data/cache/
 experiments/stochastic_volatility/results
 experiments/sphere_latent_nsde/results
 
-# === BUT keep result files (whitelist) ===
+# === whitelist result files ===
 !experiments/**/results/**/*.json
 !experiments/**/results/**/*.npz
 !experiments/**/results/**/*.npy

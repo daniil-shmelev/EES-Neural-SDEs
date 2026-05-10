@@ -1,0 +1,16 @@
+experiment = "activity"
+data_dir = "experiments/sphere_latent_sde/data_dir"
+epochs = 1
+batch_size = 16
+learning_rate = 0.001
+seed = 0
+device = "cpu"
+h_dim = 32
+z_dim = 16
+n_deg = 4
+num_timepoints = 32
+nfe_budget = 6
+solver = "cfees25"
+adjoint = "reversible"
+max_train_batches = 1
+max_eval_batches = 1

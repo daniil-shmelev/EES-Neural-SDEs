@@ -69,7 +69,7 @@ def parse_args() -> argparse.Namespace:
     )
     p.add_argument(
         "--output", type=Path,
-        default=Path("/mnt/c/Users/Shmelev/source/overleaf/EES_Neural_SDEs_Overleaf/figures/fig_kuramoto_memory_scaling.pdf"),
+        default=Path("experiments/kuramoto/results/fig_kuramoto_memory_scaling.pdf"),
     )
     p.add_argument(
         "--modes", type=str, nargs="+",

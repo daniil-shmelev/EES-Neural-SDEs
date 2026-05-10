@@ -1,54 +1,74 @@
-# Stochastic volatility (paper §3.5, Tabs `tab:further_stoch_vol`, `tab:rough-volatility-parameters`)
+# Stochastic Volatility
 
-Trains a neural SDE on seven stochastic volatility models — Black-Scholes, Heston, Rough Heston, Quadratic Rough Heston, Bergomi, Rough Bergomi, and Classical Local Stochastic Volatility — fitted by matching simulated path distributions. Drift and diffusion are MLPs on $\mathbb{R}^d$ with LipSwish activations and diagonal diffusion; integration uses a fixed NFE budget and compares `EES25`, `CFEES25`, `MCF_Euler`, `MCF_Midpoint`, `GL2`, and `ReversibleHeun` via `ReversibleAdjoint`.
+This experiment trains neural SDEs on seven stochastic-volatility datasets:
+Black-Scholes, Heston, Rough Heston, Quadratic Rough Heston, Bergomi, Rough
+Bergomi, and Classical Local Stochastic Volatility.
 
-Loss: truncated path-signature MMD (depth 6, biased $\widehat{\mathrm{MMD}}^2$ with dot-product kernel on time-augmented paths). Evaluation: two-sample KS statistic at $t = 55$.
+The implementation uses MLP drift/diffusion models on Euclidean state paths and
+a fixed forward-NFE budget. The shipped solver set is:
 
-This experiment backs:
+- `ees25`
+- `mcf_euler`
+- `mcf_midpoint`
+- `reversible_heun`
 
-- **Tab `tab:further_stoch_vol`** — solver comparison across all seven volatility models at fixed NFE budget
-- **Tab `tab:rough-volatility-parameters`** — model parameters for the rough-volatility dataset family
+The loss is a truncated path-signature MMD objective on time-augmented paths.
+Evaluation reports held-out loss and optional diagnostic predictions.
+
+## What This Backs
+
+| Manuscript item | Code/result |
+|---|---|
+| `table:rough_bergomi` | rough-Bergomi slice of the sweep |
+| `tab:further_stoch_vol` | full seven-model sweep |
+| `tab:rough-volatility-parameters` | model/dataset parameter definitions |
 
 ## Setup
 
 ```bash
-uv pip install -e ".[stoch_vol]"
+uv pip install -e ".[stochastic-volatility]"
 ```
 
-Pre-computed training data for all seven models is committed under `data/`; no download step is required.
+This extra deliberately installs `diffrax-lowstorage`, pinned in
+`pyproject.toml` to the Python 3.13-compatible revision used for the
+manuscript experiments.
+
+## Data
+
+Training expects `.npz` datasets under `experiments/stochastic_volatility/data/`.
+That directory is ignored by git and is not currently committed in this repo.
+Expected filenames:
+
+| File | Model |
+|---|---|
+| `black-scholes_data.npz` | Black-Scholes |
+| `heston_data.npz` | Heston |
+| `rough_heston_data.npz` | Rough Heston |
+| `quadratic_rough_heston_data.npz` | Quadratic Rough Heston |
+| `bergomi_data.npz` | Bergomi |
+| `rough_bergomi_data.npz` | Rough Bergomi |
+| `classical_local_stochastic_volatility_data.npz` | Classical Local Stochastic Volatility |
+
+Each file must expose `driver` and `solution` arrays. The dataset loader uses a
+70/15/15 train/validation/test split.
 
 ## Run
 
 ```bash
-# Single training run (single config)
+# Single config
 python -m experiments.stochastic_volatility.experiment.train path/to/config.toml
 
-# Sweep run (all solver × model combinations in a sweep config)
+# Full Cartesian sweep
 python -m experiments.stochastic_volatility.experiment.train experiments/stochastic_volatility/configs/stoch_vol/sweep.toml
 
-# Single entry from a sweep config
-python -m experiments.stochastic_volatility.experiment.train path/to/sweep.toml --index 0
+# One sweep entry
+python -m experiments.stochastic_volatility.experiment.train experiments/stochastic_volatility/configs/stoch_vol/sweep.toml --index 0
 
-# Count actual NFE per solver step (validates the fixed-cost model)
+# Count solver NFEs
 python -m experiments.stochastic_volatility.experiment.count_nfe
 ```
 
-Each run writes a timestamped output directory under `results/<experiment>__<solver>__seed<N>__<timestamp>/` containing `config.toml`, `nsde.eqx`, `history.json`, `metrics.json`, and optional `test_predictions.npz` and diagnostic plots.
-
-## Results committed
-
-None — rerun the scripts above to generate results locally.
-
-## Data
-
-| File | Model |
-|---|---|
-| `data/black-scholes_data.npz` | Black-Scholes |
-| `data/heston_data.npz` | Heston |
-| `data/rough_heston_data.npz` | Rough Heston |
-| `data/quadratic_rough_heston_data.npz` | Quadratic Rough Heston |
-| `data/bergomi_data.npz` | Bergomi |
-| `data/rough_bergomi_data.npz` | Rough Bergomi |
-| `data/classical_local_stochastic_volatility_data.npz` | Classical Local Stochastic Volatility |
-
-Splits: 70 % train / 15 % val / 15 % test.
+Each run writes a timestamped directory under
+`experiments/stochastic_volatility/results/<experiment>__<solver>__seed<N>__<timestamp>/`
+containing `config.toml`, `nsde.eqx`, `history.json`, `metrics.json`, and
+optional prediction/diagnostic artifacts.

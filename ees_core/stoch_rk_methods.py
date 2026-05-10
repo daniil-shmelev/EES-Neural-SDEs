@@ -1,9 +1,9 @@
 """
 This module provides instances of stochastic Runge--Kutta methods.
 
-This implementation is purely for experimentation. For an efficient implementation of
-EES schemes, see the forks of diffrax and torchsde linked in the README file of this
-directory.
+This implementation is purely for experimentation. For efficient EES
+implementations, see the patched diffrax and torchsde builds linked in the
+repository README.
 """
 
 from ees_core.stoch_rk import StochRK, from_kauri

@@ -1,12 +1,43 @@
 import itertools
 import json
+import sys
 import tomllib
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from pathlib import Path
 from typing import Any
 
-import seali
+try:
+    import seali
+except ModuleNotFoundError:
+    class _SealiFallback:
+        BOLD = ""
+
+        class Style:
+            def __init__(self, **_kwargs):
+                pass
+
+        class Help:
+            def __init__(self, **_kwargs):
+                pass
+
+        @staticmethod
+        def command(help=None):
+            def decorator(fn):
+                def wrapped(*args, **kwargs):
+                    if not args and not kwargs and len(sys.argv) > 1:
+                        raise ModuleNotFoundError(
+                            "The config CLI requires `seali`; install the "
+                            "`stochastic-volatility` extra before passing "
+                            "command-line options."
+                        )
+                    return fn(*args, **kwargs)
+
+                return wrapped
+
+            return decorator
+
+    seali = _SealiFallback()
 
 
 class Experiments(StrEnum):

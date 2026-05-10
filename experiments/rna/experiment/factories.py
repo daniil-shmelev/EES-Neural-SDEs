@@ -69,20 +69,12 @@ def make_loader(
 ) -> DataLoader:
     match config.experiment:
         case Experiments.SPD:
-            from datasets.spd.dataset import CovarianceDataset
-
-            source = CovarianceDataset(split=split).make_array_source()
-            return DataLoader(
-                [
-                    source,
-                    BatchTransform(
-                        batch_size=config.batch_size,
-                        drop_last=split == "train",
-                    ),
-                ]
+            raise NotImplementedError(
+                "The SPD dataset scaffold is not shipped in this repository. "
+                "Use experiment='rna' or add an SPD dataset implementation."
             )
         case Experiments.RNA:
-            from datasets.rna.dataset import RNATorsionDataset
+            from experiments.rna.datasets.dataset import RNATorsionDataset
 
             source = RNATorsionDataset(
                 split=split,
@@ -113,20 +105,12 @@ def make_model(
 ) -> eqx.Module:
     match config.experiment:
         case Experiments.SPD:
-            from models.nsde import ManifoldNeuralSDE
-
-            return ManifoldNeuralSDE(
-                n_stocks=metadata["n_stocks"],
-                hidden_dim=config.hidden_dim,
-                ctx_dim=config.ctx_dim,
-                n_steps=config.n_steps,
-                dt=config.dt,
-                solver=build_solver(config.solver),
-                diffusion_scale=config.diffusion_scale,
-                key=key,
+            raise NotImplementedError(
+                "The SPD experiment scaffold is not shipped in this repository. "
+                "Use experiment='rna' or add the SPD model/dataset pair."
             )
         case Experiments.RNA:
-            from models.torus_nsde import TorusNeuralSDE
+            from experiments.rna.models.torus_nsde import TorusNeuralSDE
 
             return TorusNeuralSDE(
                 num_angles=metadata["num_angles"],
