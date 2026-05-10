@@ -12,7 +12,7 @@ the relevant script with `--output` to choose an export path.
 
 | Paper item | Code path | Repo result(s) |
 |---|---|---|
-| Intro memory-scaling curve | `python -m experiments.rna.plots` | `experiments/rna/results/fig_scaling_compact_nogrid.pdf`, `rna_hlo_sweep.json`, `rna_benchmark_scaling*.json` |
+| Intro memory-scaling curve | `python -m experiments.torus.plots` | `experiments/torus/results/fig_scaling_compact_nogrid.pdf`, `torus_memory_scaling.json` |
 | EES(2,5) ODE stability domain | `python experiments/stability_ode/stability_regions.py` | `experiments/stability_ode/results/stability_regions_1.pdf` |
 | Mean-square SDE stability cross-sections | `python experiments/stability/stability.py` | `experiments/stability/results/stoch_stability.pdf` |
 | OU/LSDE training loss | `python experiments/ou/OU.py`, `python experiments/ou/plot_OU.py` | rerun to regenerate `OU_mse.pdf` |
@@ -43,4 +43,4 @@ the relevant script with `--output` to choose an export path.
 | Kuramoto pilot diagnostics | `python -m experiments.kuramoto.scripts.pilot_adjoint_parity` | `experiments/kuramoto/results/pilot/**` |
 | Kuramoto memory-sweep raw data | `python -m experiments.kuramoto.scripts.memory_sweep` | `experiments/kuramoto/results/memory_sweep_N1000.json`, `memory_sweep_cells_N1000/*.json` |
 | Sphere memory raw data | submodule memory-sweep scripts | `experiments/sphere_latent_sde/results/memory_sweep*.csv` |
-| RNA torus memory raw data | `python -m experiments.rna.scripts.run_rna_hlo_sweep` | `experiments/rna/results/rna_hlo_sweep.json`, `rna_benchmark_scaling*.json` |
+| Random torus memory raw data | `python -m experiments.torus.scripts.run_memory_sweep` | `experiments/torus/results/torus_memory_scaling.json` |

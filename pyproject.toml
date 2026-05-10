@@ -23,7 +23,7 @@ algebra = [
     "sympy>=1.13",
 ]
 
-# Shared base for modern JAX experiments (RNA, SO(3), Kuramoto, and JAX sphere)
+# Shared base for modern JAX experiments (torus, SO(3), Kuramoto, and JAX sphere)
 jax-base = [
     "jax[cuda12]>=0.10.0 ; platform_system=='Linux'",
     "jax>=0.10.0 ; platform_system!='Linux'",
@@ -64,12 +64,9 @@ stability-ode = [
     "ees-neural-sdes[algebra]",
 ]
 
-# RNA torus experiment
-rna = [
+# Generic random torus memory benchmark
+torus = [
     "ees-neural-sdes[jax-base]",
-    "biotite>=1.0",
-    "requests>=2.31",
-    "psutil>=5.9",
 ]
 
 # Kuramoto experiment on T T^N
@@ -111,7 +108,7 @@ ou = [
 ]
 
 all = [
-    "ees-neural-sdes[convergence-fbm,order-verification,stability-ode,rna,kuramoto,sphere,sphere-jax,stochastic-volatility,stiff-gbm,ou]",
+    "ees-neural-sdes[convergence-fbm,order-verification,stability-ode,torus,kuramoto,sphere,sphere-jax,stochastic-volatility,stiff-gbm,ou]",
 ]
 dev = [
     "pytest>=8",
