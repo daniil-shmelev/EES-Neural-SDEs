@@ -13,7 +13,7 @@ uv pip install -e .
 ## Run
 
 ```bash
-python experiments/stability/stability.py
+python stability/sde/stability.py
 ```
 
-The script writes `experiments/stability/results/stoch_stability.pdf`.
+The script writes `stability/sde/results/stoch_stability.pdf`.

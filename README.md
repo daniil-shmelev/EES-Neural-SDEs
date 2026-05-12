@@ -1,19 +1,19 @@
 # Explicit and Effectively Symmetric Schemes for Neural SDEs
 
-Code for the paper *"Explicit and Effectively Symmetric Schemes for Neural SDEs"*.
+Code for the paper *"Explicit and Effectively Symmetric Schemes for Neural SDEs on Lie Groups"*.
 
 This umbrella repository contains the implementations, scripts, committed
 result files, and submodules used to reproduce the paper figures and tables.
-Each experiment under `experiments/` has its own README with setup notes,
-command lines, and result-file provenance.
+Each experiment under `experiments/` has its own README with setup notes.
 
 ## Repository Layout
 
 ```text
 order_verification/             Symbolic MKW checks for CFEES order conditions
+stability/
+  ode/                          ODE stability domains for EES schemes and reversible solvers
+  sde/                          Mean-square SDE stability cross-sections
 experiments/
-  stability_ode/                ODE stability domains for EES(2,5) vs RK3/RK4
-  stability/                    Mean-square SDE stability cross-sections
   convergence_fbm/              Euclidean and SO(3) fBm/RDE convergence checks
   ou/                           Ornstein-Uhlenbeck latent SDE companion experiment
   stiff_gbm/                    Stiff GBM neural SDE experiment
@@ -40,8 +40,8 @@ Available extras:
 
 | Extra | What it pulls in | Area(s) |
 |---|---|---|
-| no extras | numpy, matplotlib, scipy, fbm | `stability/` |
-| `algebra` | kauri, sympy | `order_verification/`, `stability_ode/` |
+| no extras | numpy, matplotlib, scipy, fbm | `stability/sde/` |
+| `algebra` | kauri, sympy | `order_verification/`, `stability/ode/` |
 | `jax-base` | jax, equinox, optax, pinned diffrax build, georax, cyreal, seali | shared JAX base |
 | `lowstorage` | pinned diffrax and diffrax-lowstorage builds | shared EES(2,5)/EES(2,7) low-storage solvers |
 | `convergence-fbm` | `lowstorage` | Euclidean and SO(3) convergence scripts |
@@ -78,8 +78,8 @@ Use `PAPER_RESULTS.md` as the canonical paper-to-script map. Common entrypoints:
 
 ```bash
 # Stability and convergence
-python experiments/stability_ode/stability_regions.py
-python experiments/stability/stability.py
+python stability/ode/stability_regions.py
+python stability/sde/stability.py
 python experiments/convergence_fbm/convergence.py
 python -m experiments.convergence_fbm.scripts.so3_reversibility_verify
 python -m experiments.convergence_fbm.scripts.so3_reversibility_plot

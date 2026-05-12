@@ -4,17 +4,17 @@ This file maps the figures and tables in the published paper to the scripts and
 result files in this repository. It uses PDF-facing descriptions rather than
 source-only labels.
 
-Result files committed under `experiments/<name>/results/` back the numbers
-and visuals where listed. Some output PDFs are not committed by default; rerun
-the relevant script with `--output` to choose an export path.
+Result files committed under each script's `results/` directory back the
+numbers and visuals where listed. Some output PDFs are not committed by
+default; rerun the relevant script with `--output` to choose an export path.
 
 ## Figures
 
 | Paper item | Code path | Repo result(s) |
 |---|---|---|
 | Intro memory-scaling curve | `python -m experiments.torus.plots` | `experiments/torus/results/fig_scaling_compact_nogrid.pdf`, `torus_memory_scaling.json` |
-| EES(2,5) ODE stability domain | `python experiments/stability_ode/stability_regions.py` | `experiments/stability_ode/results/stability_regions_1.pdf` |
-| Mean-square SDE stability cross-sections | `python experiments/stability/stability.py` | `experiments/stability/results/stoch_stability.pdf` |
+| EES(2,5) and EES(2,7) ODE stability domains | `python stability/ode/stability_regions.py` | `stability/ode/results/stability_regions_1.pdf` |
+| Mean-square SDE stability cross-sections | `python stability/sde/stability.py` | `stability/sde/results/stoch_stability.pdf` |
 | OU/LSDE training loss | `python experiments/ou/OU.py`, `python experiments/ou/plot_OU.py` | rerun to regenerate `OU_mse.pdf` |
 | Kuramoto phase-circle trajectory | `python -m experiments.kuramoto.datasets.visualize` or the data-generation pipeline | `experiments/kuramoto/data/kuramoto_N2_seed0.gif` |
 | Kuramoto adjoint memory scaling | `python -m experiments.kuramoto.scripts.plot_memory_sweep` | `experiments/kuramoto/results/memory_sweep_N1000.json`; PDF generated to `experiments/kuramoto/results/fig_kuramoto_memory_scaling.pdf` by default |
