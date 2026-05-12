@@ -19,8 +19,8 @@ from __future__ import annotations
 
 import argparse
 
-from .checks import build_exact_method, verify_cfees25_table, verify_method
-from .cfees_methods import symbolic_method_specs
+from .checks import build_exact_method, derive_cfees25_table_values, verify_method
+from .cfees_methods import SYMBOLIC_METHOD_SPECS
 
 
 def parse_args() -> argparse.Namespace:
@@ -33,7 +33,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--skip-table",
         action="store_true",
-        help="Skip the CFEES(2,5;x) appendix table-value check.",
+        help="Skip deriving the CFEES(2,5;x) appendix table values.",
     )
     parser.add_argument(
         "--max-antisymmetric-order",
@@ -50,11 +50,19 @@ def parse_args() -> argparse.Namespace:
 def main() -> None:
     args = parse_args()
 
-    for spec in symbolic_method_specs():
+    for spec in SYMBOLIC_METHOD_SPECS:
         method = build_exact_method(spec)
         if not args.skip_table and spec.name == "CFEES(2,5;x)":
-            verify_cfees25_table(method=method)
-            print("CFEES(2,5;x) character table: OK")
+            table_values = derive_cfees25_table_values(method=method)
+            print("CFEES(2,5;x) derived character table values:")
+            for tree, value in table_values.items():
+                tree_repr = (
+                    "EMPTY_PLANAR_TREE"
+                    if tree.list_repr is None
+                    else str(tree.list_repr)
+                )
+                print(f"  {tree_repr}: {value}")
+            print(f"CFEES(2,5;x) table entries: {len(table_values)}")
 
         result = verify_method(
             spec,

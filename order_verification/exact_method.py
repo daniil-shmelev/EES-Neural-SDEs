@@ -26,10 +26,6 @@ from kauri.mkw.mkw import _as_basis_aware_map
 from kauri.trees import EMPTY_PLANAR_TREE
 
 
-def _b_plus_repr(tree_reprs: tuple) -> tuple:
-    return tree_reprs + (0,)
-
-
 class ExactReusedStageCFMethod(kauri.ReusedStageCFMethod):
     """Reused-stage CF method with tuple-based cached recursion."""
 
@@ -50,8 +46,8 @@ class ExactReusedStageCFMethod(kauri.ReusedStageCFMethod):
 
             total = zero
             for split in range(len(children) + 1):
-                left = _b_plus_repr(children[:split])
-                right = _b_plus_repr(children[split:])
+                left = children[:split] + (0,)
+                right = children[split:] + (0,)
                 total = total + (
                     g(row_index, exp_count - 1, left)
                     * exp_character(row_index, exp_count, right)
@@ -91,10 +87,10 @@ class ExactReusedStageCFMethod(kauri.ReusedStageCFMethod):
                 )
                 if not tree_reprs:
                     return one
-                return g(final_row, len(rows[final_row]), _b_plus_repr(tree_reprs))
+                return g(final_row, len(rows[final_row]), tree_reprs + (0,))
 
             if x == EMPTY_PLANAR_TREE:
                 return one
-            return g(final_row, len(rows[final_row]), _b_plus_repr((x.list_repr,)))
+            return g(final_row, len(rows[final_row]), (x.list_repr, 0))
 
         return _as_basis_aware_map(_char)

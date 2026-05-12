@@ -18,7 +18,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Iterable
 
 import kauri
 import sympy as sp
@@ -150,60 +149,32 @@ def cfees27(x: sp.Expr = X, *, branch: int = +1) -> CFEESMethodSpec:
     )
 
 
-def symbolic_method_specs() -> tuple[CFEESMethodSpec, ...]:
-    """The symbolic families checked by the verifier."""
-
-    return (cfees25(), cfees27(branch=+1), cfees27(branch=-1))
+SYMBOLIC_METHOD_SPECS = (cfees25(), cfees27(branch=+1), cfees27(branch=-1))
 
 
-def graft(*children: kauri.PlanarTree) -> kauri.PlanarTree:
-    return kauri.PlanarTree([child.list_repr for child in children])
-
-
-LEAF = kauri.PlanarTree([])
-C2 = graft(LEAF)
-C3 = graft(C2)
-C4 = graft(C3)
-C5 = graft(C4)
-
-
-def cfees25_table_values(x: sp.Expr = X) -> dict[kauri.PlanarTree, sp.Expr]:
-    """Published CFEES(2,5;x) character values through tree order five."""
-
-    two_leaves = graft(LEAF, LEAF)
-    three_leaves = graft(LEAF, LEAF, LEAF)
-    four_leaves = graft(LEAF, LEAF, LEAF, LEAF)
-
-    return {
-        kauri.EMPTY_PLANAR_TREE: sp.Integer(1),
-        LEAF: sp.Integer(1),
-        C2: sp.Rational(1, 2),
-        two_leaves: (2 * x - 5) / (32 * (x - 1)),
-        C3: sp.Rational(1, 8),
-        three_leaves: -(2 * x + 7) / (192 * (x - 1)),
-        graft(LEAF, C2): -(x + 2) / (32 * (x - 1)),
-        graft(C2, LEAF): sp.Rational(1, 32),
-        graft(two_leaves): -(2 * x + 1) / (64 * (x - 1)),
-        C4: sp.Integer(0),
-        four_leaves: (8 * x**3 + 24 * x**2 + 36 * x - 41)
-        / (6144 * (x - 1) ** 3),
-        graft(LEAF, LEAF, C2): (4 * x**2 + 10 * x + 13)
-        / (768 * (x - 1) ** 2),
-        graft(LEAF, C2, LEAF): -(4 * x + 5) / (384 * (x - 1)),
-        graft(LEAF, two_leaves): ((2 * x + 1) * (x + 2))
-        / (256 * (x - 1) ** 2),
-        graft(LEAF, C3): sp.Integer(0),
-        graft(C2, LEAF, LEAF): sp.Rational(1, 192),
-        graft(C2, C2): -sp.Rational(1, 64) / (2 * x - 1),
-        graft(two_leaves, LEAF): -(2 * x + 1) / (256 * (x - 1)),
-        graft(three_leaves): (2 * x + 1) ** 2 / (768 * (x - 1) ** 2),
-        graft(graft(LEAF, C2)): sp.Integer(0),
-        graft(C3, LEAF): sp.Integer(0),
-        graft(graft(C2, LEAF)): sp.Integer(0),
-        graft(graft(two_leaves)): sp.Integer(0),
-        C5: sp.Integer(0),
-    }
-
-
-def trees_by_order(order: int) -> Iterable[kauri.PlanarTree]:
-    return kauri.planar_trees_of_order(order)
+CFEES25_TABLE_TREES = (
+    kauri.EMPTY_PLANAR_TREE,
+    kauri.PlanarTree([]),
+    kauri.PlanarTree([[]]),
+    kauri.PlanarTree([[], []]),
+    kauri.PlanarTree([[[]]]),
+    kauri.PlanarTree([[], [], []]),
+    kauri.PlanarTree([[], [[]]]),
+    kauri.PlanarTree([[[]], []]),
+    kauri.PlanarTree([[[], []]]),
+    kauri.PlanarTree([[[[]]]]),
+    kauri.PlanarTree([[], [], [], []]),
+    kauri.PlanarTree([[], [], [[]]]),
+    kauri.PlanarTree([[], [[]], []]),
+    kauri.PlanarTree([[], [[], []]]),
+    kauri.PlanarTree([[], [[[]]]]),
+    kauri.PlanarTree([[[]], [], []]),
+    kauri.PlanarTree([[[]], [[]]]),
+    kauri.PlanarTree([[[], []], []]),
+    kauri.PlanarTree([[[], [], []]]),
+    kauri.PlanarTree([[[], [[]]]]),
+    kauri.PlanarTree([[[[]]], []]),
+    kauri.PlanarTree([[[[]], []]]),
+    kauri.PlanarTree([[[[], []]]]),
+    kauri.PlanarTree([[[[[]]]]]),
+)

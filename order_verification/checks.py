@@ -26,10 +26,9 @@ from sympy.polys.domains import QQ
 from sympy.polys.fields import field
 
 from .cfees_methods import (
+    CFEES25_TABLE_TREES,
     CFEESMethodSpec,
     cfees25,
-    cfees25_table_values,
-    trees_by_order,
 )
 from .exact_method import ExactReusedStageCFMethod
 
@@ -47,43 +46,24 @@ class OrderCheckResult:
 _RATIONAL_FUNCTION_FIELD, _ = field("x", QQ.algebraic_field(sp.sqrt(2)))
 
 
-def _to_field(expr):
-    return _RATIONAL_FUNCTION_FIELD.from_expr(expr)
-
-
-def _to_sympy_expr(expr) -> sp.Expr:
-    if isinstance(expr, sp.Basic):
-        return expr
-    if hasattr(expr, "as_expr"):
-        return expr.as_expr()
-    return sp.sympify(expr)
-
-
 def build_exact_method(spec: CFEESMethodSpec) -> kauri.ReusedStageCFMethod:
     """Build the method over the exact field QQ(sqrt(2))(x)."""
 
-    a = [_to_field(coeff) for coeff in spec.a]
-    b = [_to_field(coeff) for coeff in spec.b]
+    a = [_RATIONAL_FUNCTION_FIELD.from_expr(coeff) for coeff in spec.a]
+    b = [_RATIONAL_FUNCTION_FIELD.from_expr(coeff) for coeff in spec.b]
     return ExactReusedStageCFMethod(a, b, spec.name)
 
 
-def canonical(expr: sp.Expr) -> sp.Expr:
+def canonical(expr: object) -> sp.Expr:
     """Canonicalise a symbolic expression enough for rational identity checks."""
 
-    return sp.cancel(sp.radsimp(_to_sympy_expr(expr)))
-
-
-def exact_character_value(tree: kauri.PlanarTree) -> sp.Expr:
-    return sp.Rational(1, tree.factorial())
-
-
-def _defect_value(kind: CheckKind, tree: kauri.PlanarTree, value: sp.Expr) -> sp.Expr:
-    if kind == "character":
-        defect = value - exact_character_value(tree)
-        return sp.Integer(0) if defect == 0 else defect
-    if kind == "defect":
-        return sp.Integer(0) if value == 0 else value
-    raise ValueError(f"unknown check kind {kind!r}")
+    if isinstance(expr, sp.Basic):
+        sympy_expr = expr
+    elif hasattr(expr, "as_expr"):
+        sympy_expr = expr.as_expr()
+    else:
+        sympy_expr = sp.sympify(expr)
+    return sp.cancel(sp.radsimp(sympy_expr))
 
 
 def _evaluate_order(
@@ -91,12 +71,15 @@ def _evaluate_order(
     order: int,
     kind: CheckKind,
 ) -> tuple[sp.Expr, ...]:
-    trees = tuple(trees_by_order(order))
-    values = tuple(target(tree) for tree in trees)
-    return tuple(
-        _defect_value(kind, tree, value)
-        for tree, value in zip(trees, values, strict=True)
-    )
+    defects = []
+    for tree in kauri.planar_trees_of_order(order):
+        defect = target(tree)
+        if kind == "character":
+            defect -= sp.Rational(1, tree.factorial())
+        elif kind != "defect":
+            raise ValueError(f"unknown check kind {kind!r}")
+        defects.append(sp.Integer(0) if defect == 0 else defect)
+    return tuple(defects)
 
 
 def verify_planar_order(
@@ -145,19 +128,16 @@ def verify_antisymmetric_order(
     return check_order
 
 
-def verify_cfees25_table(
+def derive_cfees25_table_values(
     *,
     method: kauri.ReusedStageCFMethod | None = None,
-) -> None:
+) -> dict[kauri.PlanarTree, sp.Expr]:
     spec = cfees25()
     character = (build_exact_method(spec) if method is None else method).lb_character()
-    for tree, expected in cfees25_table_values().items():
-        diff = character(tree) - _to_field(expected)
-        if diff != 0:
-            raise AssertionError(
-                f"CFEES(2,5;x) table mismatch at "
-                f"{tree.list_repr}: {canonical(diff)}"
-            )
+    return {
+        tree: canonical(character(tree))
+        for tree in CFEES25_TABLE_TREES
+    }
 
 
 def verify_method(

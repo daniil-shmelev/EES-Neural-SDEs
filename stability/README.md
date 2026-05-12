@@ -10,7 +10,7 @@ Euler, and Reversible Heun on the scalar linear ODE test problem.
 
 ```bash
 uv pip install -e ".[stability-ode]"
-python stability/stability_regions.py
+python stability/ode.py
 ```
 
 The script writes `stability/results/stability_regions_1.pdf`.
@@ -23,7 +23,7 @@ domains for RK3, RK4, and EES(2,5) on the linear SDE test equation
 
 ```bash
 uv pip install -e .
-python stability/stability.py
+python stability/sde.py
 ```
 
 The script writes `stability/results/stoch_stability.pdf`.
