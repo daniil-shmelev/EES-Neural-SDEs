@@ -1,0 +1,18 @@
+{
+  "N": 1000,
+  "solver": "cg2",
+  "adjoint": "checkpoint_recursive",
+  "n_steps": 1000,
+  "batch_size": 64,
+  "hidden_dim": 128,
+  "T": 5.0,
+  "seed": 0,
+  "oom": false,
+  "error": null,
+  "wall_clock_s_mean": 20.144419594333158,
+  "wall_clock_s_std": 0.046499634582943795,
+  "peak_bytes": 695126784,
+  "n_params": 1204792,
+  "bytes_in_use": 11329536,
+  "bytes_limit": 7297433804
+}

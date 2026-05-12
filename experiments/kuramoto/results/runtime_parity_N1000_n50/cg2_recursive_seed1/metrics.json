@@ -1,0 +1,20 @@
+{
+  "train_walltime_s": 3996.9317796230316,
+  "best_val_loss": 373.25530700683595,
+  "final_train_loss": 365.9098364788553,
+  "final_val_loss": 374.13316040039064,
+  "final_test_loss": 369.7208282470703,
+  "final_test_theta_mae_mean": 0.34196609258651733,
+  "final_test_omega_mae_mean": 0.18857525289058685,
+  "config": {
+    "N": 1000,
+    "model": "kuramoto_nsde",
+    "solver": "cg2",
+    "adjoint": "checkpoint_recursive",
+    "n_steps": 75,
+    "epochs": 15,
+    "batch_size": 32,
+    "seed": 1,
+    "learning_rate": 0.001
+  }
+}

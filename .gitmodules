@@ -1,0 +1,6 @@
+[submodule "experiments/sphere_latent_sde"]
+	path = experiments/sphere_latent_sde
+	url = https://github.com/daniil-shmelev/EES-LatentSDEonHS.git
+[submodule "experiments/ees_dynamical_fitting"]
+	path = experiments/ees_dynamical_fitting
+	url = https://github.com/luke-a-thompson/ees-dynamical-fitting.git

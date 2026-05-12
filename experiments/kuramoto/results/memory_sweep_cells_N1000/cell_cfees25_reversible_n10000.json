@@ -1,0 +1,18 @@
+{
+  "N": 1000,
+  "solver": "cfees25",
+  "adjoint": "reversible",
+  "n_steps": 10000,
+  "batch_size": 64,
+  "hidden_dim": 128,
+  "T": 5.0,
+  "seed": 0,
+  "oom": false,
+  "error": null,
+  "wall_clock_s_mean": 137.75638210633346,
+  "wall_clock_s_std": 0.6764977945775564,
+  "peak_bytes": 368618240,
+  "n_params": 1204792,
+  "bytes_in_use": 11328768,
+  "bytes_limit": 7297433804
+}

@@ -1,0 +1,9 @@
+{
+  "summary_sha256": "1f43bd6372b74ac23d8286793069670322a7783db05f839ffa49d70bd0d0055c",
+  "ref_model_sha256": "945a122c7a7869d62d95949b2cbddbb8bb1b05099cffeb64aaa33e5f8a4dc11b",
+  "eval_inputs_sha256": "cb32fb9ee7dd2fc38246be28ab052be3b7a22d0f40c97f425927bc3c8407661d",
+  "torch_version": "2.11.0+cu130",
+  "torchsde_version": "0.2.6",
+  "n_cells": 80,
+  "device": "cuda"
+}

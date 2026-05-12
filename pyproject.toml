@@ -1,0 +1,127 @@
+[project]
+name = "ees-neural-sdes"
+version = "0.1.0"
+description = "Code for 'Explicit and Effectively Symmetric Schemes for Neural SDEs' (NeurIPS 2026)"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.13"
+
+# Core (numpy/matplotlib): enough to run stability/stability.py. JAX/Torch
+# experiments and low-storage solver checks install via extras below.
+dependencies = [
+    "numpy>=1.26",
+    "matplotlib>=3.8",
+    "scipy>=1.11",
+    "fbm>=0.3.0",
+]
+
+[project.optional-dependencies]
+
+# Symbolic Butcher / Hopf-algebra verification
+algebra = [
+    "kauri @ git+https://github.com/daniil-shmelev/kauri.git@c76ca984b81040027372c931820bf03b2f524896",
+    "sympy>=1.13",
+]
+
+# Shared base for modern JAX experiments (torus, SO(3), Kuramoto, and JAX sphere)
+jax-base = [
+    "jax[cuda12]>=0.10.0 ; platform_system=='Linux'",
+    "jax>=0.10.0 ; platform_system!='Linux'",
+    "equinox>=0.13.6",
+    "optax>=0.2.0",
+    "jaxtyping>=0.2.36",
+    # Pinned diffrax build used by the JAX experiments in this paper.
+    "diffrax @ git+https://github.com/sammccallum/diffrax.git@aeb1335b5a6278e85a270231e0f97b8db4453ae6",
+    "georax @ git+https://github.com/luke-a-thompson/georax.git@30ecbb9bb45806e0bf6ecf24bcf6da1de9173aea",
+    "cyreal @ git+https://github.com/luke-a-thompson/cyreal_dynamics.git@88f02657989fc4f9c85df0afb1452085fc3f2f8b",
+    "seali>=0.2.0",
+]
+
+# Low-storage EES solvers shared by Euclidean fBm and stochastic-volatility experiments.
+lowstorage = [
+    "diffrax @ git+https://github.com/sammccallum/diffrax.git@aeb1335b5a6278e85a270231e0f97b8db4453ae6",
+    "diffrax-lowstorage @ git+https://github.com/luke-a-thompson/diffrax-lowstorage.git@6bca580732583a492742bc39dc4b65072c8427bf",
+]
+
+# Stochastic-volatility experiment - adds diffrax-lowstorage on top of jax-base.
+stochastic-volatility = [
+    "ees-neural-sdes[jax-base]",
+    "ees-neural-sdes[lowstorage]",
+]
+
+# Numerical fBm convergence checks use low-storage EES tableaux and NumPy/SciPy.
+convergence-fbm = [
+    "ees-neural-sdes[lowstorage]",
+]
+
+# Symbolic Lie-Butcher / MKW order-condition verification (sympy + kauri)
+order-verification = [
+    "ees-neural-sdes[algebra]",
+]
+
+# ODE stability-region figure - uses kauri for tableaux
+stability-ode = [
+    "ees-neural-sdes[algebra]",
+]
+
+# Torus memory benchmark
+torus = [
+    "ees-neural-sdes[jax-base]",
+]
+
+# Kuramoto experiment on T^N x R^N
+kuramoto = [
+    "ees-neural-sdes[jax-base]",
+]
+
+# JAX/georax reimplementation of the sphere latent SDE experiment
+sphere-jax = [
+    "ees-neural-sdes[jax-base]",
+]
+
+# Sphere latent SDE - Zeng et al. 2023 PyTorch baseline + CFEES integrator
+sphere = [
+    "torch>=2.4",
+    "torchdiffeq>=0.2.5",
+    "scikit-learn>=1.4",
+    "tqdm>=4.66",
+    "pandas>=2.2",
+]
+
+# Shared torchsde base with EES25/EES27 and MCF reversible solvers
+torchsde = [
+    "torch>=2.0",
+    "torchsde @ git+https://github.com/daniil-shmelev/torchsde.git@a0b71269538197f15b11792400fb77e26737211d",
+    "torchcde>=0.2.5",
+]
+
+# Stiff GBM neural SDE - torchsde-based options-pricing experiment
+stiff-gbm = [
+    "ees-neural-sdes[torchsde]",
+    "scipy>=1.11",
+]
+
+# OU latent SDE - torchsde-based companion
+ou = [
+    "ees-neural-sdes[torchsde]",
+    "scipy>=1.11",
+]
+
+all = [
+    "ees-neural-sdes[convergence-fbm,order-verification,stability-ode,torus,kuramoto,sphere,sphere-jax,stochastic-volatility,stiff-gbm,ou]",
+]
+dev = [
+    "pytest>=8",
+    "ruff>=0.6",
+    "pyright>=1.1.380",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["experiments", "order_verification"]
+
+[tool.hatch.metadata]
+allow-direct-references = true

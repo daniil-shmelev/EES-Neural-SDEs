@@ -1,0 +1,34 @@
+# Default config for the Kuramoto NSDE experiment.
+# Single-network ($N$=2) sanity-training preset for the dev box; M5 will
+# override `N`, `solver`, `adjoint`, `n_steps`, etc. per cell of the sweep.
+
+epochs = 30
+batch_size = 64
+learning_rate = 1e-3
+seed = 0
+device = "gpu"
+dtype = "float32"
+
+model = "kuramoto_nsde"
+hidden_dim = 128
+drift_depth = 3
+diffusion_depth = 2
+activation = "silu"
+diffusion_scale = 0.1
+couple_theta_omega = false
+drift_kind = "mean_field"  # "mean_field" (default, O(N)), "equivariant" (DeepSets, O(N^2)), or "mlp" (legacy)
+
+solver = "cfees25"
+n_steps = 200
+adjoint = "auto"
+
+N = 2
+data_seed = 0
+data_dir = "experiments/kuramoto/data/"
+
+loss_horizons = [0.125, 0.25, 0.5, 1.0]
+loss_n_samples = 4
+grad_clip_norm = 1.0
+
+save_every_epoch = true
+skip_plots = false

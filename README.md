@@ -1,48 +1,91 @@
-# Explicit and Effectively Symmetric Schemes for Neural SDEs
+# Explicit and Effectively Symmetric Schemes for Neural SDEs on Lie Groups
 
-This repository contains code supporting the paper "Explicit and Effectively Symmetric Schemes for Neural SDEs".
-We implement and test Explicit and Effectively Symmetric (EES) Runge-Kutta schemes for SDEs.
+Code for the paper *"Explicit and Effectively Symmetric Schemes for Neural SDEs on Lie Groups"*.
 
-## Implementations of EES Schemes
+This umbrella repository contains the implementations, scripts, committed
+result files, and submodules used to reproduce the paper figures and tables.
+Each experiment under `experiments/` has its own README with setup notes.
 
-The following repositories contain implementations of EES schemes. 
-To run the code in the `examples` directory, please
-pip install `diffrax` and/or `torchsde` directly from the forks below.
+## Repository Layout
 
-### Diffrax
-
-A fork of the `diffrax` repository supporting EES schemes is available at:
-
+```text
+order_verification/             Symbolic MKW checks for CFEES order conditions
+stability/
+  ode.py                        ODE stability domains for EES schemes and reversible solvers
+  sde.py                        Mean-square SDE stability cross-sections
+experiments/
+  convergence_fbm/              Euclidean and SO(3) fBm/RDE convergence checks
+  ou/                           Ornstein-Uhlenbeck latent SDE experiment
+  stiff_gbm/                    Stiff GBM neural SDE experiment
+  stochastic_volatility/        Stochastic-volatility benchmark
+  kuramoto/                     Stochastic Kuramoto neural SDE on T^N x R^N
+  torus/                        Torus neural SDE memory benchmark
+  sphere_latent_nsde/           JAX/georax HumanActivity sphere latent NSDE
+  sphere_latent_sde/            Submodule: PyTorch HumanActivity sphere latent SDE
+  ees_dynamical_fitting/        Submodule: molecular-dynamics fitting benchmark
+  plotting.py                   Shared Matplotlib styling for paper figures
+PAPER_RESULTS.md                Paper figure/table to code cross-reference
 ```
-https://github.com/daniil-shmelev/diffrax
+
+## Install
+
+We recommend [`uv`](https://docs.astral.sh/uv/) and Python 3.13. Python 3.13
+is required by the pinned JAX/Diffrax/georax solver stack.
+
+```bash
+uv pip install -e ".[dev]"
 ```
 
-### torchsde
+## External Libraries
 
-A fork of the `torchsde` repository implementing EES schemes as Stratonovich SDE solvers
-is available at:
+Pinned direct references are declared in `pyproject.toml`.
 
-```
-https://github.com/daniil-shmelev/torchsde
-```
+| Library | Source | Pinned at |
+|---|---|---|
+| `diffrax` | `github.com/sammccallum/diffrax` | `aeb1335b` |
+| `diffrax-lowstorage` | `github.com/luke-a-thompson/diffrax-lowstorage` | `6bca5807` |
+| `georax` | `github.com/luke-a-thompson/georax` | `30ecbb9b` |
+| `cyreal` | `github.com/luke-a-thompson/cyreal_dynamics` | `88f02657` |
+| `kauri` | `github.com/daniil-shmelev/kauri` | `c76ca984` |
+| `torchsde` | `github.com/daniil-shmelev/torchsde` (`mcf` branch) | `a0b71269` |
 
-## Experiments
+## Datasets
 
-This repository contains code reproducing the following experiments:
+- Sphere latent SDE/NSDE: the HumanActivity experiments use the UCI
+  `ConfLongDemo_JSI.txt` file. Both the PyTorch baseline and the JAX/georax
+  reimplementation default to
+  `experiments/sphere_latent_sde/data_dir/PersonActivity/`, which is ignored by
+  git. Download and preprocess it from the UCI Machine Learning Repository with:
 
-- `stability.py` plots cross-sections of the mean-square stability domains for RK3, RK4 and EES(2,5)
-applied to SDEs.
-- `convergence.py` reproduces an example from the paper "Runge-Kutta methods for rough differential equations" (Redmann & Riedel, 2020)
-concerning convergence rates of RDE schemes. We apply this example to test the convergence rates of EES(2,5). In addition
-to the discretisation error, we evaluate the error in recovering the initial condition y_0.
-- The directory `examples` contains two examples of Neural SDEs trained using Reversible Heun and EES(2,5).
+  ```bash
+  cd experiments/sphere_latent_sde
+  python -c "from data.activity_provider import HumanActivityProvider; HumanActivityProvider('data_dir', download=True)"
+  ```
+
+  The JAX NSDE loader can also read the raw file directly from
+  `experiments/sphere_latent_sde/data_dir/PersonActivity/raw/`; the raw URL is
+  `https://archive.ics.uci.edu/ml/machine-learning-databases/00196/ConfLongDemo_JSI.txt`.
+- The PyTorch sphere baseline also has download helpers for Rotating MNIST and
+  PhysioNet 2012, and local generators for pendulum and irregular-sine data.
+  See `experiments/sphere_latent_sde/README.md`.
+- Stochastic volatility: training expects seven `.npz` files under
+  `experiments/stochastic_volatility/data/`. They are not committed here and
+  must contain `driver` and `solution` arrays; see
+  `experiments/stochastic_volatility/README.md` for the required filenames.
+- Kuramoto data is generated locally by
+  `python -m experiments.kuramoto.scripts.run_m1`. The small `N=2` smoke
+  dataset is committed; larger sweeps are regenerated locally or on a GPU
+  machine.
+- Torus, OU, stiff GBM, stability, and convergence data are synthetic or
+  generated by their scripts.
+- The molecular-dynamics fitting submodule ships its benchmark assets in
+  `experiments/ees_dynamical_fitting/IR-fitting/`, including `water64.pdb` and
+  `params_eann4.pickle`.
 
 ## Citation
-```bibtex    
-@article{shmelev2025neural,
-  title={Explicit and Effectively Symmetric Schemes for Neural SDEs},
-  author={Shmelev, Daniil and Salvi, Cristopher},
-  journal={arXiv preprint arXiv:2509.20599},
-  year={2025}
-}
-```
+
+Anonymised.
+
+## License
+
+Apache-2.0; see [LICENSE](LICENSE).

@@ -1,0 +1,16 @@
+{
+  "N": 1000,
+  "solver": "cg2",
+  "adjoint": "checkpoint_full",
+  "n_steps": 10000,
+  "batch_size": 64,
+  "hidden_dim": 128,
+  "T": 5.0,
+  "seed": 0,
+  "oom": true,
+  "error": "jax.errors.JaxRuntimeError: RESOURCE_EXHAUSTED: Out of memory while trying to allocate 9.61GiB.",
+  "wall_clock_s_mean": null,
+  "wall_clock_s_std": null,
+  "peak_bytes": null,
+  "n_params": 1204792
+}
