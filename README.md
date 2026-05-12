@@ -1,4 +1,4 @@
-# Explicit and Effectively Symmetric Schemes for Neural SDEs
+# Explicit and Effectively Symmetric Schemes for Neural SDEs on Lie Groups
 
 Code for the paper *"Explicit and Effectively Symmetric Schemes for Neural SDEs on Lie Groups"*.
 
@@ -11,8 +11,8 @@ Each experiment under `experiments/` has its own README with setup notes.
 ```text
 order_verification/             Symbolic MKW checks for CFEES order conditions
 stability/
-  ode/                          ODE stability domains for EES schemes and reversible solvers
-  sde/                          Mean-square SDE stability cross-sections
+  stability_regions.py          ODE stability domains for EES schemes and reversible solvers
+  stability.py                  Mean-square SDE stability cross-sections
 experiments/
   convergence_fbm/              Euclidean and SO(3) fBm/RDE convergence checks
   ou/                           Ornstein-Uhlenbeck latent SDE companion experiment
@@ -40,8 +40,8 @@ Available extras:
 
 | Extra | What it pulls in | Area(s) |
 |---|---|---|
-| no extras | numpy, matplotlib, scipy, fbm | `stability/sde/` |
-| `algebra` | kauri, sympy | `order_verification/`, `stability/ode/` |
+| no extras | numpy, matplotlib, scipy, fbm | `stability/stability.py` |
+| `algebra` | kauri, sympy | `order_verification/`, `stability/stability_regions.py` |
 | `jax-base` | jax, equinox, optax, pinned diffrax build, georax, cyreal, seali | shared JAX base |
 | `lowstorage` | pinned diffrax and diffrax-lowstorage builds | shared EES(2,5)/EES(2,7) low-storage solvers |
 | `convergence-fbm` | `lowstorage` | Euclidean and SO(3) convergence scripts |
@@ -78,8 +78,8 @@ Use `PAPER_RESULTS.md` as the canonical paper-to-script map. Common entrypoints:
 
 ```bash
 # Stability and convergence
-python stability/ode/stability_regions.py
-python stability/sde/stability.py
+python stability/stability_regions.py
+python stability/stability.py
 python experiments/convergence_fbm/convergence.py
 python -m experiments.convergence_fbm.scripts.so3_reversibility_verify
 python -m experiments.convergence_fbm.scripts.so3_reversibility_plot

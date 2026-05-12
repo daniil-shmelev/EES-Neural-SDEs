@@ -6,7 +6,7 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.13"
 
-# Core (numpy/matplotlib): enough to run stability/sde. JAX/Torch
+# Core (numpy/matplotlib): enough to run stability/stability.py. JAX/Torch
 # experiments and low-storage solver checks install via extras below.
 dependencies = [
     "numpy>=1.26",
