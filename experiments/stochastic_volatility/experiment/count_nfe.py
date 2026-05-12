@@ -103,7 +103,7 @@ def _count_solver(solver: Solvers, *, nfe_budget: int, mode: Mode) -> dict[str, 
     with warnings.catch_warnings():
         warnings.filterwarnings(
             "ignore",
-            message=r".*is not marked as converging to either the Itô or the Stratonovich solution\.",
+            message=r".*is not marked as converging to either the It\u00f4 or the Stratonovich solution\.",
         )
         out = _run_once(model, mode)
     jax.block_until_ready(out)

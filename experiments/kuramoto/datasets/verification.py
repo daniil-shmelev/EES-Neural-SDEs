@@ -82,7 +82,7 @@ def two_oscillator_phase_lock_study(
         }
         print(
             f"[verify] n_fine={n_fine:>6d} dt={T/n_fine:.3e} "
-            f"|Δθ|={abs(delta_wrapped):.5f} target={target:.5f} "
+            f"|delta_theta|={abs(delta_wrapped):.5f} target={target:.5f} "
             f"rel_err={rel_err:.3e}",
             flush=True,
         )
@@ -160,7 +160,7 @@ def run_verification(
     stat = stationarity_study(params, cfg_stat, n_traj_stationarity, omega_scale, k_stat)
     print(
         f"[verify] stationarity study took {time.perf_counter() - t0:.1f}s; "
-        f"r_stat={stat['r_stationary_mean']:.3f} ± {stat['r_stationary_std']:.3f}"
+        f"r_stat={stat['r_stationary_mean']:.3f} +/- {stat['r_stationary_std']:.3f}"
     )
 
     summary = {

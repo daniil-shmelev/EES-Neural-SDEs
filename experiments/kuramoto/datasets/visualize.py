@@ -3,7 +3,7 @@ r"""Render a Kuramoto trajectory as an animated GIF.
 Standard visualisation: $N$ phase oscillators as dots on the unit circle
 $e^{i\theta_j}$ together with the complex order-parameter arrow
 $re^{i\Psi} = \frac{1}{N}\sum_j e^{i\theta_j}$. The arrow length $r \in
-[0, 1]$ is the synchronisation coherence — $r \approx 0$ in the
+[0, 1]$ is the synchronisation coherence; $r \approx 0$ in the
 incoherent regime, $r \approx 1$ at full synchrony.
 
 Used by `scripts/run_m1.py` to produce a sanity-check animation of one

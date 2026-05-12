@@ -106,7 +106,7 @@ class MeanFieldDriftField(eqx.Module):
 
     Concretely, the moments are
     $(\overline{\sin\theta},\overline{\cos\theta},\overline{\sin 2\theta},
-    \overline{\cos 2\theta},\overline{\omega},\overline{\omega^2})$ —
+    \overline{\cos 2\theta},\overline{\omega},\overline{\omega^2})$,
     sufficient to express Kuramoto's natural drift exactly (the
     $(K/N)\sum_j \sin(\theta_j-\theta_i)$ coupling decomposes as
     $\overline{\sin\theta}\cos\theta_i - \overline{\cos\theta}\sin\theta_i$)
@@ -114,11 +114,11 @@ class MeanFieldDriftField(eqx.Module):
 
     Permutation-equivariance: parameter count is $O(1)$ in $N$, and
     permuting the oscillator indices in the input permutes the output
-    identically. Memory and compute are $O(N)$ — viable at $N=1000$ on a
+    identically. Memory and compute are $O(N)$, viable at $N=1000$ on a
     consumer GPU.
 
     The last layer of $\rho$ is zero-initialised so the drift starts at
-    zero — matching :class:`KuramotoDriftField`'s init pattern.
+    zero, matching :class:`KuramotoDriftField`'s init pattern.
     """
 
     rho_node: eqx.nn.MLP
@@ -181,7 +181,7 @@ class MeanFieldDriftField(eqx.Module):
         )  # (N, 3 + n_moments)
         out = jax.vmap(self.rho_node)(node_in)  # (N, 2)
         # Soft-bound the drift output. ``drift_bound`` is chosen large
-        # enough that natural Kuramoto magnitudes (O(1)–O(10)) sit in
+        # enough that natural Kuramoto magnitudes (O(1)-O(10)) sit in
         # tanh's near-linear regime, but unbounded MLP excursions during
         # training cannot send the integrator to NaN. Without this
         # bound the smoke test trains for ~270 steps and then locks into
@@ -203,14 +203,14 @@ class IndexedMeanFieldDriftField(eqx.Module):
     the cached dataset: the simulator pins the natural frequency
     $\Omega_i$ as a deterministic function of the oscillator index $i$
     (generators $i < N/2$ have $\Omega_i = +P$, consumers
-    $i \ge N/2$ have $\Omega_i = -P$ — see
+    $i \ge N/2$ have $\Omega_i = -P$; see
     `experiments/kuramoto/datasets/kuramoto.py:bimodal`). The
     collective $\sin(\theta_j-\theta_i)$ coupling is still captured via
     the $O(N)$ moments aggregator; only the per-oscillator $\Omega_i$
     bias term needs the index.
 
     Param count is $N \cdot e + \rho$-MLP, scaling linearly in $N$ but
-    with a much smaller constant than the legacy 3N→2N MLP (which
+    with a much smaller constant than the legacy 3N->2N MLP (which
     scales as $\sim N \cdot h$).
     """
 
@@ -308,7 +308,7 @@ class EquivariantDriftField(eqx.Module):
     oscillator indices in the input permutes the output identically.
 
     The last layer of $\rho$ is zero-initialised so the drift starts at
-    zero — matching :class:`KuramotoDriftField`'s init pattern.
+    zero, matching :class:`KuramotoDriftField`'s init pattern.
     """
 
     phi_pair: eqx.nn.MLP
@@ -364,7 +364,7 @@ class EquivariantDriftField(eqx.Module):
         # wrapped in ``jax.checkpoint`` so reverse-mode AD does not have
         # to store all $N$ carries (a stored carry per iter is also
         # $O(N\,h)$, so the unmitigated scan would need $O(N^2 h)$ for
-        # backward — same OOM cliff in disguise). Cost: ~2× drift FLOPs.
+        # backward, same OOM cliff in disguise). Cost: about 2x drift FLOPs.
         phi = self.phi_pair
         hidden_dim = phi.layers[-1].out_features
 
@@ -407,7 +407,7 @@ class KuramotoDiffusionField(eqx.Module):
     Output: a $2N \times N$ matrix $G(t, y)$ such that the SDE increment
     is $G\,dW$ with $W \in \mathbb{R}^N$ Brownian. By default the noise
     only acts on $\omega$ (lower $N \times N$ block); the upper block is
-    zero — matching the structure of the data-generating SDE
+    zero, matching the structure of the data-generating SDE
     (Filatrella et al. 2008 / Olmi & Torcini 2024).
     """
 

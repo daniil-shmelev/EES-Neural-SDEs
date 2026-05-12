@@ -49,7 +49,7 @@ def test_order_parameter_synced_unity():
 
 
 def test_order_parameter_uniform_zero():
-    """Equally-spaced phases on the circle give r ≈ 0."""
+    """Equally-spaced phases on the circle give r approximately 0."""
     theta = jnp.linspace(0.0, 2.0 * jnp.pi, 6, endpoint=False)
     r, _ = order_parameter(theta)
     assert float(r) < 1e-6

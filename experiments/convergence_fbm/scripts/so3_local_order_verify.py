@@ -97,7 +97,7 @@ def main():
                           # round-off is starting
         if len(tail) >= 3:
             hh, ee = zip(*tail)
-            slope, intercept = np.polyfit(np.log(hh), np.log(ee), 1)
+            slope, _ = np.polyfit(np.log(hh), np.log(ee), 1)
             print(f"  fitted slope (asymptotic tail) = {slope:.4f}  (expect 6)")
         print()
 

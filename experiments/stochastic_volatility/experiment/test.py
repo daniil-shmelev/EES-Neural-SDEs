@@ -5,7 +5,6 @@ from diffrax import (
     Dopri5,
     MultiTerm,
     ODETerm,
-    ReversibleHeun,
     SaveAt,
     VirtualBrownianTree,
     diffeqsolve,

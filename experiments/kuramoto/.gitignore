@@ -1,7 +1,7 @@
 # Regenerable simulator data (multi-GB; regen via scripts/run_m1.py)
 data/*.npz
 
-# Model checkpoints — regenerable by re-training
+# Model checkpoints - regenerable by re-training
 results/**/model_*.eqx
 results/**/opt_state_*.eqx
 

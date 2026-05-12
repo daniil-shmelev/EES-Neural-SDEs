@@ -9,7 +9,7 @@ Three sub-stages, each gated by the previous:
 
   2. **Three-adjoint training parity** (expensive): same model, RNG seed,
      data; vary only the adjoint. Train 5 epochs at the production
-     `n_steps`. Report final test loss for each adjoint × seed combo.
+     `n_steps`. Report final test loss for each adjoint x seed combo.
      Pass criterion: 95% CI on test loss overlaps between Reversible and
      full-checkpoint.
 
@@ -127,7 +127,7 @@ def relative_l2(a: np.ndarray, b: np.ndarray) -> float:
 
 
 def stage_gradient_fidelity(args, ref_grad: np.ndarray, n_steps: int) -> dict:
-    """M3.1 / M3.3 — single-batch gradient comparison vs the reference."""
+    """M3.1 / M3.3 - single-batch gradient comparison vs the reference."""
     print(f"\n[pilot] === gradient fidelity, n_steps={n_steps}, dtype={args.dtype} ===")
     out = {"n_steps": n_steps, "dtype": args.dtype, "results": {}}
     for adj in ADJOINTS:
@@ -144,7 +144,7 @@ def stage_gradient_fidelity(args, ref_grad: np.ndarray, n_steps: int) -> dict:
 
 
 def stage_training_parity(args) -> dict:
-    """M3.2 — short training run per (adjoint, seed), report final test loss."""
+    """M3.2 - short training run per (adjoint, seed), report final test loss."""
     print(f"\n[pilot] === 3-adjoint training parity (epochs={args.epochs}) ===")
     from experiments.kuramoto.experiment.train_kuramoto import fit
     from experiments.kuramoto.experiment.losses import make_eval_metrics

@@ -3,7 +3,7 @@ r"""Euclidean-embedding NSDE baseline for the Kuramoto experiment.
 State $(\sin\theta, \cos\theta, \omega) \in \mathbb{R}^{3N}$ (embedded
 on a non-Lie-group flat manifold). Drift and diffusion are MLPs over
 the same input features as `KuramotoNSDE`. Integration is via standard
-diffrax `Heun` + `DirectAdjoint` (or any specified adjoint) — no
+diffrax `Heun` + `DirectAdjoint` (or any specified adjoint), with no
 Lie-group machinery.
 
 Predictions are projected back to the torus via
@@ -31,12 +31,6 @@ from diffrax import (
 )
 
 from experiments.kuramoto.models.kuramoto_nsde import resolve_activation
-
-
-def _state_to_features(y: jax.Array, N: int) -> jax.Array:
-    """y has shape (3N,) = (sin theta, cos theta, omega). Pass through."""
-    del N
-    return y
 
 
 def _features_to_theta(y: jax.Array, N: int) -> jax.Array:

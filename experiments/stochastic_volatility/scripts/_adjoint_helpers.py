@@ -3,15 +3,15 @@
 The existing ``SimpleNeuralSDE.__call__`` (in ``models.nsde``) hard-codes
 ``adjoint = ReversibleAdjoint()``. Rather than mutate that production model,
 we wrap it in :class:`AdjointNeuralSDE` (an ``eqx.Module`` composition) that
-selects the adjoint at construction time — so the Adam updates still flow
+selects the adjoint at construction time, so the Adam updates still flow
 through the inner ``SimpleNeuralSDE`` parameters, but the
 ``diffrax.diffeqsolve`` call uses the adjoint we ask for.
 
 Two adjoints are exposed:
 
-- ``"reversible"`` — ``diffrax.ReversibleAdjoint()`` (O(1) memory; the
+- ``"reversible"`` - ``diffrax.ReversibleAdjoint()`` (O(1) memory; the
   paper's headline path).
-- ``"autograd"`` — ``diffrax.RecursiveCheckpointAdjoint()`` (the universal
+- ``"autograd"`` - ``diffrax.RecursiveCheckpointAdjoint()`` (the universal
   discretise-then-optimise adjoint; serves as the autograd reference for
   the gradient-error comparison).
 """
@@ -120,7 +120,8 @@ class AdjointNeuralSDE(eqx.Module):
     """Composition of ``SimpleNeuralSDE`` plus a fixed adjoint choice.
 
     Forwarding ``__call__`` lets this work as a drop-in replacement wherever
-    ``SimpleNeuralSDE`` is used (e.g.\ ``make_sample_fn``'s ``jax.vmap(model)``).
+    ``SimpleNeuralSDE`` is used, for example in ``make_sample_fn``'s
+    ``jax.vmap(model)``.
     """
 
     inner: SimpleNeuralSDE

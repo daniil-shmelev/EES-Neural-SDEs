@@ -298,7 +298,7 @@ def fit(
         peak_mib = (peak / 2**20) if peak else float("nan")
         print(
             f"epoch={epoch + 1}/{config.epochs} "
-            f"train={train_loss:.4f}±{history['epoch_train_loss_std'][-1]:.3f} "
+            f"train={train_loss:.4f}+/-{history['epoch_train_loss_std'][-1]:.3f} "
             f"val={val_loss:.4f} test={test_loss:.4f} "
             f"|g|={history['epoch_grad_norm_mean'][-1]:.3f} "
             f"theta_mae={val_metrics['theta_mae_mean']:.4f} "

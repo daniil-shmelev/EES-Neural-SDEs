@@ -2,7 +2,7 @@
 for the stochastic 2nd-order Kuramoto experiment.
 
 Runs (in order):
-  1. `run_verification` — analytic two-oscillator phase-lock convergence study
+  1. `run_verification` - analytic two-oscillator phase-lock convergence study
      and ensemble order-parameter stationarity check. Output:
      `results/simulator_verification.{json,npz}`.
   2. `generate_one_n` for each $N \\in $ ``--n-list``. Output:

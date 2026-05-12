@@ -37,7 +37,6 @@ def main():
 
     fig, ax = plt.subplots(figsize=(6.5, 5.2))
 
-    all_hs = []
     for rec in records:
         H = rec["H"]
         hs = np.array([g["h"] for g in rec["per_grid"]])
@@ -48,7 +47,6 @@ def main():
         ax.loglog(hs, errs, marker=marker, color=color,
                   linewidth=1.2, markersize=6,
                   label=f"H={H:.2f}  (slope={rec['fitted_slope']:.2f})")
-        all_hs.extend(hs.tolist())
 
         # Reference lines: 6H - 1 and 4H - 1
         h_ref = np.array([hs.min(), hs.max()])

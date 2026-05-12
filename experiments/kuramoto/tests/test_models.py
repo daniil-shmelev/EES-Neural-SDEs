@@ -7,10 +7,8 @@ isn't fully wired (e.g. `georax` missing on the dev box).
 
 from __future__ import annotations
 
-import jax
 import jax.numpy as jnp
 import jax.random as jr
-import numpy as np
 import pytest
 
 try:

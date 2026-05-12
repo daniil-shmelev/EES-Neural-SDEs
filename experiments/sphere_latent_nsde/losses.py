@@ -2,10 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from typing import Any
 
-import equinox as eqx
 import jax
 import jax.numpy as jnp
 from jaxtyping import Array
@@ -13,7 +11,6 @@ from jaxtyping import Array
 from experiments.sphere_latent_nsde.models import LatentSDEOutput
 
 PyTree = Any
-LossFn = Callable[[eqx.Module, PyTree, Array, Array], Array]
 
 
 def masked_mean(values: Array, mask: Array) -> Array:
@@ -73,32 +70,6 @@ def auxiliary_accuracy(output: LatentSDEOutput, batch: PyTree) -> Array:
     return jnp.mean((pred == batch["aux_obs"]).astype(jnp.float32), axis=1)
 
 
-def make_activity_loss(
-    *,
-    mc_samples: int,
-    kl0_weight: float = 1e-4,
-    klp_weight: float = 1e-4,
-    pxz_weight: float = 1.0,
-    aux_weight: float = 10.0,
-    aux_weight_mul: float = 1.0,
-) -> LossFn:
-    def loss_fn(model, batch, mask, key):
-        return activity_loss_value(
-            model,
-            batch,
-            mask,
-            key,
-            mc_samples=mc_samples,
-            kl0_weight=kl0_weight,
-            klp_weight=klp_weight,
-            pxz_weight=pxz_weight,
-            aux_weight=aux_weight,
-            aux_weight_mul=aux_weight_mul,
-        )
-
-    return loss_fn
-
-
 def activity_loss_value(
     model,
     batch,
@@ -123,32 +94,6 @@ def activity_loss_value(
     aux_per_example = auxiliary_loss(output, batch)
     total = elbo_per_example + aux_weight * aux_weight_mul * aux_per_example
     return masked_mean(total, mask)
-
-
-def make_activity_metrics(
-    *,
-    mc_samples: int,
-    kl0_weight: float = 1e-4,
-    klp_weight: float = 1e-4,
-    pxz_weight: float = 1.0,
-    aux_weight: float = 10.0,
-    aux_weight_mul: float = 1.0,
-) -> Callable[[eqx.Module, PyTree, Array, Array], dict[str, Array]]:
-    def metrics_fn(model, batch, mask, key):
-        return activity_metrics_value(
-            model,
-            batch,
-            mask,
-            key,
-            mc_samples=mc_samples,
-            kl0_weight=kl0_weight,
-            klp_weight=klp_weight,
-            pxz_weight=pxz_weight,
-            aux_weight=aux_weight,
-            aux_weight_mul=aux_weight_mul,
-        )
-
-    return metrics_fn
 
 
 def activity_metrics_value(

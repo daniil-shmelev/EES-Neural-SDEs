@@ -34,7 +34,7 @@ def simulate_batch_jit(
 ) -> tuple[jnp.ndarray, jnp.ndarray]:
     """JIT-compiled batched simulator.
 
-    Compilation key is `(params, cfg, batch_axis_size)` — recompiles when any
+    Compilation key is `(params, cfg, batch_axis_size)`, recompiles when any
     of these change. The Python-level chunked loop in `simulate_split` keeps
     the batch axis size constant except for a possible smaller final chunk.
     """
@@ -124,7 +124,7 @@ def generate_one_n(
 
     print(
         f"\n[pipeline] === generate N={N} dt_fine={cfg.dt_fine:.3e} "
-        f"K={K:.3f} (K_c≈{K_c:.3f}) P={P} D={cfg.D} ==="
+        f"K={K:.3f} (K_c~{K_c:.3f}) P={P} D={cfg.D} ==="
     )
     master = jr.PRNGKey(seed + N)
     k_train, k_val, k_test = jr.split(master, 3)

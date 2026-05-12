@@ -350,7 +350,6 @@ if __name__ == "__main__":
             avg_loss = total_loss / len(train_loader)
             print(f'Epoch {epoch}, Loss: {avg_loss}')
 
-            ##
             model.eval()
             total_loss = 0
             all_preds = []
@@ -374,7 +373,6 @@ if __name__ == "__main__":
             all_preds = torch.cat(all_preds, dim=0)
             all_trues = torch.cat(all_trues, dim=0)
 
-            ##
             plt.figure(figsize=(8, 4))
             for i in range(num_samples):
                 plt.plot(all_trues[i].numpy(), color='r')

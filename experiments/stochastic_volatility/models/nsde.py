@@ -4,6 +4,7 @@ from typing import ClassVar, cast
 import equinox as eqx
 import jax
 import jax.numpy as jnp
+from equinox import internal as eqx_internal
 from diffrax import (
     AbstractERK,
     AbstractReversibleSolver,
@@ -17,9 +18,12 @@ from diffrax import (
     diffeqsolve,
 )
 from diffrax._solution import update_result
-from equinox.internal import ω
 
-ω = cast(Callable, ω)
+omega = cast(Callable, getattr(eqx_internal, "\u03c9"))
+
+
+def _unwrap_omega(value):
+    return getattr(value, "\u03c9")
 
 
 SOLVER_NFE_PER_STEP = {
@@ -83,12 +87,14 @@ class _PatchedUReversible(AbstractReversibleSolver):
         step_z0, _, _, _, result1 = self.solver.step(
             terms, t0, t1, z0, args, None, True
         )
-        y1 = (self.coupling_parameter * (ω(y0) - ω(z0)) + ω(step_z0)).ω
+        y1 = _unwrap_omega(
+            self.coupling_parameter * (omega(y0) - omega(z0)) + omega(step_z0)
+        )
 
         step_y1, y_error, _, _, result2 = self.solver.step(
             terms, t1, t0, y1, args, None, True
         )
-        z1 = (ω(y1) + ω(z0) - ω(step_y1)).ω
+        z1 = _unwrap_omega(omega(y1) + omega(z0) - omega(step_y1))
 
         dense_info = dict(y0=y0, y1=y1)
         return y1, y_error, dense_info, z1, update_result(result1, result2)
@@ -100,12 +106,15 @@ class _PatchedUReversible(AbstractReversibleSolver):
         step_y1, _, _, _, result1 = self.solver.step(
             terms, t1, t0, y1, args, None, True
         )
-        z0 = (ω(z1) - ω(y1) + ω(step_y1)).ω
+        z0 = _unwrap_omega(omega(z1) - omega(y1) + omega(step_y1))
 
         step_z0, _, _, _, result2 = self.solver.step(
             terms, t0, t1, z0, args, None, True
         )
-        y0 = ((1 / self.coupling_parameter) * (ω(y1) - ω(step_z0)) + ω(z0)).ω
+        y0 = _unwrap_omega(
+            (1 / self.coupling_parameter) * (omega(y1) - omega(step_z0))
+            + omega(z0)
+        )
 
         dense_info = dict(y0=y0, y1=y1)
         return y0, dense_info, z0, update_result(result1, result2)

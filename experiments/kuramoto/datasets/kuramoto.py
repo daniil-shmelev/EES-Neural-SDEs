@@ -4,7 +4,7 @@ The dynamical equation, matching Olmi & Torcini (2024) eq. (1) with
 their higher-order coupling switched off ($K_2 = 0$), and equivalent to
 the deterministic power-grid model of Filatrella, Nielsen & Pedersen (2008)
 extended with the standard Gaussian momentum forcing of
-Schmietendorf et al. (2014) / Schäfer et al. (2018):
+Schmietendorf et al. (2014) / Schaefer et al. (2018):
 
 .. math::
     m\,\ddot{\theta}_i = -\dot{\theta}_i + \Omega_i
@@ -21,7 +21,7 @@ other half consumers with $\Omega_i = -P$, so the network is balanced
 State for SDE integration is the stacked vector
 $(\theta_1, \ldots, \theta_N, \omega_1, \ldots, \omega_N) \in \mathbb{R}^{2N}$,
 with $\omega_i = \dot\theta_i$ the angular velocity. The diffusion is
-additive on $\omega$, so Stratonovich and Itô coincide and the diffrax
+additive on $\omega$, so Stratonovich and Ito coincide and the diffrax
 `Heun` solver gives weak-order-one convergence.
 
 References
@@ -31,11 +31,11 @@ References
 - Schmietendorf, Peinke, Friedrich & Kamps (2014). "Self-organized
   synchronization and voltage stability in networks of synchronous
   machines." *Eur. Phys. J. Special Topics*, 223, 2577.
-- Schäfer, Witthaut, Timme & Latora (2018). "Dynamically induced cascading
+- Schaefer, Witthaut, Timme & Latora (2018). "Dynamically induced cascading
   failures in power grids." *Nature Communications*, 9, 1975.
 - Olmi & Torcini (2024). "Stochastic Kuramoto oscillators with inertia
   and higher-order interactions." arXiv:2407.14874.
-- Acebrón et al. (2005). "The Kuramoto model: A simple paradigm for
+- Acebron et al. (2005). "The Kuramoto model: A simple paradigm for
   synchronization phenomena." *Rev. Mod. Phys.*, 77, 137.
 """
 
@@ -44,7 +44,6 @@ from __future__ import annotations
 from typing import Callable
 
 import equinox as eqx
-import jax
 import jax.numpy as jnp
 from jaxtyping import Array, Float
 
@@ -140,7 +139,7 @@ def make_state_diffusion(params: KuramotoParams, D: float) -> Callable:
     r"""Build a `ControlTerm`-compatible diffusion function.
 
     The diffusion is decoupled additive noise on $\omega$ with
-    coefficient $\sqrt{2D}/m$ — the standard Gaussian white-noise
+    coefficient $\sqrt{2D}/m$, the standard Gaussian white-noise
     representation $\xi_i(t)$ with $\langle\xi_i(t)\xi_j(s)\rangle = 2D
     \delta_{ij}\delta(t-s)$ scaled by the inertia.
 
@@ -165,7 +164,7 @@ def critical_coupling(P: float) -> float:
 
     For the deterministic 2nd-order Kuramoto with bimodal $\pm P$ natural
     frequencies, the partial-synchronisation transition occurs near
-    $K_c \approx 2P / \sin(\pi / 3) \approx 2.31 P$ (Acebrón et al. 2005,
+    $K_c \approx 2P / \sin(\pi / 3) \approx 2.31 P$ (Acebron et al. 2005,
     Section IV.B; Filatrella et al. 2008, Section 4). Used as an order-
     of-magnitude scale for picking the operating regime.
     """

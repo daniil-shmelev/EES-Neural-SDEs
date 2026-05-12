@@ -12,7 +12,6 @@ from __future__ import annotations
 from typing import override
 
 import equinox as eqx
-import jax
 import jax.numpy as jnp
 import jax.scipy.linalg as jsp_linalg
 import numpy as np
@@ -138,32 +137,3 @@ def vec_to_matrix(vec: Array, basis: Array) -> Array:
     """Convert lower-triangular ``so(n)`` coordinates to skew matrices."""
 
     return jnp.einsum("...d,dij->...ij", vec, basis)
-
-
-def apply_so_action(x: Array, coeffs: Array, geometry: Sphere) -> Array:
-    """Apply ``exp(sum_i coeffs_i E_i)`` to one sphere point."""
-
-    return geometry.apply_increment(x, coeffs)
-
-
-def geometric_euler_given_increments(
-    z0: Array,
-    drift: Array,
-    noise: Array,
-    dt: Array,
-    geometry: Sphere,
-) -> Array:
-    """Reference-style geometric Euler using pre-sampled standard normals.
-
-    This helper exists for parity checks against the PyTorch baseline. Training
-    uses georax/diffrax solvers directly.
-    """
-
-    omegas = drift * dt[:, None] + noise * jnp.sqrt(dt)[:, None]
-
-    def step(z, omega):
-        z_next = geometry.apply_increment(z, omega)
-        return z_next, z_next
-
-    _, zs = jax.lax.scan(step, z0, omegas)
-    return jnp.concatenate([z0[None], zs], axis=0)

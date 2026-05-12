@@ -3,7 +3,7 @@ r"""$\mathbb{T}^N \times \mathbb{R}^N$ as a product Lie group for the Kuramoto N
 State $(\theta, \omega) \in \mathbb{R}^{2N}$ (stacked, theta first).
 The Lie algebra is $\mathbb{R}^{2N}$ with trivial bracket. Retraction is
 elementwise wrap on the first $N$ components and identity-add on the
-last $N$ — matching the structure of the underlying SDE on the cotangent
+last $N$, matching the structure of the underlying SDE on the cotangent
 bundle of the $N$-torus.
 
 """

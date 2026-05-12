@@ -13,7 +13,6 @@ from diffrax import (
     AbstractAdjoint,
     AbstractSolver,
     DirectAdjoint,
-    Heun,
     RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
 )

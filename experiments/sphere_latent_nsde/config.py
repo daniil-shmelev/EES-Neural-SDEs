@@ -13,10 +13,6 @@ from experiments.sphere_latent_nsde.dataset import NUM_TIMEPOINTS
 
 METHODS = {
     "geometric_euler_direct": ("geometric_euler", "direct"),
-    "geometric_euler_recursive_checkpoint": (
-        "geometric_euler",
-        "recursive_checkpoint",
-    ),
     "cfees25_reversible": ("cfees25", "reversible"),
     "cg2_direct": ("cg2", "direct"),
 }
@@ -54,7 +50,6 @@ class ActivityConfig:
     klp_weight: float = 1e-4
     pxz_weight: float = 1.0
     aux_weight: float = 10.0
-    aux_hidden_dim: int = 32
     mc_train_samples: int = 1
     mc_eval_samples: int = 1
     split_seed: int = 42
@@ -156,7 +151,6 @@ def to_toml(config: ActivityConfig) -> str:
         "klp_weight",
         "pxz_weight",
         "aux_weight",
-        "aux_hidden_dim",
         "mc_train_samples",
         "mc_eval_samples",
         "split_seed",

@@ -11,7 +11,7 @@ Schmietendorf et al. 2014 noise term):
 
 The diffrax solver of choice is `Heun` (Stratonovich, strong order 0.5,
 weak order 1). Because the diffusion is constant additive noise on
-$\omega$, Stratonovich and Itô coincide.
+$\omega$, Stratonovich and Ito coincide.
 
 We use `VirtualBrownianTree` for refinement-consistent Brownian paths.
 """
@@ -21,7 +21,6 @@ from __future__ import annotations
 from typing import NamedTuple
 
 import diffrax
-import jax
 import jax.numpy as jnp
 import jax.random as jr
 from jaxtyping import Array, Float, PRNGKeyArray

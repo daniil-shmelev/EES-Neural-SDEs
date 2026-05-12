@@ -6,7 +6,7 @@ https://github.com/yongkyung-oh/Stable-Neural-SDEs
 
 supporting the paper "Stable Neural Stochastic Differential Equations in Analyzing Irregular Time Series Data".
 
-Once this file is run for both reversible_heun and ees25, the training loss can be plotted using plot_GBM.py
+Once this file is run for each configured method, the training loss can be plotted using plot_GBM.py
 """
 
 import os
