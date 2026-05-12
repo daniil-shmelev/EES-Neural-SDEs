@@ -2,29 +2,14 @@
 
 Purpose
 -------
-SO(3) is a non-abelian linear Lie group. Its natural flat Cartan
-connection has *non-zero* torsion T(f,g) = -[f,g]_so(3). So the
-intrinsic MKW Lie--Butcher series of CF-EES(2,5;1/10) does NOT have
-planar-permutation-symmetric elementary differentials, and the MKW
-antisymmetric order of the scheme on SO(3) is only 3 (verified
-tree-by-tree in scheme_a_tree_algebraic_verify.py, with
-D([o,[o]]) = +1/8 and D([[o],o]) = -1/8 at weight 4).
-
-If the scheme's reversibility rate on SO(3) were governed by the
-intrinsic MKW order, we would see fitted slope 4H - 1:
-  H = 0.4  ->  slope 0.6
-  H = 0.5  ->  slope 1.0
-  H = 0.6  ->  slope 1.4
-
-If instead it is governed by the AMBIENT BCK order (via the embedding
-SO(3) subset GL(3,R) subset R^{3x3} and the ambient flat torsion-free
-connection, as in the paper's order-preservation argument), the rate
-is 6H - 1:
+The symbolic MKW check in order_verification verifies antisymmetric
+order 5 for CF-EES(2,5;x). For a fractional Brownian driver with Hurst
+parameter H, this predicts the reversibility-error slope 6H - 1:
   H = 0.4  ->  slope 1.4
   H = 0.5  ->  slope 2.0
   H = 0.6  ->  slope 2.6
 
-These predictions are well-separated. We fit the empirical slope.
+This script fits that empirical slope on an SO(3) test problem.
 
 Experiment design
 -----------------
@@ -150,7 +135,7 @@ def cfees25_step(Y: np.ndarray,
 
     dX is the driver-increment vector of shape (d,). The step size h is
     absorbed into dX (since dX = X(t+h) - X(t) already scales as h^H).
-    The recurrence is exactly Scheme A (2N-register, K-reuse).
+    The recurrence is the CF-EES 2N-register form with K reuse.
     """
     Ks = []
     Y_prev = Y
@@ -239,7 +224,7 @@ def run(H: float, d: int, step_exponents: list[int], n_trials: int,
     )
     return {
         "H": H, "fitted_slope": slope, "intercept": intercept,
-        "predict_bck5": 6 * H - 1, "predict_mkw3": 4 * H - 1,
+        "predicted_slope": 6 * H - 1,
         "per_grid": per_grid_errs,
     }
 
@@ -272,12 +257,12 @@ def main():
     print("=" * 78)
     print()
     print("  Prediction table:")
-    print("  +--------+-----------------------+----------------------+")
-    print("  |   H    |  BCK order-5 (6H-1)   |  MKW order-3 (4H-1)  |")
-    print("  +--------+-----------------------+----------------------+")
+    print("  +--------+--------------------------+")
+    print("  |   H    |  order-5 slope (6H-1)   |")
+    print("  +--------+--------------------------+")
     for H in args.hursts:
-        print(f"  |  {H:.2f}  |        {6*H-1:>5.2f}          |        {4*H-1:>5.2f}         |")
-    print("  +--------+-----------------------+----------------------+")
+        print(f"  |  {H:.2f}  |          {6*H-1:>5.2f}           |")
+    print("  +--------+--------------------------+")
     print()
 
     results = []
@@ -294,27 +279,21 @@ def main():
         )
         results.append(res)
         print(f"  ==> fitted slope = {res['fitted_slope']:.3f}  "
-              f"(predict BCK 6H-1 = {res['predict_bck5']:.2f}, "
-              f"MKW 4H-1 = {res['predict_mkw3']:.2f})")
+              f"(predicted 6H-1 = {res['predicted_slope']:.2f})")
         print()
 
     print("=" * 78)
     print("  SUMMARY")
     print("=" * 78)
-    print(f"  {'H':>6}  {'fitted slope':>13}  {'6H-1 (BCK q=5)':>16}  {'4H-1 (MKW q=3)':>16}  {'verdict':>24}")
+    print(f"  {'H':>6}  {'fitted slope':>13}  {'6H-1':>10}  {'verdict':>24}")
     for res in results:
         fit = res["fitted_slope"]
-        p5 = res["predict_bck5"]
-        p3 = res["predict_mkw3"]
-        d5 = abs(fit - p5)
-        d3 = abs(fit - p3)
-        if d5 < d3 and d5 < 0.35:
-            verdict = "matches BCK order 5"
-        elif d3 < d5 and d3 < 0.35:
-            verdict = "matches MKW order 3"
+        predicted = res["predicted_slope"]
+        if abs(fit - predicted) < 0.35:
+            verdict = "matches order 5"
         else:
             verdict = "inconclusive"
-        print(f"  {res['H']:>6.2f}  {fit:>13.3f}  {p5:>16.2f}  {p3:>16.2f}  {verdict:>24}")
+        print(f"  {res['H']:>6.2f}  {fit:>13.3f}  {predicted:>10.2f}  {verdict:>24}")
 
     outp = Path(args.output_json)
     outp.write_text(json.dumps(results, indent=2))

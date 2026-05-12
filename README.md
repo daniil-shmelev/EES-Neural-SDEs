@@ -10,16 +10,16 @@ command lines, and result-file provenance.
 ## Repository Layout
 
 ```text
+order_verification/             Symbolic MKW checks for CFEES order conditions
 experiments/
   stability_ode/                ODE stability domains for EES(2,5) vs RK3/RK4
   stability/                    Mean-square SDE stability cross-sections
   convergence_fbm/              Euclidean and SO(3) fBm/RDE convergence checks
-  order_verification/           Symbolic Lie-Butcher and MKW order verification
   ou/                           Ornstein-Uhlenbeck latent SDE companion experiment
   stiff_gbm/                    Stiff GBM neural SDE experiment
   stochastic_volatility/        Seven-model stochastic-volatility benchmark
-  kuramoto/                     Stochastic Kuramoto neural SDE on T T^N
-  torus/                        Random T^7 neural SDE memory benchmark
+  kuramoto/                     Stochastic Kuramoto neural SDE on T^N x R^N
+  torus/                        Torus neural SDE memory benchmark
   sphere_latent_nsde/           JAX/georax HumanActivity sphere latent NSDE
   sphere_latent_sde/            Submodule: PyTorch HumanActivity sphere latent SDE
   ees_dynamical_fitting/        Submodule: molecular-dynamics fitting benchmark
@@ -38,7 +38,7 @@ uv pip install -e ".[dev]"
 
 Available extras:
 
-| Extra | What it pulls in | Experiment(s) |
+| Extra | What it pulls in | Area(s) |
 |---|---|---|
 | no extras | numpy, matplotlib, scipy, fbm | `stability/` |
 | `algebra` | kauri, sympy | `order_verification/`, `stability_ode/` |
@@ -85,9 +85,7 @@ python -m experiments.convergence_fbm.scripts.so3_reversibility_verify
 python -m experiments.convergence_fbm.scripts.so3_reversibility_plot
 
 # Symbolic order verification
-python -m experiments.order_verification.scripts.scheme_a_algebraic_verify
-python -m experiments.order_verification.scripts.scheme_a_tree_algebraic_verify
-python -m experiments.order_verification.scripts.mkw_verify_cf
+python -m order_verification.verify
 
 # Main neural SDE experiments
 python -m experiments.torus.plots

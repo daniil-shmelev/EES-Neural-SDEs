@@ -35,7 +35,7 @@ the relevant script with `--output` to choose an export path.
 | Kuramoto runtime/error comparison | `python -m experiments.kuramoto.experiment.train_kuramoto`, runtime-parity scripts | `experiments/kuramoto/results/runtime_parity_N1000_n50/**/metrics.json`, `runtime_parity_summary.json` |
 | HumanActivity accuracy at compute parity | `experiments/sphere_latent_sde/scripts/compute_parity_sweep.py` | `experiments/sphere_latent_sde/results/compute_parity.csv` |
 | Per-step compute/memory counts | derivation in the paper | no script |
-| Symbolic alpha values on planar trees | `python -m experiments.order_verification.scripts.scheme_a_algebraic_verify`, `scheme_a_tree_algebraic_verify`, `mkw_verify_cf` | deterministic console output |
+| CFEES Hopf-algebra order conditions | `python -m order_verification.verify` | deterministic console output |
 | Stiff GBM metrics | `python experiments/stiff_gbm/GBM.py` | rerun to regenerate |
 | Seven-model stochastic-volatility sweep | `python -m experiments.stochastic_volatility.experiment.train experiments/stochastic_volatility/configs/stoch_vol/sweep.toml` | generated under `experiments/stochastic_volatility/results/` |
 | New/patched software packages | `pyproject.toml`, `.gitmodules` | source metadata |

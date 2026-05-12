@@ -19,7 +19,7 @@ dependencies = [
 
 # Symbolic Butcher / Hopf-algebra verification
 algebra = [
-    "kauri @ git+https://github.com/daniil-shmelev/kauri.git@0af3219a40249d33efc45591669cc6415e6270e2",
+    "kauri @ git+https://github.com/daniil-shmelev/kauri.git@c76ca984b81040027372c931820bf03b2f524896",
     "sympy>=1.13",
 ]
 
@@ -54,7 +54,7 @@ convergence-fbm = [
     "ees-neural-sdes[lowstorage]",
 ]
 
-# Symbolic Lie–Butcher / MKW order-condition verification (sympy + kauri)
+# Symbolic Lie-Butcher / MKW order-condition verification (sympy + kauri)
 order-verification = [
     "ees-neural-sdes[algebra]",
 ]
@@ -69,7 +69,7 @@ torus = [
     "ees-neural-sdes[jax-base]",
 ]
 
-# Kuramoto experiment on T T^N
+# Kuramoto experiment on T^N x R^N
 kuramoto = [
     "ees-neural-sdes[jax-base]",
 ]
@@ -121,7 +121,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["experiments"]
+packages = ["experiments", "order_verification"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
