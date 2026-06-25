@@ -5,6 +5,9 @@
 #
 #   qsub hpc/gen_kuramoto_data.pbs
 #
+# Resumable: per-chunk checkpoints mean a timed-out job, when resubmitted, skips
+# already-simulated chunks (and the whole step if the final .npz already exists).
+#
 #PBS -N kuramoto_gen_N1000
 #PBS -l select=1:ncpus=8:mem=96gb:ngpus=1:gpu_type=L40S
 #PBS -l walltime=12:00:00
