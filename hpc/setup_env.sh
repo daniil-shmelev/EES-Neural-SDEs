@@ -27,9 +27,12 @@ conda activate "${ENV_NAME}"
 # Install the two experiments we launch on the cluster. jax[cuda12] (Linux)
 # pulls self-contained CUDA wheels, so no `module load CUDA` is required.
 # Plain pip handles the git+https direct references in pyproject.toml.
-echo "[setup] installing ees-neural-sdes[kuramoto,sphere-jax]"
+# georax depends on diffrax-lowstorage, which is git-only (not on PyPI); the
+# lowstorage extra pins it from git, so it must be installed alongside or pip
+# fails resolving georax's dependency.
+echo "[setup] installing ees-neural-sdes[kuramoto,sphere-jax,lowstorage]"
 python -m pip install --upgrade pip
-python -m pip install -e ".[kuramoto,sphere-jax]"
+python -m pip install -e ".[kuramoto,sphere-jax,lowstorage]"
 
 echo "[setup] verifying JAX sees CUDA wheels (CPU on login node is expected)"
 python - <<'PY'
