@@ -399,6 +399,16 @@ def _override_from_args(config: ExperimentConfig, args: argparse.Namespace) -> E
         overrides["model"] = ModelKind(args.model)
     if args.lr is not None:
         overrides["learning_rate"] = float(args.lr)
+    if args.hidden_dim is not None:
+        overrides["hidden_dim"] = int(args.hidden_dim)
+    if args.drift_depth is not None:
+        overrides["drift_depth"] = int(args.drift_depth)
+    if args.diffusion_depth is not None:
+        overrides["diffusion_depth"] = int(args.diffusion_depth)
+    if args.grad_clip_norm is not None:
+        overrides["grad_clip_norm"] = float(args.grad_clip_norm)
+    if args.diffusion_scale is not None:
+        overrides["diffusion_scale"] = float(args.diffusion_scale)
     if not overrides:
         return config
     return dataclasses.replace(config, **overrides)
@@ -424,6 +434,12 @@ def main() -> int:
         choices=("kuramoto_nsde", "euclidean_baseline"),
     )
     parser.add_argument("--lr", type=float, default=None)
+    # Architecture / regularisation overrides (used by the calibration sweep).
+    parser.add_argument("--hidden-dim", type=int, default=None)
+    parser.add_argument("--drift-depth", type=int, default=None)
+    parser.add_argument("--diffusion-depth", type=int, default=None)
+    parser.add_argument("--grad-clip-norm", type=float, default=None)
+    parser.add_argument("--diffusion-scale", type=float, default=None)
     parser.add_argument(
         "--resume-from", type=Path, default=None,
         help="Resume from a prior run dir's model_final.eqx + opt_state_final.eqx + "

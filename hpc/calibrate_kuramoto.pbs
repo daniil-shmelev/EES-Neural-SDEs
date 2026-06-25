@@ -1,0 +1,45 @@
+#!/bin/bash
+# Hyperparameter calibration sweep for the N=1000 CF-EES(2,5) Kuramoto run.
+#
+# Runs CF-EES(2,5)+Reversible for a few epochs across a grid of lr / grad-clip /
+# width / depth (see experiments/kuramoto/scripts/run_calibration.py::GRID) to
+# find a stable config before the full multi-seed run. One array task per grid
+# point; resumable + skip-if-done. Prereqs: env built, N=1000 dataset generated.
+#
+#   # confirm the grid size (it sets the array range):
+#   python -m experiments.kuramoto.scripts.run_calibration --list
+#   qsub hpc/calibrate_kuramoto.pbs
+#   # cheaper/longer:  qsub -v EPOCHS=6 hpc/calibrate_kuramoto.pbs
+#   # then rank:
+#   python -m experiments.kuramoto.scripts.run_calibration --summarize
+#
+# If you edit GRID, update the -J range below to 0-(size-1).
+#
+#PBS -N kuramoto_calib
+#PBS -l select=1:ncpus=8:mem=64gb:ngpus=1:gpu_type=L40S
+#PBS -l walltime=04:00:00
+#PBS -J 0-31
+#PBS -j oe
+
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-$PWD}"
+
+source hpc/conda_init.sh
+conda activate "${ENV_NAME:-ees}"
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
+export PYTHONUNBUFFERED=1
+export JAX_CAPTURED_CONSTANTS_WARN_BYTES=-1   # silence the ~8GB dataset-constant warning
+
+IDX="${PBS_ARRAY_INDEX:-0}"
+EPOCHS="${EPOCHS:-8}"
+mkdir -p hpc/logs
+LOG="hpc/logs/calib_idx${IDX}.log"
+echo "[calib] idx=${IDX} epochs=${EPOCHS}  live log: $LOG"
+
+python -m experiments.kuramoto.scripts.run_calibration \
+    --index "${IDX}" \
+    --config experiments/kuramoto/configs/kuramoto_runtime_parity.toml \
+    --epochs "${EPOCHS}" \
+    --output-base experiments/kuramoto/results/calibration_N1000/ 2>&1 | tee "$LOG"
+
+echo "[calib] idx=${IDX} done."
