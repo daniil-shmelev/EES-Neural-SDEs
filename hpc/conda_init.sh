@@ -18,10 +18,17 @@ if [ ! -x "$HOME/miniforge3/bin/conda" ] && command -v miniforge-setup >/dev/nul
 fi
 
 if [ -x "$HOME/miniforge3/bin/conda" ]; then
-    eval "$("$HOME/miniforge3/bin/conda" shell.bash hook)"
+    _conda_bin="$HOME/miniforge3/bin/conda"
 elif command -v conda >/dev/null 2>&1; then
-    eval "$(conda shell.bash hook)"
+    _conda_bin="$(command -v conda)"
 else
     echo "[conda_init] ERROR: conda unavailable. Run once: module load miniforge/3 && miniforge-setup" >&2
     return 1 2>/dev/null || exit 1
 fi
+
+# conda's shell hook is not always `set -u` clean; relax nounset around the eval
+# (callers run with `set -euo pipefail`) and restore it afterwards.
+case $- in *u*) _restore_u=1; set +u ;; *) _restore_u=0 ;; esac
+eval "$("$_conda_bin" shell.bash hook)"
+[ "$_restore_u" = 1 ] && set -u
+unset _conda_bin _restore_u
