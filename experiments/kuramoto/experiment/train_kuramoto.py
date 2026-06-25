@@ -513,9 +513,9 @@ def main() -> int:
     )
     train_walltime_s = float(time.time() - train_t0)
 
-    demo = predict_demo(best_model, config)
-    save_npz(output_dir / "predictions_demo.npz", **demo)
-
+    # Save metrics FIRST: this is the essential result and must survive even if
+    # the cosmetic demo sampling below fails. predict_demo vmaps sample rollouts
+    # and can OOM at large N, so it must never be able to lose a completed run.
     save_json(
         output_dir / "metrics.json",
         {
@@ -535,6 +535,15 @@ def main() -> int:
             },
         },
     )
+
+    # Best-effort sample-trajectory demo for plotting; non-fatal on failure
+    # (e.g. GPU OOM at large N) so it can never lose a completed run's metrics.
+    try:
+        demo = predict_demo(best_model, config)
+        save_npz(output_dir / "predictions_demo.npz", **demo)
+    except Exception as exc:  # demo is cosmetic; never fail the run on it
+        print(f"[warn] predict_demo skipped ({type(exc).__name__}: {exc})", flush=True)
+
     print(f"saved artifacts to {output_dir}", flush=True)
     return 0
 
