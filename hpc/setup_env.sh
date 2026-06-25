@@ -13,9 +13,9 @@ set -euo pipefail
 ENV_NAME="${ENV_NAME:-ees}"
 PY_VERSION="${PY_VERSION:-3.13}"
 
-echo "[setup] loading miniforge"
-module load miniforge/3
-source "$(conda info --base)/etc/profile.d/conda.sh"
+echo "[setup] loading miniforge / conda (bootstraps ~/miniforge3 on first run)"
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$HERE/conda_init.sh"
 
 if ! conda env list | grep -qE "^${ENV_NAME}\s"; then
     echo "[setup] creating conda env '${ENV_NAME}' (python ${PY_VERSION})"

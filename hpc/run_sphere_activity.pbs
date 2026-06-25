@@ -22,8 +22,7 @@
 set -euo pipefail
 cd "${PBS_O_WORKDIR:-$PWD}"
 
-module load miniforge/3
-source "$(conda info --base)/etc/profile.d/conda.sh"
+source hpc/conda_init.sh
 conda activate "${ENV_NAME:-ees}"
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
 
