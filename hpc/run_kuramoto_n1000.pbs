@@ -24,12 +24,16 @@ cd "${PBS_O_WORKDIR:-$PWD}"
 source hpc/conda_init.sh
 conda activate "${ENV_NAME:-ees}"
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
+export PYTHONUNBUFFERED=1   # unbuffered so the tee'd log updates live
 
 SEED="${PBS_ARRAY_INDEX:-0}"
 EPOCHS="${EPOCHS:-30}"
 BATCH="${BATCH:-64}"
 
+mkdir -p hpc/logs
+LOG="hpc/logs/kuramoto_seed${SEED}.log"
 echo "[kuramoto] seed=${SEED} epochs=${EPOCHS} batch=${BATCH} N=1000"
+echo "[kuramoto] live log: $LOG  (per-method epochs in runtime_parity_N1000_quality/<method>_seed${SEED}/train.log)"
 python -m experiments.kuramoto.scripts.run_runtime_parity \
     --N 1000 \
     --seeds "${SEED}" \
@@ -38,6 +42,6 @@ python -m experiments.kuramoto.scripts.run_runtime_parity \
     --n-steps-cfees 50 \
     --n-steps-cg2-recursive 75 \
     --n-steps-cg2-full 75 \
-    --output-base experiments/kuramoto/results/runtime_parity_N1000_quality/
+    --output-base experiments/kuramoto/results/runtime_parity_N1000_quality/ 2>&1 | tee "$LOG"
 
 echo "[kuramoto] seed=${SEED} done."

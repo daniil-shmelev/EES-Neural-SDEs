@@ -25,6 +25,7 @@ cd "${PBS_O_WORKDIR:-$PWD}"
 source hpc/conda_init.sh
 conda activate "${ENV_NAME:-ees}"
 export XLA_PYTHON_CLIENT_PREALLOCATE=false
+export PYTHONUNBUFFERED=1   # unbuffered so the tee'd log updates live
 
 IDX="${PBS_ARRAY_INDEX:-0}"
 CONFIG="experiments/sphere_latent_nsde/configs/activity/full.toml"
@@ -39,7 +40,10 @@ if [ -n "${EPOCHS:-}" ]; then
     echo "[sphere] epochs override -> ${EPOCHS} (temp config ${CONFIG})"
 fi
 
+mkdir -p hpc/logs
+LOG="hpc/logs/sphere_idx${IDX}.log"
 echo "[sphere] sweep index=${IDX} config=${CONFIG}"
-python -m experiments.sphere_latent_nsde.train_activity "${CONFIG}" --index "${IDX}"
+echo "[sphere] live log: $LOG  (tail -f this from the login node)"
+python -m experiments.sphere_latent_nsde.train_activity "${CONFIG}" --index "${IDX}" 2>&1 | tee "$LOG"
 
 echo "[sphere] index=${IDX} done."
