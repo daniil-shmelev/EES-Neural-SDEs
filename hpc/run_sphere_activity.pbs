@@ -13,6 +13,10 @@
 #   qsub hpc/run_sphere_activity.pbs
 #   # cheaper first pass (e.g. fewer epochs): qsub -v EPOCHS=500 hpc/run_sphere_activity.pbs
 #
+# Resumable: if a task hits the walltime, resubmit the same array. Each
+# (method,seed) cell with a metrics.json is skipped; a partial one resumes from
+# its last per-epoch checkpoint (--auto-resume uses a deterministic output dir).
+#
 #PBS -N sphere_activity_full
 #PBS -l select=1:ncpus=8:mem=64gb:ngpus=1:gpu_type=L40S
 #PBS -l walltime=48:00:00
@@ -44,6 +48,6 @@ mkdir -p hpc/logs
 LOG="hpc/logs/sphere_idx${IDX}.log"
 echo "[sphere] sweep index=${IDX} config=${CONFIG}"
 echo "[sphere] live log: $LOG  (tail -f this from the login node)"
-python -m experiments.sphere_latent_nsde.train_activity "${CONFIG}" --index "${IDX}" 2>&1 | tee "$LOG"
+python -m experiments.sphere_latent_nsde.train_activity "${CONFIG}" --index "${IDX}" --auto-resume 2>&1 | tee "$LOG"
 
 echo "[sphere] index=${IDX} done."
