@@ -348,25 +348,34 @@ def predict_demo(
     figures. Saves both the data ground-truth trajectories and the
     model-sampled ones for direct comparison.
     """
-    test_loader, dataset = make_loader(config, "test")
-    test_next = jax.jit(test_loader.next)
+    # Run on CPU: this cosmetic demo vmaps many sample rollouts, and at large N
+    # the GPU still holds the training program's captured constants, so doing it
+    # on-device OOMs. CPU has ample RAM and the demo data is tiny. Also trim the
+    # number of sampled rollouts at large N to keep the CPU pass quick.
+    if config.N > 64:
+        n_samples_per_ic = min(n_samples_per_ic, 4)
+        n_ic = min(n_ic, 2)
 
-    key = jax.random.key(config.seed + seed_offset)
-    key, loader_key = jax.random.split(key)
-    state = test_loader.init_state(loader_key)
-    batch, _, _ = test_next(state)
+    cpu = jax.devices("cpu")[0]
+    with jax.default_device(cpu):
+        model = jax.device_put(model, cpu)
+        test_loader, dataset = make_loader(config, "test")
+        test_next = jax.jit(test_loader.next)
 
-    n_ic = min(n_ic, batch["theta0"].shape[0])
+        key = jax.random.key(config.seed + seed_offset)
+        key, loader_key = jax.random.split(key)
+        state = test_loader.init_state(loader_key)
+        batch, _, _ = test_next(state)
 
-    # Slice the first n_ic initial conditions.
-    sliced = {k: v[:n_ic] for k, v in batch.items()}
+        n_ic = min(n_ic, batch["theta0"].shape[0])
+        sliced = {k: v[:n_ic] for k, v in batch.items()}  # first n_ic initial conditions
 
-    @eqx.filter_jit
-    def one_pass(sk):
-        return _kuramoto_predict_batch(model, sliced, sk)
+        @eqx.filter_jit
+        def one_pass(sk):
+            return _kuramoto_predict_batch(model, sliced, sk)
 
-    sample_keys = jax.random.split(key, n_samples_per_ic)
-    sample_thetas, sample_omegas = jax.vmap(one_pass)(sample_keys)
+        sample_keys = jax.random.split(key, n_samples_per_ic)
+        sample_thetas, sample_omegas = jax.vmap(one_pass)(sample_keys)
 
     return {
         "theta0": np.asarray(sliced["theta0"]),
