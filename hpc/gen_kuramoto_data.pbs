@@ -1,0 +1,32 @@
+#!/bin/bash
+# Generate the Kuramoto N=1000 training set (5000/1000/1000 trajectories).
+# One-off GPU job; produces experiments/kuramoto/data/kuramoto_N1000_seed0.npz
+# which the training jobs load. Submit from the repo root:
+#
+#   qsub hpc/gen_kuramoto_data.pbs
+#
+#PBS -N kuramoto_gen_N1000
+#PBS -l select=1:ncpus=8:mem=96gb:ngpus=1:gpu_type=L40S
+#PBS -l walltime=04:00:00
+#PBS -j oe
+
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-$PWD}"
+
+module load miniforge/3
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "${ENV_NAME:-ees}"
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
+
+# batch-sim kept modest because each of the 2000-dim systems integrates 16384
+# fine steps; --skip-verify avoids an expensive N=1000 convergence study.
+python -m experiments.kuramoto.scripts.run_m1 \
+    --n-list 1000 \
+    --seed 0 \
+    --n-train 5000 --n-val 1000 --n-test 1000 \
+    --n-fine 16384 --n-obs 200 \
+    --batch-sim "${BATCH_SIM:-256}" \
+    --no-gif --skip-verify \
+    --data-dir experiments/kuramoto/data/
+
+echo "[gen] wrote experiments/kuramoto/data/kuramoto_N1000_seed0.npz"

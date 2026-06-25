@@ -1,0 +1,44 @@
+#!/bin/bash
+# Kuramoto quality comparison at N=1000 (the regime where the paper's memory
+# claim lives, but where quality was previously only shown at N<=8).
+#
+# Array over SEEDS: each sub-job trains all three methods
+# (CF-EES(2,5)/Reversible, CG2/Recursive, CG2/Full) for one seed, at NFE
+# parity (CF-EES 50 steps x3 NFE == CG2 75 steps x2 NFE).
+#
+# Prereqs: hpc/setup_env.sh, then the dataset job hpc/gen_kuramoto_data.pbs.
+# Submit from the repo root:
+#
+#   qsub hpc/run_kuramoto_n1000.pbs
+#   # override knobs:  qsub -v EPOCHS=50 hpc/run_kuramoto_n1000.pbs
+#
+#PBS -N kuramoto_N1000_quality
+#PBS -l select=1:ncpus=8:mem=64gb:ngpus=1:gpu_type=L40S
+#PBS -l walltime=16:00:00
+#PBS -J 0-4
+#PBS -j oe
+
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-$PWD}"
+
+module load miniforge/3
+source "$(conda info --base)/etc/profile.d/conda.sh"
+conda activate "${ENV_NAME:-ees}"
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
+
+SEED="${PBS_ARRAY_INDEX:-0}"
+EPOCHS="${EPOCHS:-30}"
+BATCH="${BATCH:-64}"
+
+echo "[kuramoto] seed=${SEED} epochs=${EPOCHS} batch=${BATCH} N=1000"
+python -m experiments.kuramoto.scripts.run_runtime_parity \
+    --N 1000 \
+    --seeds "${SEED}" \
+    --epochs "${EPOCHS}" \
+    --batch-size "${BATCH}" \
+    --n-steps-cfees 50 \
+    --n-steps-cg2-recursive 75 \
+    --n-steps-cg2-full 75 \
+    --output-base experiments/kuramoto/results/runtime_parity_N1000_quality/
+
+echo "[kuramoto] seed=${SEED} done."
