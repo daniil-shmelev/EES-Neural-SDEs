@@ -12,6 +12,11 @@
 #   qsub hpc/run_kuramoto_n1000.pbs
 #   # override knobs:  qsub -v EPOCHS=50 hpc/run_kuramoto_n1000.pbs
 #
+# Resumable: if a task hits the walltime, just resubmit the same array. Every
+# (method,seed) cell that has a metrics.json is skipped, and a partially-trained
+# cell resumes in-place from its last per-epoch checkpoint (--auto-resume), so no
+# finished work is repeated.
+#
 #PBS -N kuramoto_N1000_quality
 #PBS -l select=1:ncpus=8:mem=64gb:ngpus=1:gpu_type=L40S
 #PBS -l walltime=16:00:00

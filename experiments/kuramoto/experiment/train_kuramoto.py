@@ -83,6 +83,26 @@ def _eval_split(
     return avg_loss, avg_metrics, key, state
 
 
+def _latest_checkpoint(d: Path) -> tuple[Path, Path]:
+    """Best-available (model, opt_state) checkpoint pair in ``d``.
+
+    Prefers the end-of-run ``*_final.eqx``; otherwise falls back to the most
+    recent per-epoch checkpoint (``model_epoch_NNN.eqx`` + ``opt_state_latest.eqx``),
+    which is what a mid-training (timeout-killed) run leaves behind.
+    """
+    final_model, final_opt = d / "model_final.eqx", d / "opt_state_final.eqx"
+    if final_model.exists() and final_opt.exists():
+        return final_model, final_opt
+    epoch_ckpts = sorted(d.glob("model_epoch_*.eqx"))
+    latest_opt = d / "opt_state_latest.eqx"
+    if epoch_ckpts and latest_opt.exists():
+        return epoch_ckpts[-1], latest_opt
+    raise FileNotFoundError(
+        f"no resumable checkpoint in {d} (need model_final+opt_state_final "
+        f"or model_epoch_*+opt_state_latest)"
+    )
+
+
 def fit(
     model: eqx.Module,
     *,
@@ -127,11 +147,11 @@ def fit(
     )
 
     if resume_from is not None:
-        model = eqx.tree_deserialise_leaves(resume_from / "model_final.eqx", model)
+        model_ckpt, opt_ckpt = _latest_checkpoint(resume_from)
+        model = eqx.tree_deserialise_leaves(model_ckpt, model)
         opt_state_template = optim.init(eqx.filter(model, eqx.is_array))
-        opt_state = eqx.tree_deserialise_leaves(
-            resume_from / "opt_state_final.eqx", opt_state_template,
-        )
+        opt_state = eqx.tree_deserialise_leaves(opt_ckpt, opt_state_template)
+        print(f"resume checkpoint: {model_ckpt.name} + {opt_ckpt.name}", flush=True)
     else:
         opt_state = optim.init(eqx.filter(model, eqx.is_array))
 
@@ -218,9 +238,12 @@ def fit(
             return None, None
 
     if epoch_offset >= config.epochs:
-        raise ValueError(
-            f"resume target ({epoch_offset} prior epochs) is already at or "
-            f"beyond config.epochs={config.epochs}; bump --epochs to extend."
+        # Resumed run is already complete (e.g. killed between the final epoch
+        # and metrics.json). Skip the empty training loop and finalize below.
+        print(
+            f"resume: {epoch_offset} epochs already done >= target "
+            f"{config.epochs}; finalizing without further training.",
+            flush=True,
         )
     for epoch in range(epoch_offset, config.epochs):
         epoch_t0 = time.time()
@@ -406,6 +429,11 @@ def main() -> int:
         help="Resume from a prior run dir's model_final.eqx + opt_state_final.eqx + "
              "history.json. Interpret --epochs as the *total* (resumed + new) count.",
     )
+    parser.add_argument(
+        "--auto-resume", action="store_true",
+        help="If --output-dir already holds checkpoints, resume in-place from the "
+             "latest one (for restarting after a timeout); no-op on a fresh dir.",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
@@ -444,16 +472,28 @@ def main() -> int:
 
     if args.resume_from is not None and args.resume_from.resolve() == output_dir.resolve():
         raise ValueError(
-            "--resume-from must point to a different directory than --output-dir; "
-            "training overwrites model_final.eqx etc. in the output dir."
+            "--resume-from must differ from --output-dir; use --auto-resume for "
+            "in-place resume after a timeout."
         )
+
+    resume_from = args.resume_from
+    if args.auto_resume and resume_from is None:
+        # In-place resume only when a usable checkpoint is present and the run was
+        # not already finalized (metrics.json absent => a prior attempt was cut).
+        has_ckpt = (output_dir / "history.json").exists() and (
+            (output_dir / "model_final.eqx").exists()
+            or any(output_dir.glob("model_epoch_*.eqx"))
+        )
+        if has_ckpt:
+            resume_from = output_dir
+            print(f"auto-resume: continuing in-place from {output_dir}", flush=True)
 
     train_t0 = time.time()
     best_model, history = fit(
         model,
         loss_fn=loss_fn, metric_fn=metric_fn,
         config=config, output_dir=output_dir,
-        resume_from=args.resume_from,
+        resume_from=resume_from,
     )
     train_walltime_s = float(time.time() - train_t0)
 
