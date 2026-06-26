@@ -37,6 +37,7 @@ LOG="hpc/logs/calib_idx${IDX}.log"
 echo "[calib] idx=${IDX} epochs=${EPOCHS}  live log: $LOG"
 
 python -m experiments.kuramoto.scripts.run_calibration \
+    --grid calibration \
     --index "${IDX}" \
     --config experiments/kuramoto/configs/kuramoto_runtime_parity.toml \
     --epochs "${EPOCHS}" \
