@@ -34,16 +34,19 @@ export PYTHONUNBUFFERED=1   # unbuffered so the tee'd log updates live
 SEED="${PBS_ARRAY_INDEX:-0}"
 EPOCHS="${EPOCHS:-30}"
 BATCH="${BATCH:-64}"
+LR="${LR:-3e-4}"   # calibrated for N=1000; 1e-3 diverges. run_runtime_parity always
+                   # passes --lr, so it must be set here (not just in the TOML).
 
 mkdir -p hpc/logs
 LOG="hpc/logs/kuramoto_seed${SEED}.log"
-echo "[kuramoto] seed=${SEED} epochs=${EPOCHS} batch=${BATCH} N=1000"
+echo "[kuramoto] seed=${SEED} epochs=${EPOCHS} batch=${BATCH} lr=${LR} N=1000"
 echo "[kuramoto] live log: $LOG  (per-method epochs in runtime_parity_N1000_quality/<method>_seed${SEED}/train.log)"
 python -m experiments.kuramoto.scripts.run_runtime_parity \
     --N 1000 \
     --seeds "${SEED}" \
     --epochs "${EPOCHS}" \
     --batch-size "${BATCH}" \
+    --lr "${LR}" \
     --n-steps-cfees 50 \
     --n-steps-cg2-recursive 75 \
     --n-steps-cg2-full 75 \
