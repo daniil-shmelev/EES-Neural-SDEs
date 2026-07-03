@@ -10,8 +10,12 @@
 #
 # Runtime scales ~linearly with n_steps (ns100 f32 ~12h at 60 epochs; ns200 f32
 # ~24h; ns400 f32 ~49h). float64 is slower still on L40S (weak FP64) by an
-# unknown factor -- check the first epoch's time. Cells that hit the wall are
-# RESUMABLE: resubmit the same indices and they continue from the last epoch.
+# unknown factor -- check the first epoch's time. Walltime is set to the gpu72
+# queue maximum (72h) so every cell fits in a single run; shorter jobs backfill
+# the queue faster, so trim per-submit if waiting hurts, e.g.
+#   qsub -J 0-1 -l walltime=18:00:00 hpc/stepsize_kuramoto.pbs
+# Cells that do hit a wall are RESUMABLE: resubmit the same indices and they
+# continue from the last epoch.
 #
 # Recommended: launch in waves rather than all 12 at once:
 #   qsub -J 0-5 hpc/stepsize_kuramoto.pbs        # ns100 both dtypes + ns200 f32
@@ -22,7 +26,7 @@
 #
 #PBS -N kuramoto_stepsize
 #PBS -l select=1:ncpus=8:mem=64gb:ngpus=1:gpu_type=L40S
-#PBS -l walltime=24:00:00
+#PBS -l walltime=72:00:00
 #PBS -J 0-11
 #PBS -j oe
 
