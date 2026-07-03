@@ -418,6 +418,8 @@ def _override_from_args(config: ExperimentConfig, args: argparse.Namespace) -> E
         overrides["grad_clip_norm"] = float(args.grad_clip_norm)
     if args.diffusion_scale is not None:
         overrides["diffusion_scale"] = float(args.diffusion_scale)
+    if args.dtype is not None:
+        overrides["dtype"] = str(args.dtype)
     if not overrides:
         return config
     return dataclasses.replace(config, **overrides)
@@ -450,6 +452,11 @@ def main() -> int:
     parser.add_argument("--grad-clip-norm", type=float, default=None)
     parser.add_argument("--diffusion-scale", type=float, default=None)
     parser.add_argument(
+        "--dtype", type=str, default=None, choices=("float32", "float64"),
+        help="float64 enables jax_enable_x64 (used to probe reversible-adjoint "
+             "reconstruction round-off).",
+    )
+    parser.add_argument(
         "--resume-from", type=Path, default=None,
         help="Resume from a prior run dir's model_final.eqx + opt_state_final.eqx + "
              "history.json. Interpret --epochs as the *total* (resumed + new) count.",
@@ -463,6 +470,13 @@ def main() -> int:
 
     config = load_config(args.config)
     config = _override_from_args(config, args)
+
+    # Apply dtype before any arrays are created. float64 doubles state memory
+    # and is FLOP-slow on L40S, but removes float32 round-off from the
+    # reversible adjoint's backward reconstruction.
+    if config.dtype == "float64":
+        jax.config.update("jax_enable_x64", True)
+        print("dtype: float64 (jax_enable_x64)", flush=True)
 
     _, train_dataset = make_loader(config, "train")
     metadata = train_dataset.metadata()

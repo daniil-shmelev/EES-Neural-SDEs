@@ -1,0 +1,51 @@
+#!/bin/bash
+# Step-size stability sweep: find the integration step size at which
+# CF-EES(2,5) + Reversible trains stably for the FULL 60 epochs at N=1000.
+# EES-only (no CG2 -- its numbers exist). lr=1e-4, calibrated architecture.
+# Axes: n_steps {100,200,400} x dtype {float32,float64} x seed {0,1}.
+# See run_calibration.py::GRIDS["stepsize"]. Grid index layout:
+#   0-3  = ns100 (f32 s0, f32 s1, f64 s0, f64 s1)
+#   4-7  = ns200 (same order)
+#   8-11 = ns400 (same order)
+#
+# Runtime scales ~linearly with n_steps (ns100 f32 ~12h at 60 epochs; ns200 f32
+# ~24h; ns400 f32 ~49h). float64 is slower still on L40S (weak FP64) by an
+# unknown factor -- check the first epoch's time. Cells that hit the wall are
+# RESUMABLE: resubmit the same indices and they continue from the last epoch.
+#
+# Recommended: launch in waves rather than all 12 at once:
+#   qsub -J 0-5 hpc/stepsize_kuramoto.pbs        # ns100 both dtypes + ns200 f32
+#   qsub -J 6-11 hpc/stepsize_kuramoto.pbs       # only if the first wave demands it
+# Then rank:
+#   python -m experiments.kuramoto.scripts.run_calibration --grid stepsize \
+#       --summarize --output-base experiments/kuramoto/results/stepsize_N1000/
+#
+#PBS -N kuramoto_stepsize
+#PBS -l select=1:ncpus=8:mem=64gb:ngpus=1:gpu_type=L40S
+#PBS -l walltime=24:00:00
+#PBS -J 0-11
+#PBS -j oe
+
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-$PWD}"
+
+source hpc/conda_init.sh
+conda activate "${ENV_NAME:-ees}"
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
+export PYTHONUNBUFFERED=1
+export JAX_CAPTURED_CONSTANTS_WARN_BYTES=-1   # silence the ~8GB dataset-constant warning
+
+IDX="${PBS_ARRAY_INDEX:-0}"
+EPOCHS="${EPOCHS:-60}"   # full-length training: matches the failing ns=50 baseline
+mkdir -p hpc/logs
+LOG="hpc/logs/stepsize_idx${IDX}.log"
+echo "[stepsize] idx=${IDX} epochs=${EPOCHS}  live log: $LOG"
+
+python -m experiments.kuramoto.scripts.run_calibration \
+    --grid stepsize \
+    --index "${IDX}" \
+    --config experiments/kuramoto/configs/kuramoto_runtime_parity.toml \
+    --epochs "${EPOCHS}" \
+    --output-base experiments/kuramoto/results/stepsize_N1000/ 2>&1 | tee "$LOG"
+
+echo "[stepsize] idx=${IDX} done."

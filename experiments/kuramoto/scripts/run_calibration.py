@@ -53,6 +53,16 @@ GRIDS: dict[str, dict[str, list]] = {
         "lr": [3e-4, 1e-4],
         "n_steps": [25, 50, 100],
     },
+    # Find the integration step size at which CF-EES(2,5)+Reversible trains
+    # stably for the full 60 epochs at N=1000 (ns=50 fails 0/5 seeds; ns=100 was
+    # stable to the 22 epochs probed). dtype axis separates truncation error
+    # (persists in f64) from float32 round-off (vanishes in f64). Axis order
+    # puts cheap cells first: idx 0-3 = ns100, 4-7 = ns200, 8-11 = ns400.
+    "stepsize": {
+        "n_steps": [100, 200, 400],
+        "dtype": ["float32", "float64"],
+        "seed": [0, 1],
+    },
 }
 
 # Held fixed for every grid point of each grid.
@@ -68,6 +78,13 @@ FIXEDS: dict[str, dict[str, object]] = {
         "N": 1000, "batch_size": 64, "seed": 0,
         "hidden_dim": 256, "drift_depth": 3, "grad_clip_norm": 1.0,
     },
+    # stepsize sweeps n_steps/dtype/seed for the reversible adjoint only, at the
+    # most stable LR found (1e-4) and the calibrated architecture.
+    "stepsize": {
+        "N": 1000, "solver": "cfees25", "adjoint": "reversible",
+        "lr": 1e-4, "batch_size": 64,
+        "hidden_dim": 256, "drift_depth": 3, "grad_clip_norm": 1.0,
+    },
 }
 
 # config key -> train_kuramoto CLI flag
@@ -77,17 +94,19 @@ FLAG = {
     "lr": "--lr", "grad_clip_norm": "--grad-clip-norm",
     "hidden_dim": "--hidden-dim", "drift_depth": "--drift-depth",
     "diffusion_depth": "--diffusion-depth", "diffusion_scale": "--diffusion-scale",
+    "dtype": "--dtype",
 }
 # slug prefixes ("" => bare value, e.g. solver/adjoint)
 SHORT = {
     "lr": "lr", "grad_clip_norm": "gc", "hidden_dim": "h", "drift_depth": "d",
     "diffusion_depth": "dd", "diffusion_scale": "ds", "batch_size": "bs",
-    "n_steps": "ns", "solver": "", "adjoint": "",
+    "n_steps": "ns", "solver": "", "adjoint": "", "dtype": "", "seed": "s",
 }
 # compact value abbreviations for slugs
 VALUE_ABBR = {
     "reversible": "rev", "checkpoint_recursive": "ckpt", "checkpoint_full": "ckptfull",
     "direct": "direct", "cfees25": "ees25", "cfees27": "ees27", "cg2": "cg2",
+    "float32": "f32", "float64": "f64",
 }
 
 
