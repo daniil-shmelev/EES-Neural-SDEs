@@ -39,6 +39,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--epochs", type=int, default=15)
     p.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     p.add_argument("--lr", type=float, default=1e-3)
+    p.add_argument("--dtype", choices=("float32", "float64"), default=None)
     p.add_argument(
         "--n-steps-cfees", type=int, required=True,
         help="n_steps for CF-EES(2,5) + Reversible.",
@@ -58,6 +59,10 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--methods", type=str, nargs="+", default=None,
         help=f"Subset of method labels (default: all of {[m[0] for m in METHODS]}).",
+    )
+    p.add_argument(
+        "--summary-path", type=Path, default=None,
+        help="Summary JSON path. Default: <output-base>/runtime_parity_summary.json.",
     )
     return p.parse_args()
 
@@ -109,6 +114,8 @@ def _run_cell(args, label: str, solver: str, adjoint: str, n_steps: int,
         "--lr", str(args.lr),
         "--auto-resume",  # continue in-place from a partial (timed-out) attempt
     ]
+    if args.dtype is not None:
+        cmd.extend(["--dtype", args.dtype])
     print(f"\n[runtime-parity] === {label} | seed={seed} | N={args.N} | "
           f"n_steps={n_steps} | epochs={args.epochs} ===", flush=True)
     print(f"[runtime-parity] log: {out_dir / 'train.log'}", flush=True)
@@ -152,7 +159,8 @@ def main() -> int:
         "n_steps_per_method": n_steps_per_method,
         "cells": [],
     }
-    summary_path = args.output_base / "runtime_parity_summary.json"
+    summary_path = args.summary_path or args.output_base / "runtime_parity_summary.json"
+    summary_path.parent.mkdir(parents=True, exist_ok=True)
 
     for seed in args.seeds:
         for label, solver, adjoint in selected:
