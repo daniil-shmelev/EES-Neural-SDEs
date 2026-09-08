@@ -1,0 +1,2 @@
+# Live job logs written at runtime by the PBS scripts (tee). Not for version control.
+logs/

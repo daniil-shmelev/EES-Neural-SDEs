@@ -1,0 +1,57 @@
+#!/bin/bash
+# N=1000 float64 comparison at 300 vector-field evaluations per trajectory.
+# Indices 0-4 run CF-EES(2,5)/Reversible; 5-9 run CG2/Full.
+# Each cell resumes from its latest epoch checkpoint.
+
+#PBS -N kuramoto_N1000_f64
+#PBS -l select=1:ncpus=8:mem=64gb:ngpus=1:gpu_type=L40S
+#PBS -l walltime=72:00:00
+#PBS -J 0-9
+#PBS -j oe
+
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-$PWD}"
+
+source hpc/conda_init.sh
+conda activate "${ENV_NAME:-ees}"
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
+export PYTHONUNBUFFERED=1
+export JAX_CAPTURED_CONSTANTS_WARN_BYTES=-1
+
+IDX="${PBS_ARRAY_INDEX}"
+EPOCHS="${EPOCHS:-60}"
+BATCH="${BATCH:-64}"
+LR="${LR:-1e-4}"
+N_STEPS_CFEES="${N_STEPS_CFEES:-100}"
+N_STEPS_CG2="${N_STEPS_CG2:-150}"
+OUTPUT_BASE="${OUTPUT_BASE:-experiments/kuramoto/results/runtime_parity_N1000_f64_nfe300}"
+
+if (( IDX < 5 )); then
+    METHOD="cfees25_reversible"
+    SEED="${IDX}"
+else
+    METHOD="cg2_full"
+    SEED="$((IDX - 5))"
+fi
+
+mkdir -p hpc/logs
+LOG="hpc/logs/kuramoto_f64_nfe300_idx${IDX}.log"
+echo "[kuramoto-f64] idx=${IDX} method=${METHOD} seed=${SEED} epochs=${EPOCHS}"
+echo "[kuramoto-f64] live log: ${LOG}"
+
+python -m experiments.kuramoto.scripts.run_runtime_parity \
+    --config experiments/kuramoto/configs/kuramoto_hpc_calibrated.toml \
+    --N 1000 \
+    --seeds "${SEED}" \
+    --methods "${METHOD}" \
+    --epochs "${EPOCHS}" \
+    --batch-size "${BATCH}" \
+    --lr "${LR}" \
+    --dtype float64 \
+    --n-steps-cfees "${N_STEPS_CFEES}" \
+    --n-steps-cg2-full "${N_STEPS_CG2}" \
+    --output-base "${OUTPUT_BASE}" \
+    --summary-path "${OUTPUT_BASE}/_summaries/${METHOD}_seed${SEED}.json" \
+    2>&1 | tee "${LOG}"
+
+echo "[kuramoto-f64] idx=${IDX} done."

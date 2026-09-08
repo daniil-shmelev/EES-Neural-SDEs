@@ -1,0 +1,129 @@
+{
+  "args": {
+    "config": "experiments/kuramoto/configs/kuramoto_runtime_parity.toml",
+    "N": 1000,
+    "batch_size": 32,
+    "epochs": 15,
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "lr": 0.001,
+    "output_base": "experiments/kuramoto/results/solver_adjoint_ablation_N1000"
+  },
+  "cells": [
+    {
+      "label": "cfees25_full_n50",
+      "seed": 0,
+      "solver": "cfees25",
+      "adjoint": "checkpoint_full",
+      "n_steps": 50,
+      "exit_code": 0,
+      "wall_clock_s": 998.1805465340003,
+      "out_dir": "experiments/kuramoto/results/solver_adjoint_ablation_N1000/cfees25_full_n50_seed0",
+      "train_walltime_s": 980.4286918640137,
+      "best_val_loss": 375.00168762207034,
+      "final_train_loss": 366.4885194197945,
+      "final_val_loss": 375.87840881347654,
+      "final_test_loss": 371.9552795410156,
+      "final_test_theta_mae_mean": 0.3375488519668579,
+      "final_test_omega_mae_mean": 0.18797703087329865,
+      "config": {
+        "N": 1000,
+        "model": "kuramoto_nsde",
+        "solver": "cfees25",
+        "adjoint": "checkpoint_full",
+        "n_steps": 50,
+        "epochs": 15,
+        "batch_size": 32,
+        "seed": 0,
+        "learning_rate": 0.001
+      }
+    },
+    {
+      "label": "cfees25_full_n50",
+      "seed": 1,
+      "solver": "cfees25",
+      "adjoint": "checkpoint_full",
+      "n_steps": 50,
+      "exit_code": 0,
+      "wall_clock_s": 1021.4674001849926,
+      "out_dir": "experiments/kuramoto/results/solver_adjoint_ablation_N1000/cfees25_full_n50_seed1",
+      "train_walltime_s": 1003.9149525165558,
+      "best_val_loss": 373.9677459716797,
+      "final_train_loss": 366.50245666503906,
+      "final_val_loss": 374.88085021972654,
+      "final_test_loss": 370.4827087402344,
+      "final_test_theta_mae_mean": 0.34216606616973877,
+      "final_test_omega_mae_mean": 0.18852756917476654,
+      "config": {
+        "N": 1000,
+        "model": "kuramoto_nsde",
+        "solver": "cfees25",
+        "adjoint": "checkpoint_full",
+        "n_steps": 50,
+        "epochs": 15,
+        "batch_size": 32,
+        "seed": 1,
+        "learning_rate": 0.001
+      }
+    },
+    {
+      "label": "cfees25_full_n50",
+      "seed": 2,
+      "solver": "cfees25",
+      "adjoint": "checkpoint_full",
+      "n_steps": 50,
+      "exit_code": 0,
+      "wall_clock_s": 998.4443963820086,
+      "out_dir": "experiments/kuramoto/results/solver_adjoint_ablation_N1000/cfees25_full_n50_seed2",
+      "train_walltime_s": 980.6379570960999,
+      "best_val_loss": 374.6161193847656,
+      "final_train_loss": 365.72964079483694,
+      "final_val_loss": 375.0638946533203,
+      "final_test_loss": 370.58791198730466,
+      "final_test_theta_mae_mean": 0.33843690156936646,
+      "final_test_omega_mae_mean": 0.18793822824954987,
+      "config": {
+        "N": 1000,
+        "model": "kuramoto_nsde",
+        "solver": "cfees25",
+        "adjoint": "checkpoint_full",
+        "n_steps": 50,
+        "epochs": 15,
+        "batch_size": 32,
+        "seed": 2,
+        "learning_rate": 0.001
+      }
+    },
+    {
+      "label": "cfees25_full_n75",
+      "seed": 0,
+      "solver": "cfees25",
+      "adjoint": "checkpoint_full",
+      "n_steps": 75,
+      "exit_code": 0,
+      "wall_clock_s": 1446.2572984949948,
+      "out_dir": "experiments/kuramoto/results/solver_adjoint_ablation_N1000/cfees25_full_n75_seed0",
+      "train_walltime_s": 1427.8107905387878,
+      "best_val_loss": 374.5503173828125,
+      "final_train_loss": 366.0679911737857,
+      "final_val_loss": 375.4870147705078,
+      "final_test_loss": 371.5439147949219,
+      "final_test_theta_mae_mean": 0.33702245354652405,
+      "final_test_omega_mae_mean": 0.18804356455802917,
+      "config": {
+        "N": 1000,
+        "model": "kuramoto_nsde",
+        "solver": "cfees25",
+        "adjoint": "checkpoint_full",
+        "n_steps": 75,
+        "epochs": 15,
+        "batch_size": 32,
+        "seed": 0,
+        "learning_rate": 0.001
+      }
+    }
+  ]
+}

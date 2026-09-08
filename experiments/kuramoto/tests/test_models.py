@@ -1,25 +1,16 @@
 """Smoke tests for the Kuramoto NSDE and Euclidean baseline.
 
 Constructs each model at small N, runs a single forward pass, and checks
-output shapes and torus-wrap conventions. Skipped if the JAX environment
-isn't fully wired (e.g. `georax` missing on the dev box).
+output shapes and torus-wrap conventions. Import failures are test failures in the pinned paper environment.
 """
 
 from __future__ import annotations
 
 import jax.numpy as jnp
 import jax.random as jr
-import pytest
 
-try:
-    from experiments.kuramoto.models.kuramoto_nsde import KuramotoNSDE
-    from experiments.kuramoto.models.euclidean_baseline import EuclideanKuramotoNSDE
-    HAVE_GEORAX = True
-except Exception:
-    HAVE_GEORAX = False
-
-
-pytestmark = pytest.mark.skipif(not HAVE_GEORAX, reason="JAX/georax stack unavailable.")
+from experiments.kuramoto.models.kuramoto_nsde import KuramotoNSDE
+from experiments.kuramoto.models.euclidean_baseline import EuclideanKuramotoNSDE
 
 
 def test_kuramoto_nsde_forward_shape():

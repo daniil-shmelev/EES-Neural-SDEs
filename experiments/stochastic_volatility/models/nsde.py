@@ -1,3 +1,4 @@
+import math
 from collections.abc import Callable
 from typing import ClassVar, cast
 
@@ -187,8 +188,9 @@ class DiffusionField(eqx.Module):
 class SimpleNeuralSDE(eqx.Module):
     """Euclidean neural SDE on R^d.
 
-    Here `n_steps` is treated as a forward NFE budget. The actual number of
-    solver steps depends on the chosen integrator.
+    By default, `n_steps` is treated as a forward NFE budget and the actual
+    number of solver steps depends on the chosen integrator. If `step_size` is
+    provided, every integrator instead uses that common fixed step size.
 
     When save_path=True saves `n_save` states on a common grid and returns
     shape (n_save, state_dim). Use for full-path generation tasks.
@@ -204,6 +206,7 @@ class SimpleNeuralSDE(eqx.Module):
     solve_n_steps: int = eqx.field(static=True)
     solve_dt: float = eqx.field(static=True)
     nfe_per_step: int = eqx.field(static=True)
+    fixed_step_size: float | None = eqx.field(static=True)
     n_save: int = eqx.field(
         static=True
     )  # Number of time points to save in the output path
@@ -221,6 +224,7 @@ class SimpleNeuralSDE(eqx.Module):
         *,
         n_save: int | None = None,
         save_path: bool = False,
+        step_size: float | None = None,
         key: jax.Array,
     ):
         k1, k2 = jax.random.split(key)
@@ -231,21 +235,31 @@ class SimpleNeuralSDE(eqx.Module):
         self.dt = dt
         self.solver = solver
         self.save_path = save_path
+        self.fixed_step_size = step_size
 
         self.nfe_per_step = _solver_nfe_per_step(solver)
-        if n_steps % self.nfe_per_step != 0:
-            raise ValueError(
-                f"Fixed-NFE mode requires n_steps={n_steps} to be divisible by "
-                f"{self.nfe_per_step} for solver {type(solver).__name__}."
-            )
-        self.solve_n_steps = n_steps // self.nfe_per_step
-        self.solve_dt = dt * self.nfe_per_step
+        total_time = n_steps * dt
+        if step_size is None:
+            if n_steps % self.nfe_per_step != 0:
+                raise ValueError(
+                    f"Fixed-NFE mode requires n_steps={n_steps} to be divisible by "
+                    f"{self.nfe_per_step} for solver {type(solver).__name__}."
+                )
+            self.solve_n_steps = n_steps // self.nfe_per_step
+            self.solve_dt = dt * self.nfe_per_step
+            integration_mode = "fixed_nfe"
+        else:
+            if not math.isfinite(step_size) or step_size <= 0:
+                raise ValueError(f"step_size must be finite and positive, got {step_size}.")
+            self.solve_n_steps = math.ceil(total_time / step_size)
+            self.solve_dt = step_size
+            integration_mode = "fixed_stepsize"
         self.n_save = n_save if n_save is not None else self.solve_n_steps
 
         print(
             "[SimpleNeuralSDE] "
             f"solver={type(solver).__name__} "
-            f"nfe_budget={self.n_steps} "
+            f"mode={integration_mode} "
             f"nfe_per_step={self.nfe_per_step} "
             f"solve_n_steps={self.solve_n_steps} "
             f"required_dt={self.solve_dt:.8g}"

@@ -1,0 +1,43 @@
+# Cartesian sweep. The `method` axis expands to the supported solver/adjoint pairs.
+
+[base]
+experiment = "activity"
+data_dir = "experiments/sphere_latent_sde/data_dir"
+epochs = 200
+batch_size = 256
+learning_rate = 1e-3
+lr_schedule = "cosine"
+lr_restart = 30
+lr_min_ratio = 0.0
+device = "gpu"
+h_dim = 32
+z_dim = 16
+n_deg = 4
+num_timepoints = 128
+nfe_budget = 30
+learnable_prior = false
+use_atanh = false
+kl0_weight = 1e-4
+klp_weight = 1e-4
+pxz_weight = 1.0
+aux_weight = 10.0
+# Historical aux_hidden_dim = 32; the maintained auxiliary head is linear.
+mc_train_samples = 1
+mc_eval_samples = 1
+split_seed = 42
+split_strategy = "auto"
+data_source = "raw"
+drop_last_train = true
+
+[sweep]
+seed = [2]
+# seed = [0]
+method = [
+  "geometric_euler_direct",
+  "geometric_euler_checkpoint_full",
+  "cfees25_reversible",
+  "cg2_direct",
+  "srkmk_general_shark_direct",
+  "srkmk_general_shark_full",
+]
+# method = ["cg2_direct"]

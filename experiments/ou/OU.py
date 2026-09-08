@@ -156,27 +156,81 @@ class NeuralLSDEFunc(nn.Module):
         return self.g_net(tt)
 
 class NDE_model(nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, method, activation='lipswish', vector_field=None):
+    def __init__(self, input_dim, hidden_dim, output_dim, num_layers, method, activation='lipswish', vector_field=None,
+                 dt=None):
         super().__init__()
         self.func = vector_field(input_dim, hidden_dim, hidden_dim, num_layers, activation=activation)
         self.initial = nn.Linear(input_dim, hidden_dim)
         self.decoder = nn.Linear(hidden_dim, output_dim)
         self.method = method
+        self.dt = dt
 
-    def forward(self, coeffs, times):
+    def forward(self, coeffs, times, adjoint=False, bm_entropy=None):
         # control module
         self.func.set_X(coeffs, times)
 
         y0 = self.func.X.evaluate(times)
         y0 = self.initial(y0)[:, 0, :]
 
-        z = torchsde.sdeint(sde=self.func,
-                            y0=y0,
-                            ts=times,
-                            dt=0.05,
-                            method=self.method)
+        dt = self.dt
+        if dt is None:
+            dt = float((times[1] - times[0]).detach().cpu())
+
+        bm = None
+        if bm_entropy is not None:
+            bm = torchsde.BrownianInterval(
+                t0=float(times[0].detach().cpu()),
+                t1=float(times[-1].detach().cpu()),
+                size=(y0.size(0), y0.size(1)),
+                dtype=y0.dtype,
+                device=y0.device,
+                entropy=int(bm_entropy),
+                dt=dt,
+            )
+
+        sdeint = torchsde.sdeint_adjoint if adjoint else torchsde.sdeint
+        z = sdeint(sde=self.func,
+                   y0=y0,
+                   ts=times,
+                   bm=bm,
+                   dt=dt,
+                   method=self.method)
         z = z.permute(1, 0, 2)
         return self.decoder(z)
+
+def flattened_grads(model):
+    grads = []
+    for param in model.parameters():
+        if param.grad is None:
+            grads.append(torch.zeros_like(param).reshape(-1))
+        else:
+            grads.append(param.grad.detach().reshape(-1))
+    return torch.cat(grads)
+
+def gradient_for_loss(model, criterion, coeffs, times, true, adjoint, bm_entropy):
+    model.zero_grad(set_to_none=True)
+    pred = model(coeffs, times, adjoint=adjoint, bm_entropy=bm_entropy).squeeze(-1)
+    loss = criterion(pred, true)
+    loss.backward()
+    grad = flattened_grads(model)
+    return loss.detach(), grad
+
+def relative_gradient_error(model, criterion, coeffs, times, true, bm_entropy):
+    _, direct_grad = gradient_for_loss(
+        model, criterion, coeffs, times, true, adjoint=False, bm_entropy=bm_entropy
+    )
+    _, adjoint_grad = gradient_for_loss(
+        model, criterion, coeffs, times, true, adjoint=True, bm_entropy=bm_entropy
+    )
+    direct_grad = direct_grad.double()
+    adjoint_grad = adjoint_grad.double()
+    return (adjoint_grad - direct_grad).norm() / direct_grad.norm().clamp_min(1e-12)
+
+def save_training_histories(dir_, mse_loss, grad_error_epochs, grad_error):
+    with open(dir_ + '/mse.pickle', 'wb') as handle:
+        pickle.dump(mse_loss, handle)
+    with open(dir_ + '/grad_error.pickle', 'wb') as handle:
+        pickle.dump({'epochs': grad_error_epochs, 'values': grad_error}, handle)
 
 def calculate_kl_divergence(true_values, pred_values, num_bins=50):
     # Compute histogram for true and predicted values
@@ -239,7 +293,12 @@ if __name__ == "__main__":
         'output_dim': 1,
         'hidden_dim': 32,
         'num_layers': 1,
-        'lr': 1e-3
+        'lr': 1e-3,
+        'solver_dt': None,
+        'use_adjoint_training': True,
+        'measure_grad_error': True,
+        'grad_error_interval': 1,
+        'grad_error_batch_size': 512,
     }
 
     DIR = "plots/" + config['method']
@@ -284,7 +343,8 @@ if __name__ == "__main__":
 
 
     model = NDE_model(input_dim=config['input_dim'], hidden_dim=config['hidden_dim'], output_dim=config['output_dim'],
-                      num_layers=config['num_layers'], method = config['method'], vector_field=NeuralLSDEFunc).to(device)
+                      num_layers=config['num_layers'], method = config['method'], vector_field=NeuralLSDEFunc,
+                      dt=config['solver_dt']).to(device)
 
     optimizer = optim.Adam(model.parameters(), lr=config['lr'])
     criterion = torch.nn.MSELoss()
@@ -307,7 +367,7 @@ if __name__ == "__main__":
             all_trues.append(true.cpu())
 
     avg_loss = total_loss / len(test_loader)
-    print(f'Test Loss: {avg_loss}')
+    print(f'Test Loss: {avg_loss}', flush=True)
 
     all_preds = torch.cat(all_preds, dim=0)
     all_trues = torch.cat(all_trues, dim=0)
@@ -328,17 +388,39 @@ if __name__ == "__main__":
     plt.clf()
 
     mse_loss = []
+    grad_error_epochs = []
+    grad_error = []
 
     for epoch in range(1, config['num_epochs'] + 1):
         model.train()
         total_loss = 0
-        for batch in train_loader:
+        for batch_idx, batch in enumerate(train_loader):
             coeffs = batch[1].to(device)
             times = torch.linspace(0, 1, batch[0].shape[1]).to(device)
 
-            optimizer.zero_grad()
             true = batch[0][:, :, 1].to(device)
-            pred = model(coeffs, times).squeeze(-1)
+
+            if (
+                config['measure_grad_error']
+                and batch_idx == 0
+                and epoch % config['grad_error_interval'] == 0
+            ):
+                grad_batch_size = min(config['grad_error_batch_size'], coeffs.shape[0])
+                grad_bm_entropy = config['seed'] + 1000003 * epoch + batch_idx
+                rel_grad_error = relative_gradient_error(
+                    model=model,
+                    criterion=criterion,
+                    coeffs=coeffs[:grad_batch_size],
+                    times=times,
+                    true=true[:grad_batch_size],
+                    bm_entropy=grad_bm_entropy,
+                )
+                grad_error_epochs.append(epoch)
+                grad_error.append(rel_grad_error.item())
+                print(f'Epoch {epoch}, Grad Error: {rel_grad_error.item()}', flush=True)
+
+            optimizer.zero_grad()
+            pred = model(coeffs, times, adjoint=config['use_adjoint_training']).squeeze(-1)
             loss = criterion(pred, true)
             loss.backward()
             optimizer.step()
@@ -348,7 +430,8 @@ if __name__ == "__main__":
 
         if epoch % 10 == 0:
             avg_loss = total_loss / len(train_loader)
-            print(f'Epoch {epoch}, Loss: {avg_loss}')
+            print(f'Epoch {epoch}, Loss: {avg_loss}', flush=True)
+            save_training_histories(DIR, mse_loss, grad_error_epochs, grad_error)
 
             model.eval()
             total_loss = 0
@@ -368,7 +451,7 @@ if __name__ == "__main__":
                     all_trues.append(true.cpu())
 
             avg_loss = total_loss / len(test_loader)
-            print(f'Test Loss: {avg_loss}')
+            print(f'Test Loss: {avg_loss}', flush=True)
 
             all_preds = torch.cat(all_preds, dim=0)
             all_trues = torch.cat(all_trues, dim=0)
@@ -388,12 +471,19 @@ if __name__ == "__main__":
 
 
 
-    with open(DIR + '/mse.pickle', 'wb') as handle:
-        pickle.dump(mse_loss, handle)
+    save_training_histories(DIR, mse_loss, grad_error_epochs, grad_error)
 
     plt.plot(mse_loss)
     plt.savefig(DIR + "/loss.png")
     plt.clf()
+
+    if grad_error:
+        plt.plot(grad_error_epochs, grad_error)
+        plt.yscale("log")
+        plt.xlabel("Epoch")
+        plt.ylabel("Relative Gradient Error")
+        plt.savefig(DIR + "/grad_error.png")
+        plt.clf()
 
     points_to_compare = [0.2, 0.4, 0.6, 0.8]
     compare_distributions(all_trues, all_preds, points_to_compare, DIR)

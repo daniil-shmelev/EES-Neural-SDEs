@@ -1,0 +1,53 @@
+#!/bin/bash
+# Sphere/UCI HumanActivity latent SDE -- full-scale run.
+#
+# Restores the native 228-point grid and ~990-epoch budget of Zeng et al.
+# (2023) so we match/beat the published 90.56% baseline, across 5 seeds and the
+# three georax methods. Previously only 30 epochs / 64 timepoints / 2 seeds were
+# run (88.30% < baseline), purely due to the 16 GB workstation GPU.
+#
+# Array over the 15 sweep cells (3 methods x 5 seeds) in configs/activity/full.toml.
+# Prereqs: hpc/setup_env.sh, then hpc/prep_data.sh (UCI download). Submit from
+# the repo root:
+#
+#   qsub hpc/run_sphere_activity.pbs
+#   # cheaper first pass (e.g. fewer epochs): qsub -v EPOCHS=500 hpc/run_sphere_activity.pbs
+#
+# Resumable: if a task hits the walltime, resubmit the same array. Each
+# (method,seed) cell with a metrics.json is skipped; a partial one resumes from
+# its last per-epoch checkpoint (--auto-resume uses a deterministic output dir).
+#
+#PBS -N sphere_activity_full
+#PBS -l select=1:ncpus=8:mem=64gb:ngpus=1:gpu_type=L40S
+#PBS -l walltime=48:00:00
+#PBS -J 0-14
+#PBS -j oe
+
+set -euo pipefail
+cd "${PBS_O_WORKDIR:-$PWD}"
+
+source hpc/conda_init.sh
+conda activate "${ENV_NAME:-ees}"
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
+export PYTHONUNBUFFERED=1   # unbuffered so the tee'd log updates live
+
+IDX="${PBS_ARRAY_INDEX:-0}"
+CONFIG="experiments/sphere_latent_nsde/configs/activity/full.toml"
+
+# Optional cheaper pass: if EPOCHS is set, materialise a temp config with the
+# epoch line rewritten (train_activity has no CLI override; it only takes the
+# config path + --index).
+if [ -n "${EPOCHS:-}" ]; then
+    TMP_CONFIG="${TMPDIR:-/tmp}/sphere_full_ep${EPOCHS}.toml"
+    sed -E "s/^epochs = .*/epochs = ${EPOCHS}/" "${CONFIG}" > "${TMP_CONFIG}"
+    CONFIG="${TMP_CONFIG}"
+    echo "[sphere] epochs override -> ${EPOCHS} (temp config ${CONFIG})"
+fi
+
+mkdir -p hpc/logs
+LOG="hpc/logs/sphere_idx${IDX}.log"
+echo "[sphere] sweep index=${IDX} config=${CONFIG}"
+echo "[sphere] live log: $LOG  (tail -f this from the login node)"
+python -m experiments.sphere_latent_nsde.train_activity "${CONFIG}" --index "${IDX}" --auto-resume 2>&1 | tee "$LOG"
+
+echo "[sphere] index=${IDX} done."

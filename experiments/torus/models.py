@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from typing import override
-
 import equinox as eqx
 import jax
 import jax.numpy as jnp
@@ -12,12 +10,11 @@ from diffrax import (
     AbstractReversibleSolver,
     AbstractSolver,
     DirectAdjoint,
-    ODETerm,
     ReversibleAdjoint,
     SaveAt,
     diffeqsolve,
 )
-from georax import CFEES25, GeometricTerm, LieGroup
+from georax import CFEES25, GeometricTerm, LocalChart, Manifold
 from jaxtyping import Array
 
 NUM_LABELS = 4
@@ -37,43 +34,47 @@ def encode_labels(labels: jax.Array) -> jax.Array:
     return one_hot.reshape(*labels.shape[:-1], labels.shape[-1] * NUM_LABELS)
 
 
-class Torus(LieGroup):
-    """Flat n-torus T^d as a Lie group."""
+class TorusChart(LocalChart):
+    """Exact additive chart for periodic angle coordinates."""
+
+    def apply(self, x, a, geometry):
+        return wrap_to_pi(x + a)
+
+    def inverse_differential(self, x, a, b, geometry):
+        return b
+
+
+class Torus(Manifold):
+    """Flat n-torus represented by angle coordinates."""
 
     d: int = eqx.field(static=True)
+    _chart_class = TorusChart
 
     def __init__(self, d: int):
-        d = int(d)
-        if d < 1:
+        if int(d) < 1:
             raise ValueError("Torus(d) requires d >= 1.")
-        object.__setattr__(self, "d", d)
+        self.d = int(d)
 
     @property
-    def dimension(self) -> int:
+    def dimension(self):
         return self.d
 
-    @override
-    def frame(self, x: Array) -> Array:
-        return jnp.eye(self.d, dtype=x.dtype)
+    @property
+    def state_shape(self):
+        return (self.d,)
 
-    @override
-    def to_frame(self, x: Array, v: Array) -> Array:
-        del x
+    @property
+    def coordinate_shape(self):
+        return (self.d,)
+
+    def trivialise(self, x, v):
         return v
 
-    @override
-    def from_frame(self, x: Array, a: Array) -> Array:
-        del x
+    def detrivialise(self, x, a):
         return a
 
-    @override
-    def retraction(self, x: Array, v: Array) -> Array:
-        return wrap_to_pi(x + v)
-
-    @override
-    def chart_differential_inv(self, a: Array, b: Array) -> Array:
-        del a
-        return b
+    def frame_bracket(self, x, a, b):
+        return jnp.zeros_like(a)
 
 
 class GRUEncoder(eqx.Module):
@@ -119,7 +120,7 @@ class TorusDriftField(eqx.Module):
     def __call__(self, t, theta, ctx):
         del t
         inp = jnp.concatenate([angle_features(theta), ctx])
-        return self.geometry.from_frame(theta, self.mlp(inp))
+        return self.geometry.detrivialise(theta, self.mlp(inp))
 
 
 class TorusDiffusionField(eqx.Module):
@@ -156,7 +157,7 @@ class TorusDiffusionField(eqx.Module):
         del t
         inp = jnp.concatenate([angle_features(theta), ctx])
         scales = jax.nn.softplus(self.mlp(inp)) * self.diffusion_scale
-        return self.geometry.frame(theta) * scales[None, :]
+        return jnp.diag(scales)
 
 
 class TorusSDEField(eqx.Module):
@@ -177,6 +178,11 @@ class TorusSDEField(eqx.Module):
         drift = self.drift(t, theta, ctx)
         diffusion = self.diffusion(t, theta, ctx)
         return drift + diffusion @ noise[idx]
+
+
+def _torus_coeffs(t, theta, args):
+    vector_field, ctx, noise = args
+    return vector_field(t, theta, (ctx, noise))
 
 
 class TorusNeuralSDE(eqx.Module):
@@ -250,7 +256,7 @@ class TorusNeuralSDE(eqx.Module):
             dtype=context_angles.dtype,
         ) / jnp.sqrt(jnp.asarray(self.dt, dtype=context_angles.dtype))
         term = GeometricTerm(
-            inner=ODETerm(self.vector_field),
+            _torus_coeffs,
             geometry=self.vector_field.geometry,
         )
         if self.adjoint is not None:
@@ -267,7 +273,7 @@ class TorusNeuralSDE(eqx.Module):
             t1=t1,
             dt0=self.dt,
             y0=y0,
-            args=(ctx, noise),
+            args=(self.vector_field, ctx, noise),
             saveat=SaveAt(t1=True),
             adjoint=adjoint,
             max_steps=self.n_steps + 1,

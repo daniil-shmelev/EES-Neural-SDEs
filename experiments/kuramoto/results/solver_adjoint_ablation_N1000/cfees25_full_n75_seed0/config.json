@@ -1,0 +1,32 @@
+{
+  "N": 1000,
+  "activation": "silu",
+  "adjoint": "checkpoint_full",
+  "batch_size": 32,
+  "couple_theta_omega": false,
+  "data_dir": "experiments/kuramoto/data/",
+  "data_seed": 0,
+  "device": "gpu",
+  "diffusion_depth": 2,
+  "diffusion_scale": 0.1,
+  "drift_depth": 3,
+  "drift_kind": "indexed_mean_field",
+  "dtype": "float32",
+  "epochs": 15,
+  "grad_clip_norm": 1.0,
+  "hidden_dim": 128,
+  "learning_rate": 0.001,
+  "loss_horizons": [
+    0.125,
+    0.25,
+    0.5,
+    1.0
+  ],
+  "loss_n_samples": 4,
+  "model": "kuramoto_nsde",
+  "n_steps": 75,
+  "save_every_epoch": true,
+  "seed": 0,
+  "skip_plots": false,
+  "solver": "cfees25"
+}

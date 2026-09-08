@@ -89,6 +89,11 @@ class ExperimentConfig:
     diffusion_scale: float
     # output
     skip_plots: bool
+    # integration mode
+    # None preserves the historical fixed-NFE setup. When provided, every
+    # solver uses this step size and nfe_budget only defines the legacy base
+    # grid used to represent the total time horizon.
+    step_size: float | None = None
 
     @property
     def n_steps(self) -> int:
@@ -113,6 +118,7 @@ def make_config(
     solver: Solvers,
     diffusion_scale: float,
     skip_plots: bool,
+    step_size: float | None = None,
 ) -> ExperimentConfig:
     return ExperimentConfig(
         experiment=experiment,
@@ -127,6 +133,7 @@ def make_config(
         solver=solver,
         diffusion_scale=diffusion_scale,
         skip_plots=skip_plots,
+        step_size=step_size,
     )
 
 
@@ -167,6 +174,7 @@ def _build_config(data: dict[str, Any]) -> ExperimentConfig:
         total_time=total_time,
         diffusion_scale=data["diffusion_scale"],
         skip_plots=data["skip_plots"],
+        step_size=data.get("step_size"),
     )
 
 

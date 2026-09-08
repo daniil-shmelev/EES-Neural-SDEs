@@ -1,0 +1,4 @@
+# These launch scripts run on the Linux HPC. Force LF so a Windows checkout
+# never commits CRLF (which would break the shebang: bad interpreter /bin/bash^M).
+*.sh   text eol=lf
+*.pbs  text eol=lf

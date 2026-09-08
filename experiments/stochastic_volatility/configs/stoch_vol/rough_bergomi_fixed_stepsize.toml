@@ -1,0 +1,23 @@
+# Rough Bergomi at a common fixed step size:
+# 0.5 * (1 / 252 + 1 / 168) = 5 / 1008 = 1 / 201.6.
+#
+# nfe_budget is retained only to encode the legacy base grid. In fixed-step
+# mode it does not control the solver schedule.
+
+[base]
+epochs = 100
+batch_size = 4096
+learning_rate = 1e-3
+seed = 0
+device = "gpu"
+hidden_dim = 16
+nfe_budget = 504
+total_time = 1.0
+step_size = 0.00496031746031746
+diffusion_scale = 0.2
+skip_plots = true
+
+[sweep]
+seed = [0, 1, 2]
+experiment = ["rough_bergomi"]
+solver = ["ees25", "reversible_heun", "mcf_euler", "mcf_midpoint"]

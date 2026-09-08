@@ -66,6 +66,7 @@ def make_model(
         diffusion_scale=config.diffusion_scale,
         n_save=n_save,
         save_path=True,
+        step_size=config.step_size,
         key=key,
     )
 

@@ -1,0 +1,300 @@
+"""
+This file contains code fitting a Neural SDE to option prices derived from high
+volatility geometric Brownian motion dynamics. The code is largely based on the repository:
+
+https://github.com/yongkyung-oh/Stable-Neural-SDEs
+
+supporting the paper "Stable Neural Stochastic Differential Equations in Analyzing Irregular Time Series Data".
+
+Once this file is run for each configured method, the training loss can be plotted using plot_GBM.py
+"""
+
+import os
+import random
+import numpy as np
+import scipy
+import matplotlib.pyplot as plt
+
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import torchsde
+from scipy.stats import entropy
+
+# Setup seed for reproducibility
+def seed_everything(seed):
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    random.seed(seed)
+    torch.manual_seed(seed)
+    torch.random.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
+
+def BS_call(S, K, T, r, sigma):
+
+    if T == 0.:
+        return max(S - K, 0.)
+
+    d1 = (np.log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * np.sqrt(T))
+    d2 = d1 - sigma * np.sqrt(T)
+    return np.exp(r * T) * S * scipy.stats.norm.cdf(d1) - K * scipy.stats.norm.cdf(d2)
+
+def options_data(config):
+    m = len(config['strikes'])
+    n = len(config['maturities'])
+
+    calls = torch.empty((m, n))
+
+    for i in range(m):
+        for j in range(n):
+            calls[i, j] = BS_call(config['S0'], config['strikes'][i], config['maturities'][j], config['r'], config['sigma'])
+
+    return calls
+
+class LipSwish(nn.Module):
+    def forward(self, x):
+        return 0.909 * torch.nn.functional.silu(x)
+
+class Sigmoid(nn.Module):
+    def forward(self, x):
+        return torch.nn.functional.sigmoid(x)
+
+class MLP(nn.Module):
+    def __init__(self, in_size, out_size, hidden_dim, num_layers, tanh=False, activation='lipswish'):
+        super().__init__()
+
+        if activation == 'lipswish':
+            activation_fn = LipSwish()
+        elif activation == 'sigmoid':
+            activation_fn = Sigmoid()
+        else:
+            activation_fn = nn.ReLU()
+
+        model = [nn.Linear(in_size, hidden_dim), activation_fn]
+        for _ in range(num_layers - 1):
+            model.append(nn.Linear(hidden_dim, hidden_dim))
+            model.append(activation_fn)
+        model.append(nn.Linear(hidden_dim, out_size))
+        if tanh:
+            model.append(nn.Tanh())
+        self._model = nn.Sequential(*model)
+
+    def forward(self, x):
+        return self._model(x)
+
+class NeuralSDEFunc(nn.Module):
+    def __init__(self, input_dim, hidden_dim, num_layers, activation='lipswish'):
+        super(NeuralSDEFunc, self).__init__()
+        self.sde_type = "stratonovich"  # NSDE will learn the ito correction
+        self.noise_type = "diagonal"  # or "scalar"
+
+        self.f_net = MLP(input_dim + 1, input_dim, hidden_dim, num_layers, activation=activation)
+        self.g_net = MLP(input_dim + 1, input_dim, hidden_dim, num_layers, activation=activation)
+
+    def f(self, t, y):
+        if t.dim() == 0:
+            t = torch.full_like(y[:, 0], fill_value=t).unsqueeze(-1)
+        return self.f_net(torch.cat((t, y), dim=-1))
+
+    def g(self, t, y):
+        if t.dim() == 0:
+            t = torch.full_like(y[:, 0], fill_value=t).unsqueeze(-1)
+        return self.g_net(torch.cat((t, y), dim=-1))
+
+class NDE_model(nn.Module):
+    def __init__(self, input_dim, hidden_dim, num_layers, config, activation='lipswish', vector_field=None):
+        super(NDE_model, self).__init__()
+        self.func = vector_field(input_dim, hidden_dim, num_layers, activation=activation)
+        self.config = config
+
+    def forward(self, batch, times):
+        y0 = torch.tensor([[self.config['S0']]] * batch).to(times.device)
+
+        z = torchsde.sdeint(sde=self.func,
+                            y0=y0,
+                            ts=times,
+                            dt=self.config['dt'],
+                            method=self.config['method'])
+
+        return z.permute(1, 0, 2)
+
+def my_loss(pred_paths, call_data, config):
+    m = len(config['strikes'])
+    n = len(config['maturities'])
+
+    # pred_paths of shape (batch, T, dim)
+    pred_calls = torch.empty(size=(m,n))
+
+    assert (n == pred_paths.shape[1])
+
+    for i in range(m):
+        for j in range(n):
+            pred_calls[i, j] = torch.relu(pred_paths[:, j] - config['strikes'][i]).mean()
+
+    loss = pred_calls - call_data
+    loss *= torch.exp(-config['r'] * torch.tensor(config['maturities']))
+    loss = loss[:, ::10]
+    loss = loss ** 2
+    return loss.mean() / 2.
+
+def calculate_kl_divergence(true_values, pred_values, num_bins=50):
+    # Compute histogram for true and predicted values
+    hist_true, bin_edges = np.histogram(true_values, bins=num_bins, density=True)
+    hist_pred, _ = np.histogram(pred_values, bins=bin_edges, density=True)
+
+    # Avoid division by zero and log(0) issues
+    hist_true = np.where(hist_true == 0, 1e-10, hist_true)
+    hist_pred = np.where(hist_pred == 0, 1e-10, hist_pred)
+
+    # Calculate KL divergence
+    kl_div = entropy(hist_true, hist_pred)
+    return kl_div
+
+def compare_distributions(true_data, pred_data, points, num_bins=50):
+    time_points = [int(p * true_data.shape[1]) for p in points]
+
+    fig, axes = plt.subplots(1, len(points), figsize=(20, 5), sharey=True)
+
+    for ax, point, time_point in zip(axes, points, time_points):
+        true_values = true_data[:, time_point]
+        pred_values = pred_data[:, time_point]
+
+        kl_div = calculate_kl_divergence(true_values, pred_values, num_bins)
+
+        bins = np.histogram(np.hstack((true_values, pred_values)), bins=num_bins)[1]
+        ax.hist([round(v, 5) for v in true_values], bins=bins, alpha=0.5, label='True', color='r')
+        ax.hist([round(v, 5) for v in pred_values], bins=bins, alpha=0.5, label='Pred', color='b')
+        ax.set_title(f'{int(point * 100)}% Point\nKL: {kl_div:.4f}')
+        ax.set_xlabel('Value')
+        if ax == axes[0]:
+            ax.set_ylabel('Frequency')
+        ax.legend()
+
+    plt.suptitle('Distribution Comparison at Specific Points')
+    plt.tight_layout(rect=[0, 0, 1, 0.95])
+    plt.savefig(DIR + "/distr.png")
+    plt.savefig(DIR + "/distr.pdf")
+    plt.savefig(DIR + "/distr.eps")
+    plt.clf()
+
+if __name__ == "__main__":
+    use_cuda = torch.cuda.is_available()
+    device = torch.device("cuda" if use_cuda else "cpu")
+
+    # Parameters
+    config = {
+        'method': "reversible_heun", # "reversible_heun" or "ees25" or "ees27"
+        'num_samples': 250000,
+        'T': 25.0,
+        'r': 0.5,
+        'sigma': 1.5,
+        'S0': 100.,
+        'strikes': np.linspace(90, 110, 20),
+        'train_ratio': 0.8,
+        'batch_size': 125000,
+        'seed': 42,
+        'num_epochs': 250,
+        'input_dim': 1,
+        'hidden_dim': 8,
+        'num_layers': 2,
+        'lr': 1e-2,
+        'gamma': 0.99
+    }
+
+    config['maturities'] = np.linspace(0, config['T'], 100)
+    config['N'] = len(config['maturities'])
+    config['dt'] = config['T'] / config['N']
+
+    DIR = "plots/options_" + config['method']
+
+    if not os.path.exists(DIR):
+        os.makedirs(DIR)
+
+    # Ensure reproducibility
+    seed_everything(config['seed'])
+
+    # Generate data
+    call_data = options_data(config)
+
+    model = NDE_model(input_dim=config['input_dim'], hidden_dim=config['hidden_dim'],
+                      num_layers=config['num_layers'], vector_field=NeuralSDEFunc,
+                      config = config, activation="lipswish").to(device)
+
+    optimizer = optim.Adam(model.parameters(), lr=config['lr'])
+    scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=config['gamma'])  # decay factor
+
+
+
+    mse_loss = []
+
+    for epoch in range(1, config['num_epochs'] + 1):
+        model.train()
+
+        num_batches = config['num_samples'] // config['batch_size']
+        total_loss = 0
+        all_preds = []
+
+        for i in range(num_batches):
+            times = torch.linspace(0, 1, len(config['maturities'])).to(device)
+
+            optimizer.zero_grad()
+            pred = model(config['batch_size'], times).squeeze(-1)
+            loss = my_loss(pred, call_data, config)
+            loss.backward()
+            optimizer.step()
+
+            total_loss += loss
+            all_preds.append(pred.detach().cpu())
+
+        mse_loss.append(total_loss.detach().cpu())
+
+        # decay LR once per epoch
+        scheduler.step()
+
+        # monitor current LR
+        current_lr = scheduler.get_last_lr()[0]
+        print(f"Epoch {epoch}, Loss: {total_loss:.6f}, LR: {current_lr:.6e}")
+
+        if epoch % 10 == 0:
+            plt.figure(figsize=(8, 4))
+            for i in range(100):
+                plt.plot(times.cpu(), pred.detach().cpu()[i, :], color='r', alpha = 0.1)
+            plt.xlabel('Time')
+            plt.ylabel('Value')
+            plt.title('Model Predictions at epoch ' + str(epoch))
+            plt.savefig(DIR + "/model_pred_" + str(epoch) + ".png")
+            plt.clf()
+
+
+    import pickle
+    with open(DIR + '/mse.pickle', 'wb') as handle:
+        pickle.dump(mse_loss, handle)
+
+    plt.plot(mse_loss)
+    plt.savefig(DIR + "/loss.png")
+    plt.clf()
+
+
+
+
+    W = np.cumsum(
+        np.random.normal(0., np.sqrt(config['dt']), size=(config['num_samples'], config['N'])),
+        axis = 1
+    )
+    t = np.linspace(0, config['T'], config['N'])
+    t = np.tile(t, (config['num_samples'], 1))
+    all_trues = config['S0'] * np.exp(
+        (config['r'] - 0.5 * config['sigma']**2) * t + config['sigma'] * W
+    )
+
+    all_preds = torch.cat(all_preds, axis = 0)
+    all_preds = np.array(all_preds)
+
+    points_to_compare = [0.2, 0.4, 0.6, 0.8]
+    compare_distributions(all_trues, all_preds, points_to_compare)
+
+    with open(DIR + '/distr.pickle', 'wb') as handle:
+        pickle.dump((all_trues, all_preds), handle)

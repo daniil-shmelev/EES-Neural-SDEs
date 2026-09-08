@@ -20,8 +20,41 @@ from georax._geometry.base import LocalChart, Manifold
 from jaxtyping import Array
 
 
+_INVERSE_DEXP_COEFFS = {
+    1: -0.5,
+    2: 1.0 / 12.0,
+    4: -1.0 / 720.0,
+    6: 1.0 / 30240.0,
+    8: -1.0 / 1209600.0,
+    10: 1.0 / 47900160.0,
+}
+
+
 def normalize(x: Array, eps: float = 1e-7) -> Array:
     return x / jnp.maximum(jnp.linalg.norm(x, axis=-1, keepdims=True), eps)
+
+
+def _lie_bracket(a: Array, b: Array) -> Array:
+    return a @ b - b @ a
+
+
+def _inverse_dexp(
+    a: Array,
+    b: Array,
+    geometry: "Sphere",
+    order: RealScalarLike,
+) -> Array:
+    omega = geometry.coords_to_alg(a, dtype=b.dtype)
+    ad_power = geometry.coords_to_alg(b, dtype=b.dtype)
+    corrected = ad_power
+
+    for degree in range(1, int(order)):
+        ad_power = _lie_bracket(omega, ad_power)
+        coeff = _INVERSE_DEXP_COEFFS.get(degree)
+        if coeff is not None:
+            corrected = corrected + jnp.asarray(coeff, dtype=b.dtype) * ad_power
+
+    return geometry.alg_to_coords(corrected)
 
 
 class SphereExpChart(LocalChart):
@@ -35,6 +68,13 @@ class SphereExpChart(LocalChart):
         omega = geometry.coords_to_alg(a, dtype=x.dtype)
         q = jsp_linalg.expm(omega)
         return jnp.einsum("...ij,...j->...i", q, x)
+
+    @override
+    def inverse_differential(
+        self, x: Array, a: Array, b: Array, geometry: "Sphere"
+    ) -> Array:
+        del x
+        return _inverse_dexp(a, b, geometry, self.inverse_order)
 
 
 class SphereTaylorChart(LocalChart):
@@ -64,6 +104,13 @@ class SphereTaylorChart(LocalChart):
             )
             y = y + term
         return normalize(y)
+
+    @override
+    def inverse_differential(
+        self, x: Array, a: Array, b: Array, geometry: "Sphere"
+    ) -> Array:
+        del x
+        return _inverse_dexp(a, b, geometry, self.inverse_order)
 
 
 class Sphere(Manifold):
@@ -103,6 +150,39 @@ class Sphere(Manifold):
         """Frame-coordinate dimension, used as the Brownian driver dimension."""
 
         return self.lie_algebra_dimension
+
+    @property
+    def state_shape(self) -> tuple[int, ...]:
+        return (self.n,)
+
+    @property
+    def coordinate_shape(self) -> tuple[int, ...]:
+        return (self.lie_algebra_dimension,)
+
+    def check_state_shape(self, x: Array) -> None:
+        if x.shape[-1:] != self.state_shape:
+            raise ValueError(f"Expected sphere states ending in {self.state_shape}, got {x.shape}.")
+
+    def check_coordinate_shape(self, a: Array) -> None:
+        if a.shape[-1:] != self.coordinate_shape:
+            raise ValueError(f"Expected frame coordinates ending in {self.coordinate_shape}, got {a.shape}.")
+
+    def zero_coordinates(self, x: Array) -> Array:
+        self.check_state_shape(x)
+        return jnp.zeros(x.shape[:-1] + self.coordinate_shape, dtype=x.dtype)
+
+    def trivialise(self, x: Array, v: Array) -> Array:
+        # The skew lift v x^T - x v^T sends a unit x to its tangent v.
+        omega = v[..., :, None] * x[..., None, :] - x[..., :, None] * v[..., None, :]
+        return self.alg_to_coords(omega)
+
+    def detrivialise(self, x: Array, a: Array) -> Array:
+        return jnp.einsum("...ij,...j->...i", self.coords_to_alg(a), x)
+
+    def frame_bracket(self, x: Array, a: Array, b: Array) -> Array:
+        del x
+        # Constant generators act on the left: [X_a, X_b] = X_{ba-ab}.
+        return -self.alg_to_coords(_lie_bracket(self.coords_to_alg(a), self.coords_to_alg(b)))
 
     @property
     def basis(self) -> Array:

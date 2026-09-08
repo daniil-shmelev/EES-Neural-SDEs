@@ -267,6 +267,11 @@ def _save_config(path: Path, config: ExperimentConfig) -> None:
         f"hidden_dim     = {config.hidden_dim}",
         f"nfe_budget     = {config.nfe_budget}",
         f"total_time     = {config.total_time}",
+        *(
+            [f"step_size     = {config.step_size}"]
+            if config.step_size is not None
+            else []
+        ),
         f"diffusion_scale = {config.diffusion_scale}",
         "",
         f"device         = {str(config.device)!r}",
@@ -288,6 +293,9 @@ def _effective_solver_metrics(
     solve_dt = getattr(model, "solve_dt", config.dt)
     nfe_per_step = getattr(model, "nfe_per_step", None)
     metrics = {
+        "integration_mode": (
+            "fixed_stepsize" if config.step_size is not None else "fixed_nfe"
+        ),
         "nfe_budget": int(config.nfe_budget),
         "total_time": float(config.total_time),
         "base_dt": float(config.dt),
@@ -296,6 +304,7 @@ def _effective_solver_metrics(
     }
     if nfe_per_step is not None:
         metrics["nfe_per_step"] = int(nfe_per_step)
+        metrics["effective_nfe"] = int(nfe_per_step) * int(solve_n_steps)
     return metrics
 
 
@@ -424,6 +433,7 @@ def _run_single_config(config: ExperimentConfig) -> int:
         f"hidden_dim={config.hidden_dim}",
         f"nfe_budget={config.nfe_budget}",
         f"total_time={config.total_time:.8g}",
+        f"step_size={config.step_size}",
         f"solver={config.solver}",
         flush=True,
     )

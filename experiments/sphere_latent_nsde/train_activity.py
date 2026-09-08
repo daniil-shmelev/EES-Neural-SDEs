@@ -68,7 +68,7 @@ def _learning_rate(config: ActivityConfig, steps_per_lr_epoch: int):
     raise ValueError(f"unknown lr_schedule {config.lr_schedule!r}")
 
 
-def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
+def fit(model: eqx.Module, config: ActivityConfig, output_dir: Path, resume: bool = False) -> TrainResult:
     train_loader = make_loader(config, "train")
     val_loader = make_loader(config, "val")
     test_loader = make_loader(config, "test")
@@ -152,13 +152,33 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
     val_state = val_loader.init_state(val_key)
     test_state = test_loader.init_state(test_key)
 
+    epoch_offset = 0
     history: dict[str, list[dict[str, float]]] = {"train": [], "val": [], "test": []}
     best_model = model
     best_val_acc = -np.inf
     best_epoch = 0
 
+    # Resume from the latest per-epoch checkpoint if present (timeout restart).
+    # RNG is re-seeded from config.seed (as in the Kuramoto resume), so a resumed
+    # run is not bit-identical to an uninterrupted one but converges fine.
+    output_dir.mkdir(parents=True, exist_ok=True)
+    if resume and (output_dir / "model_latest.eqx").exists() and (output_dir / "history.json").exists():
+        model = eqx.tree_deserialise_leaves(output_dir / "model_latest.eqx", model)
+        opt_state = eqx.tree_deserialise_leaves(output_dir / "opt_state_latest.eqx", opt_state)
+        best_model = eqx.tree_deserialise_leaves(output_dir / "model_best.eqx", best_model)
+        history = json.loads((output_dir / "history.json").read_text())
+        cstate = json.loads((output_dir / "ckpt_state.json").read_text())
+        best_val_acc = float(cstate["best_val_acc"])
+        best_epoch = int(cstate["best_epoch"])
+        epoch_offset = len(history["train"])
+        print(
+            f"[resume] continuing from epoch {epoch_offset} "
+            f"(best_val_acc={100.0 * best_val_acc:.2f}% @ epoch {best_epoch})",
+            flush=True,
+        )
+
     with tqdm(
-        range(1, config.epochs + 1),
+        range(epoch_offset + 1, config.epochs + 1),
         desc=f"{config.experiment}/{config.method}",
         unit="epoch",
         dynamic_ncols=True,
@@ -198,6 +218,17 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
                 )
             )
 
+            # Per-epoch checkpoint so a timeout can resume from here.
+            eqx.tree_serialise_leaves(output_dir / "model_latest.eqx", model)
+            eqx.tree_serialise_leaves(output_dir / "opt_state_latest.eqx", opt_state)
+            if best_epoch == epoch:
+                eqx.tree_serialise_leaves(output_dir / "model_best.eqx", best_model)
+            _save_json(output_dir / "history.json", history)
+            _save_json(
+                output_dir / "ckpt_state.json",
+                {"best_val_acc": float(best_val_acc), "best_epoch": int(best_epoch)},
+            )
+
     test_metrics, _, key = eval_split(
         best_model,
         test_next,
@@ -218,9 +249,12 @@ def _save_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def _make_output_dir(config: ActivityConfig) -> Path:
-    timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
-    slug = f"{config.experiment}__{config.method}__seed{config.seed}__{timestamp}"
+def _make_output_dir(config: ActivityConfig, *, deterministic: bool = False) -> Path:
+    slug = f"{config.experiment}__{config.method}__seed{config.seed}"
+    if not deterministic:
+        # Timestamp keeps independent runs separate. For --auto-resume we want a
+        # stable, findable dir per (method, seed) so a resubmit resumes in place.
+        slug += "__" + datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
     return PROJECT_ROOT / "results" / slug
 
 
@@ -286,8 +320,11 @@ def _save_artifacts(
     _save_json(output_dir / "metrics.json", metrics)
 
 
-def _run_single_config(config: ActivityConfig) -> int:
-    output_dir = _make_output_dir(config)
+def _run_single_config(config: ActivityConfig, *, auto_resume: bool = False) -> int:
+    output_dir = _make_output_dir(config, deterministic=auto_resume)
+    if auto_resume and (output_dir / "metrics.json").exists():
+        print(f"[skip] {output_dir.name} already complete (metrics.json present)", flush=True)
+        return 0
     train_dataset = make_dataset(config, "train")
     val_dataset = make_dataset(config, "val")
     test_dataset = make_dataset(config, "test")
@@ -315,7 +352,7 @@ def _run_single_config(config: ActivityConfig) -> int:
     print(f"parameters={parameter_count}", flush=True)
 
     start = time.perf_counter()
-    train_result = fit(model, config)
+    train_result = fit(model, config, output_dir, resume=auto_resume)
     train_time_s = time.perf_counter() - start
 
     metrics = _metrics_payload(
@@ -347,23 +384,37 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("config", type=Path, help="Path to TOML config or sweep")
     parser.add_argument("--index", type=int, default=None, help="Sweep index to run")
+    parser.add_argument(
+        "--auto-resume", action="store_true",
+        help="Use a deterministic per-(method,seed) output dir and resume in-place "
+             "from the latest epoch checkpoint after a timeout; skip if already complete.",
+    )
     args = parser.parse_args()
 
     if args.index is not None:
         print(f"running sweep_index={args.index}", flush=True)
-        return _run_single_config(_configure_runtime(sweep_config_at(args.config, args.index)))
+        return _run_single_config(
+            _configure_runtime(sweep_config_at(args.config, args.index)),
+            auto_resume=args.auto_resume,
+        )
 
     if is_sweep_config(args.config):
         total = sweep_len(args.config)
         print(f"running sweep with {total} configurations", flush=True)
         for index in range(total):
             print(f"sweep_run={index + 1}/{total} sweep_index={index}", flush=True)
-            status = _run_single_config(_configure_runtime(sweep_config_at(args.config, index)))
+            status = _run_single_config(
+                _configure_runtime(sweep_config_at(args.config, index)),
+                auto_resume=args.auto_resume,
+            )
             if status != 0:
                 return status
         return 0
 
-    return _run_single_config(_configure_runtime(load_config(args.config)))
+    return _run_single_config(
+        _configure_runtime(load_config(args.config)),
+        auto_resume=args.auto_resume,
+    )
 
 
 if __name__ == "__main__":

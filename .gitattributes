@@ -1,0 +1,2 @@
+# Preserve archived CSV bytes/checksums, including their original CRLF endings.
+order_verification/siam/experiment_records/*.csv -text whitespace=blank-at-eol,blank-at-eof,space-before-tab,cr-at-eol

@@ -83,6 +83,26 @@ def _eval_split(
     return avg_loss, avg_metrics, key, state
 
 
+def _latest_checkpoint(d: Path) -> tuple[Path, Path]:
+    """Best-available (model, opt_state) checkpoint pair in ``d``.
+
+    Prefers the end-of-run ``*_final.eqx``; otherwise falls back to the most
+    recent per-epoch checkpoint (``model_epoch_NNN.eqx`` + ``opt_state_latest.eqx``),
+    which is what a mid-training (timeout-killed) run leaves behind.
+    """
+    final_model, final_opt = d / "model_final.eqx", d / "opt_state_final.eqx"
+    if final_model.exists() and final_opt.exists():
+        return final_model, final_opt
+    epoch_ckpts = sorted(d.glob("model_epoch_*.eqx"))
+    latest_opt = d / "opt_state_latest.eqx"
+    if epoch_ckpts and latest_opt.exists():
+        return epoch_ckpts[-1], latest_opt
+    raise FileNotFoundError(
+        f"no resumable checkpoint in {d} (need model_final+opt_state_final "
+        f"or model_epoch_*+opt_state_latest)"
+    )
+
+
 def fit(
     model: eqx.Module,
     *,
@@ -127,11 +147,11 @@ def fit(
     )
 
     if resume_from is not None:
-        model = eqx.tree_deserialise_leaves(resume_from / "model_final.eqx", model)
+        model_ckpt, opt_ckpt = _latest_checkpoint(resume_from)
+        model = eqx.tree_deserialise_leaves(model_ckpt, model)
         opt_state_template = optim.init(eqx.filter(model, eqx.is_array))
-        opt_state = eqx.tree_deserialise_leaves(
-            resume_from / "opt_state_final.eqx", opt_state_template,
-        )
+        opt_state = eqx.tree_deserialise_leaves(opt_ckpt, opt_state_template)
+        print(f"resume checkpoint: {model_ckpt.name} + {opt_ckpt.name}", flush=True)
     else:
         opt_state = optim.init(eqx.filter(model, eqx.is_array))
 
@@ -218,9 +238,12 @@ def fit(
             return None, None
 
     if epoch_offset >= config.epochs:
-        raise ValueError(
-            f"resume target ({epoch_offset} prior epochs) is already at or "
-            f"beyond config.epochs={config.epochs}; bump --epochs to extend."
+        # Resumed run is already complete (e.g. killed between the final epoch
+        # and metrics.json). Skip the empty training loop and finalize below.
+        print(
+            f"resume: {epoch_offset} epochs already done >= target "
+            f"{config.epochs}; finalizing without further training.",
+            flush=True,
         )
     for epoch in range(epoch_offset, config.epochs):
         epoch_t0 = time.time()
@@ -325,25 +348,34 @@ def predict_demo(
     figures. Saves both the data ground-truth trajectories and the
     model-sampled ones for direct comparison.
     """
-    test_loader, dataset = make_loader(config, "test")
-    test_next = jax.jit(test_loader.next)
+    # Run on CPU: this cosmetic demo vmaps many sample rollouts, and at large N
+    # the GPU still holds the training program's captured constants, so doing it
+    # on-device OOMs. CPU has ample RAM and the demo data is tiny. Also trim the
+    # number of sampled rollouts at large N to keep the CPU pass quick.
+    if config.N > 64:
+        n_samples_per_ic = min(n_samples_per_ic, 4)
+        n_ic = min(n_ic, 2)
 
-    key = jax.random.key(config.seed + seed_offset)
-    key, loader_key = jax.random.split(key)
-    state = test_loader.init_state(loader_key)
-    batch, _, _ = test_next(state)
+    cpu = jax.devices("cpu")[0]
+    with jax.default_device(cpu):
+        model = jax.device_put(model, cpu)
+        test_loader, dataset = make_loader(config, "test")
+        test_next = jax.jit(test_loader.next)
 
-    n_ic = min(n_ic, batch["theta0"].shape[0])
+        key = jax.random.key(config.seed + seed_offset)
+        key, loader_key = jax.random.split(key)
+        state = test_loader.init_state(loader_key)
+        batch, _, _ = test_next(state)
 
-    # Slice the first n_ic initial conditions.
-    sliced = {k: v[:n_ic] for k, v in batch.items()}
+        n_ic = min(n_ic, batch["theta0"].shape[0])
+        sliced = {k: v[:n_ic] for k, v in batch.items()}  # first n_ic initial conditions
 
-    @eqx.filter_jit
-    def one_pass(sk):
-        return _kuramoto_predict_batch(model, sliced, sk)
+        @eqx.filter_jit
+        def one_pass(sk):
+            return _kuramoto_predict_batch(model, sliced, sk)
 
-    sample_keys = jax.random.split(key, n_samples_per_ic)
-    sample_thetas, sample_omegas = jax.vmap(one_pass)(sample_keys)
+        sample_keys = jax.random.split(key, n_samples_per_ic)
+        sample_thetas, sample_omegas = jax.vmap(one_pass)(sample_keys)
 
     return {
         "theta0": np.asarray(sliced["theta0"]),
@@ -376,6 +408,18 @@ def _override_from_args(config: ExperimentConfig, args: argparse.Namespace) -> E
         overrides["model"] = ModelKind(args.model)
     if args.lr is not None:
         overrides["learning_rate"] = float(args.lr)
+    if args.hidden_dim is not None:
+        overrides["hidden_dim"] = int(args.hidden_dim)
+    if args.drift_depth is not None:
+        overrides["drift_depth"] = int(args.drift_depth)
+    if args.diffusion_depth is not None:
+        overrides["diffusion_depth"] = int(args.diffusion_depth)
+    if args.grad_clip_norm is not None:
+        overrides["grad_clip_norm"] = float(args.grad_clip_norm)
+    if args.diffusion_scale is not None:
+        overrides["diffusion_scale"] = float(args.diffusion_scale)
+    if args.dtype is not None:
+        overrides["dtype"] = str(args.dtype)
     if not overrides:
         return config
     return dataclasses.replace(config, **overrides)
@@ -401,15 +445,38 @@ def main() -> int:
         choices=("kuramoto_nsde", "euclidean_baseline"),
     )
     parser.add_argument("--lr", type=float, default=None)
+    # Architecture / regularisation overrides (used by the calibration sweep).
+    parser.add_argument("--hidden-dim", type=int, default=None)
+    parser.add_argument("--drift-depth", type=int, default=None)
+    parser.add_argument("--diffusion-depth", type=int, default=None)
+    parser.add_argument("--grad-clip-norm", type=float, default=None)
+    parser.add_argument("--diffusion-scale", type=float, default=None)
+    parser.add_argument(
+        "--dtype", type=str, default=None, choices=("float32", "float64"),
+        help="float64 enables jax_enable_x64 (used to probe reversible-adjoint "
+             "reconstruction round-off).",
+    )
     parser.add_argument(
         "--resume-from", type=Path, default=None,
         help="Resume from a prior run dir's model_final.eqx + opt_state_final.eqx + "
              "history.json. Interpret --epochs as the *total* (resumed + new) count.",
     )
+    parser.add_argument(
+        "--auto-resume", action="store_true",
+        help="If --output-dir already holds checkpoints, resume in-place from the "
+             "latest one (for restarting after a timeout); no-op on a fresh dir.",
+    )
     args = parser.parse_args()
 
     config = load_config(args.config)
     config = _override_from_args(config, args)
+
+    # Apply dtype before any arrays are created. float64 doubles state memory
+    # and is FLOP-slow on L40S, but removes float32 round-off from the
+    # reversible adjoint's backward reconstruction.
+    if config.dtype == "float64":
+        jax.config.update("jax_enable_x64", True)
+        print("dtype: float64 (jax_enable_x64)", flush=True)
 
     _, train_dataset = make_loader(config, "train")
     metadata = train_dataset.metadata()
@@ -444,22 +511,34 @@ def main() -> int:
 
     if args.resume_from is not None and args.resume_from.resolve() == output_dir.resolve():
         raise ValueError(
-            "--resume-from must point to a different directory than --output-dir; "
-            "training overwrites model_final.eqx etc. in the output dir."
+            "--resume-from must differ from --output-dir; use --auto-resume for "
+            "in-place resume after a timeout."
         )
+
+    resume_from = args.resume_from
+    if args.auto_resume and resume_from is None:
+        # In-place resume only when a usable checkpoint is present and the run was
+        # not already finalized (metrics.json absent => a prior attempt was cut).
+        has_ckpt = (output_dir / "history.json").exists() and (
+            (output_dir / "model_final.eqx").exists()
+            or any(output_dir.glob("model_epoch_*.eqx"))
+        )
+        if has_ckpt:
+            resume_from = output_dir
+            print(f"auto-resume: continuing in-place from {output_dir}", flush=True)
 
     train_t0 = time.time()
     best_model, history = fit(
         model,
         loss_fn=loss_fn, metric_fn=metric_fn,
         config=config, output_dir=output_dir,
-        resume_from=args.resume_from,
+        resume_from=resume_from,
     )
     train_walltime_s = float(time.time() - train_t0)
 
-    demo = predict_demo(best_model, config)
-    save_npz(output_dir / "predictions_demo.npz", **demo)
-
+    # Save metrics FIRST: this is the essential result and must survive even if
+    # the cosmetic demo sampling below fails. predict_demo vmaps sample rollouts
+    # and can OOM at large N, so it must never be able to lose a completed run.
     save_json(
         output_dir / "metrics.json",
         {
@@ -479,6 +558,15 @@ def main() -> int:
             },
         },
     )
+
+    # Best-effort sample-trajectory demo for plotting; non-fatal on failure
+    # (e.g. GPU OOM at large N) so it can never lose a completed run's metrics.
+    try:
+        demo = predict_demo(best_model, config)
+        save_npz(output_dir / "predictions_demo.npz", **demo)
+    except Exception as exc:  # demo is cosmetic; never fail the run on it
+        print(f"[warn] predict_demo skipped ({type(exc).__name__}: {exc})", flush=True)
+
     print(f"saved artifacts to {output_dir}", flush=True)
     return 0
 

@@ -85,3 +85,12 @@ experiments/sphere_latent_nsde/results
 !experiments/**/results/**/*.png
 !experiments/**/results/**/*.pdf
 !experiments/**/results/**/*.md
+
+# Generated local training data and integration validation outputs
+experiments/stochastic_volatility/data/
+experiments/ou/plots/
+experiments/ou/results/paper/
+experiments/stiff_gbm/results/
+experiments/option_pricing/plots/
+plots/
+validation-output/
