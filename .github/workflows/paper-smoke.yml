@@ -1,0 +1,33 @@
+name: Paper smoke checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  cpu:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      JAX_PLATFORMS: cpu
+      MPLBACKEND: Agg
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: '3.13'
+      - name: Install CPU experiment dependencies
+        run: python -m pip install '.[convergence-ode,order-verification,kuramoto,sphere-jax,stochastic-volatility]' pytest
+      - name: Solver and geometry regressions
+        run: python -m pytest experiments/kuramoto/tests tests/test_unified_solvers.py -q
+      - name: Numerical and exact order checks
+        run: |
+          python -m experiments.convergence_ode.convergence --output-dir "$RUNNER_TEMP/ode-convergence"
+          python -m order_verification.verify
+          python order_verification/siam/scripts/verify_cfees.py
+          python order_verification/siam/scripts/summarize_records.py

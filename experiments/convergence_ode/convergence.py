@@ -7,6 +7,7 @@ Run from the repository root:
 from __future__ import annotations
 
 import argparse
+from importlib import metadata
 import csv
 import json
 import os
@@ -31,7 +32,7 @@ from scipy.linalg import expm
 from georax import AbstractCommutatorFreeSolver, CFEES25, CFEES27, GeometricTerm, SO
 from georax._solver.commutator_free import CommutatorFreeTableau
 
-from .plotting import plot_error_curve
+from experiments.convergence_plotting import plot_error_curve
 from experiments.plotting import set_plotting_params
 
 
@@ -234,6 +235,13 @@ def main():
         "python": platform.python_version(), "jax": jax.__version__,
         "diffrax": diffrax.__version__, "numpy": np.__version__,
         "matplotlib": matplotlib.__version__,
+        "solver_packages": {
+            name: {
+                "version": metadata.version(name),
+                "source": json.loads(metadata.distribution(name).read_text("direct_url.json") or "null"),
+            }
+            for name in ["georax", "diffrax-lowstorage", "diffrax"]
+        },
         "action": "georax SO(3), degree-eight Taylor exponential plus QR",
         "resolved_error_threshold": float(100 * np.finfo(float).eps),
         "methods": methods,

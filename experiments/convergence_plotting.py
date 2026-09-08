@@ -1,4 +1,4 @@
-"""Convergence panels for the ODE experiment."""
+"""Convergence panels shared by the ODE and fractional-Brownian experiments."""
 
 import matplotlib.markers as mkr
 import numpy as np

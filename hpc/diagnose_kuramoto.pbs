@@ -42,7 +42,7 @@ echo "[diag] idx=${IDX} epochs=${EPOCHS}  live log: $LOG"
 python -m experiments.kuramoto.scripts.run_calibration \
     --grid diagnostic \
     --index "${IDX}" \
-    --config experiments/kuramoto/configs/kuramoto_runtime_parity.toml \
+    --config experiments/kuramoto/configs/kuramoto_hpc_calibrated.toml \
     --epochs "${EPOCHS}" \
     --output-base experiments/kuramoto/results/diagnostic_N1000/ 2>&1 | tee "$LOG"
 

@@ -1,0 +1,35 @@
+# Config for the runtime-parity experiment.
+# Mirrors the improved_v2_indexed_* runs (drift_kind=indexed_mean_field,
+# diffusion_scale=0.1) which substantially outperformed the original
+# mean_field architecture. Per-method n_steps is set on the CLI.
+
+epochs = 15
+batch_size = 32
+learning_rate = 3e-4   # calibrated for N=1000; 1e-3 diverges (gradient explosion ~epoch 3)
+seed = 0
+device = "gpu"
+dtype = "float32"
+
+model = "kuramoto_nsde"
+hidden_dim = 256   # calibrated for N=1000 (256 > 128 by ~10-15 val); see run_calibration.py
+drift_depth = 3
+diffusion_depth = 2
+activation = "silu"
+diffusion_scale = 0.1
+couple_theta_omega = false
+drift_kind = "indexed_mean_field"
+
+solver = "cfees25"
+n_steps = 100
+adjoint = "auto"
+
+N = 1000
+data_seed = 0
+data_dir = "experiments/kuramoto/data/"
+
+loss_horizons = [0.125, 0.25, 0.5, 1.0]
+loss_n_samples = 4
+grad_clip_norm = 1.0
+
+save_every_epoch = true
+skip_plots = false

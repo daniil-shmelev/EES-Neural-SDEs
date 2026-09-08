@@ -42,6 +42,7 @@ LOG="hpc/logs/kuramoto_seed${SEED}.log"
 echo "[kuramoto] seed=${SEED} epochs=${EPOCHS} batch=${BATCH} lr=${LR} N=1000"
 echo "[kuramoto] live log: $LOG  (per-method epochs in runtime_parity_N1000_quality/<method>_seed${SEED}/train.log)"
 python -m experiments.kuramoto.scripts.run_runtime_parity \
+    --config experiments/kuramoto/configs/kuramoto_hpc_calibrated.toml \
     --N 1000 \
     --seeds "${SEED}" \
     --epochs "${EPOCHS}" \

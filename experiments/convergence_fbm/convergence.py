@@ -26,10 +26,9 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.markers as mkr
 from diffrax_lowstorage import EES25, EES27
-
 from experiments.plotting import set_plotting_params
+from experiments.convergence_plotting import plot_error_curve
 
 jax.config.update("jax_enable_x64", True)
 
@@ -92,18 +91,8 @@ def plot(f, solver, H, T, rate, ax, N = 10, backward = False):
         y += np.log10(error)
 
     y /= N
-    x = np.log10(h)
-    dx = np.array([x[0], x[-1]])
-
-    err_label = r'$\log_{10}(\mathcal{E}(h))$' if not backward else r'$\log_{10}(\overleftarrow{\mathcal{E}}(h))$'
-
-    intercept = np.mean(y) - rate * np.mean(x)
+    intercept = plot_error_curve(h, y, rate, ax, backward=backward)
     print("Error intercept: ", intercept)
-    ax.scatter(x, y, marker=mkr.MarkerStyle('x', fillstyle='none'), color='crimson')
-    ax.plot(dx, rate * dx + intercept, color='mediumblue')
-    ax.legend([err_label, str(np.round(rate,1)) + r'$x + c$'])
-    ax.set_xlabel(r'$\log_{10}(h)$')
-    ax.set_ylabel(err_label)
     ax.set_title(r'$H = $' + str(np.round(H,1)))
 
 RESULTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")

@@ -1,0 +1,108 @@
+{
+  "python": "3.13.14",
+  "backend": "CPU",
+  "packages": {
+    "jax": {
+      "version": "0.11.1",
+      "source": null
+    },
+    "jaxlib": {
+      "version": "0.11.1",
+      "source": null
+    },
+    "equinox": {
+      "version": "0.13.8",
+      "source": null
+    },
+    "diffrax": {
+      "version": "0.7.1",
+      "source": {
+        "url": "https://github.com/sammccallum/diffrax",
+        "vcs_info": {
+          "vcs": "git",
+          "commit_id": "aeb1335b5a6278e85a270231e0f97b8db4453ae6",
+          "requested_revision": "aeb1335b5a6278e85a270231e0f97b8db4453ae6"
+        }
+      }
+    },
+    "diffrax-lowstorage": {
+      "version": "0.1.0",
+      "source": {
+        "url": "https://github.com/luke-a-thompson/diffrax-lowstorage.git",
+        "vcs_info": {
+          "vcs": "git",
+          "commit_id": "dc3a519919a634701c9cbb8cb5afc5f9d102a757",
+          "requested_revision": "dc3a519919a634701c9cbb8cb5afc5f9d102a757"
+        }
+      }
+    },
+    "georax": {
+      "version": "0.1.0",
+      "source": {
+        "url": "https://github.com/luke-a-thompson/georax.git",
+        "vcs_info": {
+          "vcs": "git",
+          "commit_id": "3e3b84ce3598627b2c2098cc1d3d8d8e2d030c13",
+          "requested_revision": "3e3b84ce3598627b2c2098cc1d3d8d8e2d030c13"
+        }
+      }
+    },
+    "cyreal": {
+      "version": "0.2.1",
+      "source": {
+        "url": "https://github.com/luke-a-thompson/cyreal_dynamics.git",
+        "vcs_info": {
+          "vcs": "git",
+          "commit_id": "88f02657989fc4f9c85df0afb1452085fc3f2f8b",
+          "requested_revision": "88f02657989fc4f9c85df0afb1452085fc3f2f8b"
+        }
+      }
+    },
+    "stochastax": {
+      "version": "0.5.0",
+      "source": {
+        "url": "https://github.com/luke-a-thompson/Stochastax.git",
+        "vcs_info": {
+          "vcs": "git",
+          "commit_id": "09c9612e9352bb05a0a92a30e2bc391cdd2c78e1",
+          "requested_revision": "09c9612e9352bb05a0a92a30e2bc391cdd2c78e1"
+        }
+      }
+    },
+    "kauri": {
+      "version": "2.1.1",
+      "source": {
+        "url": "https://github.com/daniil-shmelev/kauri.git",
+        "vcs_info": {
+          "vcs": "git",
+          "commit_id": "c76ca984b81040027372c931820bf03b2f524896",
+          "requested_revision": "c76ca984b81040027372c931820bf03b2f524896"
+        }
+      }
+    },
+    "optax": {
+      "version": "0.2.8",
+      "source": null
+    },
+    "numpy": {
+      "version": "2.5.3",
+      "source": null
+    },
+    "scipy": {
+      "version": "1.18.1",
+      "source": null
+    },
+    "sympy": {
+      "version": "1.14.0",
+      "source": null
+    },
+    "matplotlib": {
+      "version": "3.11.1",
+      "source": null
+    },
+    "pytest": {
+      "version": "9.1.1",
+      "source": null
+    }
+  }
+}

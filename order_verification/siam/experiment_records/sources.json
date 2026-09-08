@@ -1,0 +1,170 @@
+{
+  "experiment_records/kuramoto_runtime_parity.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/runtime_parity_N1000_n50/runtime_parity_summary.json",
+    "sha256": "560a6e5067b6f92b0d5fe81251194626cc948357290c6a0cea531811584db1fd",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/kuramoto_adjoint_ablation.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/solver_adjoint_ablation_N1000/ablation_summary.json",
+    "sha256": "4fc49aba912c461c7bda1ccec68ab7d7d10b9a7a0a8693a2857f69c470cb6334",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/kuramoto_memory.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/memory_sweep_N1000.json",
+    "sha256": "bfad2aa6e0f7abf9ec3fc48c2df97535f501db4fe50d453dd34f1bd96af2f0c6",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/kuramoto_config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/configs/kuramoto_runtime_parity.toml",
+    "sha256": "82af9ac20f6d600b852cfc605c580a6206b1dc08244f3ab70a8f37dfd1760c18",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cfees25_reversible__seed0__20260505_203627/metrics.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed0__20260505_203627/metrics.json",
+    "sha256": "0c06ee0e6eb22619caba2429b1ce6a008a9a87b253eeeac139e7ac913e66d474",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cfees25_reversible__seed0__20260505_203627/config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed0__20260505_203627/config.toml",
+    "sha256": "dd5b753f519bd26ef0a6f1adf019c61b31153652a6d4112acf3ac11e5bf98d27",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cfees25_reversible__seed1__20260505_211141/metrics.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed1__20260505_211141/metrics.json",
+    "sha256": "50d2a592a1206cc59a270123bc2e6254dcd1cf8abb480031e80474d89b194b99",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cfees25_reversible__seed1__20260505_211141/config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed1__20260505_211141/config.toml",
+    "sha256": "b72c253420b51875d18b46d2d03497bbcca77284c1eccf7603abdafb5fcfea5a",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cfees25_reversible__seed2__20260505_213646/metrics.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed2__20260505_213646/metrics.json",
+    "sha256": "4a4156c8f5c3534d3d8ad3070ccdf20db53e222273b415597e3a28c77a0afef6",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cfees25_reversible__seed2__20260505_213646/config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed2__20260505_213646/config.toml",
+    "sha256": "8644cf30483eb9bc07fc47885f23829e2002ddbc5836a4daf7379e01b64f0194",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cg2_direct__seed0__20260505_204306/metrics.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cg2_direct__seed0__20260505_204306/metrics.json",
+    "sha256": "6c848ed049d77b863d6b2e3f45be8e29d3063d2dc522800c5c9febfaa83a94f9",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cg2_direct__seed0__20260505_204306/config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cg2_direct__seed0__20260505_204306/config.toml",
+    "sha256": "792aa668f8fb8baa0731f97101dcfe4f92c45f8e5658b0c3f5b973a40d4159c7",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cg2_direct__seed1__20260505_211839/metrics.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cg2_direct__seed1__20260505_211839/metrics.json",
+    "sha256": "b94d91d3f0657a69b2fc091cfc7f62faf16dcd62c6bab2f67a9bc77a9f3633ca",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cg2_direct__seed1__20260505_211839/config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cg2_direct__seed1__20260505_211839/config.toml",
+    "sha256": "f9ce0af43300ccbe53bd8be66bee0ea20998caee73285b7e5d18f44e05b4b16f",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cg2_direct__seed2__20260505_214325/metrics.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cg2_direct__seed2__20260505_214325/metrics.json",
+    "sha256": "e6f523e8aea40f90c506ad95f0e5dfc69544d017940b36bc420ffbb29104fefa",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__cg2_direct__seed2__20260505_214325/config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__cg2_direct__seed2__20260505_214325/config.toml",
+    "sha256": "289e94abe0413d97bd9fb3e5d563a9c2338ef8e441a0f3e313c328bc1d901c4c",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__geometric_euler_direct__seed0__20260505_203015/metrics.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed0__20260505_203015/metrics.json",
+    "sha256": "7a65b73eaf2672adc322f3f9a70317f36705c44bea2fd6e126c66deb537e8287",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__geometric_euler_direct__seed0__20260505_203015/config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed0__20260505_203015/config.toml",
+    "sha256": "99a5adb23e23b07056224dcc8dbcfc7d42ccecda6776b844c1d1d30754a7902e",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__geometric_euler_direct__seed1__20260505_210514/metrics.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed1__20260505_210514/metrics.json",
+    "sha256": "412a4cdb49e6a64b5bbdab7a13b1dfd60cb3c9ac76968dd5f3cbd021981dfff9",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__geometric_euler_direct__seed1__20260505_210514/config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed1__20260505_210514/config.toml",
+    "sha256": "9eb13d490c5df5e65e37fd9d86722d8ca54317b2602f4150a19d0a48ed08fa94",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__geometric_euler_direct__seed2__20260505_213058/metrics.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed2__20260505_213058/metrics.json",
+    "sha256": "a8e59ec793f2f030b0118e7ad567bcd9506fd66c9589ee347c628afb66afa0e5",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__geometric_euler_direct__seed2__20260505_213058/config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed2__20260505_213058/config.toml",
+    "sha256": "7c3226a9c0dc44cd174bef45f280f6af3f4a082f7ce1730e8a29b75372ff4eee",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__srkmk_general_shark_checkpoint_full__seed1__20260507_203629/metrics.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed1__20260507_203629/metrics.json",
+    "sha256": "9d08f79329c81aaa5f8d60360889dcc4fa0959813cf42ce2cd09fc14b02b73c4",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__srkmk_general_shark_checkpoint_full__seed1__20260507_203629/config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed1__20260507_203629/config.toml",
+    "sha256": "e94765e91a1bf393fb4ab2bc028e84391272b05f6c1e3eeff5d3cecb5ea8684a",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__srkmk_general_shark_checkpoint_full__seed2__20260507_204807/metrics.json": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed2__20260507_204807/metrics.json",
+    "sha256": "9c59ff9f11b72e07488e1619f42a42bc46ed44fa0ef563b8be532c58bc54a7c7",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_training/activity__srkmk_general_shark_checkpoint_full__seed2__20260507_204807/config.toml": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed2__20260507_204807/config.toml",
+    "sha256": "88f74d29f790512cb92ad5f15026c59b357fdeff309f4597a39f9cd5152a2af2",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  },
+  "experiment_records/sphere_memory.csv": {
+    "local_source": "/home/luke/EES-LatentSDEonHS/results/memory_sweep_integrator.csv",
+    "sha256": "00fd0d416bb161780ee4cd34b544c7d76bdc1ab239bbeede10f3bf00a353cdcb",
+    "repository_commit": "53cc13c1dcb1ef65f8ab3459d8c1d12b207ef4af",
+    "archived": "2026-09-06"
+  },
+  "../figures/cfees_stochastic_convergence_12up.pdf": {
+    "local_source": "/home/luke/EES-Neural-SDEs/experiments/convergence_fbm/results/cfees_stochastic_convergence_12up.pdf",
+    "sha256": "e5097e4e74956c9b63c34d68c65963e55c19b607422b7ae6e3d952ff2b6c05ab",
+    "repository_commit": "62d5e91ccb2eff9006302ac00d4e68889e3fd84c",
+    "archived": "2026-09-06"
+  }
+}

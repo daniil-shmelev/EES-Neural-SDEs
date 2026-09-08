@@ -40,6 +40,7 @@ echo "[kuramoto-f64] idx=${IDX} method=${METHOD} seed=${SEED} epochs=${EPOCHS}"
 echo "[kuramoto-f64] live log: ${LOG}"
 
 python -m experiments.kuramoto.scripts.run_runtime_parity \
+    --config experiments/kuramoto/configs/kuramoto_hpc_calibrated.toml \
     --N 1000 \
     --seeds "${SEED}" \
     --methods "${METHOD}" \

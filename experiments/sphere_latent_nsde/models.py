@@ -16,14 +16,16 @@ from diffrax import (
     AbstractSolver,
     ControlTerm,
     DirectAdjoint,
+    GeneralShARK,
     MultiTerm,
     RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
     SaveAt,
+    SpaceTimeLevyArea,
     VirtualBrownianTree,
     diffeqsolve,
 )
-from georax import CFEES25, CG2, GeometricEuler, GeometricTerm
+from georax import CFEES25, CG2, GeometricEuler, GeometricTerm, SRKMK
 from jaxtyping import Array
 
 from experiments.sphere_latent_nsde.custom_vbt import (
@@ -76,29 +78,65 @@ def _apply_bbc_increment(z: Array, coeffs: Array, basis: Array) -> Array:
     return jnp.einsum("...ij,...j->...i", q, z)
 
 
-def build_solver(name: Literal["geometric_euler", "cg2", "cfees25"]) -> AbstractSolver:
+class _SRKMKWithScanKind(SRKMK):
+    scan_kind: Literal["lax", "checkpointed", "bounded"] | None
+
+    def __init__(
+        self,
+        solver: AbstractSolver,
+        *,
+        additive_after_pullback: bool = False,
+        scan_kind: Literal["lax", "checkpointed", "bounded"] | None = None,
+    ):
+        super().__init__(solver, additive_after_pullback=additive_after_pullback)
+        object.__setattr__(self, "scan_kind", scan_kind)
+
+
+def build_solver(
+    name: Literal["geometric_euler", "cg2", "cfees25", "srkmk_general_shark"],
+) -> AbstractSolver:
     if name == "geometric_euler":
         return GeometricEuler()
     if name == "cg2":
         return CG2()
     if name == "cfees25":
         return CFEES25()
+    if name == "srkmk_general_shark":
+        return _SRKMKWithScanKind(GeneralShARK())
     raise ValueError(f"unknown solver {name!r}")
 
 
 def build_adjoint(
     solver: AbstractSolver,
-    name: Literal["auto", "direct", "recursive_checkpoint", "reversible"] = "auto",
+    name: Literal[
+        "auto",
+        "direct",
+        "recursive_checkpoint",
+        "checkpoint_recursive",
+        "checkpoint_full",
+        "full",
+        "reversible",
+    ] = "auto",
+    *,
+    max_steps: int | None = None,
 ) -> AbstractAdjoint:
     if name == "direct":
         return DirectAdjoint()
-    if name == "recursive_checkpoint":
+    if name in ("recursive_checkpoint", "checkpoint_recursive"):
         return RecursiveCheckpointAdjoint()
+    if name in ("checkpoint_full", "full"):
+        if max_steps is None:
+            raise ValueError("checkpoint_full adjoint requires max_steps.")
+        return RecursiveCheckpointAdjoint(checkpoints=max_steps)
     if name == "reversible":
         return ReversibleAdjoint()
     if isinstance(solver, AbstractReversibleSolver):
         return ReversibleAdjoint()
     return DirectAdjoint()
+
+
+def _uses_diffrax_checkpoint_adjoint(adjoint: AbstractAdjoint) -> bool:
+    return isinstance(adjoint, RecursiveCheckpointAdjoint)
 
 
 def _interpolate_paths_to_grid(
@@ -470,24 +508,40 @@ class PathEncoder(eqx.Module):
         ``(mc, batch, time, z_dim)``.
         """
 
-        if isinstance(solver, GeometricEuler):
+        # Checkpoint adjoints must go through Diffrax so its tape policy is used.
+        if isinstance(solver, GeometricEuler) and not _uses_diffrax_checkpoint_adjoint(
+            adjoint
+        ):
             return self._integrate_paths_geometric_euler(h, z0, key, times=times)
-        if isinstance(solver, CFEES25):
+        if isinstance(solver, CFEES25) and isinstance(adjoint, ReversibleAdjoint):
             return self._integrate_paths_cfees25(h, z0, key, times=times)
 
         dt = times[1] - times[0]
         t0 = times[0]
         t1 = times[-1]
+        max_steps = int(times.shape[0]) + 8
         driver_dim = self.geometry.dimension
         z0 = self.geometry.project(z0)
         solve_args = (self.time_fn, h, self.sigma.astype(z0.dtype))
 
-        brownian = VirtualBrownianTree(
-            t0=t0,
-            t1=t1,
-            tol=dt / 4.0,
-            shape=z0.shape[:-1] + (driver_dim,),
-            key=key,
+        brownian_shape = z0.shape[:-1] + (driver_dim,)
+        brownian = (
+            VirtualBrownianTree(
+                t0=t0,
+                t1=t1,
+                tol=dt / 4.0,
+                shape=brownian_shape,
+                key=key,
+                levy_area=SpaceTimeLevyArea,
+            )
+            if isinstance(solver, SRKMK)
+            else VirtualBrownianTree(
+                t0=t0,
+                t1=t1,
+                tol=dt / 4.0,
+                shape=brownian_shape,
+                key=key,
+            )
         )
         term = MultiTerm(
             GeometricTerm(_sphere_drift_coeffs, self.geometry),
@@ -503,7 +557,7 @@ class PathEncoder(eqx.Module):
             args=solve_args,
             saveat=SaveAt(ts=times),
             adjoint=adjoint,
-            max_steps=int(times.shape[0]) + 8,
+            max_steps=max_steps,
         )
         return jnp.moveaxis(sol.ys, 0, 2)
 
@@ -615,9 +669,20 @@ class ActivityLatentSDE(eqx.Module):
         z_dim: int = 16,
         n_deg: int = 4,
         nfe_budget: int | None = None,
-        solver_name: Literal["geometric_euler", "cg2", "cfees25"] = "geometric_euler",
+        solver_name: Literal[
+            "geometric_euler",
+            "cg2",
+            "cfees25",
+            "srkmk_general_shark",
+        ] = "geometric_euler",
         adjoint_name: Literal[
-            "auto", "direct", "recursive_checkpoint", "reversible"
+            "auto",
+            "direct",
+            "recursive_checkpoint",
+            "checkpoint_recursive",
+            "checkpoint_full",
+            "full",
+            "reversible",
         ] = "auto",
         learnable_prior: bool = False,
         use_atanh: bool = False,
@@ -652,13 +717,15 @@ class ActivityLatentSDE(eqx.Module):
         )
         self.recon_net = eqx.nn.Linear(z_dim, input_dim, key=k3)
         self.aux_net = eqx.nn.Linear(z_dim, num_classes, key=k4)
+        solve_n_steps = int(nfe_budget) // int(nfe_per_step)
+        max_steps = solve_n_steps + 1 + 8
         self.solver = solver
-        self.adjoint = build_adjoint(solver, adjoint_name)
+        self.adjoint = build_adjoint(solver, adjoint_name, max_steps=max_steps)
         self.z_dim = z_dim
         self.num_timepoints = int(num_timepoints)
         self.nfe_budget = int(nfe_budget)
         self.nfe_per_step = int(nfe_per_step)
-        self.solve_n_steps = int(nfe_budget) // int(nfe_per_step)
+        self.solve_n_steps = solve_n_steps
         self.solve_num_timepoints = self.solve_n_steps + 1
         self.time_end = 0.99
         self.recon_sigma = jnp.asarray(1.0, dtype=jnp.float32)

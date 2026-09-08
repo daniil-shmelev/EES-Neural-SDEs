@@ -1,7 +1,6 @@
 # fBm/RDE Convergence
 
-Numerical verification of global error rates for EES-class schemes on RDEs
-driven by fractional Brownian motion at Hurst indices `H in {0.4, 0.5, 0.6}`.
+Numerical verification of global error rates for EES-class schemes on RDEs driven by fractional Brownian motion at Hurst indices `H in {0.4, 0.5, 0.6}`.
 
 - `convergence.py`: Euclidean Redmann-Riedel test problem for `EES(2,5)`
   and `EES(2,7)`.
@@ -29,3 +28,7 @@ python -m experiments.convergence_fbm.scripts.so3_local_order_verify
 python -m experiments.convergence_fbm.scripts.so3_reversibility_verify
 python -m experiments.convergence_fbm.scripts.so3_reversibility_plot
 ```
+
+## Composed pages
+
+After generating the per-Hurst PDFs, run `python -m experiments.convergence_fbm.scripts.compose_12up_pages --kind all` to make the two 12-panel pages and the combined 24-panel page. This needs Ghostscript; vector composition also needs pdflatex. Separate pages support `--raster`. `--results-dir` selects the source/output directory. The ODE and Euclidean fBm curves share `experiments.convergence_plotting`.

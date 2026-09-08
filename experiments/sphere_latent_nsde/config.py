@@ -13,14 +13,29 @@ from experiments.sphere_latent_nsde.dataset import NUM_TIMEPOINTS
 
 METHODS = {
     "geometric_euler_direct": ("geometric_euler", "direct"),
+    "geometric_euler_checkpoint_full": (
+        "geometric_euler",
+        "checkpoint_full",
+    ),
+    "geometric_euler_full": (
+        "geometric_euler",
+        "checkpoint_full",
+    ),
+    "geometric_euler_recursive_checkpoint": (
+        "geometric_euler",
+        "recursive_checkpoint",
+    ),
     "cfees25_reversible": ("cfees25", "reversible"),
     "cg2_direct": ("cg2", "direct"),
+    "srkmk_general_shark_direct": ("srkmk_general_shark", "direct"),
+    "srkmk_general_shark_full": ("srkmk_general_shark", "checkpoint_full"),
 }
 
 SOLVER_NFE_PER_STEP = {
     "geometric_euler": 1,
     "cg2": 2,
     "cfees25": 3,
+    "srkmk_general_shark": 2,
 }
 COMMON_NFE_GRANULARITY = math.lcm(*SOLVER_NFE_PER_STEP.values())
 
@@ -42,8 +57,21 @@ class ActivityConfig:
     n_deg: int = 4
     num_timepoints: int = NUM_TIMEPOINTS
     nfe_budget: int | None = None
-    solver: Literal["geometric_euler", "cg2", "cfees25"] = "geometric_euler"
-    adjoint: Literal["auto", "direct", "recursive_checkpoint", "reversible"] = "auto"
+    solver: Literal[
+        "geometric_euler",
+        "cg2",
+        "cfees25",
+        "srkmk_general_shark",
+    ] = "geometric_euler"
+    adjoint: Literal[
+        "auto",
+        "direct",
+        "recursive_checkpoint",
+        "checkpoint_recursive",
+        "checkpoint_full",
+        "full",
+        "reversible",
+    ] = "auto"
     learnable_prior: bool = False
     use_atanh: bool = False
     kl0_weight: float = 1e-4

@@ -21,7 +21,6 @@ from diffrax import (
     ControlTerm,
     DirectAdjoint,
     MultiTerm,
-    ODETerm,
     ReversibleAdjoint,
     SaveAt,
     VirtualBrownianTree,
@@ -30,6 +29,14 @@ from diffrax import (
 from georax import CFEES25, GeometricTerm
 
 from experiments.kuramoto.models.product_torus import ProductTorusEuclidean
+
+def _drift_coeffs(t, y, args):
+    return args[0](t, y, None)
+
+
+def _diffusion_coeffs(t, y, args):
+    return args[1](t, y, None)
+
 
 _ACTIVATIONS = {
     "silu": jax.nn.silu,
@@ -571,12 +578,9 @@ class KuramotoNSDE(eqx.Module):
         brownian_path = VirtualBrownianTree(
             t0=0.0, t1=t1, tol=self.dt / 4.0, shape=(N,), key=key,
         )
-        term = GeometricTerm(
-            inner=MultiTerm(
-                ODETerm(self.drift_field),
-                ControlTerm(self.diffusion_field, brownian_path),
-            ),
-            geometry=self.drift_field.geometry,
+        term = MultiTerm(
+            GeometricTerm(_drift_coeffs, geometry=self.drift_field.geometry),
+            ControlTerm(_diffusion_coeffs, brownian_path),
         )
 
         if self.adjoint is not None:
@@ -588,6 +592,7 @@ class KuramotoNSDE(eqx.Module):
 
         sol = diffeqsolve(
             term, self.solver, t0=0.0, t1=t1, dt0=self.dt, y0=y0,
+            args=(self.drift_field, self.diffusion_field),
             saveat=SaveAt(ts=t_save), adjoint=adjoint,
             max_steps=self.n_steps + 16,
         )

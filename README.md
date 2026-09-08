@@ -1,91 +1,58 @@
 # Explicit and Effectively Symmetric Schemes for Neural SDEs on Lie Groups
 
-Code for the paper *"Explicit and Effectively Symmetric Schemes for Neural SDEs on Lie Groups"*.
+Code and experiment records for [the paper](https://arxiv.org/abs/2509.20599). `main` is the target for the unified paper repository; `paper-unification` integrates the earlier experiment branches and local ODE work. See [PAPER_RESULTS.md](PAPER_RESULTS.md) for the figure/table index and [docs/unification.md](docs/unification.md) for the branch audit and reproduction gaps.
 
-This umbrella repository contains the implementations, scripts, committed
-result files, and submodules used to reproduce the paper figures and tables.
-Each experiment under `experiments/` has its own README with setup notes.
+## Setup
 
-## Repository Layout
+Use Python 3.13. Initialise the pinned submodules when running sphere or molecular-dynamics experiments:
 
-```text
-order_verification/             Symbolic MKW checks for CFEES order conditions
-stability/
-  ode.py                        ODE stability domains for EES schemes and reversible solvers
-  sde.py                        Mean-square SDE stability cross-sections
-experiments/
-  convergence_fbm/              Euclidean and SO(3) fBm/RDE convergence checks
-  ou/                           Ornstein-Uhlenbeck latent SDE experiment
-  stiff_gbm/                    Stiff GBM neural SDE experiment
-  stochastic_volatility/        Stochastic-volatility benchmark
-  kuramoto/                     Stochastic Kuramoto neural SDE on T^N x R^N
-  torus/                        Torus neural SDE memory benchmark
-  sphere_latent_nsde/           JAX/georax HumanActivity sphere latent NSDE
-  sphere_latent_sde/            Submodule: PyTorch HumanActivity sphere latent SDE
-  ees_dynamical_fitting/        Submodule: molecular-dynamics fitting benchmark
-  plotting.py                   Shared Matplotlib styling for paper figures
-PAPER_RESULTS.md                Paper figure/table to code cross-reference
+```sh
+git submodule update --init --recursive
+uv venv --python 3.13
+uv pip install -e ".[convergence-ode,order-verification,dev]"
 ```
 
-## Install
+Install experiment extras as needed: `convergence-fbm`, `ou`, `stiff-gbm`, `option-pricing`, `kuramoto`, `torus`, `sphere-jax`, `sphere`, or `stochastic-volatility`. JAX extras install the CPU-capable stack; add `cuda` for Linux GPU runs. `all` installs all paper experiment extras. Solver revisions are pinned in [pyproject.toml](pyproject.toml). Historical measurements retain their original environment metadata.
 
-We recommend [`uv`](https://docs.astral.sh/uv/) and Python 3.13. Python 3.13
-is required by the pinned JAX/Diffrax/georax solver stack.
+## Experiments
 
-```bash
-uv pip install -e ".[dev]"
+| Directory | Purpose |
+|---|---|
+| `experiments/convergence_ode` | New deterministic SO(3) convergence, recovery and embedded diagnostics |
+| `experiments/convergence_fbm` | Euclidean/SO(3) rough-driver convergence; 12/24-panel PDF compositor |
+| `order_verification` | Kauri checks; `siam/` preserves the new exact ordered-forest verifier and records |
+| `stability` | Original ODE/SDE figure recipes and separate revised Reversible-Heun overlay |
+| `experiments/ou` | Fixed-NFE training, local relative-gradient diagnostics and single-step sweeps |
+| `experiments/stiff_gbm` | High-dimensional stiff-drift GBM recovered from `gbm` |
+| `experiments/option_pricing` | Previous `stiff_gbm` option-pricing example |
+| `experiments/stochastic_volatility` | Seven-model sweep, fixed-step alternative and repeated inference |
+| `experiments/kuramoto` | Training, memory/parity sweeps, adjoint ablation and Lyapunov diagnostics |
+| `experiments/torus` | Torus memory benchmark |
+| `experiments/sphere_latent_nsde` | JAX sphere learning and SRKMK-GeneralShARK baseline |
+| `experiments/sphere_latent_sde` | Pinned PyTorch sphere submodule |
+| `experiments/ees_dynamical_fitting` | Pinned molecular-dynamics submodule |
+| `hpc` | Imperial RCS launchers and resumable runs |
+
+Run module commands from the repository root:
+
+```sh
+python -m experiments.convergence_ode.convergence
+python -m order_verification.verify
+python -m experiments.kuramoto.scripts.run_runtime_parity --help
 ```
 
-## External Libraries
+## Data and results
 
-Pinned direct references are declared in `pyproject.toml`.
+Compact existing measurements and archived manuscript records remain in Git. The new ODE experiment and compositor generate their outputs locally; their generated PDFs/CSV/JSON are not added by this integration. Large datasets and checkpoints remain outside the source history.
 
-| Library | Source | Pinned at |
-|---|---|---|
-| `diffrax` | `github.com/sammccallum/diffrax` | `aeb1335b` |
-| `diffrax-lowstorage` | `github.com/luke-a-thompson/diffrax-lowstorage` | `6bca5807` |
-| `georax` | `github.com/luke-a-thompson/georax` | `30ecbb9b` |
-| `cyreal` | `github.com/luke-a-thompson/cyreal_dynamics` | `88f02657` |
-| `kauri` | `github.com/daniil-shmelev/kauri` | `c76ca984` |
-| `torchsde` | `github.com/daniil-shmelev/torchsde` (`mcf` branch) | `a0b71269` |
+The sphere loader accepts UCI HumanActivity data under `experiments/sphere_latent_sde/data_dir`; see the [sphere README](experiments/sphere_latent_nsde/README.md). Stochastic-volatility datasets must be supplied separately; see the [volatility README](experiments/stochastic_volatility/README.md) for filenames and schema. Generate Kuramoto datasets with `python -m experiments.kuramoto.scripts.run_m1`. OU, GBM, torus, stability and convergence scripts generate synthetic inputs.
 
-## Datasets
+Published configurations and later calibration recipes are distinct. `kuramoto_runtime_parity.toml` keeps the earlier learning rate and width; HPC jobs explicitly select `kuramoto_hpc_calibrated.toml`. See [the audit](docs/unification.md) before treating new outputs as reproductions of archived numbers.
 
-- Sphere latent SDE/NSDE: the HumanActivity experiments use the UCI
-  `ConfLongDemo_JSI.txt` file. Both the PyTorch baseline and the JAX/georax
-  reimplementation default to
-  `experiments/sphere_latent_sde/data_dir/PersonActivity/`, which is ignored by
-  git. Download and preprocess it from the UCI Machine Learning Repository with:
+## Development and releases
 
-  ```bash
-  cd experiments/sphere_latent_sde
-  python -c "from data.activity_provider import HumanActivityProvider; HumanActivityProvider('data_dir', download=True)"
-  ```
+Use short-lived branches and PRs targeting `main`. Record each figure/table command, configuration, seeds, source revision and result location in `PAPER_RESULTS.md`. Tag a paper snapshot after its figure/table checklist is verified. Retire old branches after integration is merged and their original tips are archived.
 
-  The JAX NSDE loader can also read the raw file directly from
-  `experiments/sphere_latent_sde/data_dir/PersonActivity/raw/`; the raw URL is
-  `https://archive.ics.uci.edu/ml/machine-learning-databases/00196/ConfLongDemo_JSI.txt`.
-- The PyTorch sphere baseline also has download helpers for Rotating MNIST and
-  PhysioNet 2012, and local generators for pendulum and irregular-sine data.
-  See `experiments/sphere_latent_sde/README.md`.
-- Stochastic volatility: training expects seven `.npz` files under
-  `experiments/stochastic_volatility/data/`. They are not committed here and
-  must contain `driver` and `solution` arrays; see
-  `experiments/stochastic_volatility/README.md` for the required filenames.
-- Kuramoto data is generated locally by
-  `python -m experiments.kuramoto.scripts.run_m1`. The small `N=2` smoke
-  dataset is committed; larger sweeps are regenerated locally or on a GPU
-  machine.
-- Torus, OU, stiff GBM, stability, and convergence data are synthetic or
-  generated by their scripts.
-- The molecular-dynamics fitting submodule ships its benchmark assets in
-  `experiments/ees_dynamical_fitting/IR-fitting/`, including `water64.pdb` and
-  `params_eann4.pickle`.
+## Citation and licence
 
-## Citation
-
-Anonymised.
-
-## License
-
-Apache-2.0; see [LICENSE](LICENSE).
+See [CITATION.cff](CITATION.cff) and [the paper](https://arxiv.org/abs/2509.20599). Licensed under Apache-2.0; see [LICENSE](LICENSE).

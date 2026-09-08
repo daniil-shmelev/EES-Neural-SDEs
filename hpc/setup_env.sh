@@ -30,9 +30,9 @@ conda activate "${ENV_NAME}"
 # georax depends on diffrax-lowstorage, which is git-only (not on PyPI); the
 # lowstorage extra pins it from git, so it must be installed alongside or pip
 # fails resolving georax's dependency.
-echo "[setup] installing ees-neural-sdes[kuramoto,sphere-jax,lowstorage]"
+echo "[setup] installing ees-neural-sdes[kuramoto,sphere-jax,cuda]"
 python -m pip install --upgrade pip
-python -m pip install -e ".[kuramoto,sphere-jax,lowstorage]"
+python -m pip install -e ".[kuramoto,sphere-jax,cuda]"
 
 echo "[setup] verifying JAX sees CUDA wheels (CPU on login node is expected)"
 python - <<'PY'
