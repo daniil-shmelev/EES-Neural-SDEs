@@ -1,0 +1,33 @@
+# Full-scale HumanActivity sweep for the paper's sphere latent-SDE table.
+#
+# Restores the *native* 228-point output grid and the published ~990-epoch
+# training budget of Zeng et al. (2023), across 5 seeds and the three georax
+# solver/adjoint methods. This is the configuration meant for the HPC; the
+# committed sweep.toml (30 epochs, 64 timepoints, 3 seeds) is the fast
+# workstation/dev version.
+#
+# sweep_len = len(method) * len(seed) = 3 * 5 = 15  -> PBS array 0-14.
+# Index ordering is itertools.product(method, seed): index = method_i*5 + seed_i.
+
+[base]
+experiment = "activity"
+data_dir = "experiments/sphere_latent_sde/data_dir"
+epochs = 990
+batch_size = 64
+learning_rate = 0.001
+seed = 0
+device = "gpu"
+h_dim = 32
+z_dim = 16          # latent state on S^15
+n_deg = 4
+num_timepoints = 228   # native grid (dev configs use 64/32)
+# nfe_budget omitted -> auto: largest multiple of 6 <= num_timepoints-1 (= 222).
+# Per-step NFE: geometric_euler=1 (222 steps), cg2=2 (111), cfees25=3 (74).
+
+[sweep]
+method = [
+    "geometric_euler_direct",
+    "cg2_direct",
+    "cfees25_reversible",
+]
+seed = [0, 1, 2, 3, 4]

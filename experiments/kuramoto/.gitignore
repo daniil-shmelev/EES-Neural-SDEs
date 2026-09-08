@@ -1,5 +1,7 @@
 # Regenerable simulator data (multi-GB; regen via scripts/run_m1.py)
 data/*.npz
+# Per-chunk data-gen checkpoints (transient; auto-removed once the .npz is written)
+data/_ckpt_*/
 
 # Model checkpoints - regenerable by re-training
 results/**/model_*.eqx
