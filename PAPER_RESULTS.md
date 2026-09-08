@@ -17,8 +17,8 @@ Result files committed under each script's `results/` directory back the numbers
 | Sphere latent SDE memory scaling | `experiments/sphere_latent_sde/scripts/memory_sweep_integrator.py`, `plot_figures.py` | `experiments/sphere_latent_sde/figures/memory.pdf`, `results/memory_sweep_integrator.csv` |
 | EES fBm convergence summary | `python experiments/convergence_fbm/convergence.py` | `experiments/convergence_fbm/results/ees_stochastic_convergence_H{40,50,60}.pdf` |
 | CF-EES SO(3) convergence summary | `python -m experiments.convergence_fbm.scripts.so3_reversibility_verify`, `so3_reversibility_plot` | `experiments/convergence_fbm/results/cfees_stochastic_convergence_H{40,50,60}.pdf`, `so3_reversibility_results.json` |
-| OU EES(2,5) vs EES(2,7) gradient error | `python -m experiments.ou.plot_paper_loss` and OU grad-error scripts | `experiments/ou/results/grad_error/single_step/OU_grad_error.pdf` |
-| Stiff GBM loss and gradient MSE | `python -m experiments.stiff_gbm.GBM --method ees25`, `plot_GBM.py` | rerun to regenerate |
+| OU EES(2,5) vs EES(2,7) gradient error | `python -m experiments.ou.scripts.single_step_grad_error`, `python -m experiments.ou.scripts.plot_grad_error` | `experiments/ou/results/grad_error/single_step/OU_grad_error.pdf` |
+| Stiff GBM loss and gradient MSE | `python -m experiments.stiff_gbm.GBM --method ees25`, `python -m experiments.stiff_gbm.plot_GBM`, `python -m experiments.stiff_gbm.plot_gradients` | rerun to regenerate |
 | Molecular-dynamics water initial condition | `experiments/ees_dynamical_fitting/IR-fitting/` | submodule assets; figure exported separately |
 | Molecular-dynamics training MSE | `experiments/ees_dynamical_fitting/IR-fitting/benchmark_ees.py` | generated from submodule benchmark |
 
