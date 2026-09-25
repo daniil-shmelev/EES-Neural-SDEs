@@ -1,0 +1,368 @@
+{
+  "unrestricted_gradient_checks": [
+    {
+      "model": "failed",
+      "seed": 12,
+      "mode": "reference",
+      "loss": 618.8602905273438,
+      "relative_error": 0.0,
+      "cosine": 1.0,
+      "seconds": 5.150465173006523
+    },
+    {
+      "model": "failed",
+      "seed": 12,
+      "mode": "raw",
+      "loss": 618.8602905273438,
+      "relative_error": 557.7305960881779,
+      "cosine": 0.004174631020639689,
+      "seconds": 4.955895506005618
+    },
+    {
+      "model": "failed",
+      "seed": 12,
+      "mode": "corrected",
+      "loss": 618.8602905273438,
+      "relative_error": 0.00011746497850631185,
+      "cosine": 0.9999999932309407,
+      "seconds": 6.177657053995063
+    },
+    {
+      "model": "failed",
+      "seed": 13,
+      "mode": "reference",
+      "loss": 592.59765625,
+      "relative_error": 0.0,
+      "cosine": 1.0,
+      "seconds": 1.2775409649912035
+    },
+    {
+      "model": "failed",
+      "seed": 13,
+      "mode": "raw",
+      "loss": 592.59765625,
+      "relative_error": 1506.8403448070678,
+      "cosine": 0.0058907672886931856,
+      "seconds": 1.4537479930004338
+    },
+    {
+      "model": "failed",
+      "seed": 13,
+      "mode": "corrected",
+      "loss": 592.59765625,
+      "relative_error": 0.00033154726293632664,
+      "cosine": 0.9999999472570305,
+      "seconds": 2.1537580719887046
+    },
+    {
+      "model": "failed",
+      "seed": 14,
+      "mode": "reference",
+      "loss": 584.9996337890625,
+      "relative_error": 0.0,
+      "cosine": 1.0,
+      "seconds": 1.473732366997865
+    },
+    {
+      "model": "failed",
+      "seed": 14,
+      "mode": "raw",
+      "loss": 584.9996337890625,
+      "relative_error": 1279.5510356192665,
+      "cosine": 0.0019114717201203079,
+      "seconds": 1.6737135699950159
+    },
+    {
+      "model": "failed",
+      "seed": 14,
+      "mode": "corrected",
+      "loss": 584.9996337890625,
+      "relative_error": 5.869533708470168e-05,
+      "cosine": 0.9999999988939228,
+      "seconds": 2.3637266590085346
+    },
+    {
+      "model": "cg2",
+      "seed": 12,
+      "mode": "reference",
+      "loss": 535.3425903320312,
+      "relative_error": 0.0,
+      "cosine": 1.0000000000000002,
+      "seconds": 0.7468740589974914
+    },
+    {
+      "model": "cg2",
+      "seed": 12,
+      "mode": "raw",
+      "loss": 535.3425903320312,
+      "relative_error": 1.1664931260410651,
+      "cosine": 0.4956465404275215,
+      "seconds": 1.055684093007585
+    },
+    {
+      "model": "cg2",
+      "seed": 12,
+      "mode": "corrected",
+      "loss": 535.3425903320312,
+      "relative_error": 0.008610571792653107,
+      "cosine": 0.9999630501384276,
+      "seconds": 1.4597474699985469
+    },
+    {
+      "model": "cg2",
+      "seed": 13,
+      "mode": "reference",
+      "loss": 524.019287109375,
+      "relative_error": 0.0,
+      "cosine": 0.9999999999999999,
+      "seconds": 0.7396305500005838
+    },
+    {
+      "model": "cg2",
+      "seed": 13,
+      "mode": "raw",
+      "loss": 524.019287109375,
+      "relative_error": 2.5348688612001395,
+      "cosine": 0.18613009968854982,
+      "seconds": 1.0836699049978051
+    },
+    {
+      "model": "cg2",
+      "seed": 13,
+      "mode": "corrected",
+      "loss": 524.019287109375,
+      "relative_error": 0.11930051661945788,
+      "cosine": 0.9944466016321691,
+      "seconds": 1.4520315019908594
+    },
+    {
+      "model": "cg2",
+      "seed": 14,
+      "mode": "reference",
+      "loss": 512.6626586914062,
+      "relative_error": 0.0,
+      "cosine": 0.9999999999999999,
+      "seconds": 0.7817268569924636
+    },
+    {
+      "model": "cg2",
+      "seed": 14,
+      "mode": "raw",
+      "loss": 512.6626586914062,
+      "relative_error": 1.0703849654970918,
+      "cosine": 0.485900428044653,
+      "seconds": 1.0516370429977542
+    },
+    {
+      "model": "cg2",
+      "seed": 14,
+      "mode": "corrected",
+      "loss": 512.6626586914062,
+      "relative_error": 0.07742581681647741,
+      "cosine": 0.9970516491209904,
+      "seconds": 1.4397140130022308
+    }
+  ],
+  "structured_gradient_checks": [
+    {
+      "atol": 0.01,
+      "nsteps": 50,
+      "seed": 12,
+      "adjoint": "reference",
+      "loss": 495.10693359375,
+      "norm": 664.4574955572864,
+      "error": 0.0,
+      "cosine": 1.0000000000000002,
+      "seconds": 4.306827934997273
+    },
+    {
+      "atol": 0.01,
+      "nsteps": 50,
+      "seed": 12,
+      "adjoint": "reversible",
+      "loss": 495.10693359375,
+      "norm": 664.4575828493778,
+      "error": 1.4736857649146605e-06,
+      "cosine": 0.9999999999989214,
+      "seconds": 4.547579473000951
+    },
+    {
+      "atol": 0.01,
+      "nsteps": 50,
+      "seed": 13,
+      "adjoint": "reference",
+      "loss": 485.3957824707031,
+      "norm": 589.8818639897609,
+      "error": 0.0,
+      "cosine": 1.0,
+      "seconds": 0.7194629900041036
+    },
+    {
+      "atol": 0.01,
+      "nsteps": 50,
+      "seed": 13,
+      "adjoint": "reversible",
+      "loss": 485.3957824707031,
+      "norm": 589.881764384721,
+      "error": 1.2529154681196316e-06,
+      "cosine": 0.9999999999992283,
+      "seconds": 1.0586803519981913
+    },
+    {
+      "atol": 0.01,
+      "nsteps": 50,
+      "seed": 14,
+      "adjoint": "reference",
+      "loss": 481.4491271972656,
+      "norm": 591.614867865406,
+      "error": 0.0,
+      "cosine": 1.0,
+      "seconds": 0.7626560450007673
+    },
+    {
+      "atol": 0.01,
+      "nsteps": 50,
+      "seed": 14,
+      "adjoint": "reversible",
+      "loss": 481.4491271972656,
+      "norm": 591.614684173369,
+      "error": 1.1504016293489017e-06,
+      "cosine": 0.9999999999993858,
+      "seconds": 1.11759974299639
+    },
+    {
+      "atol": 0.01,
+      "nsteps": 10,
+      "seed": 12,
+      "adjoint": "reference",
+      "loss": 494.83245849609375,
+      "norm": 657.4961014453572,
+      "error": 0.0,
+      "cosine": 0.9999999999999999,
+      "seconds": 4.003795782002271
+    },
+    {
+      "atol": 0.01,
+      "nsteps": 10,
+      "seed": 12,
+      "adjoint": "reversible",
+      "loss": 494.83245849609375,
+      "norm": 657.4949072142283,
+      "error": 9.01311890963392e-06,
+      "cosine": 0.9999999999610298,
+      "seconds": 3.8514403640001547
+    },
+    {
+      "atol": 0.01,
+      "nsteps": 10,
+      "seed": 13,
+      "adjoint": "reference",
+      "loss": 484.3528137207031,
+      "norm": 582.6503539469593,
+      "error": 0.0,
+      "cosine": 0.9999999999999998,
+      "seconds": 0.5316008249938022
+    },
+    {
+      "atol": 0.01,
+      "nsteps": 10,
+      "seed": 13,
+      "adjoint": "reversible",
+      "loss": 484.3528137207031,
+      "norm": 582.6498839402996,
+      "error": 9.941144549918007e-06,
+      "cosine": 0.9999999999509115,
+      "seconds": 0.67171248998784
+    },
+    {
+      "atol": 0.01,
+      "nsteps": 10,
+      "seed": 14,
+      "adjoint": "reference",
+      "loss": 480.926025390625,
+      "norm": 594.7645734355568,
+      "error": 0.0,
+      "cosine": 1.0,
+      "seconds": 0.5475779380067252
+    },
+    {
+      "atol": 0.01,
+      "nsteps": 10,
+      "seed": 14,
+      "adjoint": "reversible",
+      "loss": 480.926025390625,
+      "norm": 594.7625096149644,
+      "error": 8.153582210879723e-06,
+      "cosine": 0.9999999999727786,
+      "seconds": 0.6716454269917449
+    },
+    {
+      "atol": 0.03,
+      "nsteps": 10,
+      "seed": 12,
+      "adjoint": "reference",
+      "loss": 493.67572021484375,
+      "norm": 651.3457904008316,
+      "error": 0.0,
+      "cosine": 1.0000000000000002,
+      "seconds": 3.767668049011263
+    },
+    {
+      "atol": 0.03,
+      "nsteps": 10,
+      "seed": 12,
+      "adjoint": "reversible",
+      "loss": 493.67572021484375,
+      "norm": 651.2661264455476,
+      "error": 0.00047431664968414184,
+      "cosine": 0.9999998949784769,
+      "seconds": 3.6635287620010786
+    },
+    {
+      "atol": 0.03,
+      "nsteps": 10,
+      "seed": 13,
+      "adjoint": "reference",
+      "loss": 483.5921325683594,
+      "norm": 581.7044240910781,
+      "error": 0.0,
+      "cosine": 1.0000000000000002,
+      "seconds": 0.3035504400031641
+    },
+    {
+      "atol": 0.03,
+      "nsteps": 10,
+      "seed": 13,
+      "adjoint": "reversible",
+      "loss": 483.5921325683594,
+      "norm": 581.6901128385138,
+      "error": 0.00040245469424599707,
+      "cosine": 0.9999999193157594,
+      "seconds": 0.3675302060000831
+    },
+    {
+      "atol": 0.03,
+      "nsteps": 10,
+      "seed": 14,
+      "adjoint": "reference",
+      "loss": 479.781494140625,
+      "norm": 570.5819800613027,
+      "error": 0.0,
+      "cosine": 1.0,
+      "seconds": 0.2821898219990544
+    },
+    {
+      "atol": 0.03,
+      "nsteps": 10,
+      "seed": 14,
+      "adjoint": "reversible",
+      "loss": 479.781494140625,
+      "norm": 570.4776461531405,
+      "error": 0.0004386058302643704,
+      "cosine": 0.9999999205159483,
+      "seconds": 0.33912839299591724
+    }
+  ],
+  "local_drift_jacobian_eigenvalues": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_006.eqx 0 [-2.65519  +0.j -2.6747396+0.j -2.6837277+0.j -3.0480034+0.j]\nexperiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_006.eqx 50 [-2.3212113+0.j -2.3599768+0.j -2.410496 +0.j -2.7776964+0.j]\nexperiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_006.eqx 99 [-2.469761 +0.j -2.4728801+0.j -2.4800277+0.j -2.9835289+0.j]\nexperiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_final.eqx 0 [-1.2207179+0.j -1.2328842+0.j -1.2331246+0.j -3.405358 +0.j]\nexperiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_final.eqx 50 [-1.0967228+0.j -1.1516128+0.j -1.1836299+0.j -3.4138796+0.j]\nexperiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_final.eqx 99 [-1.1094096+0.j -1.1528611+0.j -1.1893843+0.j -3.4602675+0.j]\n",
+  "note": "Exploratory diagnostics. The refined inverse rows were a rejected approach; production uses ordinary CFEES25 and ReversibleAdjoint with the second-order model."
+}

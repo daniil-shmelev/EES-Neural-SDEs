@@ -15,49 +15,52 @@ import time
 from itertools import product
 from pathlib import Path
 
+from experiments.kuramoto.experiment.config import COMPARISON_METHODS, DEFAULT_CONFIG, PROTOCOL, load_config, serialize_config
+
 
 DEFAULT_NSTEPS = (50, 100, 200, 500, 1000, 2000, 5000, 10000)
-DEFAULT_PAIRS = (
-    ("cfees25", "reversible"),
-    ("cg2", "checkpoint_full"),
-    ("cg2", "checkpoint_recursive"),
-)
-
+DEFAULT_PAIRS = tuple((solver.value, adjoint) for _, solver, adjoint, _ in COMPARISON_METHODS)
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--N", type=int, default=1000)
-    p.add_argument("--batch-size", type=int, default=64)
-    p.add_argument("--hidden-dim", type=int, default=128)
-    p.add_argument("--T", type=float, default=5.0)
+    p.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    p.add_argument("--N", type=int, default=None)
+    p.add_argument("--batch-size", type=int, default=None)
     p.add_argument("--n-steps-grid", type=int, nargs="+",
                    default=list(DEFAULT_NSTEPS))
     p.add_argument(
         "--pairs", type=str, nargs="+",
         default=[f"{s}:{a}" for s, a in DEFAULT_PAIRS],
+        choices=[f"{s}:{a}" for s, a in DEFAULT_PAIRS],
         help="(solver:adjoint) pairs",
     )
-    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--seed", type=int, default=None)
     p.add_argument("--n-warmup", type=int, default=1)
     p.add_argument("--n-reps", type=int, default=3)
     p.add_argument("--output", type=Path,
-                   default=Path("experiments/kuramoto/results/memory_sweep_N1000.json"))
+                   default=Path("experiments/kuramoto/results/unified/memory.json"))
     p.add_argument("--cell-timeout", type=int, default=900,
                    help="Per-cell timeout in seconds.")
-    return p.parse_args()
+    args = p.parse_args()
+    config = load_config(args.config)
+    for name in ("N", "batch_size", "seed"):
+        if getattr(args, name) is None:
+            setattr(args, name, getattr(config, name))
+    return args
 
 
 def _run_cell(args, solver: str, adjoint: str, n_steps: int, cell_dir: Path) -> dict:
     out_path = cell_dir / f"cell_{solver}_{adjoint}_n{n_steps}.json"
+    if out_path.exists():
+        raise FileExistsError(f"Use a fresh output path: {out_path}")
     cmd = [
         sys.executable, "-m",
         "experiments.kuramoto.scripts.memory_sweep_single",
+        "--config", str(args.config),
         "--N", str(args.N),
         "--solver", solver, "--adjoint", adjoint,
         "--n-steps", str(n_steps),
         "--batch-size", str(args.batch_size),
-        "--hidden-dim", str(args.hidden_dim),
-        "--T", str(args.T),
         "--seed", str(args.seed),
         "--n-warmup", str(args.n_warmup),
         "--n-reps", str(args.n_reps),
@@ -102,8 +105,10 @@ def _run_cell(args, solver: str, adjoint: str, n_steps: int, cell_dir: Path) -> 
 
 def main() -> int:
     args = parse_args()
+    if args.output.exists():
+        raise FileExistsError(f"Use a fresh output path: {args.output}")
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    cell_dir = args.output.parent / f"memory_sweep_cells_N{args.N}"
+    cell_dir = args.output.parent / f"{args.output.stem}_cells"
     cell_dir.mkdir(parents=True, exist_ok=True)
 
     pairs = []
@@ -116,9 +121,10 @@ def main() -> int:
         cells.append(_run_cell(args, solver, adjoint, n_steps, cell_dir))
         # Persist after every cell so partial results survive a crash.
         args.output.write_text(json.dumps({
+            "protocol": PROTOCOL,
+            "experiment_config": json.loads(serialize_config(load_config(args.config))),
             "config": {
                 "N": args.N, "batch_size": args.batch_size,
-                "hidden_dim": args.hidden_dim, "T": args.T,
                 "n_steps_grid": args.n_steps_grid, "pairs": args.pairs,
                 "seed": args.seed,
             },

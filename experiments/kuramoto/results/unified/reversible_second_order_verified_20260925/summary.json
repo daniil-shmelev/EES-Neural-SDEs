@@ -1,0 +1,27 @@
+{
+  "results": {
+    "cfees25_reversible": {
+      "final_test_loss": 361.0294376627604,
+      "best_val_loss": 363.6375992838542,
+      "end_to_end_seconds": 400.84086807600397,
+      "training_update_seconds": 321.05909770684957,
+      "max_gradient_norm": 995.8734130859375,
+      "peak_gpu_mib": 4507.062255859375,
+      "epochs": 15
+    },
+    "cg2_full": {
+      "final_test_loss": 361.19439615885415,
+      "best_val_loss": 363.82466796875,
+      "end_to_end_seconds": 690.3033770089969,
+      "training_update_seconds": 596.0143580438453,
+      "max_gradient_norm": 996.8515625,
+      "peak_gpu_mib": 5110.26513671875,
+      "epochs": 15
+    }
+  },
+  "comparison": {
+    "speedup": 1.722138214904044,
+    "test_loss_relative_difference": -0.00045670281113991226
+  },
+  "scope": "One seed (0), 15 epochs, N=1000, 1500/300/300 trajectories, batch size 32, four forecast samples. Both solvers use the same second_order_mean_field drift. CF-EES uses ordinary ReversibleAdjoint, atol=0.03, dtmax=0.5, dtmin=1e-4; CG2 uses full checkpointing and 75 fixed steps. End-to-end timings use a monotonic external clock."
+}

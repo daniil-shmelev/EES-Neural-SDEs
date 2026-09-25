@@ -1,8 +1,4 @@
-"""Frozen-dataclass + TOML config for the Kuramoto NSDE experiment.
-
-Mirrors the convention of `experiments/rna/experiment/config.py` so that
-solver / adjoint / training-loop helpers carry over with minimal rewiring.
-"""
+"""TOML configuration for the Kuramoto training and memory benchmarks."""
 
 from __future__ import annotations
 
@@ -20,22 +16,36 @@ class Devices(StrEnum):
 
 class Solvers(StrEnum):
     CFEES25 = "cfees25"
-    CFEES27 = "cfees27"
     CG2 = "cg2"
-    CG4 = "cg4"
-    RKMK = "rkmk"
 
 
 class ModelKind(StrEnum):
     KURAMOTO_NSDE = "kuramoto_nsde"
-    EUCLIDEAN_BASELINE = "euclidean_baseline"
+
+
+COMPARISON_METHODS = (
+    ("cg2_full", Solvers.CG2, "checkpoint_full", 75),
+    ("cg2_recursive", Solvers.CG2, "checkpoint_recursive", 75),
+    ("cfees25_reversible", Solvers.CFEES25, "reversible", 50),
+)
+
+
+def validate_method(solver, adjoint, *, adaptive=False):
+    """Keep fixed-step comparisons restricted; allow checkpointed adaptive training."""
+    if adaptive and solver == Solvers.CFEES25 and adjoint == "checkpoint_recursive":
+        return
+    if (solver, adjoint) not in {(s, a) for _, s, a, _ in COMPARISON_METHODS}:
+        raise ValueError(
+            "Kuramoto supports only CG2 with checkpoint_full or checkpoint_recursive, "
+            "and CF-EES(2,5) with reversible."
+        )
 
 
 @dataclass(frozen=True)
 class ExperimentConfig:
     # Core training
-    epochs: int = 30
-    batch_size: int = 64
+    epochs: int = 15
+    batch_size: int = 32
     learning_rate: float = 1e-3
     seed: int = 0
     device: Devices = Devices.GPU
@@ -47,25 +57,21 @@ class ExperimentConfig:
     drift_depth: int = 3
     diffusion_depth: int = 2
     activation: str = "silu"
-    diffusion_scale: float = 0.3
+    diffusion_scale: float = 0.1
     couple_theta_omega: bool = False
-    drift_kind: str = "mean_field"
-    # Options:
-    #   "mean_field"          — moments + node MLP, default; O(N), perm-equivariant.
-    #   "indexed_mean_field"  — mean_field + per-osc embedding; matches the
-    #                           dataset's index-pinned Omega assignment but
-    #                           breaks pure equivariance.
-    #   "equivariant"         — full DeepSets phi(z_ij) -> mean-pool; O(N^2),
-    #                           viable only at N <= ~64 on consumer GPUs.
-    #   "mlp"                 — legacy 3N->2N MLP; retained for old checkpoints.
+    drift_kind: str = "second_order_mean_field"
 
     # SDE integrator
     solver: Solvers = Solvers.CFEES25
-    n_steps: int = 200
-    adjoint: str = "auto"
+    n_steps: int = 50
+    adjoint: str = "reversible"
+    adaptive: bool = False
+    adaptive_atol: float = 1e-3
+    adaptive_dtmin: float = 1e-4
+    adaptive_max_steps: int = 4096
 
     # Data
-    N: int = 2
+    N: int = 1000
     data_seed: int = 0
     data_dir: str = "experiments/kuramoto/data/"
 
@@ -77,6 +83,23 @@ class ExperimentConfig:
     # Outputs
     save_every_epoch: bool = True
     skip_plots: bool = False
+
+
+    def __post_init__(self):
+        if self.adaptive:
+            if self.solver != Solvers.CFEES25:
+                raise ValueError("Adaptive stepping requires a CF-EES embedded pair.")
+            if self.adaptive_atol <= 0 or self.adaptive_dtmin <= 0:
+                raise ValueError("Adaptive tolerance and minimum step must be positive.")
+            if self.adaptive_max_steps < self.n_steps:
+                raise ValueError("adaptive_max_steps must be at least n_steps.")
+        validate_method(self.solver, self.adjoint, adaptive=self.adaptive)
+        if self.model != ModelKind.KURAMOTO_NSDE or self.drift_kind not in ("indexed_mean_field", "second_order_mean_field"):
+            raise ValueError("Use a supported mean-field Kuramoto drift.")
+
+
+DEFAULT_CONFIG = Path(__file__).resolve().parents[1] / "configs" / "kuramoto.toml"
+PROTOCOL = "kuramoto_second_order_mean_field_georax8cbae32_v3"
 
 
 def make_config(**overrides) -> ExperimentConfig:

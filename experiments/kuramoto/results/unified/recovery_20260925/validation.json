@@ -1,0 +1,14 @@
+{
+  "tests_passed": 42,
+  "unittest_subtests_passed": 11,
+  "artifact_checks": "15 finite epochs, loadable best/final model checkpoints, final optimizer files and finite forecast arrays for CG2 and selected CF-EES.",
+  "final_source_sha256": {
+    "run": "5e1e63cdef552ab3b0f41ce6fac76780f9cfdacf14674a37756dd4a8a6745a13",
+    "experiments/kuramoto/configs/kuramoto.toml": "93d546a633015f4546154dbb4a5a0dca5e93c0dc61fbb28b81b69152968d4716",
+    "experiments/kuramoto/experiment/config.py": "87cbdbc29cb9083dda1c357c9651225c011815a9bd0a961f15edaa8415ea8960",
+    "experiments/kuramoto/experiment/factories.py": "d94cc4605be7e972f7cc2789ef1b86a9e37bd011f85e34d5c4947beda6e0100e",
+    "experiments/kuramoto/experiment/losses.py": "1a3ce08aface2b6fd42222f50d1913675e7e6b9e4916e299dfc2cfa851b908df",
+    "experiments/kuramoto/experiment/train_kuramoto.py": "62be01da903643bce7f19295d98586a15eccefb96b2502b9cb822e49c599d1cb",
+    "experiments/kuramoto/models/kuramoto_nsde.py": "bf61ed95703f0e098727e2363432fa1868f1a120e09aa1a2373b972bc3a1f51a"
+  }
+}

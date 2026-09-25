@@ -15,9 +15,7 @@ with the wrapped-on-$\theta$, plain-on-$\omega$ distance
         \sum_i |\mathrm{wrap}(\theta_a^i - \theta_b^i)| +
         \sum_i |\omega_a^i - \omega_b^i|.
 
-The total loss is a uniform mean across horizons. This generalises the
-single-horizon energy score in
-`experiments/rna/experiment/rna_losses.py:68-100`.
+The total loss is a uniform mean across horizons.
 """
 
 from __future__ import annotations
@@ -28,7 +26,7 @@ import equinox as eqx
 import jax
 import jax.numpy as jnp
 
-from experiments.rna.models.torus import wrap_to_pi
+from experiments.torus_memory.models.torus import wrap_to_pi
 
 PyTree = Any
 LossFn = Callable[[eqx.Module, PyTree, jax.Array, jax.Array], jax.Array]
@@ -55,13 +53,17 @@ def _state_distance(
 
 
 def _kuramoto_predict_batch(
-    model: eqx.Module, batch: PyTree, key: jax.Array
+    model: eqx.Module, batch: PyTree, key: jax.Array, *, save_indices=None,
 ) -> tuple[jax.Array, jax.Array]:
     """vmap the NSDE over the batch dimension. Returns (theta, omega) trajectories."""
     theta0 = batch["theta0"]
     omega0 = batch["omega0"]
     sample_keys = jax.random.split(key, theta0.shape[0])
-    return jax.vmap(model)(theta0, omega0, sample_keys)
+    if save_indices is None:
+        return jax.vmap(model)(theta0, omega0, sample_keys)
+    return jax.vmap(lambda th, om, sk: model(th, om, sk, save_indices=save_indices))(
+        theta0, omega0, sample_keys,
+    )
 
 
 def _order_parameter(theta: jax.Array) -> jax.Array:
@@ -73,76 +75,74 @@ def _order_parameter(theta: jax.Array) -> jax.Array:
     return jnp.abs(jnp.mean(jnp.exp(1j * theta), axis=-1))
 
 
+def _sample_horizons(model, batch, key, horizons, n_samples):
+    target_theta = batch["theta_traj"]
+    target_omega = batch["omega_traj"]
+    n_obs = target_theta.shape[1]
+    idx = jnp.clip((horizons * (n_obs - 1)).astype(jnp.int32), 1, n_obs - 1)
+    sample_keys = jax.random.split(key, n_samples)
+    sample_theta, sample_omega = jax.vmap(
+        lambda sk: _kuramoto_predict_batch(model, batch, sk, save_indices=idx)
+    )(sample_keys)
+    return (
+        sample_theta, sample_omega,
+        target_theta[:, idx, :], target_omega[:, idx, :],
+    )
+
+
+def _batch_mean(values, mask):
+    """Average axis zero over real examples, excluding padded batch entries."""
+    if mask is None:
+        return jnp.mean(values, axis=0)
+    mask = jnp.asarray(mask, dtype=bool)
+    expanded = mask.reshape((mask.shape[0],) + (1,) * (values.ndim - 1))
+    return jnp.sum(jnp.where(expanded, values, 0), axis=0) / jnp.sum(mask)
+
+
+def _energy_score(samples, mask, aux_r_weight):
+    theta_s, omega_s, theta_t, omega_t = samples
+    divergence = jnp.mean(
+        _state_distance(theta_s, omega_s, theta_t[None], omega_t[None]), axis=0,
+    )  # (B, H)
+    diversity = 0.5 * jnp.mean(
+        _state_distance(
+            theta_s[:, None], omega_s[:, None],
+            theta_s[None, :], omega_s[None, :],
+        ), axis=(0, 1),
+    )
+    main = jnp.mean(_batch_mean(divergence - diversity, mask))
+    if aux_r_weight == 0.0:
+        return main
+    r_pred_mean = _batch_mean(jnp.mean(_order_parameter(theta_s), axis=0), mask)
+    r_data_mean = _batch_mean(_order_parameter(theta_t), mask)
+    return main + aux_r_weight * jnp.sum((r_pred_mean - r_data_mean) ** 2)
+
+
+def _forecast_metrics(samples, mask):
+    theta_s, omega_s, theta_t, omega_t = samples
+    theta_h = jnp.mean(theta_s, axis=0)
+    omega_h = jnp.mean(omega_s, axis=0)
+    wrapped_mae = _batch_mean(jnp.mean(jnp.abs(_wrapped_diff(theta_h, theta_t)), axis=-1), mask)
+    omega_mae = _batch_mean(jnp.mean(jnp.abs(omega_h - omega_t), axis=-1), mask)
+    return {
+        "theta_mae_per_horizon": wrapped_mae,
+        "omega_mae_per_horizon": omega_mae,
+        "theta_mae_mean": jnp.mean(wrapped_mae),
+        "omega_mae_mean": jnp.mean(omega_mae),
+    }
+
+
 def make_multi_horizon_energy_score(
     horizons: Sequence[float] = (0.125, 0.25, 0.5, 1.0),
     n_samples: int = 4,
     aux_r_weight: float = 0.1,
 ) -> LossFn:
-    """Average energy score across multiple horizons of the trajectory.
-
-    If ``aux_r_weight > 0`` an auxiliary moment-matching term is added
-    that drives the sample-mean Kuramoto order parameter $r(t)$ toward
-    the data-mean $r(t)$ at each horizon. The strictly-proper energy
-    score is moment-blind, so without this auxiliary term the slow
-    synchronisation onset is invisible to the gradient signal.
-    """
+    """Mean energy score with optional order-parameter moment matching."""
     horizons_t = jnp.asarray(horizons, dtype=jnp.float32)
 
     def loss_fn(model, batch, mask, key):
-        del mask  # batches are dense for the Kuramoto dataset
-        target_theta = batch["theta_traj"]  # (B, T_obs, N)
-        target_omega = batch["omega_traj"]
-        T_obs = target_theta.shape[1]
-
-        # Indices into the saved-time axis for the requested horizons.
-        idx = jnp.clip((horizons_t * (T_obs - 1)).astype(jnp.int32), 1, T_obs - 1)
-
-        sample_keys = jax.random.split(key, n_samples)
-
-        def one_sample(sk):
-            return _kuramoto_predict_batch(model, batch, sk)
-
-        sample_theta, sample_omega = jax.vmap(one_sample)(sample_keys)
-        # sample_theta: (S, B, T_obs, N), target_theta: (B, T_obs, N)
-
-        per_horizon_theta_s = sample_theta[:, :, idx, :]  # (S, B, H, N)
-        per_horizon_omega_s = sample_omega[:, :, idx, :]
-        per_horizon_theta_t = target_theta[:, idx, :]  # (B, H, N)
-        per_horizon_omega_t = target_omega[:, idx, :]
-
-        # Divergence: E_{X~F} d(X, y_h) for each (b, h)
-        divergence = jnp.mean(
-            _state_distance(
-                per_horizon_theta_s,
-                per_horizon_omega_s,
-                per_horizon_theta_t[None],
-                per_horizon_omega_t[None],
-            ),
-            axis=0,
-        )  # (B, H)
-
-        # Diversity: 0.5 * E_{X, X'~F} d(X, X') for each (b, h)
-        pairwise = _state_distance(
-            per_horizon_theta_s[:, None],
-            per_horizon_omega_s[:, None],
-            per_horizon_theta_s[None, :],
-            per_horizon_omega_s[None, :],
-        )  # (S, S, B, H)
-        diversity = 0.5 * jnp.mean(pairwise, axis=(0, 1))  # (B, H)
-
-        per_example_per_horizon = divergence - diversity  # (B, H)
-        main = jnp.mean(per_example_per_horizon)
-
-        if aux_r_weight == 0.0:
-            return main
-
-        # Auxiliary moment-matching: per-horizon mean order parameter.
-        r_sample = _order_parameter(per_horizon_theta_s)  # (S, B, H)
-        r_target = _order_parameter(per_horizon_theta_t)  # (B, H)
-        r_pred_mean = jnp.mean(r_sample, axis=(0, 1))  # (H,)
-        r_data_mean = jnp.mean(r_target, axis=0)  # (H,)
-        aux = jnp.sum((r_pred_mean - r_data_mean) ** 2)
-        return main + aux_r_weight * aux
+        samples = _sample_horizons(model, batch, key, horizons_t, n_samples)
+        return _energy_score(samples, mask, aux_r_weight)
 
     return loss_fn
 
@@ -151,36 +151,28 @@ def make_eval_metrics(
     horizons: Sequence[float] = (0.125, 0.25, 0.5, 1.0),
     n_samples: int = 4,
 ) -> Callable:
-    """Per-horizon mean wrapped-MAE on theta + MAE on omega for monitoring.
-
-    Returns a callable that produces a dict mapping a metric key to a scalar.
-    Used for richer per-epoch logging beyond the energy score.
-    """
+    """Per-horizon wrapped phase MAE and velocity MAE for monitoring."""
     horizons_t = jnp.asarray(horizons, dtype=jnp.float32)
 
     @eqx.filter_jit
-    def metric_fn(model, batch, key):
-        target_theta = batch["theta_traj"]
-        target_omega = batch["omega_traj"]
-        T_obs = target_theta.shape[1]
-        idx = jnp.clip((horizons_t * (T_obs - 1)).astype(jnp.int32), 1, T_obs - 1)
-        sample_keys = jax.random.split(key, n_samples)
-
-        def one_sample(sk):
-            return _kuramoto_predict_batch(model, batch, sk)
-
-        sample_theta, sample_omega = jax.vmap(one_sample)(sample_keys)
-        theta_h = jnp.mean(sample_theta[:, :, idx, :], axis=0)  # (B, H, N)
-        omega_h = jnp.mean(sample_omega[:, :, idx, :], axis=0)
-        theta_t = target_theta[:, idx, :]
-        omega_t = target_omega[:, idx, :]
-        wrapped_mae = jnp.mean(jnp.abs(_wrapped_diff(theta_h, theta_t)), axis=(0, 2))  # (H,)
-        omega_mae = jnp.mean(jnp.abs(omega_h - omega_t), axis=(0, 2))
-        return {
-            "theta_mae_per_horizon": wrapped_mae,
-            "omega_mae_per_horizon": omega_mae,
-            "theta_mae_mean": jnp.mean(wrapped_mae),
-            "omega_mae_mean": jnp.mean(omega_mae),
-        }
+    def metric_fn(model, batch, key, mask=None):
+        samples = _sample_horizons(model, batch, key, horizons_t, n_samples)
+        return _forecast_metrics(samples, mask)
 
     return metric_fn
+
+
+def make_eval_step(
+    horizons: Sequence[float] = (0.125, 0.25, 0.5, 1.0),
+    n_samples: int = 4,
+    aux_r_weight: float = 0.1,
+) -> Callable:
+    """Compute loss and metrics from one shared ensemble of SDE forecasts."""
+    horizons_t = jnp.asarray(horizons, dtype=jnp.float32)
+
+    @eqx.filter_jit
+    def eval_step(model, batch, mask, key):
+        samples = _sample_horizons(model, batch, key, horizons_t, n_samples)
+        return _energy_score(samples, mask, aux_r_weight), _forecast_metrics(samples, mask)
+
+    return eval_step

@@ -1,17 +1,4 @@
-"""Single-cell memory benchmark for one (solver, adjoint, n_steps) cell of the
-Kuramoto memory sweep.
-
-Mirrors the subprocess-isolation pattern of
-`experiments/rna/experiment/integrator_benchmark_single.py`. Each cell:
-
-  1. Builds a fresh Kuramoto NSDE at the requested config (random init).
-  2. Runs one forward+backward of a synthetic energy-score loss on a random
-     batch.
-  3. Reports peak XLA scratch memory and wall-clock time.
-
-Cells that OOM are caught and the JSON output records `oom: true` rather
-than crashing the parent driver.
-"""
+"""Measure one isolated forward/backward pass of the canonical training model and energy-score loss."""
 
 from __future__ import annotations
 
@@ -23,6 +10,9 @@ import sys
 import time
 import traceback
 from pathlib import Path
+from dataclasses import replace
+
+from experiments.kuramoto.experiment.config import DEFAULT_CONFIG, PROTOCOL, Solvers, load_config, serialize_config
 
 
 def _set_xla_alloc_env():
@@ -34,17 +24,16 @@ def _set_xla_alloc_env():
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--N", type=int, required=True)
+    p.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+    p.add_argument("--N", type=int, default=None)
     p.add_argument("--solver", type=str, required=True,
-                   choices=("cfees25", "cfees27", "cg2", "cg4", "rkmk"))
+                   choices=("cfees25", "cg2"))
     p.add_argument("--adjoint", type=str, required=True,
                    choices=("reversible", "checkpoint_full",
                             "checkpoint_recursive"))
     p.add_argument("--n-steps", type=int, required=True)
-    p.add_argument("--batch-size", type=int, default=64)
-    p.add_argument("--hidden-dim", type=int, default=128)
-    p.add_argument("--T", type=float, default=5.0)
-    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--batch-size", type=int, default=None)
+    p.add_argument("--seed", type=int, default=None)
     p.add_argument("--n-warmup", type=int, default=1)
     p.add_argument("--n-reps", type=int, default=3)
     p.add_argument("--output", type=Path, required=True)
@@ -54,15 +43,25 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     _set_xla_alloc_env()
     args = parse_args()
+    if args.output.exists():
+        raise FileExistsError(f"Use a fresh output path: {args.output}")
     args.output.parent.mkdir(parents=True, exist_ok=True)
+    config = load_config(args.config)
+    overrides = dict(solver=Solvers(args.solver), adjoint=args.adjoint, n_steps=args.n_steps)
+    for name in ("N", "batch_size", "seed"):
+        if getattr(args, name) is not None:
+            overrides[name] = getattr(args, name)
+    config = replace(config, **overrides)
 
     summary = {
-        "N": args.N, "solver": args.solver, "adjoint": args.adjoint,
-        "n_steps": args.n_steps, "batch_size": args.batch_size,
-        "hidden_dim": args.hidden_dim, "T": args.T, "seed": args.seed,
-        "oom": False, "error": None,
+        "protocol": PROTOCOL, "config": json.loads(serialize_config(config)),
+        "N": config.N, "solver": config.solver.value, "adjoint": config.adjoint,
+        "n_steps": config.n_steps, "batch_size": config.batch_size,
+        "drift_kind": config.drift_kind, "hidden_dim": config.hidden_dim,
+        "seed": config.seed, "oom": False, "error": None,
         "wall_clock_s_mean": None, "wall_clock_s_std": None,
         "peak_bytes": None, "n_params": None,
+        "measurement": "isolated gradient of the training loss; excludes optimiser and resident full datasets",
     }
 
     try:
@@ -70,52 +69,30 @@ def main() -> int:
         import jax
         import jax.numpy as jnp
         import jax.random as jr
-        from experiments.kuramoto.experiment.factories import build_adjoint, build_solver
-        from experiments.kuramoto.experiment.config import Solvers
-        from experiments.kuramoto.models.kuramoto_nsde import KuramotoNSDE
+        from experiments.kuramoto.experiment.benchmark import prepare_benchmark
 
         device = jax.devices()[0]
-        dt = args.T / args.n_steps
-        n_obs = 64
-
-        model_key = jr.PRNGKey(args.seed)
-        solver = build_solver(Solvers(args.solver))
-        adjoint = build_adjoint(args.adjoint, args.n_steps)
-        model = KuramotoNSDE(
-            N=args.N, hidden_dim=args.hidden_dim,
-            n_steps=args.n_steps, dt=dt, n_obs=n_obs,
-            solver=solver, diffusion_scale=0.3, adjoint=adjoint,
-            key=model_key,
-        )
-        n_params = sum(int(x.size) for x in jax.tree.leaves(eqx.filter(model, eqx.is_array)))
-        summary["n_params"] = n_params
-
-        bk = jr.split(jr.PRNGKey(args.seed + 1), args.batch_size)
-        theta0 = jr.uniform(jr.PRNGKey(2), (args.batch_size, args.N),
-                             minval=-jnp.pi, maxval=jnp.pi)
-        omega0 = 0.5 * jr.normal(jr.PRNGKey(3), (args.batch_size, args.N))
+        model, batch, loss, metadata = prepare_benchmark(config)
+        summary["T"] = metadata["T"]
+        summary["n_obs"] = metadata["n_obs"]
+        summary["n_params"] = sum(int(x.size) for x in jax.tree.leaves(eqx.filter(model, eqx.is_array)))
+        mask = jnp.ones(config.batch_size)
+        key = jr.key(config.seed + 1)
 
         @eqx.filter_jit
-        def step(model, theta0, omega0, keys):
-            def per_traj(model, th0, om0, k):
-                th, om = model(th0, om0, k)
-                return jnp.mean(jnp.sin(th) ** 2 + om ** 2)
-            def loss(model):
-                vals = jax.vmap(lambda th, om, k: per_traj(model, th, om, k))(
-                    theta0, omega0, keys)
-                return jnp.mean(vals)
-            return eqx.filter_grad(loss)(model)
+        def step(model, batch, key):
+            return eqx.filter_grad(loss)(model, batch, mask, key)
 
         # warmup (compile + first run)
         for _ in range(args.n_warmup):
-            g = step(model, theta0, omega0, bk)
+            g = step(model, batch, key)
             jax.block_until_ready(g)
 
         # wall-clock
         times = []
         for _ in range(args.n_reps):
             t0 = time.perf_counter()
-            g = step(model, theta0, omega0, bk)
+            g = step(model, batch, key)
             jax.block_until_ready(g)
             times.append(time.perf_counter() - t0)
         summary["wall_clock_s_mean"] = float(sum(times) / len(times))
@@ -140,7 +117,7 @@ def main() -> int:
     print(json.dumps({k: v for k, v in summary.items()
                       if k not in ("error",) or v is not None}))
     gc.collect()
-    return 0
+    return 1 if summary["error"] else 0
 
 
 if __name__ == "__main__":

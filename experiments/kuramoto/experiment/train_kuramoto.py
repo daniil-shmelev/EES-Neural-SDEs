@@ -19,13 +19,14 @@ The fit loop persists everything we might want to plot later:
 - a JSON history dump (`history.json`) and a sidecar config (`config.json`)
 - a sample of test predictions (`predictions_demo.npz`) for plotting
 
-Mirrors the shape of `experiments/rna/experiment/train_rna.py`.
+Trains the canonical indexed mean-field Kuramoto model.
 """
 
 from __future__ import annotations
 
 import argparse
 import dataclasses
+import json
 import time
 from pathlib import Path
 from typing import Any
@@ -38,17 +39,17 @@ import optax
 
 from experiments.kuramoto.experiment.config import (
     ExperimentConfig,
-    ModelKind,
+    DEFAULT_CONFIG,
     Solvers,
     load_config,
     serialize_config,
+    validate_method,
 )
 from experiments.kuramoto.experiment.factories import make_loader, make_model
 from experiments.kuramoto.experiment.losses import (
     LossFn,
-    PyTree,
     _kuramoto_predict_batch,
-    make_eval_metrics,
+    make_eval_step,
     make_multi_horizon_energy_score,
 )
 from experiments.kuramoto.experiment.runtime import (
@@ -63,42 +64,64 @@ def _eval_split(
     loader,
     loader_next,
     eval_step,
-    metric_fn,
     state,
     key: jax.Array,
+    *,
+    label: str,
 ) -> tuple[float, dict[str, float], jax.Array, Any]:
     total_loss = 0.0
-    metric_accum: dict[str, list[float]] = {}
-    for _ in range(loader.steps_per_epoch):
-        key, k1, k2 = jax.random.split(key, 3)
+    total_examples = 0
+    metric_accum = {}
+    for batch_index in range(loader.steps_per_epoch):
+        print(f"{label} batch={batch_index + 1}/{loader.steps_per_epoch} starting", flush=True)
+        started = time.perf_counter()
+        key, eval_key = jax.random.split(key)
         batch, state, mask = loader_next(state)
-        loss = float(eval_step(model, batch, mask, k1))
-        total_loss += loss
-        metrics = metric_fn(model, batch, k2)
+        loss, metrics = jax.device_get(eval_step(model, batch, mask, eval_key))
+        count = int(jnp.sum(mask))
+        total_examples += count
+        total_loss += float(loss) * count
         for name, value in metrics.items():
-            metric_accum.setdefault(name, []).append(np.asarray(jax.device_get(value)))
-    avg_loss = total_loss / loader.steps_per_epoch
-    avg_metrics: dict[str, Any] = {}
-    for name, vals in metric_accum.items():
-        stacked = np.stack(vals, axis=0)
-        avg_metrics[name] = stacked.mean(axis=0).tolist() if stacked.ndim > 1 else float(stacked.mean())
+            metric_accum[name] = metric_accum.get(name, 0.0) + np.asarray(value) * count
+        print(f"{label} batch={batch_index + 1}/{loader.steps_per_epoch} loss={float(loss):.4f} time={time.perf_counter() - started:.2f}s", flush=True)
+    avg_loss = total_loss / total_examples
+    avg_metrics = {name: (value / total_examples).tolist() for name, value in metric_accum.items()}
     return avg_loss, avg_metrics, key, state
+
+
+def _resume_checkpoints(directory: Path) -> tuple[Path, Path]:
+    """Find a model/optimiser pair matching the completed history."""
+    final_model = directory / "model_final.eqx"
+    final_opt = directory / "opt_state_final.eqx"
+    if final_model.is_file() and final_opt.is_file():
+        return final_model, final_opt
+    history = json.loads((directory / "history.json").read_text())
+    completed = len(history["val_loss"])
+    epochs = sorted(directory.glob("model_epoch_*.eqx"))
+    expected = directory / f"model_epoch_{completed - 1:03d}.eqx"
+    latest_opt = directory / "opt_state_latest.eqx"
+    if completed and epochs and epochs[-1] == expected and latest_opt.is_file():
+        return expected, latest_opt
+    raise ValueError(
+        f"No model/optimiser pair matching completed evaluation history in {directory}. "
+        "The last epoch may have been interrupted during evaluation."
+    )
 
 
 def fit(
     model: eqx.Module,
     *,
     loss_fn: LossFn,
-    metric_fn,
+    eval_step,
     config: ExperimentConfig,
     output_dir: Path,
     resume_from: Path | None = None,
 ) -> tuple[eqx.Module, dict[str, list[float]]]:
     """Train ``model`` for ``config.epochs`` epochs total.
 
-    If ``resume_from`` is given, load ``model_final.eqx``,
-    ``opt_state_final.eqx``, and ``history.json`` from that directory and
-    pick up where they left off. ``config.epochs`` is interpreted as the
+    If ``resume_from`` is given, load final checkpoints or the last fully
+    evaluated epoch's model and optimiser, together with ``history.json``.
+    ``config.epochs`` is interpreted as the
     *total* (resumed + new) epoch count; the warmup-cosine LR schedule
     is built with ``decay_steps = total_epochs * steps_per_epoch`` so
     the loaded optimiser state's step counter continues to index into
@@ -129,10 +152,11 @@ def fit(
     )
 
     if resume_from is not None:
-        model = eqx.tree_deserialise_leaves(resume_from / "model_final.eqx", model)
+        model_path, opt_path = _resume_checkpoints(resume_from)
+        model = eqx.tree_deserialise_leaves(model_path, model)
         opt_state_template = optim.init(eqx.filter(model, eqx.is_array))
         opt_state = eqx.tree_deserialise_leaves(
-            resume_from / "opt_state_final.eqx", opt_state_template,
+            opt_path, opt_state_template,
         )
     else:
         opt_state = optim.init(eqx.filter(model, eqx.is_array))
@@ -160,8 +184,6 @@ def fit(
             candidate_opt_state, opt_state,
         )
         return new_model, new_opt_state, loss, grad_norm
-
-    eval_step = eqx.filter_jit(loss_fn)
 
     key = jax.random.key(config.seed)
     key, train_key, val_key, test_key = jax.random.split(key, 4)
@@ -209,7 +231,16 @@ def fit(
         best_val_loss = float("inf")
 
     best_model = model
+    if resume_from is not None and (resume_from / "model_best.eqx").is_file():
+        best_model = eqx.tree_deserialise_leaves(resume_from / "model_best.eqx", model)
+        eqx.tree_serialise_leaves(output_dir / "model_best.eqx", best_model)
     device = jax.devices()[0]
+    print(
+        f"device: {device}; batches per epoch: train={train_loader.steps_per_epoch} "
+        f"val={val_loader.steps_per_epoch} test={test_loader.steps_per_epoch}. "
+        "The first training and evaluation batches include JAX compilation.",
+        flush=True,
+    )
 
     def _peak_mem() -> tuple[int | None, int | None]:
         try:
@@ -225,12 +256,13 @@ def fit(
             f"beyond config.epochs={config.epochs}; bump --epochs to extend."
         )
     for epoch in range(epoch_offset, config.epochs):
-        epoch_t0 = time.time()
+        epoch_t0 = time.perf_counter()
         per_step_loss: list[float] = []
         per_step_grad: list[float] = []
         per_step_time: list[float] = []
 
-        for _ in range(train_loader.steps_per_epoch):
+        for batch_index in range(train_loader.steps_per_epoch):
+            print(f"epoch={epoch + 1}/{config.epochs} train batch={batch_index + 1}/{train_loader.steps_per_epoch} starting", flush=True)
             key, step_key = jax.random.split(key)
             batch, train_state, mask = train_next(train_state)
             t_step = time.perf_counter()
@@ -241,6 +273,7 @@ def fit(
             per_step_loss.append(float(loss))
             per_step_grad.append(float(gnorm))
             per_step_time.append(dt_step)
+            print(f"batch_loss={float(loss):.4f} |g|={float(gnorm):.3f} time={dt_step:.2f}s", flush=True)
 
         train_loss = float(np.mean(per_step_loss))
         history["train_loss"].append(train_loss)
@@ -255,11 +288,18 @@ def fit(
         history["step_time_s"].extend(per_step_time)
         history["step_epoch_index"].extend([epoch] * len(per_step_loss))
 
+        # Preserve the trained weights even if evaluation is interrupted.
+        if config.save_every_epoch:
+            eqx.tree_serialise_leaves(output_dir / f"model_epoch_{epoch:03d}.eqx", model)
+            eqx.tree_serialise_leaves(output_dir / "opt_state_latest.eqx", opt_state)
+
         val_loss, val_metrics, key, val_state = _eval_split(
-            model, val_loader, val_next, eval_step, metric_fn, val_state, key,
+            model, val_loader, val_next, eval_step, val_state, key,
+            label=f"epoch={epoch + 1}/{config.epochs} val",
         )
         test_loss, test_metrics, key, test_state = _eval_split(
-            model, test_loader, test_next, eval_step, metric_fn, test_state, key,
+            model, test_loader, test_next, eval_step, test_state, key,
+            label=f"epoch={epoch + 1}/{config.epochs} test",
         )
 
         history["val_loss"].append(val_loss)
@@ -277,7 +317,7 @@ def fit(
         history["epoch_peak_bytes"].append(peak)
         history["epoch_bytes_in_use"].append(in_use)
 
-        epoch_walltime = float(time.time() - epoch_t0)
+        epoch_walltime = float(time.perf_counter() - epoch_t0)
         history["epoch_walltime_s"].append(epoch_walltime)
 
         if val_loss < best_val_loss:
@@ -285,15 +325,6 @@ def fit(
             best_model = model
             eqx.tree_serialise_leaves(output_dir / "model_best.eqx", best_model)
             eqx.tree_serialise_leaves(output_dir / "opt_state_best.eqx", opt_state)
-
-        if config.save_every_epoch:
-            eqx.tree_serialise_leaves(
-                output_dir / f"model_epoch_{epoch:03d}.eqx", model
-            )
-            # Resumability: keep only the most-recent opt_state to save disk.
-            eqx.tree_serialise_leaves(
-                output_dir / "opt_state_latest.eqx", opt_state
-            )
 
         save_json(output_dir / "history.json", history)
 
@@ -333,9 +364,9 @@ def predict_demo(
     key = jax.random.key(config.seed + seed_offset)
     key, loader_key = jax.random.split(key)
     state = test_loader.init_state(loader_key)
-    batch, _, _ = test_next(state)
+    batch, _, mask = test_next(state)
 
-    n_ic = min(n_ic, batch["theta0"].shape[0])
+    n_ic = min(n_ic, int(jnp.sum(mask)))
 
     # Slice the first n_ic initial conditions.
     sliced = {k: v[:n_ic] for k, v in batch.items()}
@@ -358,6 +389,29 @@ def predict_demo(
     }
 
 
+
+def solver_work(model, config):
+    """Count attempted/accepted/rejected steps on eight validation trajectories."""
+    from experiments.kuramoto.datasets.kuramoto_dataset import KuramotoDataset, default_npz_path
+
+    dataset = KuramotoDataset(default_npz_path(Path(config.data_dir), config.N, config.data_seed), "val")
+    theta0 = jnp.asarray(dataset.theta[:8, 0])
+    omega0 = jnp.asarray(dataset.omega[:8, 0])
+    keys = jax.random.split(jax.random.key(config.seed + 731), len(theta0))
+
+    @eqx.filter_jit
+    def measure(m):
+        return jax.vmap(lambda th, om, key: m.solve(th, om, key).stats)(theta0, omega0, keys)
+
+    stats = measure(model)
+    summary = {name: np.asarray(stats[name]).tolist() for name in
+               ("num_steps", "num_accepted_steps", "num_rejected_steps")}
+    summary.update(split="val", model_checkpoint="model_best.eqx", brownian_seed=config.seed + 731)
+    summary["forward_generator_evaluations"] = (
+        np.asarray(stats["num_steps"]) * model.solver.recurrence.num_stages
+    ).tolist()
+    return summary
+
 def _override_from_args(config: ExperimentConfig, args: argparse.Namespace) -> ExperimentConfig:
     overrides: dict[str, Any] = {}
     if args.solver is not None:
@@ -374,10 +428,12 @@ def _override_from_args(config: ExperimentConfig, args: argparse.Namespace) -> E
         overrides["seed"] = int(args.seed)
     if args.N is not None:
         overrides["N"] = int(args.N)
-    if args.model is not None:
-        overrides["model"] = ModelKind(args.model)
     if args.lr is not None:
         overrides["learning_rate"] = float(args.lr)
+    for name in ("adaptive", "adaptive_atol", "adaptive_dtmin", "adaptive_max_steps"):
+        value = getattr(args, name, None)
+        if value is not None:
+            overrides[name] = value
     if not overrides:
         return config
     return dataclasses.replace(config, **overrides)
@@ -385,33 +441,36 @@ def _override_from_args(config: ExperimentConfig, args: argparse.Namespace) -> E
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("config", type=Path, help="Path to experiment config TOML")
+    parser.add_argument("config", type=Path, nargs="?", default=DEFAULT_CONFIG, help="Path to experiment config TOML")
     parser.add_argument("--output-dir", type=Path, default=None)
-    parser.add_argument("--solver", type=str, default=None)
+    parser.add_argument("--solver", type=str, choices=tuple(Solvers), default=None)
     parser.add_argument(
         "--adjoint", type=str, default=None,
-        choices=("auto", "reversible", "direct", "checkpoint_recursive",
-                 "checkpoint_log", "checkpoint_full"),
+        choices=("reversible", "checkpoint_recursive", "checkpoint_full"),
     )
-    parser.add_argument("--n-steps", type=int, default=None)
+    parser.add_argument("--n-steps", type=int, default=None,
+                        help="Fixed step count, or T/dtmax for adaptive solves.")
+    parser.add_argument("--adaptive", action=argparse.BooleanOptionalAction, default=None)
+    parser.add_argument("--adaptive-atol", type=float, default=None)
+    parser.add_argument("--adaptive-dtmin", type=float, default=None)
+    parser.add_argument("--adaptive-max-steps", type=int, default=None)
     parser.add_argument("--batch-size", type=int, default=None)
     parser.add_argument("--epochs", type=int, default=None)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--N", type=int, default=None)
-    parser.add_argument(
-        "--model", type=str, default=None,
-        choices=("kuramoto_nsde", "euclidean_baseline"),
-    )
     parser.add_argument("--lr", type=float, default=None)
     parser.add_argument(
         "--resume-from", type=Path, default=None,
-        help="Resume from a prior run dir's model_final.eqx + opt_state_final.eqx + "
-             "history.json. Interpret --epochs as the *total* (resumed + new) count.",
+        help="Resume from final checkpoints or the last fully evaluated epoch. "
+             "Interpret --epochs as the *total* (resumed + new) count.",
     )
     args = parser.parse_args()
 
     config = load_config(args.config)
     config = _override_from_args(config, args)
+    if args.resume_from is not None:
+        source_config = json.loads((args.resume_from / "config.json").read_text())
+        validate_method(source_config["solver"], source_config["adjoint"], adaptive=source_config.get("adaptive", False))
 
     _, train_dataset = make_loader(config, "train")
     metadata = train_dataset.metadata()
@@ -422,12 +481,16 @@ def main() -> int:
     loss_fn = make_multi_horizon_energy_score(
         horizons=config.loss_horizons, n_samples=config.loss_n_samples,
     )
-    metric_fn = make_eval_metrics(
+    eval_step = make_eval_step(
         horizons=config.loss_horizons, n_samples=config.loss_n_samples,
     )
 
     tag = f"N{config.N}_{config.model.value}_{config.solver.value}_{config.adjoint}_seed{config.seed}"
+    if config.adaptive:
+        tag += "_adaptive"
     output_dir = args.output_dir or make_output_dir(tag)
+    if output_dir.exists() and any(output_dir.iterdir()):
+        raise FileExistsError(f"Use a fresh output directory: {output_dir}")
     output_dir.mkdir(parents=True, exist_ok=True)
     (output_dir / "config.json").write_text(serialize_config(config))
 
@@ -439,7 +502,9 @@ def main() -> int:
     print(
         f"model: {config.model.value} hidden={config.hidden_dim} "
         f"n_steps={config.n_steps} solver={config.solver.value} "
-        f"adjoint={config.adjoint} dt={metadata['T']/config.n_steps:.4f}",
+        f"adjoint={config.adjoint} dt={metadata['T']/config.n_steps:.4f} "
+        f"adaptive={config.adaptive} atol={config.adaptive_atol:g} "
+        f"drift={config.drift_kind}",
         flush=True,
     )
     print(f"output_dir: {output_dir}", flush=True)
@@ -450,15 +515,16 @@ def main() -> int:
             "training overwrites model_final.eqx etc. in the output dir."
         )
 
-    train_t0 = time.time()
+    train_t0 = time.perf_counter()
     best_model, history = fit(
         model,
-        loss_fn=loss_fn, metric_fn=metric_fn,
+        loss_fn=loss_fn, eval_step=eval_step,
         config=config, output_dir=output_dir,
         resume_from=args.resume_from,
     )
-    train_walltime_s = float(time.time() - train_t0)
+    train_walltime_s = float(time.perf_counter() - train_t0)
 
+    print("Saving demonstration forecasts...", flush=True)
     demo = predict_demo(best_model, config)
     save_npz(output_dir / "predictions_demo.npz", **demo)
 
@@ -466,19 +532,14 @@ def main() -> int:
         output_dir / "metrics.json",
         {
             "train_walltime_s": train_walltime_s,
+            "adaptive_solver_work": solver_work(best_model, config) if config.adaptive else None,
             "best_val_loss": float(min(history["val_loss"])) if history["val_loss"] else float("nan"),
             "final_train_loss": float(history["train_loss"][-1]) if history["train_loss"] else float("nan"),
             "final_val_loss": float(history["val_loss"][-1]) if history["val_loss"] else float("nan"),
             "final_test_loss": float(history["test_loss"][-1]) if history["test_loss"] else float("nan"),
             "final_test_theta_mae_mean": float(history["test_theta_mae_mean"][-1]) if history["test_theta_mae_mean"] else float("nan"),
             "final_test_omega_mae_mean": float(history["test_omega_mae_mean"][-1]) if history["test_omega_mae_mean"] else float("nan"),
-            "config": {
-                "N": config.N, "model": config.model.value,
-                "solver": config.solver.value, "adjoint": config.adjoint,
-                "n_steps": config.n_steps, "epochs": config.epochs,
-                "batch_size": config.batch_size, "seed": config.seed,
-                "learning_rate": config.learning_rate,
-            },
+            "config": json.loads(serialize_config(config)),
         },
     )
     print(f"saved artifacts to {output_dir}", flush=True)
@@ -486,4 +547,8 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        print("Training interrupted. Completed training epochs retain their saved weights when save_every_epoch is enabled.", flush=True)
+        raise SystemExit(130)

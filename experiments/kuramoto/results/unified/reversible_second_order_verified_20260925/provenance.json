@@ -1,0 +1,26 @@
+{
+  "source_sha256": {
+    "run": "65f85fcb8b8a36008c2d97cc02e26db8c8be0ddd2b708080cc84f4bc08350686",
+    "experiments/kuramoto/configs/kuramoto.toml": "3a372ac3fa4555b79781a3cc72debd58a7068f9410e84a821104eb33d8ed974d",
+    "experiments/kuramoto/models/kuramoto_nsde.py": "dc0dc9e0a90d09229c6959cab97a28beb75e135506f01bd3386148143b32735a",
+    "experiments/kuramoto/experiment/train_kuramoto.py": "5b24459649cba5dd74df9d9c2282da7c0d082bc548aa33367c832b48bb25c423",
+    "experiments/kuramoto/experiment/losses.py": "1a3ce08aface2b6fd42222f50d1913675e7e6b9e4916e299dfc2cfa851b908df",
+    "experiments/kuramoto/experiment/factories.py": "d94cc4605be7e972f7cc2789ef1b86a9e37bd011f85e34d5c4947beda6e0100e",
+    "experiments/kuramoto/experiment/config.py": "0f83d2c52a6d02366d8e127242ccd7b637b1b21bd062f0f87a0e54e84293cedb"
+  },
+  "diffrax_worktree": "/home/luke/diffrax/.worktrees/adaptive-reversible",
+  "diffrax_commit": "aeb1335b5a6278e85a270231e0f97b8db4453ae6",
+  "packages": {
+    "jax": "0.11.2",
+    "jaxlib": "0.11.2",
+    "equinox": "0.13.8",
+    "diffrax": "0.7.1",
+    "georax": "0.1.0",
+    "diffrax-lowstorage": "0.1.0",
+    "lineax": "0.1.1",
+    "optax": "0.2.8",
+    "cyreal": "0.2.1"
+  },
+  "gpu": "NVIDIA GeForce RTX 5080",
+  "timing": "One sequential invocation per method, measured with time.perf_counter."
+}

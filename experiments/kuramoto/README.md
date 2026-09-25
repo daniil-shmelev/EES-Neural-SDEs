@@ -1,117 +1,64 @@
-# Stochastic 2nd-order Kuramoto Neural SDE on $T\mathbb{T}^N$
+# Kuramoto learning experiment
 
-Replacement for the RNA torsion experiment. Trains a neural SDE on the
-product Lie group $T\mathbb{T}^N = \mathbb{T}^N \times \mathbb{R}^N$ to
-forecast trajectories of a stochastic Kuramoto-with-inertia network — the
-canonical model of power-grid frequency stability (Filatrella, Nielsen &
-Pedersen 2008; Schäfer et al. 2018; Olmi & Torcini 2024).
+The active experiment trains one geometric neural SDE on the tangent torus with 1000 oscillators. Its drift enforces `dtheta/dt = omega` and learns a phase-dependent mean-field force plus scalar damping `2*sigmoid(damping_logit)` in `(0, 2)`, initialized at 1. This includes the cached dataset's true unit damping. The force uses a shared per-oscillator network with trigonometric moments and learned oscillator embeddings; it has no velocity inputs. The diffusion remains a learned neural field. The same model is used for CG2 and CF-EES. This changes the model assumption from the earlier unconstrained drift, whose backward reconstruction amplified numerical errors. The cached dataset has 1500/300/300 training/validation/test trajectories, 100 observations and horizon 5. Training uses the multi-horizon energy score with four stochastic predictions per example.
 
-Plan: `~/.claude/plans/ok-carefully-plan-how-sequential-cerf.md`.
+## One configuration
 
-## Dynamics
+[configs/kuramoto.toml](configs/kuramoto.toml) defines the model, dataset, loss and training settings. Training and isolated memory measurements both use the same model factory and loss. The fixed-step training comparison and memory measurements use these solver--adjoint combinations:
 
-We integrate the canonical second-order Kuramoto SDE (Olmi & Torcini 2024
-eq. (1) with $K_2 = 0$; deterministic part from Filatrella, Nielsen &
-Pedersen 2008; noise term as in Schmietendorf et al. 2014 / Schäfer et al.
-2018):
+| Solver | Adjoint | Steps | Forward generator evaluations |
+| --- | --- | ---: | ---: |
+| CG2 | Full | 75 | 150 |
+| CG2 | Recursive | 75 | 150 |
+| CF-EES(2,5) | Reconstruction without checkpoints | 50 | 150 |
 
-$$m\,\ddot{\theta}_i = -\dot{\theta}_i + \Omega_i
-    + \frac{K}{N}\sum_j \sin(\theta_j - \theta_i) + \xi_i(t),
-    \qquad \langle\xi_i(t)\xi_j(s)\rangle = 2D\,\delta_{ij}\delta(t-s).$$
-
-Bimodal natural frequencies $\Omega_i \in \{+P, -P\}$ (Filatrella generator
-/ consumer balance). The state for SDE integration is
-$(\theta, \omega) \in \mathbb{R}^{2N}$ on the cotangent bundle
-$T\mathbb{T}^N$.
-
-## Workflow
-
-Heavy compute (data generation, GPU sweeps, training) runs on a separate,
-more powerful machine. Implementation happens locally. Each milestone ends
-with a portable orchestrator script.
-
-| Milestone | Status | Hand-off |
-| --- | --- | --- |
-| M1: simulator + verification | implemented | yes |
-| M2: model + training scaffolding | pending | no |
-| M3: pilot diagnostic gate | pending | yes |
-| M4: memory + scaling sweeps | pending | yes |
-| M5: hero training | pending | yes |
-| M6: plots + manuscript edits | pending | no |
-
-## M1 — data simulator and verification
-
-Implemented:
-
-- `datasets/kuramoto.py` — `KuramotoParams` (`eqx.Module`), drift function
-  (vectorised mean-field $\sin(\theta_j-\theta_i)$ coupling), Brownian
-  diffusion factory, complex order parameter.
-- `datasets/simulator.py` — diffrax `Heun` simulator on $(\theta, \omega)
-  \in \mathbb{R}^{2N}$ with `MultiTerm(ODETerm, ControlTerm)` and
-  `VirtualBrownianTree`. Reuses `wrap_to_pi` from `experiments/rna/models/torus.py`.
-- `datasets/pipeline.py` — JIT-compiled batched simulator
-  (`simulate_batch_jit`), chunked simulation (`simulate_split`),
-  persistence (`save_split`), and per-$N$ orchestration (`generate_one_n`).
-- `datasets/verification.py` — analytic two-oscillator phase-lock study
-  (deterministic limit, $D=0$) and SDE order-parameter stationarity study.
-- `datasets/visualize.py` — phase-circle GIF: $N$ oscillators on the unit
-  circle plus the complex order-parameter arrow $r e^{i\Psi}$.
-- `scripts/run_m1.py` — single CLI orchestrator.
-- `tests/test_kuramoto.py` — unit tests on `KuramotoParams`, the drift
-  function, the analytic 2-oscillator phase-lock, and the order parameter.
-
-Choice of solver: `Heun` at fine $dt$ (Stratonovich strong order 0.5,
-weak order 1). Diffusion is constant additive noise on $\omega$, so
-Stratonovich and Itô coincide and `Heun` gives a clean reference
-trajectory at sub-second wall-clock per chunk.
-
-### Local smoke
-
-The local Windows environment currently has a broken JAX / jaxlib pin;
-local validation is restricted to `py_compile`. Functional testing
-happens on the remote machine.
-
-If you fix the local env:
-
-```
-python -m experiments.kuramoto.scripts.run_m1 --smoke
-```
-
-### Remote hand-off (single command)
+Run commands from the repository root:
 
 ```bash
-cd /path/to/EES-Neural-SDEs
-git pull
-python -m experiments.kuramoto.scripts.run_m1
+./run kuramoto
+./run kuramoto --memory
 ```
 
-Defaults match the plan: $N \in \{2, 4, 8\}$, $P=0.5$, $K=2.0$
-(deterministic 2-oscillator phase-lock $\arcsin(2P/K) \approx 0.524$),
-$m=1$, $D=0.05$, $T=5\,\text{s}$, $n_\text{fine}=16384$,
-$n_\text{obs}=200$, 5000/1000/1000 train/val/test.
-Override any subset with the matching CLI flag. To customise the network
-sizes: `--n-list 2 4 8`. To skip verification: `--skip-verify`. To
-disable the GIF: `--no-gif`.
+Each invocation gets a fresh directory under `results/unified/runs/`. Training prints progress and saves a log per method; `--memory` writes both `memory.json` and `memory.pdf`. Use `--seeds 0` for one training seed, `--config PATH` for a configuration override, and `--help` for all options. Memory sweeps vary the solver step count while keeping the model, batch, observations and loss fixed. They measure an isolated gradient calculation on one real training batch, excluding the optimiser and the full resident datasets. Training histories separately record process peaks during training and evaluation. These are distinct memory measurements of the same model.
 
-Expected wall-clock on a single A100 / H100: ~3 min verification, ~30 min
-total data gen, ~30 s GIF render. NPZ sizes ~3-15 MiB each, GIF ~1-3 MiB.
+Training, validation and test batches print progress and elapsed time; the first training and evaluation batches include JAX compilation. Evaluation computes loss and MAEs from the same forecast ensemble and counts each held-out trajectory once, masking the padded final batch and weighting batch averages by their valid example counts. Diffusion applies its diagonal entries directly instead of materialising a dense matrix, and loss calculations save only their four requested observation times. With `save_every_epoch = true`, epoch weights and the latest optimiser state are saved before evaluation, so an interruption during evaluation preserves that epoch's training weights. `--resume-from` accepts final checkpoints or the last fully evaluated epoch with its matching latest optimiser state. If evaluation was interrupted after a newer optimiser was saved, resume refuses to pair that optimiser with the older evaluated model.
 
-### What to send back
+The plot displays actual peak allocations, without flattening or baseline subtraction. It rejects historical data without the unified protocol marker and rejects sweeps that mix model or loss settings. The isolated memory sweep has not been rerun for the second-order model; the previous memory figure cannot be relabelled as a measurement of this model.
 
-- `experiments/kuramoto/results/simulator_verification.{json,npz}` (small)
-- `experiments/kuramoto/data/kuramoto_N{2,4,8}_seed0.{npz,json}` (large)
-- `experiments/kuramoto/data/kuramoto_N2_seed0.gif` (small, demo)
+## Adaptive CF-EES
 
-### Pass criterion
+Train with the final-increment embedded estimator, dynamic step sizes and checkpoint-free reversible reconstruction gradients:
 
-- Phase-lock relative error in the verification JSON drops below ~$10^{-3}$
-  by $n_\text{fine} = 16384$ (`Heun` converges to the analytic
-  $\Delta\theta_\infty = \arcsin(2P/K)$).
-- Order-parameter stationary mean is finite and the std doesn't grow
-  with time (no integration blow-up).
-- The GIF shows partial-sync dynamics: $N$ phase points on the unit
-  circle, the order-parameter arrow $re^{i\Psi}$ wandering with
-  intermediate length $r \in (0.3, 0.9)$.
+```bash
+./run kuramoto --adaptive --seed 0
+```
 
-If all three pass, M2 (model + training scaffolding) starts on the dev
-box and will not need remote compute again until M3.
+The launcher uses `reversible`, `n_steps = 10` and `adaptive_dtmin = 1e-4` for this mode; explicit CLI flags override the preset. The shared TOML supplies `adaptive_atol = 3e-2`. The tolerance controls the estimated RMS difference between the two endpoints, using wrapped phase differences and ordinary velocity differences. Diffrax's PI controller adjusts the step size, capped at `T/n_steps` (0.5 for this configuration). The Brownian-tree tolerance is ten times smaller than `adaptive_dtmin`; a step that cannot meet tolerance at the minimum size fails. `adaptive_max_steps` defaults to 4096 attempted steps per trajectory. These options can be set in the shared TOML configuration or with the corresponding CLI flags.
+
+Batched adaptive reconstruction currently needs a Diffrax fix: the pinned fork reads a padded time after one batch member finishes its reverse loop. The tested fix is in `/home/luke/diffrax/.worktrees/adaptive-reversible`, on branch `codex/adaptive-reversible-vmap`; the launcher selects that worktree automatically for `--adaptive`. The original pin remains unchanged. The earlier adaptive attempt retains the exact patch and dependency provenance.
+
+The Brownian tree is retained through rejection. CF-EES uses the ordinary `ReversibleAdjoint` and reconstructs states on the accepted mesh without trajectory checkpoints. The accepted-time buffer is separate from the reconstructed state. No inverse-correction loop or checkpointed gradient is substituted. The previous unconstrained drift remains available as `drift_kind = "indexed_mean_field"` for reading historical checkpoints and reproducing the failure; new runs use `second_order_mean_field`. The earlier checkpointed speed comparison does not establish reversible-training performance. `--adjoint checkpoint_recursive` remains an explicit diagnostic alternative. Adaptive runs have variable evaluation counts; they are additional experiments to the fixed 150-forward-evaluation comparison. `metrics.json` records accepted/rejected steps and forward generator evaluations on eight fixed validation trajectories using the best validation checkpoint.
+
+The endpoint controller permits an accepted final step shorter than `adaptive_dtmin` when it has been clipped to the remaining interval. It preserves minimum-step failures before completion and on rejected steps. This avoids the pinned PID controller reporting failure solely because the proposed next step is too short after integration has already finished.
+
+## Verification
+
+Tests compare reversible gradients with reference gradients, check adaptive mesh replay, and verify exact phase kinematics, velocity-independent forcing and bounded damping. Forward stability alone does not guarantee accurate backward reconstruction; gradient comparisons on learned fields are part of the numerical validation.
+
+For short iterations, keep the production network and reduce the batch, number of forecast samples and data subset:
+
+```bash
+PYTHONPATH=/home/luke/diffrax/.worktrees/adaptive-reversible:$PWD \
+  .venv/bin/python -m experiments.kuramoto.scripts.check_reversible_training \
+  --output-dir /tmp/kuramoto-reversible-check --steps 600
+```
+
+This compares CG2 with checkpoints and CF-EES with ordinary reversible reconstruction from the same initialization, using two examples and two forecasts per update. `--modes ees` runs just the candidate. `--initial-checkpoint PATH` instead starts both methods at the same saved weights with fresh, identical optimisers; the checkpoint must match the configured architecture. The script records matched validation losses, timings and a final same-weights gradient comparison; reference gradients are used only in that diagnostic. Its default two-sample losses must not be compared numerically with the full four-sample results.
+
+The existing simulator checks and same-noise Lyapunov diagnostic remain available. scripts/run_m1.py defaults match the cached production dataset; --smoke uses a small dataset for testing.
+
+## Historical results and dependencies
+
+Historical models, presets, pilot scripts and documentation are in `/home/luke/nsde_archive/experiments/kuramoto/legacy/`. Manuscript datasets and the other measured results remain in this repository. The archived memory curve used a global MLP with 1,204,792 parameters; the second-order mean-field training model has 582,251. These results must not be merged into the new memory sweep.
+
+New runs use Georax `8cbae326c64eccd0a2c37d1ea7767a14cc29b8ae`, its public `TangentTorus` geometry and CF-EES(2,5;1/10). Historical learning and memory records used the earlier implementation with parameter 1/4. The protocol marker is now `kuramoto_second_order_mean_field_georax8cbae32_v3`, so the plotting script rejects old records. The protocol revision records the second-order model, so earlier timings and memory measurements cannot be relabelled as measurements of this implementation. The completed full-data training comparison is documented in [the verified results](results/unified/reversible_second_order_verified_20260925/README.md): reversible CF-EES reached test loss 361.03 in 6.68 minutes, and matched-model CG2 reached 361.19 in 11.51 minutes (15 epochs, seed 0). Isolated memory measurements have not been repeated.

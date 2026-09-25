@@ -1,8 +1,4 @@
-"""Factory helpers for the Kuramoto experiment.
-
-Mirrors `experiments/rna/experiment/factories.py` for the solver / adjoint
-dispatch and adds a model branch for the Euclidean baseline.
-"""
+"""Build the Kuramoto model, data loader, solver and adjoint."""
 
 from __future__ import annotations
 
@@ -16,12 +12,10 @@ from cyreal.transforms import BatchTransform
 from diffrax import (
     AbstractAdjoint,
     AbstractSolver,
-    DirectAdjoint,
-    Heun,
     RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
 )
-from georax import CFEES25, CFEES27, CG2, CG4, RKMK
+from georax import CFEES25, CG2
 
 from experiments.kuramoto.datasets.kuramoto_dataset import (
     KuramotoDataset,
@@ -31,14 +25,12 @@ from experiments.kuramoto.experiment.config import (
     ExperimentConfig,
     ModelKind,
     Solvers,
+    validate_method,
 )
 
 _GEORAX_SOLVERS: dict[Solvers, type[AbstractSolver]] = {
     Solvers.CFEES25: CFEES25,
-    Solvers.CFEES27: CFEES27,
     Solvers.CG2: CG2,
-    Solvers.CG4: CG4,
-    Solvers.RKMK: RKMK,
 }
 
 
@@ -47,32 +39,14 @@ def build_solver(name: Solvers) -> AbstractSolver:
     return cls()
 
 
-def build_adjoint(name: str | None, n_steps: int) -> AbstractAdjoint | None:
-    """Map an adjoint-name string to a diffrax adjoint instance.
-
-      - ``"auto"`` / ``None``: model picks ReversibleAdjoint for reversible
-        solvers and DirectAdjoint otherwise.
-      - ``"reversible"``: ``ReversibleAdjoint()``.
-      - ``"direct"``: ``DirectAdjoint()``.
-      - ``"checkpoint_recursive"``: diffrax default Stumm-Walther
-        treeverse, $O(\\sqrt{n})$ checkpoints.
-      - ``"checkpoint_full"``: $O(n)$ tape (one snapshot per step).
-    """
-    if name is None:
-        return None
-    name = name.lower()
-    max_steps = n_steps + 8
-    if name == "auto":
-        return None
+def build_adjoint(solver: Solvers, name: str, n_steps: int, *, adaptive=False) -> AbstractAdjoint:
+    """Build the adjoint for one of the three Kuramoto methods."""
+    validate_method(solver, name, adaptive=adaptive)
     if name == "reversible":
         return ReversibleAdjoint()
-    if name == "direct":
-        return DirectAdjoint()
-    if name in ("checkpoint_recursive", "recursive", "checkpoint_log"):
+    if name == "checkpoint_recursive":
         return RecursiveCheckpointAdjoint()
-    if name in ("checkpoint_full", "full"):
-        return RecursiveCheckpointAdjoint(checkpoints=max_steps)
-    raise ValueError(f"unknown adjoint {name!r}")
+    return RecursiveCheckpointAdjoint(checkpoints=n_steps + 8)
 
 
 def make_loader(
@@ -90,6 +64,7 @@ def make_loader(
             BatchTransform(
                 batch_size=config.batch_size,
                 drop_last=split == "train",
+                pad_last_batch=split != "train",
             ),
         ]
     )
@@ -103,9 +78,10 @@ def make_model(
 ) -> eqx.Module:
     N = int(metadata["N"])
     n_obs = int(metadata["n_obs"])
-    T = float(metadata.get("T", config.n_steps * (T_default := 0.025)))
+    T = float(metadata["T"])
     dt = T / config.n_steps
-    adjoint = build_adjoint(config.adjoint, config.n_steps)
+    step_limit = config.adaptive_max_steps if config.adaptive else config.n_steps
+    adjoint = build_adjoint(config.solver, config.adjoint, step_limit, adaptive=config.adaptive)
 
     if config.model is ModelKind.KURAMOTO_NSDE:
         from experiments.kuramoto.models.kuramoto_nsde import KuramotoNSDE
@@ -124,22 +100,10 @@ def make_model(
             diffusion_depth=config.diffusion_depth,
             couple_theta_omega=config.couple_theta_omega,
             drift_kind=config.drift_kind,
-            key=key,
-        )
-    if config.model is ModelKind.EUCLIDEAN_BASELINE:
-        from experiments.kuramoto.models.euclidean_baseline import EuclideanKuramotoNSDE
-
-        return EuclideanKuramotoNSDE(
-            N=N,
-            hidden_dim=config.hidden_dim,
-            n_steps=config.n_steps,
-            dt=dt,
-            n_obs=n_obs,
-            diffusion_scale=config.diffusion_scale,
-            adjoint=adjoint,
-            activation=config.activation,
-            drift_depth=config.drift_depth,
-            diffusion_depth=config.diffusion_depth,
+            adaptive=config.adaptive,
+            adaptive_atol=config.adaptive_atol,
+            adaptive_dtmin=config.adaptive_dtmin,
+            adaptive_max_steps=config.adaptive_max_steps,
             key=key,
         )
     raise ValueError(f"Unknown model kind: {config.model}")

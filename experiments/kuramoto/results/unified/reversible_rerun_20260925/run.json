@@ -1,0 +1,23 @@
+{
+  "command": [
+    "./run",
+    "kuramoto",
+    "--adaptive",
+    "--adjoint",
+    "reversible",
+    "--solver",
+    "cfees25",
+    "--seed",
+    "0",
+    "--epochs",
+    "15",
+    "--output-dir",
+    "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/reversible_rerun_20260925/training"
+  ],
+  "status": "interrupted",
+  "baseline": "../recovery_20260925/cg2_full",
+  "timing": "monotonic end-to-end elapsed seconds",
+  "exit_code": 130,
+  "wall_time_s": 2016.4476934760023,
+  "reason": "Stopped after user redirected work to smaller diagnostic experiments; epoch 13 evaluation was incomplete."
+}

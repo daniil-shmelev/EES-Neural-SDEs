@@ -1,0 +1,146 @@
+{
+  "command_options": {
+    "config": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/configs/kuramoto.toml",
+    "output_dir": "experiments/kuramoto/results/unified/reversible_recovery_small_20260925",
+    "modes": [
+      "cg2",
+      "ees_raw",
+      "ees"
+    ],
+    "steps": 200,
+    "seed": 0,
+    "batch_size": 2,
+    "samples": 2,
+    "inverse_iterations": 5,
+    "initial_checkpoint": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_006.eqx"
+  },
+  "train_examples": 128,
+  "validation_examples": 8,
+  "devices": [
+    "cuda:0"
+  ],
+  "scope": "Small-batch diagnostic; losses are not interchangeable with the full four-sample experiment.",
+  "runs": [
+    {
+      "mode": "cg2",
+      "config": {
+        "epochs": 15,
+        "batch_size": 2,
+        "learning_rate": 0.001,
+        "seed": 0,
+        "device": "gpu",
+        "dtype": "float32",
+        "model": "kuramoto_nsde",
+        "hidden_dim": 128,
+        "drift_depth": 3,
+        "diffusion_depth": 2,
+        "activation": "silu",
+        "diffusion_scale": 0.1,
+        "couple_theta_omega": false,
+        "drift_kind": "indexed_mean_field",
+        "solver": "cg2",
+        "n_steps": 75,
+        "adjoint": "checkpoint_full",
+        "adaptive": false,
+        "adaptive_atol": 0.01,
+        "adaptive_dtmin": 1e-06,
+        "adaptive_max_steps": 512,
+        "N": 1000,
+        "data_seed": 0,
+        "data_dir": "experiments/kuramoto/data/",
+        "loss_horizons": [
+          0.125,
+          0.25,
+          0.5,
+          1.0
+        ],
+        "loss_n_samples": 2,
+        "grad_clip_norm": 1.0,
+        "save_every_epoch": true,
+        "skip_plots": false
+      },
+      "history": [
+        {
+          "mode": "cg2",
+          "step": 100,
+          "train_loss": 430.0803527832031,
+          "val_loss": 427.0505676269531,
+          "grad_norm": 392.8358154296875,
+          "elapsed_s": 33.561769847001415
+        },
+        {
+          "mode": "cg2",
+          "step": 200,
+          "train_loss": 453.6666564941406,
+          "val_loss": 421.2057800292969,
+          "grad_norm": 425.5963439941406,
+          "elapsed_s": 52.79677550199267
+        }
+      ],
+      "derivative": null
+    },
+    {
+      "mode": "ees_raw",
+      "config": {
+        "epochs": 15,
+        "batch_size": 2,
+        "learning_rate": 0.001,
+        "seed": 0,
+        "device": "gpu",
+        "dtype": "float32",
+        "model": "kuramoto_nsde",
+        "hidden_dim": 128,
+        "drift_depth": 3,
+        "diffusion_depth": 2,
+        "activation": "silu",
+        "diffusion_scale": 0.1,
+        "couple_theta_omega": false,
+        "drift_kind": "indexed_mean_field",
+        "solver": "cfees25",
+        "n_steps": 50,
+        "adjoint": "reversible",
+        "adaptive": true,
+        "adaptive_atol": 0.01,
+        "adaptive_dtmin": 1e-06,
+        "adaptive_max_steps": 512,
+        "N": 1000,
+        "data_seed": 0,
+        "data_dir": "experiments/kuramoto/data/",
+        "loss_horizons": [
+          0.125,
+          0.25,
+          0.5,
+          1.0
+        ],
+        "loss_n_samples": 2,
+        "grad_clip_norm": 1.0,
+        "save_every_epoch": true,
+        "skip_plots": false
+      },
+      "history": [
+        {
+          "mode": "ees_raw",
+          "step": 100,
+          "train_loss": 533.6747436523438,
+          "val_loss": 508.08203125,
+          "grad_norm": 7075415.5,
+          "elapsed_s": 109.94317177499761
+        },
+        {
+          "mode": "ees_raw",
+          "step": 200,
+          "train_loss": 494.9028015136719,
+          "val_loss": 456.7444763183594,
+          "grad_norm": 152051.796875,
+          "elapsed_s": 191.85494475498854
+        }
+      ],
+      "derivative": {
+        "relative_error": 1103.0433300503453,
+        "cosine": 0.005849168809566311,
+        "loss_difference": 0.0
+      }
+    }
+  ],
+  "note": "CG2 and uncorrected EES completed 200 updates and derivative checks. The subsequent corrected trial was interrupted before its first report, then restarted separately in reversible_recovery_fixed_20260925."
+}

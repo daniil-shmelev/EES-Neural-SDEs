@@ -1,0 +1,46 @@
+{
+  "cfees25_reversible": {
+    "epochs": 15,
+    "checkpoint_parameters_finite": true,
+    "history_finite": true,
+    "predictions_finite": true,
+    "damping": 1.0144745111465454,
+    "parameter_count": 582251,
+    "gradient_checks": [
+      {
+        "seed": 901,
+        "loss": 340.5645446777344,
+        "relative_gradient_error": 0.0004001559003789389,
+        "gradient_cosine": 0.9999999236071243,
+        "seconds": 21.188160607998725
+      },
+      {
+        "seed": 902,
+        "loss": 341.2999572753906,
+        "relative_gradient_error": 0.00042294000795446403,
+        "gradient_cosine": 0.999999920485744,
+        "seconds": 0.29604723400552757
+      },
+      {
+        "seed": 903,
+        "loss": 340.30218505859375,
+        "relative_gradient_error": 0.0003988576984157268,
+        "gradient_cosine": 0.9999999216821993,
+        "seconds": 0.29314034499111585
+      }
+    ]
+  },
+  "cg2_full": {
+    "epochs": 15,
+    "checkpoint_parameters_finite": true,
+    "history_finite": true,
+    "predictions_finite": true,
+    "damping": 1.0149164199829102,
+    "parameter_count": 582251
+  },
+  "tests": {
+    "passed": 46,
+    "subtests_passed": 11
+  },
+  "training_sources_unchanged_since_launch": true
+}

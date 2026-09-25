@@ -13,8 +13,7 @@ The diffrax solver of choice is `Heun` (Stratonovich, strong order 0.5,
 weak order 1). Because the diffusion is constant additive noise on
 $\omega$, Stratonovich and Itô coincide.
 
-We use `VirtualBrownianTree` for refinement-consistent Brownian paths,
-matching the pattern in `experiments/rna/models/torus_nsde.py`.
+`VirtualBrownianTree` supplies refinement-consistent Brownian paths.
 """
 
 from __future__ import annotations
@@ -22,7 +21,6 @@ from __future__ import annotations
 from typing import NamedTuple
 
 import diffrax
-import jax
 import jax.numpy as jnp
 import jax.random as jr
 from jaxtyping import Array, Float, PRNGKeyArray
@@ -32,7 +30,7 @@ from experiments.kuramoto.datasets.kuramoto import (
     make_state_diffusion,
     make_state_drift,
 )
-from experiments.rna.models.torus import wrap_to_pi
+from experiments.torus_memory.models.torus import wrap_to_pi
 
 
 class SimConfig(NamedTuple):

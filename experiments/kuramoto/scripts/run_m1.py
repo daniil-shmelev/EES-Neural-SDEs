@@ -29,10 +29,10 @@ from experiments.kuramoto.datasets.verification import run_verification
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--n-list", type=int, nargs="+", default=[2, 4, 8])
-    p.add_argument("--n-train", type=int, default=5000)
-    p.add_argument("--n-val", type=int, default=1000)
-    p.add_argument("--n-test", type=int, default=1000)
+    p.add_argument("--n-list", type=int, nargs="+", default=[1000])
+    p.add_argument("--n-train", type=int, default=1500)
+    p.add_argument("--n-val", type=int, default=300)
+    p.add_argument("--n-test", type=int, default=300)
     p.add_argument(
         "--P", type=float, default=0.5,
         help="Bimodal natural-frequency magnitude (Filatrella 2008 generator/consumer).",
@@ -44,14 +44,14 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--m", type=float, default=1.0, help="Inertia (Olmi-Torcini 2024).")
     p.add_argument("--D", type=float, default=0.05, help="Noise strength (variance ~ 2D).")
     p.add_argument("--T", type=float, default=5.0, help="Trajectory horizon (seconds).")
-    p.add_argument("--n-fine", type=int, default=16384)
-    p.add_argument("--n-obs", type=int, default=200)
+    p.add_argument("--n-fine", type=int, default=2048)
+    p.add_argument("--n-obs", type=int, default=100)
     p.add_argument(
         "--omega-scale", type=float, default=0.5,
         help="Std of initial Gaussian angular velocity per oscillator.",
     )
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--batch-sim", type=int, default=2048)
+    p.add_argument("--batch-sim", type=int, default=32)
     p.add_argument("--data-dir", type=Path, default=Path("experiments/kuramoto/data/"))
     p.add_argument(
         "--results-dir", type=Path, default=Path("experiments/kuramoto/results/")
@@ -87,6 +87,10 @@ def _apply_smoke(args: argparse.Namespace) -> argparse.Namespace:
 
 def main() -> int:
     args = _apply_smoke(parse_args())
+    for n in args.n_list:
+        existing = args.data_dir / f"kuramoto_N{n}_seed{args.seed}.npz"
+        if existing.exists():
+            raise FileExistsError(f"Dataset already exists; use a fresh --data-dir: {existing}")
     smallest_n = min(args.n_list)
 
     if not args.skip_verify:

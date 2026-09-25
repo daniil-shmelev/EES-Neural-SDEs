@@ -1,0 +1,188 @@
+[
+  {
+    "mode": "cg2_structure",
+    "cells": [
+      {
+        "mode": "cg2_structure",
+        "step": 100,
+        "train_loss": 652.6148681640625,
+        "val_loss": 645.8533325195312,
+        "grad_norm": 439.9631652832031,
+        "elapsed_s": 34.04165679799917
+      },
+      {
+        "mode": "cg2_structure",
+        "step": 200,
+        "train_loss": 434.48876953125,
+        "val_loss": 429.0040283203125,
+        "grad_norm": 295.8523254394531,
+        "elapsed_s": 53.97906991900527
+      },
+      {
+        "mode": "cg2_structure",
+        "step": 300,
+        "train_loss": 411.5964660644531,
+        "val_loss": 419.9823303222656,
+        "grad_norm": 179.32359313964844,
+        "elapsed_s": 73.96691442700103
+      },
+      {
+        "mode": "cg2_structure",
+        "step": 400,
+        "train_loss": 403.6279602050781,
+        "val_loss": 418.47772216796875,
+        "grad_norm": 298.15887451171875,
+        "elapsed_s": 93.80983952300448
+      },
+      {
+        "mode": "cg2_structure",
+        "step": 500,
+        "train_loss": 399.858642578125,
+        "val_loss": 415.8983154296875,
+        "grad_norm": 164.8985137939453,
+        "elapsed_s": 113.7584759349993
+      },
+      {
+        "mode": "cg2_structure",
+        "step": 600,
+        "train_loss": 415.7639465332031,
+        "val_loss": 416.79608154296875,
+        "grad_norm": 283.62554931640625,
+        "elapsed_s": 132.93078497500392
+      }
+    ],
+    "gradient": null,
+    "config": {
+      "epochs": 15,
+      "batch_size": 2,
+      "learning_rate": 0.001,
+      "seed": 0,
+      "device": "gpu",
+      "dtype": "float32",
+      "model": "kuramoto_nsde",
+      "hidden_dim": 128,
+      "drift_depth": 3,
+      "diffusion_depth": 2,
+      "activation": "silu",
+      "diffusion_scale": 0.1,
+      "couple_theta_omega": false,
+      "drift_kind": "indexed_mean_field",
+      "solver": "cg2",
+      "n_steps": 75,
+      "adjoint": "checkpoint_full",
+      "reconstruction_iterations": 0,
+      "adaptive": false,
+      "adaptive_atol": 0.01,
+      "adaptive_dtmin": 1e-06,
+      "adaptive_max_steps": 512,
+      "N": 1000,
+      "data_seed": 0,
+      "data_dir": "experiments/kuramoto/data/",
+      "loss_horizons": [
+        0.125,
+        0.25,
+        0.5,
+        1.0
+      ],
+      "loss_n_samples": 4,
+      "grad_clip_norm": 1.0,
+      "save_every_epoch": true,
+      "skip_plots": false
+    }
+  },
+  {
+    "mode": "ees_structure",
+    "cells": [
+      {
+        "mode": "ees_structure",
+        "step": 100,
+        "train_loss": 652.6480712890625,
+        "val_loss": 645.8923950195312,
+        "grad_norm": 437.68902587890625,
+        "elapsed_s": 61.54121740099799
+      },
+      {
+        "mode": "ees_structure",
+        "step": 200,
+        "train_loss": 434.7387390136719,
+        "val_loss": 428.6063232421875,
+        "grad_norm": 291.5431213378906,
+        "elapsed_s": 112.29396974900737
+      },
+      {
+        "mode": "ees_structure",
+        "step": 300,
+        "train_loss": 413.5530090332031,
+        "val_loss": 418.1590270996094,
+        "grad_norm": 193.66770935058594,
+        "elapsed_s": 160.9457187950029
+      },
+      {
+        "mode": "ees_structure",
+        "step": 400,
+        "train_loss": 403.98846435546875,
+        "val_loss": 418.3863525390625,
+        "grad_norm": 305.97381591796875,
+        "elapsed_s": 210.99767770600738
+      },
+      {
+        "mode": "ees_structure",
+        "step": 500,
+        "train_loss": 399.9582214355469,
+        "val_loss": 415.9201354980469,
+        "grad_norm": 149.53369140625,
+        "elapsed_s": 261.74978584900964
+      },
+      {
+        "mode": "ees_structure",
+        "step": 600,
+        "train_loss": 416.1070251464844,
+        "val_loss": 416.6983642578125,
+        "grad_norm": 285.8365478515625,
+        "elapsed_s": 314.526763108006
+      }
+    ],
+    "gradient": {
+      "relative_error": 0.0001189585598382507,
+      "cosine": 0.9999999931544049,
+      "loss_difference": 0.0
+    },
+    "config": {
+      "epochs": 15,
+      "batch_size": 2,
+      "learning_rate": 0.001,
+      "seed": 0,
+      "device": "gpu",
+      "dtype": "float32",
+      "model": "kuramoto_nsde",
+      "hidden_dim": 128,
+      "drift_depth": 3,
+      "diffusion_depth": 2,
+      "activation": "silu",
+      "diffusion_scale": 0.1,
+      "couple_theta_omega": false,
+      "drift_kind": "indexed_mean_field",
+      "solver": "cfees25",
+      "n_steps": 50,
+      "adjoint": "reversible",
+      "reconstruction_iterations": 0,
+      "adaptive": true,
+      "adaptive_atol": 0.01,
+      "adaptive_dtmin": 1e-06,
+      "adaptive_max_steps": 512,
+      "N": 1000,
+      "data_seed": 0,
+      "data_dir": "experiments/kuramoto/data/",
+      "loss_horizons": [
+        0.125,
+        0.25,
+        0.5,
+        1.0
+      ],
+      "loss_n_samples": 4,
+      "grad_clip_norm": 1.0,
+      "save_every_epoch": true,
+      "skip_plots": false
+    }
+  }
+]

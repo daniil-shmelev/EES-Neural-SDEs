@@ -1,0 +1,22 @@
+{
+  "source_sha256": {
+    "experiments/kuramoto/experiment/train_kuramoto.py": "8b78fcafebaf5bfe4e947f922c3466803d6a4a0693b3bbd87a0a4a1047b64d9f",
+    "experiments/kuramoto/experiment/factories.py": "06b4a385811d86d917dfce249133378fa1e7feb020b870a24981f6a32d1ea488",
+    "experiments/kuramoto/experiment/losses.py": "1a3ce08aface2b6fd42222f50d1913675e7e6b9e4916e299dfc2cfa851b908df",
+    "experiments/kuramoto/models/kuramoto_nsde.py": "868e23b6d953ff66dc12a838b0c29c00e6a3b49c6fd53d10ad06e20c2c79333a"
+  },
+  "diffrax_worktree": "/home/luke/diffrax/.worktrees/adaptive-reversible",
+  "diffrax_commit": "aeb1335b5a6278e85a270231e0f97b8db4453ae6",
+  "packages": {
+    "jax": "0.11.2",
+    "jaxlib": "0.11.2",
+    "equinox": "0.13.8",
+    "optax": "0.2.8",
+    "diffrax": "0.7.1",
+    "georax": "0.1.0",
+    "cyreal": "0.2.1",
+    "lineax": "0.1.1"
+  },
+  "gpu": "NVIDIA GeForce RTX 5080",
+  "timing": "External drivers use time.perf_counter. A system-clock jump affected CG2 epoch_walltime_s and train_walltime_s; use driver wall_time_s or step_time_s for comparisons."
+}
