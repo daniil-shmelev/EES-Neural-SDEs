@@ -10,12 +10,6 @@ import seali
 
 
 class Experiments(StrEnum):
-    BLACK_SCHOLES = "black_scholes"
-    LOCAL_STOCH_VOL = "local_stoch_vol"
-    HESTON = "heston"
-    ROUGH_HESTON = "rough_heston"
-    QUADRATIC_ROUGH_HESTON = "quadratic_rough_heston"
-    BERGOMI = "bergomi"
     ROUGH_BERGOMI = "rough_bergomi"
 
 
@@ -58,6 +52,11 @@ class ExperimentConfig:
     diffusion_scale: float
     # output
     skip_plots: bool
+    # integration mode
+    # None preserves the historical fixed-NFE setup. When provided, every
+    # solver uses this step size and nfe_budget only defines the legacy base
+    # grid used to represent the total time horizon.
+    step_size: float | None = None
 
     @property
     def n_steps(self) -> int:
@@ -82,6 +81,7 @@ def make_config(
     solver: Solvers,
     diffusion_scale: float,
     skip_plots: bool,
+    step_size: float | None = None,
 ) -> ExperimentConfig:
     return ExperimentConfig(
         experiment=experiment,
@@ -96,6 +96,7 @@ def make_config(
         solver=solver,
         diffusion_scale=diffusion_scale,
         skip_plots=skip_plots,
+        step_size=step_size,
     )
 
 
@@ -136,6 +137,7 @@ def _build_config(data: dict[str, Any]) -> ExperimentConfig:
         total_time=total_time,
         diffusion_scale=data["diffusion_scale"],
         skip_plots=data["skip_plots"],
+        step_size=data.get("step_size"),
     )
 
 
@@ -209,7 +211,7 @@ HELP = seali.Help(
 @seali.command(help=HELP)
 def main(
     *,
-    experiment: Experiments = Experiments.BLACK_SCHOLES,
+    experiment: Experiments = Experiments.ROUGH_BERGOMI,
     epochs: int = 10,
     batch_size: int = 64,
     learning_rate: float = 1e-3,

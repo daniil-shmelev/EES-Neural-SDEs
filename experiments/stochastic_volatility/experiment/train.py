@@ -248,10 +248,10 @@ def _save_json(path: Path, payload: dict[str, Any]) -> None:
         json.dump(payload, handle, indent=2, sort_keys=True)
 
 
-def _make_output_dir(config: ExperimentConfig) -> Path:
-    timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
+def _make_output_dir(config: ExperimentConfig, output_base: Path | None = None) -> Path:
+    timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S_%f")
     slug = f"{config.experiment}__{config.solver}__seed{config.seed}__{timestamp}"
-    return PROJECT_ROOT / "results" / slug
+    return (output_base if output_base is not None else PROJECT_ROOT / "results") / slug
 
 
 def _save_config(path: Path, config: ExperimentConfig) -> None:
@@ -267,6 +267,11 @@ def _save_config(path: Path, config: ExperimentConfig) -> None:
         f"hidden_dim     = {config.hidden_dim}",
         f"nfe_budget     = {config.nfe_budget}",
         f"total_time     = {config.total_time}",
+        *(
+            [f"step_size     = {config.step_size}"]
+            if config.step_size is not None
+            else []
+        ),
         f"diffusion_scale = {config.diffusion_scale}",
         "",
         f"device         = {str(config.device)!r}",
@@ -288,6 +293,9 @@ def _effective_solver_metrics(
     solve_dt = getattr(model, "solve_dt", config.dt)
     nfe_per_step = getattr(model, "nfe_per_step", None)
     metrics = {
+        "integration_mode": (
+            "fixed_stepsize" if config.step_size is not None else "fixed_nfe"
+        ),
         "nfe_budget": int(config.nfe_budget),
         "total_time": float(config.total_time),
         "base_dt": float(config.dt),
@@ -296,6 +304,7 @@ def _effective_solver_metrics(
     }
     if nfe_per_step is not None:
         metrics["nfe_per_step"] = int(nfe_per_step)
+        metrics["effective_nfe"] = int(nfe_per_step) * int(solve_n_steps)
     return metrics
 
 
@@ -410,8 +419,8 @@ def _setup_stoch_vol(config: ExperimentConfig, key: jax.Array) -> dict[str, Any]
 # ---------------------------------------------------------------------------
 
 
-def _run_single_config(config: ExperimentConfig) -> int:
-    output_dir = _make_output_dir(config)
+def _run_single_config(config: ExperimentConfig, output_base: Path | None = None) -> int:
+    output_dir = _make_output_dir(config, output_base)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     model_key = jax.random.key(config.seed)
@@ -424,6 +433,7 @@ def _run_single_config(config: ExperimentConfig) -> int:
         f"hidden_dim={config.hidden_dim}",
         f"nfe_budget={config.nfe_budget}",
         f"total_time={config.total_time:.8g}",
+        f"step_size={config.step_size}",
         f"solver={config.solver}",
         flush=True,
     )
@@ -535,12 +545,13 @@ def main() -> int:
     parser.add_argument(
         "--index", type=int, default=None, help="Sweep index for a single sweep run"
     )
+    parser.add_argument("--output-base", type=Path, default=None, help="Parent directory for this sweep's run directories.")
     args = parser.parse_args()
 
     if args.index is not None:
         config = _configure_runtime(sweep_config_at(args.config, args.index))
         print(f"running sweep_index={args.index}", flush=True)
-        return _run_single_config(config)
+        return _run_single_config(config, args.output_base)
 
     if is_sweep_config(args.config):
         total = sweep_len(args.config)
@@ -548,14 +559,14 @@ def main() -> int:
         for index in range(total):
             print(f"sweep_run={index + 1}/{total} sweep_index={index}", flush=True)
             config = _configure_runtime(sweep_config_at(args.config, index))
-            status = _run_single_config(config)
+            status = _run_single_config(config, args.output_base)
             if status != 0:
                 return status
         return 0
 
     config = _configure_runtime(load_config(args.config))
-    return _run_single_config(config)
+    return _run_single_config(config, args.output_base)
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

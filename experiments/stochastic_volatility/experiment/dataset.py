@@ -16,12 +16,6 @@ from experiments.stochastic_volatility.experiment.config import Experiments
 _DATA_DIR = Path(__file__).parent.parent / "data"
 
 STOCH_VOL_DATSET_PATHS = {
-    Experiments.BLACK_SCHOLES: _DATA_DIR / "black-scholes_data.npz",
-    Experiments.LOCAL_STOCH_VOL: _DATA_DIR / "classical_local_stochastic_volatility_data.npz",
-    Experiments.HESTON: _DATA_DIR / "heston_data.npz",
-    Experiments.ROUGH_HESTON: _DATA_DIR / "rough_heston_data.npz",
-    Experiments.QUADRATIC_ROUGH_HESTON: _DATA_DIR / "quadratic_rough_heston_data.npz",
-    Experiments.BERGOMI: _DATA_DIR / "bergomi_data.npz",
     Experiments.ROUGH_BERGOMI: _DATA_DIR / "rough_bergomi_data.npz",
 }
 

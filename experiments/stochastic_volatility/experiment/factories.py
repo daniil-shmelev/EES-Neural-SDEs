@@ -14,15 +14,7 @@ def make_loader(
     split: Literal["train", "val", "test"],
 ) -> DataLoader:
     match config.experiment:
-        case (
-            Experiments.BLACK_SCHOLES
-            | Experiments.LOCAL_STOCH_VOL
-            | Experiments.HESTON
-            | Experiments.ROUGH_HESTON
-            | Experiments.QUADRATIC_ROUGH_HESTON
-            | Experiments.BERGOMI
-            | Experiments.ROUGH_BERGOMI
-        ):
+        case Experiments.ROUGH_BERGOMI:
             from experiments.stochastic_volatility.experiment.dataset import StochVolatilityDataset
 
             source = StochVolatilityDataset(
@@ -66,6 +58,7 @@ def make_model(
         diffusion_scale=config.diffusion_scale,
         n_save=n_save,
         save_path=True,
+        step_size=config.step_size,
         key=key,
     )
 

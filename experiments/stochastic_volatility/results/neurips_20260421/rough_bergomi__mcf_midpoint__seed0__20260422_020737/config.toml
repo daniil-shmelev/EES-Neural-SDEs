@@ -1,0 +1,15 @@
+experiment     = 'rough_bergomi'
+solver         = 'mcf_midpoint'
+seed           = 0
+
+epochs         = 100
+batch_size     = 4096
+learning_rate  = 0.001
+
+hidden_dim     = 16
+nfe_budget     = 504
+total_time     = 1.0
+diffusion_scale = 0.2
+
+device         = 'gpu'
+skip_plots     = false

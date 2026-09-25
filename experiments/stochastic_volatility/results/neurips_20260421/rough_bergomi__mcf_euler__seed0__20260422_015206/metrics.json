@@ -1,0 +1,15 @@
+{
+  "base_dt": 0.001984126984126984,
+  "completed_epochs": 100,
+  "inference_time_s": 3.31,
+  "interrupted": false,
+  "ks_t55": 0.095458984375,
+  "latest_epoch": 100,
+  "nfe_budget": 504,
+  "nfe_per_step": 2,
+  "solve_dt": 0.003968253968253968,
+  "solve_n_steps": 252,
+  "test_loss": 0.004492282867431641,
+  "total_time": 1.0,
+  "train_time_s": 925.57
+}
