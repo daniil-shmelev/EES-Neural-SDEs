@@ -23,7 +23,7 @@ import jax.numpy as jnp
 import numpy as np
 
 from experiments.sphere_latent_nsde.dataset import load_activity_arrays
-from experiments.sphere_latent_nsde.geometry import Sphere, SphereExpChart
+from georax import Sphere
 from experiments.sphere_latent_nsde.losses import _cross_entropy_per_time, gather_time
 from experiments.sphere_latent_nsde.models import Chebyshev
 
@@ -139,10 +139,13 @@ np.savez(sys.argv[1], z=z.numpy(), a=a.numpy(), y=y.numpy(), basis=basis.numpy()
         out,
     )
     original = np.load(out)
-    sphere = Sphere(int(original["z"].shape[0]), chart=SphereExpChart())
-    ours = sphere.apply_increment(jnp.asarray(original["z"]), jnp.asarray(original["a"]))
+    sphere = Sphere(int(original["z"].shape[0]))
+    z, a = jnp.asarray(original["z"]), jnp.asarray(original["a"])
+    ours = sphere.apply_increment(z, a, sphere.select_chart(12))
     _assert_close("sphere action", np.asarray(ours), original["y"], atol=2e-6)
-    _assert_close("sphere basis", np.asarray(sphere.basis), original["basis"], atol=0.0)
+    tangent = sphere.detrivialise(z, a)
+    expected = np.einsum("d,dij,j->i", original["a"], original["basis"], original["z"])
+    _assert_close("sphere coordinate convention", np.asarray(tangent), expected, atol=2e-6)
 
 
 def check_aux_loss(tmp: Path) -> None:

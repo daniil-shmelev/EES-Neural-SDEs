@@ -16,28 +16,22 @@ from diffrax import (
     AbstractSolver,
     ControlTerm,
     DirectAdjoint,
+    GeneralShARK,
     MultiTerm,
     RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
     SaveAt,
+    SpaceTimeLevyArea,
     VirtualBrownianTree,
     diffeqsolve,
 )
-from georax import CFEES25, CG2, GeometricEuler, GeometricTerm
+from georax import CFEES25, CG2, GeometricEuler, GeometricTerm, SRKMK, Sphere
 from jaxtyping import Array
 
-from experiments.sphere_latent_nsde.custom_vbt import (
-    cfees25_integrate_reversible,
-    step_noise,
-)
 from experiments.sphere_latent_nsde.config import SOLVER_NFE_PER_STEP
 from experiments.sphere_latent_nsde.dataset import INPUT_DIM, NUM_CLASSES, NUM_TIMEPOINTS
 from experiments.sphere_latent_nsde.distributions import PowerSpherical
-from experiments.sphere_latent_nsde.geometry import (
-    Sphere,
-    normalize,
-    vec_to_matrix,
-)
+from experiments.sphere_latent_nsde.geometry import normalize
 
 
 def apply_linear(linear: eqx.nn.Linear, x: Array) -> Array:
@@ -47,53 +41,42 @@ def apply_linear(linear: eqx.nn.Linear, x: Array) -> Array:
     return y
 
 
-_BBC_SQRT177 = math.sqrt(177.0)
-_BBC_X1 = 1.0
-_BBC_X2 = 0.25
-_BBC_X3 = (-1.0 + _BBC_SQRT177) / 2.0
-_BBC_X5 = 11.0 / 630.0
-_BBC_X7 = 1.0 / 2520.0
-_BBC_X4 = 1.0 / 6.0 - _BBC_X5 * _BBC_X3
-_BBC_X6 = (10.0 - _BBC_X3) / 2520.0
-_BBC_Y2 = 0.5 - _BBC_X3 * _BBC_X4
-
-
-def _bbc_expm_8(a: Array) -> Array:
-    """BBC/Sastre matrix-exponential polynomial used by the Torch baseline."""
-
-    ident = jnp.eye(a.shape[-1], dtype=a.dtype)
-    a2 = a @ a
-    a4 = a2 @ (_BBC_X1 * a + _BBC_X2 * a2)
-    a8 = (_BBC_X3 * a2 + a4) @ (
-        _BBC_X4 * ident + _BBC_X5 * a + _BBC_X6 * a2 + _BBC_X7 * a4
-    )
-    return ident + a + _BBC_Y2 * a2 + a8
-
-
-def _apply_bbc_increment(z: Array, coeffs: Array, basis: Array) -> Array:
-    omega = vec_to_matrix(coeffs, basis)
-    q = _bbc_expm_8(omega)
-    return jnp.einsum("...ij,...j->...i", q, z)
-
-
-def build_solver(name: Literal["geometric_euler", "cg2", "cfees25"]) -> AbstractSolver:
+def build_solver(
+    name: Literal["geometric_euler", "cg2", "cfees25", "srkmk_general_shark"],
+) -> AbstractSolver:
     if name == "geometric_euler":
         return GeometricEuler()
     if name == "cg2":
         return CG2()
     if name == "cfees25":
         return CFEES25()
+    if name == "srkmk_general_shark":
+        return SRKMK(GeneralShARK())
     raise ValueError(f"unknown solver {name!r}")
 
 
 def build_adjoint(
     solver: AbstractSolver,
-    name: Literal["auto", "direct", "recursive_checkpoint", "reversible"] = "auto",
+    name: Literal[
+        "auto",
+        "direct",
+        "recursive_checkpoint",
+        "checkpoint_recursive",
+        "checkpoint_full",
+        "full",
+        "reversible",
+    ] = "auto",
+    *,
+    max_steps: int | None = None,
 ) -> AbstractAdjoint:
     if name == "direct":
         return DirectAdjoint()
-    if name == "recursive_checkpoint":
+    if name in ("recursive_checkpoint", "checkpoint_recursive"):
         return RecursiveCheckpointAdjoint()
+    if name in ("checkpoint_full", "full"):
+        if max_steps is None:
+            raise ValueError("checkpoint_full adjoint requires max_steps.")
+        return RecursiveCheckpointAdjoint(checkpoints=max_steps)
     if name == "reversible":
         return ReversibleAdjoint()
     if isinstance(solver, AbstractReversibleSolver):
@@ -105,7 +88,6 @@ def _interpolate_paths_to_grid(
     paths: Array,
     source_times: Array,
     target_times: Array,
-    geometry: Sphere,
 ) -> Array:
     """Linearly interpolate ambient coordinates, then project to the sphere."""
 
@@ -118,7 +100,7 @@ def _interpolate_paths_to_grid(
     )(flat_paths)
     out = flat_interp.reshape((target_times.shape[0],) + paths_by_time.shape[1:])
     out = jnp.moveaxis(out, 0, 2)
-    return geometry.project(out)
+    return normalize(out)
 
 
 def _sphere_drift_coeffs(t, y, args):
@@ -412,7 +394,7 @@ class PathEncoder(eqx.Module):
     ) -> None:
         k1, k2, k3, k4 = jax.random.split(key, 4)
         geometry = Sphere(z_dim)
-        group_dim = geometry.lie_algebra_dimension
+        group_dim = geometry.coordinate_shape[0]
         self.loc_map = eqx.nn.Linear(h_dim, z_dim, key=k1)
         self.scale_map = eqx.nn.Linear(h_dim, 1, key=k2)
         self.time_fn = Chebyshev(
@@ -445,7 +427,7 @@ class PathEncoder(eqx.Module):
         if self.learnable_prior:
             assert self.prior_h is not None
             return self.time_fn(self.prior_h, times)
-        return jnp.zeros((times.shape[0], self.geometry.dimension), dtype=times.dtype)
+        return jnp.zeros((times.shape[0], self.geometry.coordinate_shape[0]), dtype=times.dtype)
 
     def _posterior_drift_batched(self, h: Array, times: Array) -> Array:
         if h.ndim == 1:
@@ -470,24 +452,32 @@ class PathEncoder(eqx.Module):
         ``(mc, batch, time, z_dim)``.
         """
 
-        if isinstance(solver, GeometricEuler):
-            return self._integrate_paths_geometric_euler(h, z0, key, times=times)
-        if isinstance(solver, CFEES25):
-            return self._integrate_paths_cfees25(h, z0, key, times=times)
-
         dt = times[1] - times[0]
         t0 = times[0]
         t1 = times[-1]
-        driver_dim = self.geometry.dimension
-        z0 = self.geometry.project(z0)
+        max_steps = int(times.shape[0]) + 8
+        driver_dim = self.geometry.coordinate_shape[0]
+        z0 = normalize(z0)
         solve_args = (self.time_fn, h, self.sigma.astype(z0.dtype))
 
-        brownian = VirtualBrownianTree(
-            t0=t0,
-            t1=t1,
-            tol=dt / 4.0,
-            shape=z0.shape[:-1] + (driver_dim,),
-            key=key,
+        brownian_shape = z0.shape[:-1] + (driver_dim,)
+        brownian = (
+            VirtualBrownianTree(
+                t0=t0,
+                t1=t1,
+                tol=dt / 4.0,
+                shape=brownian_shape,
+                key=key,
+                levy_area=SpaceTimeLevyArea,
+            )
+            if isinstance(solver, SRKMK)
+            else VirtualBrownianTree(
+                t0=t0,
+                t1=t1,
+                tol=dt / 4.0,
+                shape=brownian_shape,
+                key=key,
+            )
         )
         term = MultiTerm(
             GeometricTerm(_sphere_drift_coeffs, self.geometry),
@@ -503,57 +493,9 @@ class PathEncoder(eqx.Module):
             args=solve_args,
             saveat=SaveAt(ts=times),
             adjoint=adjoint,
-            max_steps=int(times.shape[0]) + 8,
+            max_steps=max_steps,
         )
         return jnp.moveaxis(sol.ys, 0, 2)
-
-    def _integrate_paths_geometric_euler(
-        self,
-        h: Array,
-        z0: Array,
-        key: Array,
-        *,
-        times: Array,
-    ) -> Array:
-        """Fixed-grid geometric Euler with replayable independent increments."""
-
-        dt = jnp.diff(times)
-        z0 = self.geometry.project(z0)
-        driver_dim = self.geometry.dimension
-        drift = self._posterior_drift_batched(h, times[:-1])
-        drift = jnp.broadcast_to(drift, z0.shape[:-1] + drift.shape[-2:])
-        drift = jnp.moveaxis(drift, -2, 0)
-        sigma = self.sigma.astype(z0.dtype)
-        noise_shape = z0.shape[:-1] + (driver_dim,)
-
-        def step(z, inputs):
-            step_index, dt_i, drift_i = inputs
-            noise = step_noise(key, step_index, noise_shape, z.dtype)
-            increment = drift_i * dt_i + sigma * jnp.sqrt(dt_i) * noise
-            z_next = _apply_bbc_increment(z, increment, self.geometry.basis)
-            return z_next, z_next
-
-        step_indices = jnp.arange(times.shape[0] - 1)
-        _, zs = jax.lax.scan(step, z0, (step_indices, dt, drift))
-        zs = jnp.concatenate([z0[None], zs], axis=0)
-        return jnp.moveaxis(zs, 0, 2)
-
-    def _integrate_paths_cfees25(
-        self,
-        h: Array,
-        z0: Array,
-        key: Array,
-        *,
-        times: Array,
-    ) -> Array:
-        """Fixed-grid CFEES25 with replayable Brownian increments."""
-
-        return cfees25_integrate_reversible(
-            (self.time_fn, h, z0, self.sigma.astype(z0.dtype)),
-            times,
-            self.geometry.basis,
-            key,
-        )
 
     def path_kl(self, paths: Array, h: Array, times: Array) -> Array:
         grid = times[:-1]
@@ -561,8 +503,7 @@ class PathEncoder(eqx.Module):
         prior = self.prior_drift(grid)
         if h.ndim == 1:
             delta = self.posterior_drift(h, grid) - prior
-            drift_mats = vec_to_matrix(delta, self.geometry.basis)
-            projection = jnp.einsum("tij,stj->sti", drift_mats, paths[:, :-1, :])
+            projection = self.geometry.detrivialise(paths[:, :-1, :], delta)
             norm_squared = jnp.sum(projection**2, axis=-1)
             per_sample = jnp.sum(norm_squared * dt[None, :], axis=-1) / jnp.square(
                 self.sigma
@@ -571,8 +512,7 @@ class PathEncoder(eqx.Module):
 
         posterior = self._posterior_drift_batched(h, grid)
         delta = posterior - prior[None, :, :]
-        drift_mats = vec_to_matrix(delta, self.geometry.basis)
-        projection = jnp.einsum("btij,sbtj->sbti", drift_mats, paths[:, :, :-1, :])
+        projection = self.geometry.detrivialise(paths[:, :, :-1, :], delta)
         norm_squared = jnp.sum(projection**2, axis=-1)
         per_sample = jnp.sum(norm_squared * dt[None, None, :], axis=-1) / jnp.square(
             self.sigma
@@ -615,9 +555,20 @@ class ActivityLatentSDE(eqx.Module):
         z_dim: int = 16,
         n_deg: int = 4,
         nfe_budget: int | None = None,
-        solver_name: Literal["geometric_euler", "cg2", "cfees25"] = "geometric_euler",
+        solver_name: Literal[
+            "geometric_euler",
+            "cg2",
+            "cfees25",
+            "srkmk_general_shark",
+        ] = "geometric_euler",
         adjoint_name: Literal[
-            "auto", "direct", "recursive_checkpoint", "reversible"
+            "auto",
+            "direct",
+            "recursive_checkpoint",
+            "checkpoint_recursive",
+            "checkpoint_full",
+            "full",
+            "reversible",
         ] = "auto",
         learnable_prior: bool = False,
         use_atanh: bool = False,
@@ -652,13 +603,15 @@ class ActivityLatentSDE(eqx.Module):
         )
         self.recon_net = eqx.nn.Linear(z_dim, input_dim, key=k3)
         self.aux_net = eqx.nn.Linear(z_dim, num_classes, key=k4)
+        solve_n_steps = int(nfe_budget) // int(nfe_per_step)
+        max_steps = solve_n_steps + 1 + 8
         self.solver = solver
-        self.adjoint = build_adjoint(solver, adjoint_name)
+        self.adjoint = build_adjoint(solver, adjoint_name, max_steps=max_steps)
         self.z_dim = z_dim
         self.num_timepoints = int(num_timepoints)
         self.nfe_budget = int(nfe_budget)
         self.nfe_per_step = int(nfe_per_step)
-        self.solve_n_steps = int(nfe_budget) // int(nfe_per_step)
+        self.solve_n_steps = solve_n_steps
         self.solve_num_timepoints = self.solve_n_steps + 1
         self.time_end = 0.99
         self.recon_sigma = jnp.asarray(1.0, dtype=jnp.float32)
@@ -695,7 +648,6 @@ class ActivityLatentSDE(eqx.Module):
                 solve_paths,
                 solve_times,
                 output_times,
-                self.path_encoder.geometry,
             )
         recon_mu = apply_linear(self.recon_net, paths)
         aux_logits = apply_linear(self.aux_net, paths)

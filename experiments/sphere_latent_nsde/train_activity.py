@@ -218,10 +218,10 @@ def _save_json(path: Path, payload: dict[str, Any]) -> None:
     path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def _make_output_dir(config: ActivityConfig) -> Path:
-    timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S")
+def _make_output_dir(config: ActivityConfig, output_base: Path | None = None) -> Path:
+    timestamp = datetime.now().astimezone().strftime("%Y%m%d_%H%M%S_%f")
     slug = f"{config.experiment}__{config.method}__seed{config.seed}__{timestamp}"
-    return PROJECT_ROOT / "results" / slug
+    return (output_base if output_base is not None else PROJECT_ROOT / "results") / slug
 
 
 def _configure_runtime(config: ActivityConfig) -> ActivityConfig:
@@ -286,8 +286,8 @@ def _save_artifacts(
     _save_json(output_dir / "metrics.json", metrics)
 
 
-def _run_single_config(config: ActivityConfig) -> int:
-    output_dir = _make_output_dir(config)
+def _run_single_config(config: ActivityConfig, output_base: Path | None = None) -> int:
+    output_dir = _make_output_dir(config, output_base)
     train_dataset = make_dataset(config, "train")
     val_dataset = make_dataset(config, "val")
     test_dataset = make_dataset(config, "test")
@@ -347,23 +347,24 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("config", type=Path, help="Path to TOML config or sweep")
     parser.add_argument("--index", type=int, default=None, help="Sweep index to run")
+    parser.add_argument("--output-base", type=Path, default=None, help="Parent directory for this sweep's run directories.")
     args = parser.parse_args()
 
     if args.index is not None:
         print(f"running sweep_index={args.index}", flush=True)
-        return _run_single_config(_configure_runtime(sweep_config_at(args.config, args.index)))
+        return _run_single_config(_configure_runtime(sweep_config_at(args.config, args.index)), args.output_base)
 
     if is_sweep_config(args.config):
         total = sweep_len(args.config)
         print(f"running sweep with {total} configurations", flush=True)
         for index in range(total):
             print(f"sweep_run={index + 1}/{total} sweep_index={index}", flush=True)
-            status = _run_single_config(_configure_runtime(sweep_config_at(args.config, index)))
+            status = _run_single_config(_configure_runtime(sweep_config_at(args.config, index)), args.output_base)
             if status != 0:
                 return status
         return 0
 
-    return _run_single_config(_configure_runtime(load_config(args.config)))
+    return _run_single_config(_configure_runtime(load_config(args.config)), args.output_base)
 
 
 if __name__ == "__main__":
