@@ -1,0 +1,147 @@
+#!/usr/bin/env python3
+"""Run an experiment from the repository root, using its uv dependencies."""
+
+import argparse
+from datetime import datetime
+import os
+from pathlib import Path
+import shlex
+import shutil
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parent
+# module, uv extra, experiment directory, default configuration, output option
+EXPERIMENTS = {
+    "kuramoto": ("kuramoto.scripts.run_comparison", "jax-base", "kuramoto", "configs/kuramoto.toml", "--output-base"),
+    "sphere": ("sphere_latent_nsde.train_activity", "sphere", "sphere_latent_nsde", "configs/activity/sweep.toml", "--output-base"),
+    "rough-vol": ("stochastic_volatility.experiment.train", "stochastic-volatility", "stochastic_volatility", "configs/stoch_vol/sweep.toml", "--output-base"),
+    "convergence-ode": ("convergence_ode.convergence", "jax-base", "convergence_ode", None, "--output-dir"),
+    "convergence-fbm": ("convergence_fbm.convergence", "algebra", "convergence_fbm", None, "--output-dir"),
+    "stability-ode": ("stability_ode.stability_regions", "stability-ode", "stability_ode", None, "--output-dir"),
+    "stability": ("stability.stability", None, "stability", None, "--output-dir"),
+    "ou": ("ou.OU", "ou", "ou", None, "--output-dir"),
+    "stiff-gbm": ("stiff_gbm.GBM", "stiff-gbm", "stiff_gbm", None, "--output-dir"),
+    "torus-memory": ("torus_memory.benchmark", "torus-memory", "torus_memory", None, "--output"),
+    "order-verification": ("order_verification.siam.scripts.verify_cfees", "order-verification", "order_verification", None, None),
+}
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    subparsers = parser.add_subparsers(dest="experiment", required=True)
+    for name, (_, _, folder, config, output_option) in EXPERIMENTS.items():
+        sub = subparsers.add_parser(name, add_help=False, allow_abbrev=False)
+        sub.add_argument("--dry-run", action="store_true", help="Show commands without installing or running anything.")
+        if output_option:
+            sub.add_argument("--output-dir", type=Path, help="New run directory; defaults to a timestamped directory under this experiment's results/.")
+        if config:
+            sub.add_argument("--config", type=Path, default=ROOT / "experiments" / folder / config)
+        if name == "kuramoto":
+            mode = sub.add_mutually_exclusive_group()
+            mode.add_argument("--memory", action="store_true", help="Measure and plot memory for the three methods.")
+            mode.add_argument("--adaptive", action="store_true", help="Train adaptive CF-EES with reversible reconstruction gradients.")
+        elif name == "convergence-fbm":
+            sub.add_argument("--so3", action="store_true", help="Run and plot the SO(3) recovery experiment.")
+        elif name == "rough-vol":
+            sub.add_argument("--table", action="store_true", help="Print the table from saved manuscript predictions.")
+    args, forwarded = parser.parse_known_args(argv)
+    name = args.experiment
+    module, extra, folder, config, output_option = EXPERIMENTS[name]
+    help_requested = any(flag in forwarded for flag in ("-h", "--help"))
+    if any(arg.split("=", 1)[0] in ("--output", "--output-base", "--output_json") for arg in forwarded):
+        parser.error("Use --output-dir to choose this run's output directory.")
+    if getattr(args, "memory", False):
+        module, output_option = "kuramoto.scripts.run_memory_sweep", "--output"
+    elif getattr(args, "adaptive", False):
+        module, output_option = "kuramoto.experiment.train_kuramoto", "--output-dir"
+    elif getattr(args, "so3", False):
+        module, extra, output_option = "convergence_fbm.scripts.so3_reversibility_verify", "convergence-fbm", "--output_json"
+    elif getattr(args, "table", False):
+        module, config, extra, output_option = "stochastic_volatility.scripts.paper_table", None, None, None
+
+    if help_requested:
+        subparsers.choices[name].print_help()
+    if config:
+        print(f"Configuration: {args.config}", flush=True)
+    else:
+        print(f"Setup: experiments/{module.replace('.', '/')}.py", flush=True)
+
+    # There is one output directory for the whole invocation, including sweeps.
+    output = None
+    native = []
+    if config:
+        if not help_requested and not args.config.is_file():
+            parser.error(f"Configuration does not exist: {args.config}")
+        native += (["--config"] if module.endswith(("run_comparison", "run_memory_sweep")) else []) + [str(args.config)]
+    if output_option:
+        base = ROOT / "experiments" / folder / "results"
+        if name == "kuramoto":
+            base /= "unified"
+        output = getattr(args, "output_dir", None) or base / "runs" / datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        output = output.resolve()
+        print(f"Outputs: {base / 'runs' / '<timestamp>' if help_requested else output}", flush=True)
+        filename = "memory.json" if getattr(args, "memory", False) else "benchmark.json"
+        if output_option == "--output_json":
+            filename = "so3_reversibility_results.json"
+        native += [output_option, str(output / filename if output_option in ("--output", "--output_json") else output)]
+    if getattr(args, "adaptive", False):
+        # Adaptive EES retains checkpoint-free reconstruction.
+        # Explicit forwarded flags can override this preset.
+        native += ["--adaptive", "--adjoint", "reversible",
+                   "--n-steps", "10", "--adaptive-dtmin", "1e-4"]
+
+    commands = [(module, native + forwarded)]
+    if not help_requested:
+        if name in ("ou", "stiff-gbm"):
+            if not any(arg == "--method" or arg.startswith("--method=") for arg in forwarded):
+                methods = ["reversible_heun", "ees25"] + (["ees27"] if name == "stiff-gbm" else [])
+                commands = [(module, native + ["--method", method] + forwarded) for method in methods]
+            plot = "ou.plot_OU" if name == "ou" else "stiff_gbm.plot_GBM"
+            commands.append((plot, ["--input-dir", str(output)]))
+        elif getattr(args, "memory", False):
+            commands.append(("kuramoto.scripts.plot_memory_sweep", ["--input", str(output / "memory.json"), "--output", str(output / "memory.pdf")]))
+        elif getattr(args, "so3", False):
+            commands.append(("convergence_fbm.scripts.so3_reversibility_plot", [str(output / "so3_reversibility_results.json"), "--output", str(output / "so3_reversibility_convergence.pdf")]))
+
+    env = os.environ.copy()
+    env.setdefault("MPLBACKEND", "Agg")
+    if name == "kuramoto" and not getattr(args, "memory", False):
+        # Allocate training memory on demand; memory sweeps keep their own policy.
+        env.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
+    if getattr(args, "adaptive", False):
+        # This existing Diffrax worktree fixes batched adaptive reverse replay.
+        diffrax = ROOT.parent / "diffrax" / ".worktrees" / "adaptive-reversible"
+        if not diffrax.is_dir() and not help_requested:
+            parser.error(f"Adaptive reconstruction needs the tested Diffrax fix at {diffrax}; see experiments/kuramoto/README.md.")
+        env["PYTHONPATH"] = os.pathsep.join([str(diffrax), str(ROOT), env.get("PYTHONPATH", "")])
+        print(f"Diffrax: {diffrax}", flush=True)
+
+    prefix = ["uv", "run", "--locked"] + (["--extra", extra] if extra else []) + ["python", "-u", "-m"]
+    if args.dry_run:
+        for target, options in commands:
+            print(shlex.join(prefix + ["experiments." + target] + options))
+        return 0
+    if shutil.which("uv") is None:
+        parser.error("uv is not on PATH; install uv before running experiments.")
+    plot_only = name == "convergence-ode" and "--plot-only" in forwarded
+    if output is not None and not help_requested and plot_only:
+        if args.output_dir is None or not (output / "ode_convergence.csv").is_file():
+            parser.error("--plot-only requires --output-dir pointing to a saved ODE run.")
+    elif output is not None and not help_requested:
+        if output.exists():
+            parser.error(f"Output directory already exists: {output}. Omit --output-dir for a fresh run.")
+        output.mkdir(parents=True)
+    for target, options in commands:
+        status = subprocess.run(prefix + ["experiments." + target] + options, cwd=ROOT, env=env).returncode
+        if status:
+            print(f"Experiment failed (exit {status})." + (f" Outputs: {output}" if output else ""), file=sys.stderr)
+            return status
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        raise SystemExit(130)

@@ -1,42 +1,29 @@
-# Manuscript figure / table → code crossref
+# Manuscript experiments and their sources
 
-This is the canonical mapping from each manuscript figure and table to the code that generates it. Result files committed under `experiments/<name>/results/` back the numbers and visuals; rerun the listed script to regenerate.
+Scope: the active text of `neurips2026/ees_neurips_manuscript.tex`, `SIAM/ees_simods.tex` and the SIAM supplement in `/home/luke/68b70b0040ed79e6aef597a4`. Commented-out RNA prediction experiments and the SPD covariance prototype are outside this scope. Paths below are relative to the experiment repository unless absolute.
 
-Manuscript: `EES_Neural_SDEs_Overleaf/neurips2026/ees_neurips_manuscript.tex`.
+| Manuscript item | Manuscript | Code and records |
+|---|---|---|
+| `fig:ees25_stability`, `fig:ees_stoch_stability` | NeurIPS | `experiments/stability_ode/stability_regions.py`, `experiments/stability/stability.py`; saved plots in their `results/` directories. Older stability variants remain in the predecessor archive. Exact source-to-manuscript PDF equality is not established for the current plots. |
+| `fig:lsde`, `table:lsde` | NeurIPS | `experiments/ou/OU.py`, `experiments/ou/plot_OU.py`, `experiments/ou/results/` and `plots/`. |
+| `fig:gbm`, `fig:gbm_grad`, `table:gbm` | NeurIPS | `experiments/stiff_gbm/GBM.py`, `experiments/stiff_gbm/plot_GBM.py`. |
+| `table:rough_bergomi`, `tab:further_stoch_vol` | NeurIPS | `experiments/stochastic_volatility/scripts/paper_table.py`; four rough Bergomi runs in `results/neurips_20260421/`; configuration `configs/stoch_vol/sweep.toml` (504 evaluations, seed 0). The 24 appendix runs and original full table are preserved in `/home/luke/nsde_archive/volatility_main_text_20260924/`. These records reproduce central errors and runtimes, not the printed uncertainty intervals. |
+| `tab:rough-volatility-parameters` | NeurIPS | Dataset configuration description in the manuscript; rough Bergomi data in `experiments/stochastic_volatility/data/`; the other six datasets are in `/home/luke/nsde_archive/volatility_main_text_20260924/`. |
+| `fig:torus_scaling`, `tab:torus_intro_memory_data` | NeurIPS | `experiments/torus_memory/benchmark.py`, `benchmark_single.py`, `plot.py`, `results/rna_benchmark_scaling.json` and `fig_scaling_compact_nogrid.pdf`. Extracted from the RNA implementation; unused prediction experiments and earlier benchmark variants are in `/home/luke/nsde_archive/experiments/rna/`. |
+| `tab:alpha-cf-ees25-x`, forward and recovery order certificates | Both | `experiments/order_verification/scripts/`; SIAM-specific checks in `experiments/order_verification/siam/scripts/verify_cfees.py`. |
+| `fig:ode-convergence`, `tab:ode-orders` | SIAM | `experiments/convergence_ode/convergence.py`, `results/ode_convergence.csv`, `ode_validation.json`, `cfees_ode_convergence.pdf`. |
+| Rough-driver convergence figures, including `fig:cfees_convergence_12` | Both | `experiments/convergence_fbm/convergence.py`, `scripts/so3_reversibility_verify.py`, `scripts/so3_reversibility_plot.py`, `scripts/compose_12up_pages.py`; saved PDFs in `results/`. |
+| `fig:kuramoto_trajectory`, `tab:kuramoto_quality` | Both | `experiments/kuramoto/`; canonical workflow in its README. Existing manuscript measurements remain in `experiments/order_verification/siam/experiment_records/kuramoto_*.json`; new runs use `experiments/kuramoto/results/unified/`. |
+| `fig:kuramoto_memory_scaling`, `tab:kuramoto_memory_data`; SIAM `fig:learning-memory` | Both | Historical records in `experiments/kuramoto/results/memory_sweep_N1000.json` and the SIAM record copy. These used the old global MLP. `experiments/kuramoto/scripts/run_memory_sweep.py` now measures the same indexed mean-field model as training; its new results must not be mixed with those historical records. |
+| `tab:sphere_parity` | Both | `experiments/sphere_latent_nsde/train_activity.py`, `configs/activity/sweep.toml`, `results/activity__*/`; SIAM snapshots in `experiments/order_verification/siam/experiment_records/sphere_training/`. |
+| `fig:sphere_memory`, `tab:sphere_memory_data` | NeurIPS | Original implementation in `/home/luke/EES-LatentSDEonHS`; saved CSV copied into `experiments/order_verification/siam/experiment_records/sphere_memory.csv`. This differs from the JAX classification implementation. |
+| Molecular dynamics experiment, `fig:md_mse` | NeurIPS | Companion repository `/home/luke/ees-dynamical-fitting`. |
+| `tab:exp_counts` | Both | Analytical operation counts; no measurement script. |
 
-## Figures
+## Consolidation and provenance
 
-| Figure label | Caption | Script | Committed result(s) |
-|---|---|---|---|
-| `fig:ees25_stability` | EES(2,5) stability domain vs Kutta's RK3/RK4 | `experiments/stability_ode/stability_regions.py` | `experiments/stability_ode/results/stability_regions_1.pdf` |
-| `fig:ees_stoch_stability` | Mean-square stability cross-sections | `experiments/stability/stability.py` | `experiments/stability/results/stoch_stability.pdf` |
-| `fig:gbm`, `fig:gbm_grad` | Stiff GBM training/gradient MSE | `experiments/stiff_gbm/GBM.py` + `plot_GBM.py` | (rerun to regenerate) |
-| `fig:torus_trajectory` | T² stochastic trajectory | `experiments/rna/scripts/run_rna_sweep.py` (visualisation in `plots.py`) | `experiments/rna/results/fig_trajectory_compact.pdf` |
-| `fig:torus_bar` / `fig:torus_side_by_side` | Per-angle wrapped MAE | `experiments/rna/scripts/train_and_save_predictions_demo.py` + `plots.py` | `experiments/rna/results/fig_predictions_bar.pdf`, `rna_predictions_demo.npz` |
-| `fig:torus_scaling` | Memory scaling curves | `experiments/rna/scripts/run_rna_hlo_sweep.py` + `plots.py` | `experiments/rna/results/fig_scaling_compact_nogrid.pdf`, `rna_benchmark_scaling*.json`, `rna_hlo_*.json` |
-| `fig:onvergence_4`/`5`/`6` | EES_R fBm convergence at H=0.4/0.5/0.6 | `experiments/convergence_fbm/convergence.py` | `experiments/convergence_fbm/results/ees_stochastic_convergence_H{40,50,60}.pdf` |
-| `fig:cf_convergence_4`/`5`/`6` | CF-EES_R SO(3) convergence at H=0.4/0.5/0.6 | `experiments/convergence_fbm/scripts/so3_reversibility_verify.py` + `so3_reversibility_plot.py` | `experiments/convergence_fbm/results/cfees_stochastic_convergence_H{40,50,60}.pdf` |
-| `fig:sphere_memory` | Latent SDE on $S^{15}$, peak GPU memory vs N | `experiments/sphere_latent_sde/scripts/memory_sweep_integrator.py` + `plot_figures.py` (in submodule) | `experiments/sphere_latent_sde/figures/memory.pdf`, `results/memory_sweep{,_integrator}.csv` (in submodule) |
+The imports and their SHA-256 checksums are in [consolidation_20260924.json](consolidation_20260924.json). The prior index is preserved in `/home/luke/archive/neural-sde-predecessors-20260924/canonical_before_consolidation/docs/figure_table_index.md`. No training was rerun during consolidation, and no manuscript numbers were changed.
 
-## Tables
+The consolidation check found one existing numerical discrepancy: rough Bergomi with MCF Midpoint gives a displayed terminal MSE of 7.82 from the saved predictions, while the NeurIPS table prints 7.81. All 28 rounded runtimes and the other 27 central errors match. The manuscript was not changed.
 
-| Table label | Caption | Script | Committed result(s) |
-|---|---|---|---|
-| `table:gbm` | Stiff GBM metrics | `experiments/stiff_gbm/GBM.py` | (rerun to regenerate) |
-| `table:rough_bergomi` (first block) | Rough Bergomi runtime/MSE | not yet on this machine (Luke owns) | — |
-| `table:rough_bergomi` (second block, log-NCDE/B-NRDE) | log-NCDE & B-NRDE PID-step comparison | not yet on this machine (Luke owns) | — |
-| `tab:exp_counts` | Per-step compute/memory of Lie-group integrators | derivation only — no script | — |
-| `tab:alpha-cf-ees25-x` | Symbolic α(τ) on planar trees of order ≤5 | `experiments/order_verification/scripts/scheme_a_algebraic_verify.py`, `scheme_a_tree_algebraic_verify.py`, `mkw_verify_cf.py` | console output (deterministic) |
-| `tab:further_stoch_vol` | Stoch-vol benchmark suite | not yet on this machine (Luke owns) | — |
-| `tab:rough-volatility-parameters` | Stoch-vol model parameters | model-config table only — no script | — |
-| `tab:torus_scaling` | XLA scratch memory at d=350, batch 32, n_steps∈[5, 10000] | `experiments/rna/scripts/run_rna_hlo_sweep.py` | `experiments/rna/results/rna_hlo_*.json`, `rna_benchmark_scaling*.json` |
-| `tab:torus_runtime_error` | Wall-clock + relative ℓ₂ gradient error | `experiments/rna/scripts/run_rna_sweep.py` + `compute_reference_gradient.py` | `experiments/rna/results/rna_integrator_benchmark.json`, `rna_benchmark_ref_gradient.{json,npy}` |
-| `tab:torus_adjoint_retrain` | 3 retrains varying only the diffrax adjoint | `experiments/rna/scripts/collect_adjoint_retrain.py` | `experiments/rna/results/rna_adjoint_retrain.json` |
-| `tab:torus_mae` | Per-angle wrapped MAE on 17 682 non-canonical test residues | `experiments/rna/scripts/train_and_save_predictions_demo.py` | `experiments/rna/results/rna_predictions_demo.npz` |
-| `tab:sphere_parity` | UCI Human Activity classification accuracy at compute parity | `experiments/sphere_latent_sde/scripts/compute_parity_sweep.py` (in submodule) | `experiments/sphere_latent_sde/results/compute_parity.csv` (in submodule) |
-
-## Status legend
-
-- **Backed**: result file committed; manuscript number/figure can be regenerated by re-reading the file or rerunning the script.
-- **Luke owns**: experiment owned by Luke Thompson, not yet on this machine.
-- **Derivation only**: no code — result is symbolic/theoretical content of the paper.
+Unused experiments and diagnostic records were moved to `/home/luke/nsde_archive`; its `manifest.json` records original paths and checksums. Active geometric benchmarks now import Georax's public geometries. The torus helper module contains only angle wrapping. Pre-migration source files, including the removed custom geometry and adjoint implementations, are preserved in `/home/luke/nsde_archive/georax8cbae32_migration/`.

@@ -1,143 +1,54 @@
 # Explicit and Effectively Symmetric Schemes for Neural SDEs
 
-Code for the NeurIPS 2026 paper *"Explicit and Effectively Symmetric Schemes for Neural SDEs"* by Daniil Shmelev, Luke Thompson, and Cristopher Salvi.
+Experiments for the NeurIPS 2026 manuscript and SIAM resubmission by Daniil Shmelev, Luke Thompson and Cristopher Salvi. SIAM uses the geometric experiments and order verification; the Euclidean experiments support NeurIPS.
 
-This umbrella repository reproduces every experiment, figure, and table in the paper. Each subdirectory under `experiments/` is self-contained: its own `README.md`, configs, data-fetch scripts, training/evaluation scripts, and result files that back the manuscript figures/tables.
+## Experiments
 
-## Repository layout
-
-```
-ees_core/                       Pure-numpy EES Butcher tableaux + RK driver (paper §3 numerics)
-experiments/
-  stability_ode/                ODE stability domains for EES(2,5;1/10) vs RK3/RK4 (Fig. fig:ees25_stability)
-  stability/                    Mean-square stability cross-sections (Fig. fig:ees_stoch_stability)
-  convergence_fbm/              Euclidean and SO(3) fBm convergence rates (Figs fig:onvergence_4-6 + fig:cf_convergence_4-6)
-  order_verification/           Symbolic Lie–Butcher / MKW order-condition verification (Tab tab:alpha-cf-ees25-x)
-  rna/                          RNA torus T^7 NSDE (paper §3.6, Tabs torus_*, Figs torus_*)
-  sphere_latent_sde/            (git submodule) Latent SDE on S^15 with CF-EES + ReversibleAdjoint (paper §sec:sphere_latent_sde)
-  stiff_gbm/                    Stiff GBM neural SDE (paper §3.4, Tab. table:gbm, Fig fig:gbm)
-  ou/                           OU latent SDE (companion torchsde experiment)
-docs/figure_table_index.md      Manuscript figure/table → script crossref
-```
-
-## Install
-
-We recommend [`uv`](https://docs.astral.sh/uv/) and Python 3.13 (Python 3.10 is enough for the pure-numpy figures only).
-
-```bash
-# Clone with submodules (the sphere experiment lives in a fork of plus-rkwitt/LatentSDEonHS)
-git clone --recursive https://github.com/daniil-shmelev/EES-Neural-SDEs.git
-# Or, if already cloned:
-git submodule update --init --recursive
-
-uv venv -p 3.13
-uv pip install -e ".[convergence-fbm,rna]"   # pick the experiments you need
-# Or everything:
-uv pip install -e ".[all]"
-```
-
-Available extras:
-
-| Extra | What it pulls in | Experiment(s) |
+| Directory under `experiments/` | Purpose | Manuscript |
 |---|---|---|
-| (no extras) | numpy, matplotlib, scipy, fbm | `stability/`, `convergence_fbm/` |
-| `algebra` | + kauri, sympy | `order_verification/`, `stability_ode/` |
-| `stability-ode` | + kauri | `stability_ode/` (alias for `algebra`) |
-| `jax-base` | + jax 0.10, equinox, optax, sammccallum/diffrax fork, georax, cyreal, diffrax-lowstorage, seali | shared base for all JAX experiments |
-| `convergence-fbm` | jax-base | `convergence_fbm/scripts/` (SO(3) RDE convergence) |
-| `order-verification` | algebra | `order_verification/` |
-| `rna` | jax-base + biotite | `rna/` |
-| `sphere` | torch + torchdiffeq + sklearn + tqdm | `sphere_latent_sde/` |
-| `torchsde` | torch + Daniil's torchsde fork (`mcf` branch) + torchcde | `stiff_gbm/`, `ou/` |
-| `all` | all of the above | everything |
-| `dev` | pytest, ruff, pyright | development |
+| [kuramoto](experiments/kuramoto/README.md) | Geometric learning, adjoint diagnostics and memory | Both |
+| [sphere_latent_nsde](experiments/sphere_latent_nsde/README.md) | JAX sphere-valued activity classification | Both |
+| [convergence_fbm](experiments/convergence_fbm/README.md) | Euclidean and SO(3) rough-driver convergence | Both; SO(3) only in SIAM |
+| [convergence_ode](experiments/convergence_ode/README.md) | SO(3) ODE forward and recovery orders | SIAM |
+| [order_verification](experiments/order_verification/siam/README.md) | Symbolic order conditions and saved SIAM measurements | Both |
+| [stability_ode](experiments/stability_ode/README.md), [stability](experiments/stability/README.md) | Deterministic and stochastic stability regions | NeurIPS |
+| [ou](experiments/ou/README.md) | High-volatility Ornstein–Uhlenbeck learning | NeurIPS |
+| [stiff_gbm](experiments/stiff_gbm/README.md) | Stiff geometric Brownian motion | NeurIPS |
+| [stochastic_volatility](experiments/stochastic_volatility/README.md) | Main-text rough Bergomi comparison | NeurIPS |
+| [torus_memory](experiments/torus_memory/README.md) | Seven-torus memory benchmark in the introduction | NeurIPS |
 
-## External libraries (pinned via `pyproject.toml`)
+The [figure/table index](docs/figure_table_index.md) links manuscript results to scripts, saved records and external companion repositories.
 
-| Library | Source | Pinned at |
-|---|---|---|
-| `diffrax` | `github.com/sammccallum/diffrax` | `aeb1335b` |
-| `diffrax-lowstorage` | `github.com/luke-a-thompson/diffrax-lowstorage` | `74fd4dba` |
-| `georax` (the manuscript's anonymized "jax_geo_int") | `github.com/luke-a-thompson/georax` | `30ecbb9b` |
-| `cyreal` | `github.com/luke-a-thompson/cyreal_dynamics` | `88f02657` |
-| `Stochastax` | `github.com/luke-a-thompson/Stochastax` | `3775ec44` |
-| `pySigLib` | `github.com/daniil-shmelev/pySigLib` | `v3.0.0` (`2beb2541`) |
-| `kauri` | `github.com/daniil-shmelev/kauri` (`cf_methods` branch) | `0af3219a` |
-| `torchsde` | `github.com/daniil-shmelev/torchsde` (`mcf` branch) | `a0b71269` |
+## Run
 
-## Reproducing the paper
+Install `uv`, then run experiments from this repository root. `./run` selects the dependencies and default configuration. Every numerical run gets a fresh directory under its experiment's `results/runs/` (Kuramoto uses `results/unified/runs/`); the command prints its location. Output is shown in the terminal. Existing results are preserved.
 
-Quick start commands per experiment:
+| Command | Experiment / default setup |
+|---|---|
+| `./run kuramoto` | CG2 full, CG2 recursive and CF-EES reversible; [configuration](experiments/kuramoto/configs/kuramoto.toml) |
+| `./run kuramoto --memory` | Measure and plot memory for those three methods |
+| `./run kuramoto --adaptive` | Adaptive reversible CF-EES; uses the existing local Diffrax fix described in its README |
+| `./run sphere` | Activity-classification [sweep](experiments/sphere_latent_nsde/configs/activity/sweep.toml) |
+| `./run rough-vol` | Rough Bergomi [sweep](experiments/stochastic_volatility/configs/stoch_vol/sweep.toml) |
+| `./run rough-vol --table` | Print the table from saved predictions |
+| `./run convergence-ode` | SO(3) forward and recovery convergence |
+| `./run convergence-fbm` | Euclidean fBm convergence |
+| `./run convergence-fbm --so3` | SO(3) recovery sweep and plot |
+| `./run stability-ode` | ODE stability regions |
+| `./run stability` | Stochastic stability cross-sections |
+| `./run ou` | OU comparison: Reversible Heun and EES(2,5), then plot |
+| `./run stiff-gbm` | GBM comparison: Reversible Heun, EES(2,5), EES(2,7), then plot |
+| `./run torus-memory` | Seven-torus benchmark |
+| `./run order-verification --manuscript /path/to/SIAM/ees_simods.tex` | Exact order and printed-coefficient checks (read-only) |
 
-```bash
-# §3 ODE stability domains (Fig fig:ees25_stability)
-python experiments/stability_ode/stability_regions.py
+Use `./run <experiment> --help` for settings and setup locations, or `--dry-run` to inspect the commands without installing dependencies or running computations. Training sweeps accept `--config PATH`; `--output-dir PATH` selects a new output directory. Additional options are passed to the experiment, for example `./run kuramoto --seeds 0` or `./run sphere --index 0`. OU/GBM accept `--method`, `--epochs` and `--seed`; their remaining settings are in the training scripts linked by `--help`.
 
-# §3 SDE mean-square stability cross-sections (Fig fig:ees_stoch_stability)
-python experiments/stability/stability.py
+No environment activation or separate installation command is needed. The launcher uses the shared `uv.lock`; the underlying modules remain available for development. Saved manuscript results retain their original provenance and are not replaced by new runs.
 
-# §3 fBm convergence (Figs fig:onvergence_4/5/6)
-python experiments/convergence_fbm/convergence.py
+## Archives
 
-# §3 CF-EES on SO(3) numerical convergence (Figs fig:cf_convergence_4/5/6)
-python -m experiments.convergence_fbm.scripts.so3_local_order_verify
-python -m experiments.convergence_fbm.scripts.so3_reversibility_verify
-python -m experiments.convergence_fbm.scripts.so3_reversibility_plot
+Unused experiments, additional volatility models and earlier source versions are in [`/home/luke/nsde_archive`](../nsde_archive/README.md). Complete predecessor repositories are in [`/home/luke/archive/neural-sde-predecessors-20260924`](../archive/neural-sde-predecessors-20260924/README.md). The [import manifest](docs/consolidation_20260924.json) records the original result sources and checksums.
 
-# Symbolic Lie–Butcher / MKW order-condition verification (Tab tab:alpha-cf-ees25-x)
-python -m experiments.order_verification.scripts.scheme_a_algebraic_verify
-python -m experiments.order_verification.scripts.scheme_a_tree_algebraic_verify
-python -m experiments.order_verification.scripts.mkw_verify_cf
+## Licence
 
-# §3.6 RNA torus T^7 (Tabs torus_*, Figs torus_*)
-python -m experiments.rna.experiment.train_rna experiments/rna/configs/nsde.toml
-python -m experiments.rna.scripts.run_rna_sweep
-python -m experiments.rna.scripts.run_rna_hlo_sweep
-
-# §sec:sphere_latent_sde Latent SDE on S^15 (Tab tab:sphere_parity, Fig fig:sphere_memory)
-# (run from inside the submodule, since it's the unmodified Zeng et al. 2023 layout)
-cd experiments/sphere_latent_sde
-python activity_classification.py
-python scripts/compute_parity_sweep.py
-python scripts/memory_sweep_integrator.py
-cd ../..
-
-# §3.4 Stiff GBM neural SDE (Tab table:gbm, Fig fig:gbm)
-python experiments/stiff_gbm/GBM.py        # set `method` in the script then re-run for each integrator
-python experiments/stiff_gbm/plot_GBM.py
-
-# OU latent SDE companion
-python experiments/ou/OU.py
-python experiments/ou/plot_OU.py
-```
-
-The full mapping from manuscript figure/table to script is in `docs/figure_table_index.md`.
-
-## Datasets
-
-Raw data is **not** shipped. Each experiment's `datasets/` (or `data/`) module fetches what it needs:
-
-- **RNA torus** — BGSU representative-set RNA mmCIF files via `experiments/rna/datasets/download.py`
-- **Sphere latent SDE** — UCI Human Activity Recognition; see `experiments/sphere_latent_sde/data/README.md`
-
-## Citation
-
-```bibtex
-@inproceedings{shmelev2026ees,
-  title  = {Explicit and Effectively Symmetric Schemes for Neural SDEs},
-  author = {Shmelev, Daniil and Thompson, Luke and Salvi, Cristopher},
-  booktitle = {Advances in Neural Information Processing Systems},
-  year   = {2026}
-}
-
-@article{shmelev2025neural,
-  title  = {Explicit and Effectively Symmetric Schemes for Neural SDEs},
-  author = {Shmelev, Daniil and Salvi, Cristopher},
-  journal= {arXiv preprint arXiv:2509.20599},
-  year   = {2025}
-}
-```
-
-## License
-
-Apache-2.0 — see [LICENSE](LICENSE).
+Apache-2.0; see [LICENSE](LICENSE) and [CITATION.cff](CITATION.cff).

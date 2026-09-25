@@ -1,0 +1,403 @@
+{
+  "date": "2026-09-24",
+  "canonical_repository": "/home/luke/EES-Neural-SDEs",
+  "imports": [
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/bergomi__ees25__seed0__20260422_004059",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/bergomi__ees25__seed0__20260422_004059",
+      "files": {
+        "config.toml": "5bfb569ae48b0f541ea555ce82c3a18bec2996cb5321f522adb74abfc6cfbd0a",
+        "history.json": "997f416626689c3bab93588eb99b0e0d806184ac915acc32fcd23d5b8584a482",
+        "latest_epoch_batch.npz": "161ebeb6d4898a9067eb28979396ba17222da29b40d369553818b0f607e11d2a",
+        "latest_epoch_trajectories.png": "55bd6849e70dba188c92b90826f2bccde570cecc6d444ee5440a8d27e0b97e28",
+        "metrics.json": "a6db53053c84d4810303472aa24bbd4555c33ad1173b77e29134b7acf77a120a",
+        "nsde.eqx": "2028d217bfd6b21e05389dd7175d54392ce4e326fd023c46eea6ef1bbcffc673",
+        "test_predictions.npz": "1a54239aafa954e0af5e749caff95307b8cab99d1ee93956a7e6acaaad3fda10",
+        "training_curves.png": "fb7f180e52fa8ccbe403b931fe6b2ca973b3c27b69c5d68502b86f7aaef25524"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/bergomi__mcf_euler__seed0__20260422_010427",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/bergomi__mcf_euler__seed0__20260422_010427",
+      "files": {
+        "config.toml": "1ddcf42d4b07d1617eb314276210640821ea7aff5432a7a525a358de07246ff1",
+        "history.json": "44816761a4fb20252785809c97c2e282465ef55eda7ccc20c77b14df116583fb",
+        "latest_epoch_batch.npz": "ae144c2342a0f2b2e37f34f9bd0c789eefb3dfec96e266ce2988acafc1ee3ee1",
+        "latest_epoch_trajectories.png": "fc91b60c4a658a2744eeb2736da376e59bd692cc9dbd9b61b6bd09a8b6136e7e",
+        "metrics.json": "d448713651b4152c59ddd30d817f51cc7870c3a74076b448707a462baf056a9c",
+        "nsde.eqx": "18f67d2414a11b53fcab0b95e5f6380631cef420941f4cc7ffdd0130ee0231a0",
+        "test_predictions.npz": "0d2c02c435c45c59afe95111f5301916fdac2e83c2334424485a42e2ac69f322",
+        "training_curves.png": "af8e8c51fc555e71d613de28dc958e336a83d03423b0e4ebd27bf5921dabefda"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/bergomi__mcf_midpoint__seed0__20260422_011952",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/bergomi__mcf_midpoint__seed0__20260422_011952",
+      "files": {
+        "config.toml": "816c9cb0f26ae0717cb4b5bd4fb1bd14c2ebea24434596856bf0c6ba99f8a8d6",
+        "history.json": "baccaf2df62a0b2f63426ffc1ca6786970f1abf908cf7e2bcda0381ba503e0b4",
+        "latest_epoch_batch.npz": "a7dd4e0510cc26d7d7fc90fa826ba57c9e9e8f5c3231b4ef120dda42d962b0be",
+        "latest_epoch_trajectories.png": "d6a54b2b42a21ac89921466268428cfb26380568f1ec26953e812ec9b9d26033",
+        "metrics.json": "48289b6afd0c76294f27cdda5e0332aa8287981fe426adfc82b00ccd9db7fe61",
+        "nsde.eqx": "ed5ce7f7927938a17ef46aac96eaff744a417812ee80453075501dd3d8cb6f3d",
+        "test_predictions.npz": "58af121f43c81bb004613ce4cd504bb13f3cf761ace65a61270b734bb839d01f",
+        "training_curves.png": "46a70888ff1e9c133d2b438aef55050f723cdee9d39461eaada645dd0a2c6873"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/bergomi__reversible_heun__seed0__20260422_004743",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/bergomi__reversible_heun__seed0__20260422_004743",
+      "files": {
+        "config.toml": "b294a7401bd1d466599ea4270b2b11376612afe55ce6ccea0138cc6c72f890f5",
+        "history.json": "d69c0d62c29f204f7776f912b75617151137092d9b2af1947789eabbb87170ff",
+        "latest_epoch_batch.npz": "c215f6ad697a8455a7002288491dfb46a189d8486a2b830c91df1913d9667ba3",
+        "latest_epoch_trajectories.png": "e82a458ed620298bddb7919f2d5ad635dfb4ed8d7e5a41a916d016f45a1313fb",
+        "metrics.json": "974537541f57c0eaf45d0ff93f7124ccd40b83087d25e917acc3f0a08faeb117",
+        "nsde.eqx": "49c9639afc095e691d9f81346d5199dcb772f3271ea07660d89921413804645e",
+        "test_predictions.npz": "0d620565762da46ed248fa006fd1dbed89055f6995933d95419debd2b2fe3245",
+        "training_curves.png": "b7e60979d9c30917354652b46ff5cf9c215a51a878f3b1d464bae743d48e462f"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/black_scholes__ees25__seed0__20260421_213031",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/black_scholes__ees25__seed0__20260421_213031",
+      "files": {
+        "config.toml": "ef9e59ea4d65c0682875d6f583f81e379747ccabb44ec945c10bb82b7de04821",
+        "history.json": "448e4b06a6a70e2747305924c2589be21c9577e8e67b8a05e7d9a8c2ed1ae854",
+        "latest_epoch_batch.npz": "4f140147d9851f8c9d64f779068cdb529ddd69ac5e748d8e42449cc2e1020029",
+        "latest_epoch_trajectories.png": "3ef2a0800b450d9be1ef7219317e69fb64328f099ab780767d74e4a011809f4f",
+        "metrics.json": "7fdea3ae1d786dd6eba8b25ec50f845de82c171b559e7e59b723e5ecf59c1281",
+        "nsde.eqx": "4725733f65833dce49029fd550c91ec65cf1fd14c22090e6efe34058e355e67d",
+        "test_predictions.npz": "172128b2fdbf852b061a087816a3a54366027d47b98e4cb5b4184a3afb1e77b0",
+        "training_curves.png": "bb0b5dcb34f34f43ce17db42e012a8806001539692470f6361bfe1c17187c776"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/black_scholes__mcf_euler__seed0__20260421_215405",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/black_scholes__mcf_euler__seed0__20260421_215405",
+      "files": {
+        "config.toml": "a5e31d78199d5f21eee88f8e665e733610b34d0ec060d52527845e85ceb8552b",
+        "history.json": "ce4ab5c32373e677d508dbdb9ebbd67716f0038aac4d75ce3e7eee7c211e49c9",
+        "latest_epoch_batch.npz": "8940d7c0e393a0cd140769396ab670846b208f976a92de15ff188a2232f3f64a",
+        "latest_epoch_trajectories.png": "fc032995e2e85eb2990d112d09a9539893421087c5d26cae062577f8914f4ad6",
+        "metrics.json": "95653c7a6601c490afe3d14058168668f3e320efe22db1d2e9ae28af10485923",
+        "nsde.eqx": "1d69c0e8e612a2dd9368a9a615544468e9b064fa6fafde0dfc4fe275934dd81e",
+        "test_predictions.npz": "1a0cc6a465ee6dd471f0bb21c8e30060a6f30d104192a921d8289ee46283c136",
+        "training_curves.png": "90cb81efc2bfd05586bb8a8637a54502ac793870cc4d05987aa434688f65ef09"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/black_scholes__mcf_midpoint__seed0__20260421_220944",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/black_scholes__mcf_midpoint__seed0__20260421_220944",
+      "files": {
+        "config.toml": "c83d0a68de93a69926d2a3edcd4b2dbffd6f63c1268926887fb96a8ff694d7cf",
+        "history.json": "c2812689523b72e195a466c6178f1fe5d531827c2859436be8d54d704d6ba255",
+        "latest_epoch_batch.npz": "ec29cfb477426bb51b745cb6a2a736a43bb322db00ba6bd1d1381b82a2ad738d",
+        "latest_epoch_trajectories.png": "cbde13f6fa36ced9c584cd732ec535e667b9941cd6d316ede7490b39a3c271ff",
+        "metrics.json": "2075973c12508a258a51f5fd649b19403866620e611be12f65c1c46476e05719",
+        "nsde.eqx": "5bddbb9be2a741772cb41f47ef9c382535cec88ca7984df16224c3eb8a9c4c05",
+        "test_predictions.npz": "c5e31ddf66a63d342fe1777ab0309726b12004390f9b1955941ec08886f54749",
+        "training_curves.png": "b966949924a028d2c27f1a64caab604f37881314765f76eee36df3e1f731626d"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/black_scholes__reversible_heun__seed0__20260421_213723",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/black_scholes__reversible_heun__seed0__20260421_213723",
+      "files": {
+        "config.toml": "df8a9d989bd989d02610864b2b88ee8433876e2af6c3fabb8bd8d876b1da621b",
+        "history.json": "be771a7752d5314b7dece6d96acad1b9738126a44df04d1af7a2813ad9bf5d3f",
+        "latest_epoch_batch.npz": "4ba2181b74b2a6b3d106f3c7c6572163c04242322f12a5e7a3ff73dfc2644b19",
+        "latest_epoch_trajectories.png": "48ce62d335eb52824f529c4e7310a40708cb3200c53ed7ef235b917286802408",
+        "metrics.json": "1a4f501190a842dba635210bcfe18351ab86a8e5d40838fcc067cf58bbca4733",
+        "nsde.eqx": "fabb5f0db8a8b4794f27ae718f3685ea1f83d57c32930a85937ee5286d8190a9",
+        "test_predictions.npz": "8c4bafa448a310be94e41e12969a5a4743fa1ad409a2be768c6d18bcfd242841",
+        "training_curves.png": "e8a413e11a66a6cd23264c983b9495e0193eb115fd3bbb8eb47f8621034c9969"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/heston__ees25__seed0__20260421_221822",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/heston__ees25__seed0__20260421_221822",
+      "files": {
+        "config.toml": "ea25d720d328e58eadac228cc5473fcc6c0a0d569dc00b62a930ec25b4a85d3e",
+        "history.json": "4553ce79b10cbc0466e250b36e184825e641e8d8235e4a6f347d22b59b8a3abe",
+        "latest_epoch_batch.npz": "cc13341a293eaa0c49b7b2fb9db93ee9148908ae57fce7ad4808bc4a18612899",
+        "latest_epoch_trajectories.png": "ad5cc4b721c71915d23c2448200657230d48295b33f8c9251926ceddf9fa7399",
+        "metrics.json": "b811cea4341553e19dd27888814029e5fadd679c2e321793d2628407c4068ec6",
+        "nsde.eqx": "97c3c0e5c8c351adde302a65ae2226a218aa80951076f86415feba971356c6d6",
+        "test_predictions.npz": "82d7c2ee906eafc564a35dc35aa316a79472b935d38b5af55fc2124fe211fc74",
+        "training_curves.png": "44c0dd3fa850159f7fd1861f50fef0becb2b39cec06693e53ae096f0ed7cab67"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/heston__mcf_euler__seed0__20260421_224142",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/heston__mcf_euler__seed0__20260421_224142",
+      "files": {
+        "config.toml": "773eeaa8d5993aa3f9d489d65053e96f900111052330a96d6c611b95ed2ffd13",
+        "history.json": "c98cfc454ea1293d688b92cbf04984cfb49bd5de004a06e24a30891dacd84256",
+        "latest_epoch_batch.npz": "b38b97f8403b68284e1c385ee438e52824558c8058a7da0e9a790f14c299ecc8",
+        "latest_epoch_trajectories.png": "3637d63ad88c414152375dffbd3b7cd9dcd2b490051176f7832ce7954e1242ab",
+        "metrics.json": "048a5273082a52ef7aba96e07008390903c521de9ba02ebc6ede04455afd03b4",
+        "nsde.eqx": "2ed7cf1357b3d7122c090fbdbb6b9aaa73cc196bbcbd842de91cd2ca0fb58c10",
+        "test_predictions.npz": "7ba376a4b3dbe2bba8d545e6215631355f23861071574b4e472c175f62d0b9cf",
+        "training_curves.png": "bc0ea4328f3920f4d0c4ae93319dcee0b24e5a23b30029e13f9983b31d0a2acc"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/heston__mcf_midpoint__seed0__20260421_225712",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/heston__mcf_midpoint__seed0__20260421_225712",
+      "files": {
+        "config.toml": "35b3f79496819d4f09bcb31ef9b2dd5d27cbeefd5140edc761b68d02b8ede81e",
+        "history.json": "0fe4829a16a9c8c40182ea547503d23daa89c67b695b287b68f3718535a99957",
+        "latest_epoch_batch.npz": "7dda70e246289cb3c0625d52eadaefd7b42c79d09f73cbd8130b33891fdc7c74",
+        "latest_epoch_trajectories.png": "c742108197ca9ff0972026f0258e59358568372944af8a119d38ceabbe584cb9",
+        "metrics.json": "bc343ce3fec0acdbf93b63190646c21a494b52dff830e7b83eb238a8347ffcf6",
+        "nsde.eqx": "c1ed891e92854c612bae909f64cf2927cf0d009b4af741d19988145bb6154100",
+        "test_predictions.npz": "e5823cfe30e497a683bab7a5737f5f48c4c79b7c0a0c5df0af41fed123094be7",
+        "training_curves.png": "001ef0675e8ef5c2a5b2b537d48ac827aa66ac5e3b926992ffa69b9bc59756df"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/heston__reversible_heun__seed0__20260421_222513",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/heston__reversible_heun__seed0__20260421_222513",
+      "files": {
+        "config.toml": "dac4b8cf0e78a7b701822bef2353dcab006f251ef3ffb0eb86de905f828baa28",
+        "history.json": "a71aeff31d127f52de368a099b88640852881a3b30ee2cdde2a1feb2bb953493",
+        "latest_epoch_batch.npz": "670e11f2a1d3839643402626a8fd4fb6b64d539b0692ef62c1a2f4d478e5d993",
+        "latest_epoch_trajectories.png": "db33fb0733513a32419be3a4541037f09edee6a1dfaca2122dec508e4337d8af",
+        "metrics.json": "73c2bddd9d7894c385ec34275c96820b1b058d32afb0623f21e5477bdc8a72bc",
+        "nsde.eqx": "9040dc9835b84013f63abbe4d2a575c11c5c39119df0503c1ff976846360f03b",
+        "test_predictions.npz": "bc291eaa11c3e954a2216bb9a4d91401485d60b3e407574218d6acef63495e6a",
+        "training_curves.png": "bbc65958727aa39c90265fc787e50f7faf882b1de037755732e7fc6970331d62"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/local_stoch_vol__ees25__seed0__20260421_235258",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/local_stoch_vol__ees25__seed0__20260421_235258",
+      "files": {
+        "config.toml": "6c8cd13ca43433cbbdbfe9ad5f4a6477f5dd0f5d04e244433e345c9aa3361126",
+        "history.json": "783460aa1d7344b4b27a6ee2d1594fddd3c3112afbef8093f5569e0c8f3bab9e",
+        "latest_epoch_batch.npz": "adac3ff58955dd1ab0348b399a40f485ed05f9849adc4a9e6ad3cdd2dc6982d7",
+        "latest_epoch_trajectories.png": "689b5d2ae63a0b81a336556b1bed049095b9da16e56845884a9355463c29d66e",
+        "metrics.json": "3752ed350435dd96fba2a7fd117cbf6aa5ecf710ab3a8b61c25ead1cd1dfcce3",
+        "nsde.eqx": "bade1e4d0422c75c3a6bf8ca245ac711038c5a251bd74282a277373beccd6160",
+        "test_predictions.npz": "b5ab9a39415c0da17eb3f808cac5cb6fab4a1f85a209697dc6cf92b20d0fb09a",
+        "training_curves.png": "474e3f656486201d21c753bbf1ad1cfe2013278c5ef78e7949a3149036f76779"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/local_stoch_vol__mcf_euler__seed0__20260422_001648",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/local_stoch_vol__mcf_euler__seed0__20260422_001648",
+      "files": {
+        "config.toml": "ddf895aee656327c47dcd514a935c62c1e67869330064aa180d03ca944b0405c",
+        "history.json": "73c880acc2dadf2d5dc640021bf909ac65bef2545ef587f62be5a5888d139674",
+        "latest_epoch_batch.npz": "6093d829318ca0fab969f42d8ba3e7313ca583724969c53abd7a69d20bc06dd3",
+        "latest_epoch_trajectories.png": "5df325ccb882e8289991119ccc0c13c1b8d639340ef31d9b11dc6677a0953d52",
+        "metrics.json": "272284775bf70179f7cc50254e46d0c0cc9881970235e7f9294ccbec2523c43e",
+        "nsde.eqx": "a7646ce8d7264e0a01fdd779523d27a4e21288f57736a8acf446d4bdd61df871",
+        "test_predictions.npz": "ab8948993621bb2bf61f94a8ee03f7a539ca8b24d203b9bc81ce52b22353c9b0",
+        "training_curves.png": "11685b8335e5c5562e2efe4654e8571dd9c6200aefbd86ea853e805910b1485e"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/local_stoch_vol__mcf_midpoint__seed0__20260422_003215",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/local_stoch_vol__mcf_midpoint__seed0__20260422_003215",
+      "files": {
+        "config.toml": "a52f1b05daca2f9017b97d54fc35ee3f912ba495a0a71ed54b4c6bf0b4bc8cd6",
+        "history.json": "494210f979e9f8f2935dd3dee3afb983c9da43ded9687c939a3f2582abb1151a",
+        "latest_epoch_batch.npz": "225c838ed355718159c377bbb90a4f84e292a597fb10fa33466680f67c86ad64",
+        "latest_epoch_trajectories.png": "533cb54c1f774d411bad4e71dab31fb94ec72ed3f77af18e013fb50e7c2328a7",
+        "metrics.json": "0c91f30876e6b445f58f25a484e69b68804f0d360bde1891083ae40d9768ef5d",
+        "nsde.eqx": "271862372c7c4d39d4c9e942599783ae95a8adcb3c290f932bf726991eae50bb",
+        "test_predictions.npz": "58d9fba26d5bd8e5782f61ce247f465682ac34418e57b05d155223a0f83daeb1",
+        "training_curves.png": "affe3fdb5381341a8e8680d90bb95e9d9b549ec1c67b893a5d46e03d2c447076"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/local_stoch_vol__reversible_heun__seed0__20260421_235955",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/local_stoch_vol__reversible_heun__seed0__20260421_235955",
+      "files": {
+        "config.toml": "0cf9db67bafb928114cf372ec206dbcdaecf2a9a32c1f9b922da907964e58e93",
+        "history.json": "e196d54db00b34c4a27e800e2d1e8e20b3e5f5275ff05251456bb0e95bead31a",
+        "latest_epoch_batch.npz": "a0d63fa4fc82c49eb0b3768fb287a092f8e483ea6d198a65614c32e052ebd8da",
+        "latest_epoch_trajectories.png": "a70e318a5aff3d432ac658e4216c71473d09ea4f0dfb6131ae504e10f8b3c660",
+        "metrics.json": "8166eaa1de4490462b67c81f0906087fff40db5a630bcf724cf8cc208028a510",
+        "nsde.eqx": "4697c3b4383f5ec07e3d251d79a3ba759957553460c90dfd85211c60cca19906",
+        "test_predictions.npz": "834922981da20690968b978ae2903c53d92938e5a4d670b4ff258b415f45a9a1",
+        "training_curves.png": "59d385fb3d8c1d4a4286037f7020c69fe927b5ccafac97f4175012fea65df9fc"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/quadratic_rough_heston__ees25__seed0__20260422_021619",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/quadratic_rough_heston__ees25__seed0__20260422_021619",
+      "files": {
+        "config.toml": "00a92194e648f8a1b9fb67559a67afcd1392eef82f4075069a538110cf6d4c91",
+        "history.json": "a3f5535f85a4fa7bb6a789886b0979d94578e816df03f154dbdf4a2bacc04002",
+        "latest_epoch_batch.npz": "057de95c8c6f07a25a981e7d82f0561a1b952a105ab656d30f0fa408455ffc62",
+        "latest_epoch_trajectories.png": "7437d19cebc874d86ed0dc226034b8afe43218d5b4b5e1d968a059ae11904a69",
+        "metrics.json": "799d11e7530c91b3334304c19f618df855f2a9a3838af73153e2475beaeeafd5",
+        "nsde.eqx": "039d05b3b03734472f38cc1467ea9c30f13aa6aaca65580e451e59424d567d27",
+        "test_predictions.npz": "df2858f85dfd4f8f0648e1f2e49f9b4029a72fceb204da039d9d077c52c7a80b",
+        "training_curves.png": "f3c6fa65ce2365c27bfaebbd25c8b05e49b2186c901302b4db6a9237631bcc68"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/quadratic_rough_heston__mcf_euler__seed0__20260422_023932",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/quadratic_rough_heston__mcf_euler__seed0__20260422_023932",
+      "files": {
+        "config.toml": "25607ee1651c7d582937c7796a7593af42a80e8d9f04a6053cbf56c9dc1530d1",
+        "history.json": "d7ea29114925ba915a60116fe5f5239248441da25a2db6721ddc10d5445a3c96",
+        "latest_epoch_batch.npz": "0b069bcc7a9b35ae77a4aecd1f37910b1a72039c90809d6a934b71dbeef4fcb5",
+        "latest_epoch_trajectories.png": "da3d04e42ae922a74bc7f6c962a8eb40c318e74519f1da41f2be990a0fa06c9b",
+        "metrics.json": "c6f9263e14b500775a56b1c15fb783592658d874d956c164f97d343adb4deac7",
+        "nsde.eqx": "63369bd5ccfaf0bffef0d5532d11d9e5a409aefa3e8235b5256426a8d902c398",
+        "test_predictions.npz": "1e5a97e267cebf638b34741414f6e0c44b66c1fcb07c7c742fa6432da16f67ab",
+        "training_curves.png": "4a392d84afc134ece5a628735240a94cd310952ab3d4124fb295226218d4f16a"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/quadratic_rough_heston__mcf_midpoint__seed0__20260422_025401",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/quadratic_rough_heston__mcf_midpoint__seed0__20260422_025401",
+      "files": {
+        "config.toml": "bea73498133c808afafb028a66eceb2e92d19a61adf05b9916c89d0ba83eaad6",
+        "history.json": "3d8b3a90e8505cb0dc6afc8001d5f441e8dcfa6541b2b1e2e1e066e901aa6dd5",
+        "latest_epoch_batch.npz": "38da73d9a0225b58d0ab92671abd9c5b77b73e5dbec338db5d6aac3c34f4cf72",
+        "latest_epoch_trajectories.png": "7ff025c138a2b4a6facf022d8bcf82a2aa1d9d132f7e72427eaf3f87c065d7bb",
+        "metrics.json": "c2a2120253fe44934b27fc248532fcd0a3370974f6189c9a6a47e4b58725e224",
+        "nsde.eqx": "06c6b1c50ee033284579c218638bba61628a5a8d68d047b4fa1e497107e269e2",
+        "test_predictions.npz": "421b2a5ab1699ea8f30240051781ad7f46481e3878321d1ad8f25fc8428e6604",
+        "training_curves.png": "70ec08a3f628a22e25a60bce61e97d2d0531b17cf02463dc1159d614d9dae6ab"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/quadratic_rough_heston__reversible_heun__seed0__20260422_022312",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/quadratic_rough_heston__reversible_heun__seed0__20260422_022312",
+      "files": {
+        "config.toml": "115b0410de108a9ccc8ba680b42913c4728cfa53cd2fcef92e0f7b295c2de2b4",
+        "history.json": "1f4fb6628efecf25b93ba5469718d38b3c907fec0592da0627b4563746a2d716",
+        "latest_epoch_batch.npz": "b930381b7411ea2691dbca2a6425fe8def6152bb92747ae589a70fbf5855e7b0",
+        "latest_epoch_trajectories.png": "f395f4511ee861450ca457c35ef126bfe18b70a861e0bd646f7befb86cf4d181",
+        "metrics.json": "5f9916626efdad2cbad2b7062f0a019d5c85d81f0491d2c31f60d87803938a4c",
+        "nsde.eqx": "61a288599d85abb663a67309d9106bb0bdaff91bf37fc8965dba33e84a1565a2",
+        "test_predictions.npz": "3f2c1b86fee34fe494dc6d36ffa1323c9499e89da2407f945864ae1e0ec9e400",
+        "training_curves.png": "0087b1ec7036797afdb0879a60754437d9d985ebed45bf6340f024a991626452"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/rough_bergomi__ees25__seed0__20260422_012836",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836",
+      "files": {
+        "config.toml": "a721d2bb31c29145c9259b732e2a89be51324718521bcee6c574168fa7b9b7ae",
+        "history.json": "dc42a6088244328e9a3dd11d9b8c8e632f3c9f424cb842de5cf259c1befdaa66",
+        "latest_epoch_batch.npz": "37e5e35e53a1992d7fca4016baced2c90a8093bca505e6da975464bd7ab4b219",
+        "latest_epoch_trajectories.png": "c59d9b60a5db2c0d0e7e32f7df6bc89e6417f99746f223e43b5768ce95d5ba86",
+        "metrics.json": "1f9d935e8a56cdd4f5557a8a08c4e6adda8920feada4522edf896746508792f3",
+        "nsde.eqx": "4157b643c80a41c1d6b8f08aa9b44311918b4b182b1263693ef66b8bbdecda3c",
+        "test_predictions.npz": "0b10fe37074d50ea061a73bc70e4b7633eb9e1c2a30525f52acee90d6694e3fc",
+        "training_curves.png": "87b1c1761bb26de5f385d46dc18c504a50081724c968889261b67621e71de833"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/rough_bergomi__mcf_euler__seed0__20260422_015206",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206",
+      "files": {
+        "config.toml": "e8b314f5b304b56653261774884fe64c3d5f9adcdf8b2947183740158aec3f29",
+        "history.json": "84bd80bdbd471cab4016cdfdf091265d889c488bcb285b5627d47594d20ecf34",
+        "latest_epoch_batch.npz": "42d8903817857411bd92c418f6f9c28d2bb0c6d9ffd847d189f46f387749ec40",
+        "latest_epoch_trajectories.png": "7982402e2e534bc86f014b9aeed6f03430944aa9687df1e783c091be09cd51ab",
+        "metrics.json": "e7a0775797031bb6635e0edca6dc2630a5499876c4440c306de8348b67eae9cd",
+        "nsde.eqx": "72abb078da33c28bc1cb240da166fb0ebc355c43ea0b956ebc53e88d78e88153",
+        "test_predictions.npz": "e0f7654a146619bb7c1a1fbae2e7cca0bb07cb615b4f05253047818d72e1765c",
+        "training_curves.png": "2a68934fa6d5a21e0451edaa96c250348c6a66ab33645c28bbd4c10cba65d3a4"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/rough_bergomi__mcf_midpoint__seed0__20260422_020737",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737",
+      "files": {
+        "config.toml": "9c7521580a46550d9c429ced3af9cdb942a6f9f83a56791468576284d143ac7e",
+        "history.json": "f3a5aaae5418217f1cc1228e03da28dbb90338811395fb2ecbac312077bbee37",
+        "latest_epoch_batch.npz": "7bbe484acd69d9e76a5d69cc4c4d616545239373cf614b91bdcba1f82c453a8e",
+        "latest_epoch_trajectories.png": "5fd48988e2624477f07035eb32883912aee51172c280e55f444458b7d0f73520",
+        "metrics.json": "bacac4dd612d50ec0c2345f933eb78fe2b73053e265edbfa9399f1365a2e9e92",
+        "nsde.eqx": "739f9b44d3dc666a17917e1bd3783fdc9d98786acde227c67f00c57fe535ec1a",
+        "test_predictions.npz": "7eb1fc3f5f5de42d018a92ba69c96f1269bb0a80350af4fee3bc7e10331b2419",
+        "training_curves.png": "387f3baa06bdc5185a76d9d3f9391cc539f41c15112b8124ef05b642d4ae750e"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/rough_bergomi__reversible_heun__seed0__20260422_013524",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524",
+      "files": {
+        "config.toml": "0a724259a47cca6055216264e509feb8790759304332b197329f38002592028b",
+        "history.json": "5f87bd17199716916e8e515811cd4797ec36b98d9509eae849745c4a8fb8ddbd",
+        "latest_epoch_batch.npz": "f91c16ed89ee634b58bfb16a755bd7c002903dfafb681ccdc27875c8f96b3436",
+        "latest_epoch_trajectories.png": "960b7f8bfd6d10523e00c723c7514fc6d12dc5f688856081e00988f4e2ea469d",
+        "metrics.json": "9c331c85e2b0ab454e2443e13b66c18184a6374ac86ed2a936d150fa5c06e696",
+        "nsde.eqx": "b8d16b3b5d6fe11247eafb27e4c8d66413bd7b4e0ff6d76ab915b3b2fa5c8c65",
+        "test_predictions.npz": "d4d456a04587de33817575c15b7db4adf2c21607f0e0b441ea6694aac67c443d",
+        "training_curves.png": "567a1f09f1b6abbff007df1a3ec6d98bc0a1795d9641a4811386c3d9f56c8be0"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/rough_heston__ees25__seed0__20260421_230556",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/rough_heston__ees25__seed0__20260421_230556",
+      "files": {
+        "config.toml": "07531695e31d8382d168e8d2b9197b54dc4f678f01a95251b6c849ef30ee37e4",
+        "history.json": "0e1d9575dba470b2f0fa50f5276a63e5b4642d6f2d8caef063578ebc2133416f",
+        "latest_epoch_batch.npz": "6a628ee5a355c49882b18189a1ce5d5559a96aceced747c1a342c32e7239137c",
+        "latest_epoch_trajectories.png": "d3319c2d8cf1b60959e6b5d16a6f7239b1813d96ad0b0c4ca5c5b218fa658a29",
+        "metrics.json": "aa0237ae7725f52bd32de53f06f6058608db03f41ba28c538055c8a6ded3230d",
+        "nsde.eqx": "1752b829fd71adfdb83dc29051e23a79a2de546d2b16771560637444c557fe55",
+        "test_predictions.npz": "bd08e41687126d5b6f24549cf1c3a32be38606fac1f6f8a7fd67360bf3e7c540",
+        "training_curves.png": "bc56202381c18e862ac8fe838746f10d96412105de64a93a7f2afe164fa63262"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/rough_heston__mcf_euler__seed0__20260421_232907",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/rough_heston__mcf_euler__seed0__20260421_232907",
+      "files": {
+        "config.toml": "c61ca6a1772f9d8b8e024c1f51797103b5ff851c970e78e8ab902cc492faaeec",
+        "history.json": "65a95f15acb36a61c081ef04355e616ec23c1bde1bb273fefcdfee99b416d887",
+        "latest_epoch_batch.npz": "30924b98b72ebfe62b528ba6e011f897bf02f065a20d9e231e2890c8cbb1aef5",
+        "latest_epoch_trajectories.png": "681ee84552757454eb1c11df99f03a28a2c9a43b606625a6ad050a4d1224c094",
+        "metrics.json": "9c24c6fa80ce4848db70bfee81fcf1548cafb4a58b437a471016ba63c25a1940",
+        "nsde.eqx": "0e1efe2178c5398c6c52c23db56fd98531d8b872869fc98775788e0e93f37079",
+        "test_predictions.npz": "321d8913d8be25365059fe3957160d669d384ebe9cb7384f2efb9cbf12489a8c",
+        "training_curves.png": "522e97dd20c968ff87c5ed84894239c95ffd0969f0d0815ffb1f5a5109864909"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/rough_heston__mcf_midpoint__seed0__20260421_234424",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/rough_heston__mcf_midpoint__seed0__20260421_234424",
+      "files": {
+        "config.toml": "1242b905b1533adca9cd975efce1b2646f1fb5715118f90c6f9d5b333b591ea0",
+        "history.json": "b1fa333143d1d6296d93ed97a85f0adb74c2afd8109b3ff49090717230fe728b",
+        "latest_epoch_batch.npz": "80f77354a7e47fa504d6c9907e31ff0b2ad29da698ecee21ea7ad59a441a0732",
+        "latest_epoch_trajectories.png": "2c44b9091a5fdd0c81bde78dff305e88b18e87e5114fcf547afbafaba437edb0",
+        "metrics.json": "b9a2ebf81c059943986124931ca9d2b7803d0203fe3dbba2bcc7044e8e9cc14e",
+        "nsde.eqx": "9af884ae68ccdc0dd7b78f61c8448a59e69541b453ee0f9d9203ec2494e7f402",
+        "test_predictions.npz": "a6fd5768356d9feb2027ab0598b5628b4e895163c171394635e9027556f01e02",
+        "training_curves.png": "0f5810058f48a67b1b6e5e17d05c0308d0a78d42ca370218ac694e79222a4651"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/results/rough_heston__reversible_heun__seed0__20260421_231241",
+      "destination": "experiments/stochastic_volatility/results/neurips_20260421/rough_heston__reversible_heun__seed0__20260421_231241",
+      "files": {
+        "config.toml": "3e203bc375465cc2cb17acc3dbe363111626cff6a3a634a2bd550a0379be787e",
+        "history.json": "824bb48862aca96f5d9356b7120a604c0b6e01f24c80ace819f0c8d5da37405e",
+        "latest_epoch_batch.npz": "1c02c77b702475fcc6cf43f5a6aee7135681aa0d1700f72e24faa1bf29ed020a",
+        "latest_epoch_trajectories.png": "35e7cab07a6099ec3ade3873c4b0515277e954990f1a9138e2d64837b6fbb370",
+        "metrics.json": "65cd2f591531020b6f32e3e3df701fc6b5f4bfa550a4528ef9ef5e0220adb4b1",
+        "nsde.eqx": "30ed81e6af47fe9d44c0057a20e989a5b8e8458a84602c7238f413414bd2d9e9",
+        "test_predictions.npz": "80461cf8291b63bc870dce73dbd3a802cbd0fa684da5f2cbe5adf2a560a8e1f4",
+        "training_curves.png": "8c6e2370515bc73b50948d98c4fe698b0bd2104513b1e3dab35f2e08cd734b4d"
+      }
+    },
+    {
+      "source": "/home/luke/EES_Neural_SDE2/Z_paper_content/rough_vol_table.py",
+      "destination": "experiments/stochastic_volatility/scripts/paper_table.py",
+      "adaptation": "Package path and explicit results directory; numerical definitions unchanged."
+    }
+  ]
+}
