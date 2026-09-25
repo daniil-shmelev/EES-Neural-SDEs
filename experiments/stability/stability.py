@@ -1,6 +1,7 @@
 """
-This file plots cross-sections of the mean-square stability domains for RK3, RK4 and EES(2,5)
-applied to SDEs. For EES(2,5), the solution is mean-square stable if and only if:
+This file plots cross-sections of the mean-square stability domains for RK4 and
+EES(2,5) applied to SDEs, together with the published ODE stability set for
+Reversible Heun. For EES(2,5), the solution is mean-square stable if and only if:
 
 E[ ( 1 + x + (1/2)x^2 + (1/8)x^3 )^2 ] < 1
 
@@ -8,13 +9,14 @@ where x = lambda dt + mu dW is a normal random variable N(lambda dt, mu^2 dt). A
 for the stability domain can be derived using the moments of a normal distribution. For simplicity,
 we do this on-the-fly here.
 
-Similarly, RK3 has the domain:
-
-E[ ( 1 + x + (1/2)x^2 + (1/6)x^3 )^2 ] < 1
-
-and RK4:
+Similarly, RK4 has the domain:
 
 E[ ( 1 + x + (1/2)x^2 + (1/6)x^3 + (1/24)x^4 )^2 ] < 1.
+
+Reversible Heun is not a one-step RK method, so it is not represented by the
+standard Heun stability polynomial. Its published ODE stability set is the
+imaginary segment [-i, i]; this is overlaid in red where it intersects these
+cross-sections.
 
 The resulting domains are 4-dimensional (2 complex dimensions). We plot 4 cross-sections
 of these domains, given by:
@@ -26,6 +28,8 @@ of these domains, given by:
 
 """
 
+import argparse
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.lines as mlines
@@ -71,23 +75,41 @@ def ees25_(x, y, x_scale, y_scale):
     coeffs = [1., 2., 2., 5. / 4, 1. / 2, 1. / 8, 1. / 64]
     return stability_function(x, y, x_scale, y_scale, coeffs)
 
-def rk3_(x, y, x_scale, y_scale):
-    # coefficients of ( 1 + x + (1/2)x^2 + (1/6)x^3 )^2
-    coeffs = [1., 2., 2., 4. / 3, 7. / 12, 1. / 6, 1. / 36]
-    return stability_function(x, y, x_scale, y_scale, coeffs)
-
 def rk4_(x, y, x_scale, y_scale):
     # coefficients of ( 1 + x + (1/2)x^2 + (1/6)x^3 + (1/24)x^4 )^2
     coeffs = [1., 2., 2., 4. / 3, 2. / 3, 1. / 4, 5. / 72, 1. / 72, 1. / 576]
     return stability_function(x, y, x_scale, y_scale, coeffs)
 
 ees25 = np.vectorize(ees25_)
-rk3 = np.vectorize(rk3_)
 rk4 = np.vectorize(rk4_)
 
-if __name__ == "__main__":
+REV_HEUN_COLOUR = 'firebrick'
+REV_HEUN_LW = 3.0
 
-    resolution=500
+
+def plot_reversible_heun_intersection(ax, x_scale, xlim):
+    """Draw the Reversible Heun ODE stability set in this cross-section."""
+    # The published stability set is lambda dt in [-i, i] with no diffusion.
+    # In these slices this gives a segment only for lambda dt = alpha i; the
+    # other panels intersect it only at the origin.
+    ax.plot([0.0], [0.0], marker='o', color=REV_HEUN_COLOUR,
+            markersize=REV_HEUN_LW + 3, zorder=10)
+    if x_scale != 1j:
+        return
+
+    left = max(xlim[0], -1.0)
+    right = min(xlim[1], 1.0)
+    if left <= right:
+        ax.plot([left, right], [0.0, 0.0], color=REV_HEUN_COLOUR,
+                linewidth=REV_HEUN_LW, solid_capstyle='round', zorder=10)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", type=Path, default=Path(__file__).parent / "results")
+    parser.add_argument("--resolution", type=int, default=500)
+    args = parser.parse_args()
+    resolution = args.resolution
 
     x_scale = [1, 1j, 1j+1, 1j+1]
     y_scale = [1, 1j, 1j+1, 1j-1]
@@ -109,11 +131,10 @@ if __name__ == "__main__":
         y = np.linspace(ylm[0], ylm[1], resolution)
         X, Y = np.meshgrid(x, y)
 
+        plot_reversible_heun_intersection(ax, x_s, xlm)
+
         R = ees25(X, Y, x_s, y_s)
         ax.contour(X, Y, R, levels=[1], colors='black', linewidths=3)
-
-        R = rk3(X, Y, x_s, y_s)
-        ax.contour(X, Y, R, levels=[1], colors='black', linewidths=3, linestyles = "--")
 
         R = rk4(X, Y, x_s, y_s)
         ax.contour(X, Y, R, levels=[1], colors='black', linewidths=3, linestyles = ":")
@@ -126,19 +147,18 @@ if __name__ == "__main__":
         ax.set_title(title_, pad = 25)
 
     # proxy artists for legend
+    line0 = mlines.Line2D([], [], color=REV_HEUN_COLOUR, linewidth=REV_HEUN_LW,
+                          label=r"$\mathrm{Reversible\ Heun}$")
     line1 = mlines.Line2D([], [], color='black', linewidth=3, label=r"$\mathrm{EES}(2,5)$")
-    line2 = mlines.Line2D([], [], color='black', linewidth=3, linestyle="--", label=r"$\mathrm{RK3}$")
     line3 = mlines.Line2D([], [], color='black', linewidth=3, linestyle=":", label=r"$\mathrm{RK4}$")
 
-    axes[1].legend(handles = [line1, line2, line3], loc='upper center',
+    axes[1].legend(handles = [line0, line1, line3], loc='upper center',
                  bbox_to_anchor=(1.15, -0.2),fancybox=False, shadow=False, ncol=3)
 
     plt.tight_layout()
     plt.subplots_adjust(bottom=0.25, wspace=0.25)
-    import os as _os
-    _results_dir = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "results")
-    _os.makedirs(_results_dir, exist_ok=True)
-    plt.savefig(_os.path.join(_results_dir, "stoch_stability.pdf"))
-    plt.savefig(_os.path.join(_results_dir, "stoch_stability.eps"))
-    plt.savefig(_os.path.join(_results_dir, "stoch_stability.png"))
-    plt.show()
+    args.output_dir.mkdir(parents=True, exist_ok=True)
+    plt.savefig(args.output_dir / "stoch_stability.pdf")
+    plt.savefig(args.output_dir / "stoch_stability.eps")
+    plt.savefig(args.output_dir / "stoch_stability.png")
+    plt.close()

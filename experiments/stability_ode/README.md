@@ -15,18 +15,10 @@ EES(2,5;1/10) and RK4 contours are computed via the determinant formula in [kaur
 ## Run
 
 ```bash
-python experiments/stability_ode/stability_regions.py
+./run stability-ode
 ```
 
-Writes `results/stability_regions_1.pdf`.
-
-## Setup
-
-```bash
-uv pip install -e ".[stability-ode]"
-```
-
-Pulls `kauri` (for the EES25 / RK3 / RK4 Butcher tableaux).
+Run from the repository root. The launcher selects uv dependencies and a fresh `results/runs/<timestamp>/` directory. Use `--help` for settings; `--resolution` defaults to 600.
 
 ## Results committed
 

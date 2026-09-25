@@ -28,6 +28,7 @@ tableaux via `kauri`, mirroring `examples/ees_schemes/stability.ipynb` from
 the kauri repository (https://github.com/daniil-shmelev/kauri).
 """
 
+import argparse
 import os
 from math import sqrt
 
@@ -158,8 +159,12 @@ def main(
 
     plt.tight_layout()
     plt.savefig(os.path.join(output_dir, 'stability_regions_1.pdf'))
-    plt.show()
+    plt.close()
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", default=None)
+    parser.add_argument("--resolution", type=int, default=600)
+    args = parser.parse_args()
+    main(output_dir=args.output_dir, resolution=args.resolution)
