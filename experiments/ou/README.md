@@ -2,23 +2,21 @@
 
 Trains a Neural Latent SDE (LSDE) on high-volatility Ornstein–Uhlenbeck dynamics. Compares Reversible Heun against EES(2,5) on a `torchsde`-based pipeline. Adapted from the [Stable Neural SDEs](https://github.com/yongkyung-oh/Stable-Neural-SDEs) tutorial.
 
-The integrator is selected via the `method` field in the in-script `config` dict.
-
-## Setup
-
-```bash
-uv pip install -e ".[ou]"
-```
-
-Pulls Daniil's `torchsde` fork (`mcf` branch) plus `torchcde`.
+Select an integrator with `--method`; the other default settings are in `OU.py`.
 
 ## Run
 
+From the repository root:
+
 ```bash
-python experiments/ou/OU.py
-python experiments/ou/plot_OU.py
+./run ou
+./run ou --method ees25
 ```
+
+The default runs Reversible Heun and EES(2,5), then plots the comparison. `--method` selects one method. The launcher selects the uv dependencies, including Daniil's torchsde fork, and creates a fresh `results/runs/<timestamp>/` directory. Each method saves its effective `config.json` alongside the measurements.
+
+Use `--epochs`, `--seed` and `--output-dir` to override those settings. `--help` identifies the training script containing the remaining experiment settings. Numerical and training defaults are unchanged.
 
 ## Results committed
 
-None — the OU experiment is not directly cited in the NeurIPS 2026 manuscript. Rerun the scripts above to generate `results/OU_mse.pdf` locally.
+New comparisons write `OU_mse.pdf` and `OU_mse_grads.pdf` inside the printed run directory.

@@ -9,6 +9,9 @@ supporting the paper "Stable Neural Stochastic Differential Equations in Analyzi
 Once this file is run for both reversible_heun and ees25, the training loss can be plotted using plot_GBM.py
 """
 
+import argparse
+import json
+from pathlib import Path
 import os
 import random
 import numpy as np
@@ -181,12 +184,18 @@ def compare_distributions(true_data, pred_data, points, num_bins=50):
     plt.clf()
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--method", choices=('reversible_heun', 'ees25', 'ees27'), default="reversible_heun", help="Integrator")
+    parser.add_argument("--epochs", type=int, default=250, help="Training epochs")
+    parser.add_argument("--seed", type=int, default=42, help="Random seed")
+    parser.add_argument("--output-dir", type=Path, default=Path(__file__).parent / "results", help="Parent output directory")
+    args = parser.parse_args()
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
 
     # Parameters
     config = {
-        'method': "reversible_heun", # "reversible_heun" or "ees25" or "ees27"
+        'method': args.method,
         'num_samples': 250000,
         'T': 25.0,
         'r': 0.5,
@@ -195,8 +204,8 @@ if __name__ == "__main__":
         'strikes': np.linspace(90, 110, 20),
         'train_ratio': 0.8,
         'batch_size': 125000,
-        'seed': 42,
-        'num_epochs': 250,
+        'seed': args.seed,
+        'num_epochs': args.epochs,
         'input_dim': 1,
         'hidden_dim': 8,
         'num_layers': 2,
@@ -208,10 +217,11 @@ if __name__ == "__main__":
     config['N'] = len(config['maturities'])
     config['dt'] = config['T'] / config['N']
 
-    DIR = "plots/options_" + config['method']
-
-    if not os.path.exists(DIR):
-        os.makedirs(DIR)
+    output_dir = args.output_dir / ("options_" + config["method"])
+    output_dir.mkdir(parents=True, exist_ok=False)
+    DIR = str(output_dir)
+    (output_dir / "config.json").write_text(json.dumps(config, indent=2, default=lambda value: value.tolist()))
+    print(f"Output: {output_dir}", flush=True)
 
     # Ensure reproducibility
     seed_everything(config['seed'])

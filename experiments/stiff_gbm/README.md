@@ -2,26 +2,21 @@
 
 Trains a neural SDE on high-volatility geometric Brownian motion dynamics, fitted to vanilla European call prices. Compares Reversible Heun against EES(2,5) and EES(2,7) at fixed step size.
 
-The training loop is a torchsde-based `sdeint` over a Stratonovich neural SDE; the integrator is selected via the `method` field in the in-script `config` dict (`"reversible_heun"`, `"ees25"`, or `"ees27"`).
-
-## Setup
-
-```bash
-uv pip install -e ".[stiff-gbm]"
-```
-
-This pulls Daniil's `torchsde` fork (`mcf` branch), which adds `EES25`, `EES27`, and the MCF reversible solvers to torchsde.
+The training loop is a torchsde-based `sdeint` over a Stratonovich neural SDE; select the integrator with `--method reversible_heun`, `--method ees25` or `--method ees27`.
 
 ## Run
 
-```bash
-# Fit for each integrator (sets the `method` field inside the script then re-run, or pass --method via CLI)
-python experiments/stiff_gbm/GBM.py
+From the repository root:
 
-# Plot training MSE curves once all three runs have completed
-python experiments/stiff_gbm/plot_GBM.py
+```bash
+./run stiff-gbm
+./run stiff-gbm --method ees25
 ```
+
+The default runs Reversible Heun, EES(2,5) and EES(2,7), then plots the comparison. `--method` selects one method. The launcher selects the uv dependencies, including Daniil's torchsde fork, and creates a fresh `results/runs/<timestamp>/` directory. Each method saves its effective `config.json` alongside the measurements.
+
+Use `--epochs`, `--seed` and `--output-dir` to override those settings. `--help` identifies the training script containing the remaining experiment settings. Numerical and training defaults are unchanged.
 
 ## Results committed
 
-None — rerun the scripts above to generate `results/GBM_mse.pdf` locally.
+None. New comparisons write `GBM_mse.pdf` inside the printed run directory.
