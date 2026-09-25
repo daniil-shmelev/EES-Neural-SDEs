@@ -12,16 +12,15 @@ from diffrax import (
     ControlTerm,
     DirectAdjoint,
     MultiTerm,
-    ODETerm,
     ReversibleAdjoint,
     SaveAt,
     VirtualBrownianTree,
     diffeqsolve,
 )
-from georax import CFEES25, GeometricTerm
+from georax import CFEES25, GeometricTerm, Torus
 
-from experiments.rna.datasets.preprocessing import NUM_BASES
-from experiments.rna.models.torus import Torus, wrap_to_pi
+NUM_BASES = 4  # Preserve the feature encoding used for the published memory benchmark.
+from experiments.torus_memory.models.torus import wrap_to_pi
 
 _ACTIVATIONS = {
     "silu": jax.nn.silu,
@@ -67,7 +66,7 @@ class TorusDriftField(eqx.Module):
         activation=jax.nn.silu,
         key,
     ):
-        d = geometry.dimension
+        d = geometry.coordinate_shape[0]
         mlp = eqx.nn.MLP(
             in_size=2 * d + ctx_dim,
             out_size=d,
@@ -85,7 +84,7 @@ class TorusDriftField(eqx.Module):
         del t
         inp = jnp.concatenate([angle_features(theta), ctx])
         coeffs = self.mlp(inp)
-        return self.geometry.from_frame(theta, coeffs)
+        return coeffs
 
 
 class TorusDiffusionField(eqx.Module):
@@ -104,7 +103,7 @@ class TorusDiffusionField(eqx.Module):
         activation=jax.nn.silu,
         key,
     ):
-        d = geometry.dimension
+        d = geometry.coordinate_shape[0]
         mlp = eqx.nn.MLP(
             in_size=2 * d + ctx_dim,
             out_size=d,
@@ -124,8 +123,7 @@ class TorusDiffusionField(eqx.Module):
         del t
         inp = jnp.concatenate([angle_features(theta), ctx])
         scales = jax.nn.softplus(self.mlp(inp)) * self.diffusion_scale
-        basis = self.geometry.frame(theta)  # (d, d) identity
-        return basis * scales[None, :]
+        return jnp.diag(scales)
 
 
 class GRUEncoder(eqx.Module):
@@ -219,7 +217,7 @@ class TorusNeuralSDE(eqx.Module):
         k1, k2, k3, k4 = jax.random.split(key, 4)
 
         geometry = Torus(num_angles)
-        d = geometry.dimension
+        d = geometry.coordinate_shape[0]
         bases_per_state = residues_per_state
         base_feature_dim = bases_per_state * NUM_BASES
         act_fn = resolve_activation(activation)
@@ -313,12 +311,9 @@ class TorusNeuralSDE(eqx.Module):
             key=key,
         )
 
-        term = GeometricTerm(
-            inner=MultiTerm(
-                ODETerm(self.drift_field),
-                ControlTerm(self.diffusion_field, brownian_path),
-            ),
-            geometry=self.drift_field.geometry,
+        term = MultiTerm(
+            GeometricTerm(self.drift_field, self.drift_field.geometry),
+            ControlTerm(self.diffusion_field, brownian_path),
         )
 
         if self.adjoint is not None:

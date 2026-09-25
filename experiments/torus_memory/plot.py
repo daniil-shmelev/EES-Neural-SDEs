@@ -1,4 +1,4 @@
-"""Paper-quality visualization for RNA torus training results."""
+"""Historical plotting routine for the NeurIPS torus-memory measurements."""
 
 import json
 from pathlib import Path
@@ -18,17 +18,6 @@ plt.rcParams.update({
     "savefig.bbox": "tight",
 })
 
-ANGLE_SYMBOLS = (
-    r"$\alpha$", r"$\beta$", r"$\gamma$", r"$\delta$",
-    r"$\epsilon$", r"$\zeta$", r"$\chi$",
-)
-
-
-def _wrapped_diff(a: np.ndarray, b: np.ndarray) -> np.ndarray:
-    d = a - b
-    return np.arctan2(np.sin(d), np.cos(d))
-
-
 def _set_stix_params(small: int = 7, medium: int = 8, bigger: int = 9) -> None:
     plt.rcParams["mathtext.fontset"] = "stix"
     plt.rcParams["font.family"] = "STIXGeneral"
@@ -39,75 +28,6 @@ def _set_stix_params(small: int = 7, medium: int = 8, bigger: int = 9) -> None:
     plt.rc("ytick", labelsize=small)
     plt.rc("legend", fontsize=small)
     plt.rc("figure", titlesize=bigger)
-
-
-def plot_training_curves(
-    histories: dict[str, dict],
-    save_path: Path,
-) -> None:
-    """Training and validation loss curves."""
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-
-    for name, hist in histories.items():
-        train_values = hist.get("train_loss", hist.get("train"))
-        val_values = hist.get("val_riemannian_dist", hist.get("val_loss", hist.get("val")))
-        if train_values:
-            axes[0].plot(np.asarray(train_values), label=name, linewidth=1.2)
-        if val_values:
-            axes[1].plot(np.asarray(val_values), label=name, linewidth=1.2)
-
-    axes[0].set_xlabel("Epoch")
-    axes[0].set_ylabel("Training Loss")
-    axes[0].set_title("Training Loss")
-    axes[0].legend()
-    axes[0].grid(True, alpha=0.3)
-
-    axes[1].set_xlabel("Epoch")
-    axes[1].set_ylabel("Validation Metric")
-    axes[1].set_title("Validation Curve")
-    axes[1].legend()
-    axes[1].grid(True, alpha=0.3)
-
-    fig.tight_layout()
-    fig.savefig(save_path)
-    plt.close(fig)
-
-
-def fig_predictions_bar(npz_path: Path, save_path: Path) -> None:
-    """Per-angle wrapped MAE bar chart: CF-EES(2,5) vs predict-previous baseline.
-
-    Loads ``rna_predictions_demo.npz`` (predicted/actual angles plus the
-    20-residue context window) and writes a 2-bar grouped chart.
-    """
-    _set_stix_params(7, 8, 9)
-    data = np.load(npz_path)
-    predicted = np.asarray(data["predicted"])
-    actual = np.asarray(data["actual"])
-    prev = np.asarray(data["context_angles"])[:, -1, :]
-
-    mae_pred = np.mean(np.abs(_wrapped_diff(predicted, actual)), axis=0)
-    mae_prev = np.mean(np.abs(_wrapped_diff(prev, actual)), axis=0)
-    bundle = [
-        (r"$\mathrm{CF\text{-}EES}(2,5)$", mae_pred, "#d62728"),
-        ("prev. residue", mae_prev, "#1f77b4"),
-    ]
-
-    fig, ax = plt.subplots(figsize=(3.2, 2.2))
-    positions = np.arange(len(ANGLE_SYMBOLS))
-    bar_width = 0.78 / len(bundle)
-    for i, (label, values, color) in enumerate(bundle):
-        offset = (i - (len(bundle) - 1) / 2) * bar_width
-        ax.bar(positions + offset, values, width=bar_width, color=color, label=label)
-    y_max = max(float(np.max(v)) for _, v, _ in bundle)
-    ax.set_xticks(positions)
-    ax.set_xticklabels(ANGLE_SYMBOLS)
-    ax.set_ylabel("wrapped MAE (rad)")
-    ax.set_ylim(0, y_max * 1.18)
-    ax.grid(axis="y", alpha=0.3)
-    ax.legend(loc="upper right", frameon=True, ncol=1)
-    fig.savefig(save_path, bbox_inches="tight", pad_inches=0.04)
-    plt.close(fig)
-
 
 _SCALING_MODE_LABEL = {
     "cfees25:reversible": r"CF-EES(2,5) + Reversible Adj.",
@@ -252,14 +172,9 @@ def fig_torus_scaling(
 
 
 if __name__ == "__main__":
-    here = Path(__file__).resolve().parent
-    fig_predictions_bar(
-        here / "results" / "rna_predictions_demo.npz",
-        here / "results" / "fig_predictions_bar.pdf",
-    )
-    fig_torus_scaling(
-        here / "results" / "rna_benchmark_scaling.json",
-        here / "results" / "fig_scaling_compact_nogrid.pdf",
-        subtract_baseline=True,
-        show_reference_slopes=True,
-    )
+    import argparse
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--input", type=Path, default=Path(__file__).parent / "results/rna_benchmark_scaling.json")
+    parser.add_argument("--output", type=Path, required=True)
+    args = parser.parse_args()
+    fig_torus_scaling(args.input, args.output, subtract_baseline=True, show_reference_slopes=True)

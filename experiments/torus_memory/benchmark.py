@@ -3,14 +3,13 @@
 Isolating each measurement in its own Python process eliminates JIT-cache
 contamination from prior solvers, so the RSS and HLO readings become the
 actual peak working set for *that* solver on *that* configuration, not the
-residual cache from the previous run. Mirrors
-``../CFEES-Neural-SDEs/experiment/integrator_benchmark_isolated.py``.
+residual cache from the previous run.
 
 Usage::
 
-    python -m experiment.integrator_benchmark_isolated \\
+    python -m experiments.torus_memory.benchmark \\
         --configs 7x5,7x20,7x50,7x100,7x200,14x50,35x50,70x50,140x50 \\
-        --solvers cg2 cfees25 \\
+        --modes cg2:checkpoint_full cfees25:reversible \\
         --n-reps 10
 """
 
@@ -22,9 +21,9 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def run_subprocess(
@@ -45,7 +44,7 @@ def run_subprocess(
     cmd = [
         python_bin,
         "-m",
-        "experiments.rna.experiment.integrator_benchmark_single",
+        "experiments.torus_memory.benchmark_single",
         "--num-angles", str(num_angles),
         "--n-steps", str(n_steps),
         "--solver", solver,
@@ -132,7 +131,7 @@ def main() -> int:
     parser.add_argument(
         "--output",
         type=Path,
-        default=PROJECT_ROOT / "results" / "rna_benchmark_scaling.json",
+        default=Path(__file__).parent / "results" / "benchmark_new.json",
     )
     parser.add_argument(
         "--ref-grad",
@@ -141,7 +140,7 @@ def main() -> int:
         help=(
             "Optional .npy path to a reference gradient. Pass through to each "
             "cell so it records rel_err_vs_ref / cos_sim_vs_ref. Use "
-            "scripts/compute_reference_gradient.py to produce this file."
+            "benchmark_single --save-grad to produce this file."
         ),
     )
     args = parser.parse_args()

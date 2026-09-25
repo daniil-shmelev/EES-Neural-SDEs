@@ -2,12 +2,11 @@
 
 Intended to be launched as a fresh subprocess so peak-memory measurement is
 not contaminated by JIT caches from other solver runs in the same process.
-Mirrors ``../CFEES-Neural-SDEs/experiment/integrator_benchmark_single.py``
-adapted to the torus model.
+Retains the original torus-memory measurement computation.
 
 Usage::
 
-    python -m experiment.integrator_benchmark_single \
+    python -m experiments.torus_memory.benchmark_single \
         --num-angles 7 --n-steps 50 --solver cfees25 --n-reps 10
 """
 
@@ -28,9 +27,9 @@ import jax.numpy as jnp
 import numpy as np
 import psutil
 
-from experiments.rna.experiment.config import Solvers
-from experiments.rna.experiment.factories import build_adjoint, build_solver
-from experiments.rna.models.torus_nsde import TorusNeuralSDE
+from experiments.torus_memory.solvers import Solvers
+from experiments.torus_memory.solvers import build_adjoint, build_solver
+from experiments.torus_memory.models.torus_nsde import TorusNeuralSDE
 
 
 def rss_mb() -> float:
@@ -333,7 +332,7 @@ def main() -> int:
         default=None,
         help=(
             "Optional .npy path where this cell's flattened gradient vector "
-            "is saved. Used by scripts/compute_reference_gradient.py."
+            "is saved. Optional diagnostic output."
         ),
     )
     parser.add_argument("--seed-model", type=int, default=0)
