@@ -1,0 +1,86 @@
+{
+  "terminal_time": 1.0,
+  "powers": [
+    1,
+    7
+  ],
+  "arithmetic": "float64",
+  "platform": "cpu",
+  "python": "3.12.13",
+  "jax": "0.10.0",
+  "diffrax": "0.7.2",
+  "numpy": "2.4.6",
+  "matplotlib": "3.10.9",
+  "action": "georax SO(3), degree-eight Taylor exponential plus QR",
+  "resolved_error_threshold": 2.220446049250313e-14,
+  "methods": {
+    "5": {
+      "forward": {
+        "slope": 2.00008282240949,
+        "steps": [
+          32,
+          64,
+          128
+        ]
+      },
+      "recovery": {
+        "slope": 4.990082476319332,
+        "steps": [
+          32,
+          64,
+          128
+        ]
+      },
+      "local_recovery": {
+        "slope": 5.999925511604396,
+        "steps": [
+          16,
+          32,
+          64
+        ]
+      },
+      "embedded": {
+        "slope": 2.0001341476111563,
+        "steps": [
+          32,
+          64,
+          128
+        ]
+      }
+    },
+    "7": {
+      "forward": {
+        "slope": 2.0000224574318173,
+        "steps": [
+          32,
+          64,
+          128
+        ]
+      },
+      "recovery": {
+        "slope": 6.997963283357167,
+        "steps": [
+          4,
+          8,
+          16
+        ]
+      },
+      "local_recovery": {
+        "slope": 7.9941057054138485,
+        "steps": [
+          2,
+          4,
+          8
+        ]
+      },
+      "embedded": {
+        "slope": 1.9999682229277769,
+        "steps": [
+          32,
+          64,
+          128
+        ]
+      }
+    }
+  }
+}

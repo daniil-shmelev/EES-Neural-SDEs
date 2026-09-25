@@ -23,11 +23,7 @@ import numpy as np
 from scipy.linalg import expm
 
 
-BETA = np.array([
-    [1/3,     0,       0],
-    [-7/16,   15/16,   0],
-    [49/240, -7/16,   2/5],
-], dtype=np.float64)
+from experiments.convergence_fbm.scripts.so3_reversibility_verify import cfees25_step as driver_step
 
 
 def antisym(M: np.ndarray) -> np.ndarray:
@@ -50,14 +46,7 @@ def make_xi(seed: int, scale: float = 0.4):
 
 def cfees25_step(Y: np.ndarray, xi, h: float) -> np.ndarray:
     """One step (ODE case, increment h along the one 'driver')."""
-    Ks = []
-    Y_prev = Y
-    for l in range(3):
-        K_l = xi(Y_prev)
-        Ks.append(K_l)
-        V_l = h * sum(BETA[l, i] * Ks[i] for i in range(l + 1))
-        Y_prev = expm(V_l) @ Y_prev
-    return Y_prev
+    return driver_step(Y, [xi], np.asarray([h]))
 
 
 def main():

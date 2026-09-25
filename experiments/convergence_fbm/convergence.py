@@ -19,15 +19,16 @@ to the discretisation error, we evaluate the error in recovering the initial
 condition, y_0.
 """
 
+import argparse
 import os
 from math import sqrt
 from fbm import FBM
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.markers as mkr
 
 from ees_core.stoch_rk_methods import EES25, EES27
 from ees_core import plotting_params
+from ees_core.convergence_plotting import plot_error_curve
 
 np.random.seed(0)
 
@@ -69,22 +70,11 @@ def plot(f, method, H, T, rate, ax, N = 10, backward = False):
         y += np.log10(error)
 
     y /= N
-    x = np.log10(h)
-    dx = np.array([x[0], x[-1]])
-
-    err_label = r'$\log_{10}(\mathcal{E}(h))$' if not backward else r'$\log_{10}(\overleftarrow{\mathcal{E}}(h))$'
-
-    intercept = np.mean(y) - rate * np.mean(x)
+    intercept = plot_error_curve(h, y, rate, ax, backward=backward)
     print("Error intercept: ", intercept)
-    ax.scatter(x, y, marker=mkr.MarkerStyle('x', fillstyle='none'), color='crimson')
-    ax.plot(dx, rate * dx + intercept, color='mediumblue')
-    ax.legend([err_label, str(np.round(rate,1)) + r'$x + c$'])
-    ax.set_xlabel(r'$\log_{10}(h)$')
-    ax.set_ylabel(err_label)
     ax.set_title(r'$H = $' + str(np.round(H,1)))
 
 RESULTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")
-os.makedirs(RESULTS_DIR, exist_ok=True)
 
 
 def plot_grid(f_, T_, H_, rates_, methods_, titles_):
@@ -101,6 +91,11 @@ def plot_grid(f_, T_, H_, rates_, methods_, titles_):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output-dir", default=RESULTS_DIR)
+    args = parser.parse_args()
+    RESULTS_DIR = args.output_dir
+    os.makedirs(RESULTS_DIR, exist_ok=True)
     EES27_param = (5 - 3 * sqrt(2)) / 14
     methods = [EES25, EES27]
     titles = [

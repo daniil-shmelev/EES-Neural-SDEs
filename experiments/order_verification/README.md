@@ -9,25 +9,10 @@ All scripts are pure-`sympy`, exact-rational, no JAX. They produce the symbolic 
 
 ## Run
 
-```bash
-# MKW Hopf-algebra independent verification (no kauri)
-python -m experiments.order_verification.scripts.mkw_verify
-python -m experiments.order_verification.scripts.mkw_verify_cf
-
-# Scheme α character: planar order, antisymmetric order, tree/algebraic checks
-python -m experiments.order_verification.scripts.scheme_a_order_verify
-python -m experiments.order_verification.scripts.scheme_a_antisym_at_N
-python -m experiments.order_verification.scripts.scheme_a_algebraic_verify
-python -m experiments.order_verification.scripts.scheme_a_tree_algebraic_verify
-
-# Tree-vs-matrix consistency cross-check
-python -m experiments.order_verification.scripts.cross_check_tree_vs_matrix
-```
-
-## Setup
+From the repository root:
 
 ```bash
-uv pip install -e ".[order-verification]"
+./run order-verification --manuscript /path/to/SIAM/ees_simods.tex
 ```
 
-(pulls `kauri` and `sympy`; the verification scripts themselves are self-contained sympy, but `kauri` is the package that produced the symbolic table in the manuscript.)
+The launcher selects the uv dependencies and runs the exact verifier in `siam/scripts/verify_cfees.py`. It checks the order conditions, embedded companions and printed tree coefficients, reports to the terminal and does not modify the manuscript. Use `--help` for options. The earlier independent algebraic cross-checks remain in `scripts/` for development.

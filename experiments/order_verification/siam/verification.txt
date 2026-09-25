@@ -1,0 +1,22 @@
+  All 24 printed tree-table entries verified in Q(x), including zeros.
+CF-EES(2,5;x): forward order two verified (0.06s)
+  degree 1: 1 forests, 0 nonzero residuals
+  degree 2: 2 forests, 0 nonzero residuals
+  degree 3: 5 forests, 0 nonzero residuals
+  degree 4: 14 forests, 0 nonzero residuals
+  degree 5: 42 forests, 0 nonzero residuals
+  final-increment normalization: -(4*x - 1)/(2*(x - 1)*(2*x - 1))
+  embedded second-order coefficient: (x - 1)/(2*x - 1)
+CF-EES(2,5;x): all checks passed (0.17s)
+CF-EES(2,7), selected parameter: forward order two verified (0.06s)
+  degree 1: 1 forests, 0 nonzero residuals
+  degree 2: 2 forests, 0 nonzero residuals
+  degree 3: 5 forests, 0 nonzero residuals
+  degree 4: 14 forests, 0 nonzero residuals
+  degree 5: 42 forests, 0 nonzero residuals
+  degree 6: 132 forests, 0 nonzero residuals
+  degree 7: 429 forests, 0 nonzero residuals
+  final-increment normalization: -(-10 + sqrt(2))/21
+  embedded second-order coefficient: 3*sqrt(2)/4
+CF-EES(2,7), selected parameter: all checks passed (0.30s)
+Both final-increment companions and the georax penultimate companion verified.

@@ -1,0 +1,17 @@
+{
+  "date": "2026-09-08",
+  "python": "3.14.4",
+  "packages": {
+    "sympy": "1.14.0",
+    "mpmath": "1.3.0",
+    "numpy": "2.5.2",
+    "matplotlib": "3.11.1",
+    "pymupdf": "1.28.2"
+  },
+  "pdflatex": "pdfTeX 3.141592653-2.6-1.40.28 (TeX Live 2025/Debian)",
+  "bibtex": "BibTeX 0.99d (TeX Live 2025/Debian)",
+  "tex_package_search_path_used": "/tmp/siam-tex//:",
+  "tex_package_note": "Standard algorithms and algorithmicx packages were extracted from CTAN distributions into a temporary local TeX tree. Other packages use the system TeX Live installation.",
+  "validation": "Exact coefficient checks against the consolidated master, learning table checks, mathematical and style review, local and project-root LaTeX builds.",
+  "ode_validation_environment": "/home/luke/EES-Neural-SDEs/experiments/convergence_ode/results/ode_validation.json"
+}

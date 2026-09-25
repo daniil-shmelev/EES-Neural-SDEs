@@ -35,8 +35,7 @@ Experiment design
   through weight 5 are non-trivial (a linear xi would make trees with
   >= 3 children at the root trivially vanish).
 - CF-EES(2,5;1/10) with beta_1 = (1/3,0,0), beta_2 = (-7/16,15/16,0),
-  beta_3 = (49/240,-7/16,2/5), implemented *directly* via scipy
-  matrix exponential (no georax dependency, avoids API drift).
+  beta_3 = (49/240,-7/16,2/5), using the pinned Georax solver and SO(3) chart.
 - Step sizes h = T/2^k for k = 6, 7, 8, 9, 10, 11 (six grids).
 - n_trials independent fBm realisations per Hurst; the coarser grids
   sub-sample the finest grid so all step sizes see the SAME sample
@@ -47,7 +46,7 @@ Experiment design
 
 Usage
 -----
-  uv run python scripts/so3_reversibility_verify.py
+  uv run --extra convergence-fbm python -m experiments.convergence_fbm.scripts.so3_reversibility_verify
 """
 
 from __future__ import annotations
@@ -56,20 +55,16 @@ import argparse
 import json
 import math
 from pathlib import Path
+from functools import lru_cache
+
+import jax
+import jax.numpy as jnp
+from georax import CFEES25, GeometricTerm, SO
+
+jax.config.update("jax_enable_x64", True)
 
 import numpy as np
 from scipy.linalg import expm
-
-
-# ---------------------------------------------------------------------
-# CF-EES(2,5; 1/10) weight vectors
-# ---------------------------------------------------------------------
-
-BETA = np.array([
-    [1/3,     0,       0],
-    [-7/16,   15/16,   0],
-    [49/240, -7/16,   2/5],
-], dtype=np.float64)
 
 
 # ---------------------------------------------------------------------
@@ -134,48 +129,42 @@ def make_so3_vfs(d: int, seed: int, scale: float = 0.1) -> list[callable]:
     return vfs
 
 
-def evaluate_vfs(vfs: list[callable], Y: np.ndarray) -> np.ndarray:
-    """Return (3, 3, d) tensor whose slab [:,:,m] is xi_m(Y)."""
-    return np.stack([vf(Y) for vf in vfs], axis=-1)
+@lru_cache(maxsize=32)
+def _stepper(vfs: tuple):
+    def coeffs(t, rotation, increment):
+        del t
+        # Z = Y.T satisfies dZ = -Z xi(Z.T), matching Georax's right action.
+        omega = -sum(vf(rotation.T) * increment[i] for i, vf in enumerate(vfs))
+        return omega[jnp.triu_indices(3, k=1)]
+
+    term = GeometricTerm(coeffs, SO(3))
+    solver = CFEES25()
+
+    @jax.jit
+    def step(rotation, increment):
+        state = solver.init(term, 0.0, 1.0, rotation.T, increment)
+        result, _, _, _, _ = solver.step(term, 0.0, 1.0, rotation.T, increment, state, False)
+        return result.T
+
+    return step
 
 
-# ---------------------------------------------------------------------
-# CF-EES(2,5; 1/10) step on SO(3) for RDE dY = sum_m xi_m(Y) Y dX_m
-# ---------------------------------------------------------------------
-
-def cfees25_step(Y: np.ndarray,
-                 vfs: list[callable],
-                 dX: np.ndarray) -> np.ndarray:
-    """One step of the CF-EES(2,5; 1/10) 2N-register recurrence.
-
-    dX is the driver-increment vector of shape (d,). The step size h is
-    absorbed into dX (since dX = X(t+h) - X(t) already scales as h^H).
-    The recurrence is exactly Scheme A (2N-register, K-reuse).
-    """
-    Ks = []
-    Y_prev = Y
-    for l in range(3):
-        K_l = evaluate_vfs(vfs, Y_prev)                   # (3, 3, d)
-        Ks.append(K_l)
-        V_l = np.zeros((3, 3), dtype=np.float64)
-        for i in range(l + 1):
-            V_l = V_l + BETA[l, i] * np.einsum("abm,m->ab", Ks[i], dX)
-        Y_prev = expm(V_l) @ Y_prev
-    return Y_prev
+def cfees25_step(Y: np.ndarray, vfs: list[callable], dX: np.ndarray) -> np.ndarray:
+    """Apply the library CF-EES(2,5;1/10) step to a driver increment."""
+    return np.asarray(_stepper(tuple(vfs))(jnp.asarray(Y), jnp.asarray(dX)))
 
 
 def integrate(Y0: np.ndarray, vfs, X_values: np.ndarray, reverse: bool = False) -> np.ndarray:
-    """Run CF-EES(2,5; 1/10) over the grid X_values (shape (N+1, d))
-    either forward or backward."""
-    Y = Y0
-    N = X_values.shape[0] - 1
-    rng_order = range(N - 1, -1, -1) if reverse else range(N)
-    for i in rng_order:
-        dX = X_values[i + 1] - X_values[i]
-        if reverse:
-            dX = -dX
-        Y = cfees25_step(Y, vfs, dX)
-    return Y
+    increments = jnp.diff(jnp.asarray(X_values), axis=0)
+    if reverse:
+        increments = -increments[::-1]
+    step = _stepper(tuple(vfs))
+
+    def advance(y, increment):
+        return step(y, increment), None
+
+    result, _ = jax.lax.scan(advance, jnp.asarray(Y0), increments)
+    return np.asarray(result)
 
 
 # ---------------------------------------------------------------------
