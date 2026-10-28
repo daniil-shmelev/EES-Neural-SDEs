@@ -54,42 +54,47 @@ from __future__ import annotations
 import argparse
 import json
 import math
-from pathlib import Path
 from functools import lru_cache
+from pathlib import Path
 
 import jax
 import jax.numpy as jnp
-from georax import CFEES25, GeometricTerm, SO
+from georax import CFEES25, SO, GeometricTerm
 
 jax.config.update("jax_enable_x64", True)
 
 import numpy as np
 from scipy.linalg import expm
 
-
 # ---------------------------------------------------------------------
 # Davies-Harte fBm sampler (exact Gaussian)
 # ---------------------------------------------------------------------
 
-def davies_harte_fbm(H: float, N: int, T: float, rng: np.random.Generator) -> np.ndarray:
+
+def davies_harte_fbm(
+    H: float, N: int, T: float, rng: np.random.Generator
+) -> np.ndarray:
     """Return fBm sample of Hurst H on [0, T] at N+1 equispaced grid points."""
+
     def gamma(k):
-        return 0.5 * (abs(k - 1) ** (2 * H) - 2 * abs(k) ** (2 * H) + abs(k + 1) ** (2 * H))
+        return 0.5 * (
+            abs(k - 1) ** (2 * H) - 2 * abs(k) ** (2 * H) + abs(k + 1) ** (2 * H)
+        )
 
     k_arr = np.arange(N)
     c = np.array([gamma(int(k)) for k in k_arr])
-    circ = np.concatenate([c, [0.0], c[:0:-1]])          # length 2N
+    circ = np.concatenate([c, [0.0], c[:0:-1]])  # length 2N
     lam = np.maximum(np.real(np.fft.fft(circ)), 0.0)
     xi_r = rng.standard_normal(2 * N)
     xi_i = rng.standard_normal(2 * N)
     xi = xi_r + 1j * xi_i
     xi[0] = xi_r[0]
     xi[N] = xi_r[N]
-    xi[N + 1:] = np.conj(xi[1:N][::-1])
+    xi[N + 1 :] = np.conj(xi[1:N][::-1])
     W = np.sqrt(lam) * xi / math.sqrt(2 * N)
     fgn = np.real(np.fft.fft(W))[:N]
     dt = T / N
-    fgn *= dt ** H                                        # scale increments
+    fgn *= dt**H  # scale increments
     return np.concatenate([[0.0], np.cumsum(fgn)]).astype(np.float64)
 
 
@@ -105,6 +110,7 @@ def multidim_fbm(H: float, d: int, N: int, T: float, seed: int) -> np.ndarray:
 # ---------------------------------------------------------------------
 # Vector fields on SO(3): xi_m(Y) = antisym(poly_4(Y)) for m = 0..d-1.
 # ---------------------------------------------------------------------
+
 
 def antisym(M: np.ndarray) -> np.ndarray:
     return 0.5 * (M - M.T)
@@ -143,7 +149,9 @@ def _stepper(vfs: tuple):
     @jax.jit
     def step(rotation, increment):
         state = solver.init(term, 0.0, 1.0, rotation.T, increment)
-        result, _, _, _, _ = solver.step(term, 0.0, 1.0, rotation.T, increment, state, False)
+        result, _, _, _, _ = solver.step(
+            term, 0.0, 1.0, rotation.T, increment, state, False
+        )
         return result.T
 
     return step
@@ -154,7 +162,9 @@ def cfees25_step(Y: np.ndarray, vfs: list[callable], dX: np.ndarray) -> np.ndarr
     return np.asarray(_stepper(tuple(vfs))(jnp.asarray(Y), jnp.asarray(dX)))
 
 
-def integrate(Y0: np.ndarray, vfs, X_values: np.ndarray, reverse: bool = False) -> np.ndarray:
+def integrate(
+    Y0: np.ndarray, vfs, X_values: np.ndarray, reverse: bool = False
+) -> np.ndarray:
     increments = jnp.diff(jnp.asarray(X_values), axis=0)
     if reverse:
         increments = -increments[::-1]
@@ -171,6 +181,7 @@ def integrate(Y0: np.ndarray, vfs, X_values: np.ndarray, reverse: bool = False) 
 # Slope fit
 # ---------------------------------------------------------------------
 
+
 def fit_slope(hs, errs):
     lh = np.log(np.asarray(hs, dtype=np.float64))
     le = np.log(np.asarray(errs, dtype=np.float64))
@@ -182,12 +193,21 @@ def fit_slope(hs, errs):
 # Main experiment
 # ---------------------------------------------------------------------
 
-def run(H: float, d: int, step_exponents: list[int], n_trials: int,
-        t_final: float, vf_seed: int, base_seed: int,
-        Y0: np.ndarray, verbose: bool = True) -> dict:
+
+def run(
+    H: float,
+    d: int,
+    step_exponents: list[int],
+    n_trials: int,
+    t_final: float,
+    vf_seed: int,
+    base_seed: int,
+    Y0: np.ndarray,
+    verbose: bool = True,
+) -> dict:
 
     K_max = max(step_exponents)
-    N_max = 2 ** K_max
+    N_max = 2**K_max
     vfs = make_so3_vfs(d, vf_seed)
 
     # Per-trial FINE fBm paths (all coarser grids sub-sample the fine grid
@@ -200,7 +220,7 @@ def run(H: float, d: int, step_exponents: list[int], n_trials: int,
     log_h, log_err = [], []
     per_grid_errs = []
     for k in step_exponents:
-        N = 2 ** k
+        N = 2**k
         h = t_final / N
         stride = N_max // N
         errs = []
@@ -214,21 +234,30 @@ def run(H: float, d: int, step_exponents: list[int], n_trials: int,
         std_err = float(np.std(errs))
         log_h.append(math.log(h))
         log_err.append(math.log(max(mean_err, 1e-300)))
-        per_grid_errs.append({
-            "N": int(N), "h": float(h),
-            "mean_err": mean_err, "std_err": std_err,
-        })
+        per_grid_errs.append(
+            {
+                "N": int(N),
+                "h": float(h),
+                "mean_err": mean_err,
+                "std_err": std_err,
+            }
+        )
         if verbose:
-            print(f"  H={H:.2f}  N={N:6d}  h={h:.5e}  mean||Y_b - Y_0||={mean_err:.3e}  (std={std_err:.2e})",
-                  flush=True)
+            print(
+                f"  H={H:.2f}  N={N:6d}  h={h:.5e}  mean||Y_b - Y_0||={mean_err:.3e}  (std={std_err:.2e})",
+                flush=True,
+            )
 
     slope, intercept = fit_slope(
         [math.exp(x) for x in log_h],
         [math.exp(x) for x in log_err],
     )
     return {
-        "H": H, "fitted_slope": slope, "intercept": intercept,
-        "predict_bck5": 6 * H - 1, "predict_mkw3": 4 * H - 1,
+        "H": H,
+        "fitted_slope": slope,
+        "intercept": intercept,
+        "predict_bck5": 6 * H - 1,
+        "predict_mkw3": 4 * H - 1,
         "per_grid": per_grid_errs,
     }
 
@@ -237,8 +266,9 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--hursts", nargs="+", type=float, default=[0.4, 0.5, 0.6])
     ap.add_argument("--d", type=int, default=3)
-    ap.add_argument("--step_exponents", nargs="+", type=int,
-                    default=[6, 7, 8, 9, 10, 11])
+    ap.add_argument(
+        "--step_exponents", nargs="+", type=int, default=[6, 7, 8, 9, 10, 11]
+    )
     ap.add_argument("--n_trials", type=int, default=30)
     ap.add_argument("--t_final", type=float, default=1.0)
     ap.add_argument("--vf_seed", type=int, default=42)
@@ -253,11 +283,11 @@ def main():
 
     print("=" * 78)
     print("  CF-EES(2,5; 1/10) reversibility convergence on SO(3) (non-abelian)")
-    print(f"  Group: SO(3) (matrix embedding in R^{{3x3}}, non-zero intrinsic torsion)")
+    print("  Group: SO(3) (matrix embedding in R^{3x3}, non-zero intrinsic torsion)")
     print(f"  Driver: {args.d} independent fBm paths (Davies-Harte)")
     print(f"  Step sizes: h = T / 2^k, k in {args.step_exponents}, T = {args.t_final}")
     print(f"  Trials per Hurst: {args.n_trials}")
-    print(f"  Vector fields: degree-4 matrix polynomials projected to so(3)")
+    print("  Vector fields: degree-4 matrix polynomials projected to so(3)")
     print("=" * 78)
     print()
     print("  Prediction table:")
@@ -265,7 +295,9 @@ def main():
     print("  |   H    |  BCK order-5 (6H-1)   |  MKW order-3 (4H-1)  |")
     print("  +--------+-----------------------+----------------------+")
     for H in args.hursts:
-        print(f"  |  {H:.2f}  |        {6*H-1:>5.2f}          |        {4*H-1:>5.2f}         |")
+        print(
+            f"  |  {H:.2f}  |        {6 * H - 1:>5.2f}          |        {4 * H - 1:>5.2f}         |"
+        )
     print("  +--------+-----------------------+----------------------+")
     print()
 
@@ -273,7 +305,8 @@ def main():
     for H in args.hursts:
         print(f"[Hurst H = {H:.2f}]")
         res = run(
-            H=H, d=args.d,
+            H=H,
+            d=args.d,
             step_exponents=args.step_exponents,
             n_trials=args.n_trials,
             t_final=args.t_final,
@@ -282,15 +315,19 @@ def main():
             Y0=Y0,
         )
         results.append(res)
-        print(f"  ==> fitted slope = {res['fitted_slope']:.3f}  "
-              f"(predict BCK 6H-1 = {res['predict_bck5']:.2f}, "
-              f"MKW 4H-1 = {res['predict_mkw3']:.2f})")
+        print(
+            f"  ==> fitted slope = {res['fitted_slope']:.3f}  "
+            f"(predict BCK 6H-1 = {res['predict_bck5']:.2f}, "
+            f"MKW 4H-1 = {res['predict_mkw3']:.2f})"
+        )
         print()
 
     print("=" * 78)
     print("  SUMMARY")
     print("=" * 78)
-    print(f"  {'H':>6}  {'fitted slope':>13}  {'6H-1 (BCK q=5)':>16}  {'4H-1 (MKW q=3)':>16}  {'verdict':>24}")
+    print(
+        f"  {'H':>6}  {'fitted slope':>13}  {'6H-1 (BCK q=5)':>16}  {'4H-1 (MKW q=3)':>16}  {'verdict':>24}"
+    )
     for res in results:
         fit = res["fitted_slope"]
         p5 = res["predict_bck5"]
@@ -303,7 +340,9 @@ def main():
             verdict = "matches MKW order 3"
         else:
             verdict = "inconclusive"
-        print(f"  {res['H']:>6.2f}  {fit:>13.3f}  {p5:>16.2f}  {p3:>16.2f}  {verdict:>24}")
+        print(
+            f"  {res['H']:>6.2f}  {fit:>13.3f}  {p5:>16.2f}  {p3:>16.2f}  {verdict:>24}"
+        )
 
     outp = Path(args.output_json)
     outp.write_text(json.dumps(results, indent=2))

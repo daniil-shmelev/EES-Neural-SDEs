@@ -30,7 +30,7 @@ from experiments.kuramoto.datasets.kuramoto import (
     make_state_diffusion,
     make_state_drift,
 )
-from experiments.torus_memory.models.torus import wrap_to_pi
+from ees_core.torus import wrap_to_pi
 
 
 class SimConfig(NamedTuple):

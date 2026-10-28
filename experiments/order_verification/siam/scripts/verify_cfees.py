@@ -16,11 +16,11 @@ Taylor recurrences in the manuscript, not a non-planar RK verifier.
 from __future__ import annotations
 
 import argparse
+import re
+import time
 from functools import cache
 from math import comb, factorial
 from pathlib import Path
-import re
-import time
 
 import sympy as sp
 from sympy.parsing.sympy_parser import (
@@ -99,9 +99,12 @@ def family_five():
     symbol = sp.Symbol("x")
     domain = sp.QQ.frac_field(symbol)
     x = domain.from_sympy(symbol)
-    a = [domain.zero, (4*x*x-2*x+1)/(2*(x-1)),
-         -(4*x*x-2*x+1)/((2*x-1)**2*(2*x+1))]
-    b = [(2*x+1)/(4*(1-x)), (1-x)/(1-4*x*x), (1-2*x)/2]
+    a = [
+        domain.zero,
+        (4 * x * x - 2 * x + 1) / (2 * (x - 1)),
+        -(4 * x * x - 2 * x + 1) / ((2 * x - 1) ** 2 * (2 * x + 1)),
+    ]
+    b = [(2 * x + 1) / (4 * (1 - x)), (1 - x) / (1 - 4 * x * x), (1 - 2 * x) / 2]
     return domain, a, b
 
 
@@ -109,8 +112,8 @@ def family_seven():
     root = sp.sqrt(2)
     domain = sp.QQ.algebraic_field(root)
     r = domain.from_sympy(root)
-    a = [domain.zero, (-7+4*r)/3, -(4+5*r)/12, 3*(-31+8*r)/49]
-    b = [(2-r)/3, (4+r)/8, 3*(3-r)/7, (9-4*r)/14]
+    a = [domain.zero, (-7 + 4 * r) / 3, -(4 + 5 * r) / 12, 3 * (-31 + 8 * r) / 49]
+    b = [(2 - r) / 3, (4 + r) / 8, 3 * (3 - r) / 7, (9 - 4 * r) / 14]
     return domain, a, b
 
 
@@ -121,9 +124,9 @@ def tableau(domain, a, b):
     rows = []
     for i, (ai, bi) in enumerate(zip(a, b, strict=True)):
         rows.append(state.copy())
-        increment = [ai*coefficient for coefficient in increment]
+        increment = [ai * coefficient for coefficient in increment]
         increment[i] += domain.one
-        state = [u+bi*v for u, v in zip(state, increment, strict=True)]
+        state = [u + bi * v for u, v in zip(state, increment, strict=True)]
     return rows, state, increment
 
 
@@ -159,18 +162,27 @@ def verify_published_tree_table(domain, forward, source):
         "TChainFive": ((chain3,),),
     }
     assert len(set(trees.values())) == 23
-    assert [sum(tree_degree(t) == n for t in trees.values()) for n in range(1, 6)] == [1, 1, 2, 5, 14]
+    assert [sum(tree_degree(t) == n for t in trees.values()) for n in range(1, 6)] == [
+        1,
+        1,
+        2,
+        5,
+        14,
+    ]
 
     def fraction_expression(latex):
         # The table uses integer constants and one fraction per nonconstant entry.
         match = re.fullmatch(r"(-?)\\tfrac\{([^{}]+)\}\{([^{}]+)\}", latex)
-        expression = (f"{match[1]}(({match[2]})/({match[3]}))" if match else latex)
+        expression = f"{match[1]}(({match[2]})/({match[3]}))" if match else latex
         assert re.fullmatch(r"[0-9x()+*/^ -]+", expression), latex
-        return parse_expr(expression.replace("^", "**"),
-                          local_dict={"x": sp.Symbol("x")},
-                          transformations=standard_transformations + (implicit_multiplication_application,))
+        return parse_expr(
+            expression.replace("^", "**"),
+            local_dict={"x": sp.Symbol("x")},
+            transformations=standard_transformations
+            + (implicit_multiplication_application,),
+        )
 
-    tables = re.findall(r"\\begin\{table\}.*?\\end\{table\}", source.read_text(), re.S)
+    tables = re.findall(r"\\begin\{table\}.*?\\end\{table\}", source.read_text(), re.DOTALL)
     printed = [table for table in tables if r"\label{tab:alpha-cf-ees25-x}" in table]
     assert len(printed) == 1
     entries = re.findall(r"\\(T\w+)\s*&\s*\$([^$]+)\$", printed[0])
@@ -180,7 +192,10 @@ def verify_published_tree_table(domain, forward, source):
         forest = () if name == "TEmpty" else (trees[name],)
         printed = domain.from_sympy(fraction_expression(latex))
         assert printed == forward.get(forest, domain.zero), (name, latex)
-    print("  All 24 printed tree-table entries verified in Q(x), including zeros.", flush=True)
+    print(
+        "  All 24 printed tree-table entries verified in Q(x), including zeros.",
+        flush=True,
+    )
 
 
 def verify(name, degree, coefficients, manuscript):
@@ -190,29 +205,41 @@ def verify(name, degree, coefficients, manuscript):
     start = time.monotonic()
     forward = algebra.step(identity, a, b)
     leaf, chain = (), ((),)
-    expected = {(): domain.one, (leaf,): domain.one,
-                (chain,): domain.one/2, (leaf, leaf): domain.one/2}
+    expected = {
+        (): domain.one,
+        (leaf,): domain.one,
+        (chain,): domain.one / 2,
+        (leaf, leaf): domain.one / 2,
+    }
     assert {w: c for w, c in forward.items() if forest_degree(w) <= 2} == expected
     if degree == 5:
         verify_published_tree_table(domain, forward, manuscript)
-    print(f"{name}: forward order two verified ({time.monotonic()-start:.2f}s)", flush=True)
+    print(
+        f"{name}: forward order two verified ({time.monotonic() - start:.2f}s)",
+        flush=True,
+    )
     reverse = algebra.step(forward, a, b, sign=-1)
-    for n in range(1, degree+1):
+    for n in range(1, degree + 1):
         residual = {w: c for w, c in reverse.items() if forest_degree(w) == n}
-        print(f"  degree {n}: {comb(2*n, n)//(n+1)} forests, "
-              f"{len(residual)} nonzero residuals", flush=True)
+        print(
+            f"  degree {n}: {comb(2 * n, n) // (n + 1)} forests, "
+            f"{len(residual)} nonzero residuals",
+            flush=True,
+        )
         assert not residual, residual
     assert reverse == identity
     rows, weights, increment = tableau(domain, a, b)
     nodes = [sum(row, domain.zero) for row in rows]
     assert sum(weights, domain.zero) == domain.one
-    assert sum((bi*ci for bi, ci in zip(weights, nodes)), domain.zero) == domain.one/2
+    assert (
+        sum((bi * ci for bi, ci in zip(weights, nodes)), domain.zero) == domain.one / 2
+    )
     sigma = sum(increment, domain.zero)
-    mu = sum((di*ci for di, ci in zip(increment, nodes)), domain.zero)/sigma
+    mu = sum((di * ci for di, ci in zip(increment, nodes)), domain.zero) / sigma
     print(f"  final-increment normalization: {sp.factor(domain.to_sympy(sigma))}")
     print(f"  embedded second-order coefficient: {sp.factor(domain.to_sympy(mu))}")
-    assert mu != domain.one/2
-    print(f"{name}: all checks passed ({time.monotonic()-start:.2f}s)", flush=True)
+    assert mu != domain.one / 2
+    print(f"{name}: all checks passed ({time.monotonic() - start:.2f}s)", flush=True)
 
 
 def verify_selected_companions():
@@ -220,12 +247,12 @@ def verify_selected_companions():
     five = q, [q.zero, q(-7, 15), q(-35, 32)], [q(1, 3), q(15, 16), q(2, 5)]
     for (domain, a, b), expected_sigma, expected_mu in [
         (five, sp.Rational(5, 12), sp.Rational(9, 8)),
-        (family_seven(), (10-sp.sqrt(2))/21, 3*sp.sqrt(2)/4),
+        (family_seven(), (10 - sp.sqrt(2)) / 21, 3 * sp.sqrt(2) / 4),
     ]:
         rows, _, increment = tableau(domain, a, b)
         sigma = sum(increment, domain.zero)
         nodes = [sum(row, domain.zero) for row in rows]
-        mu = sum((di*ci for di, ci in zip(increment, nodes)), domain.zero)/sigma
+        mu = sum((di * ci for di, ci in zip(increment, nodes)), domain.zero) / sigma
         assert sigma == domain.from_sympy(expected_sigma)
         assert mu == domain.from_sympy(expected_mu)
 
@@ -235,14 +262,23 @@ def verify_selected_companions():
     for ai, bi in zip(a[:2], b[:2], strict=True):
         stages.append(algebra.graft(state))
         increment = algebra.add(algebra.scale(increment, ai), stages[-1])
-        state = algebra.multiply(state, algebra.exponential(algebra.scale(increment, bi)))
-    extra = algebra.add(algebra.scale(stages[0], q(5, 48)),
-                        algebra.scale(stages[1], q(1, 16)))
+        state = algebra.multiply(
+            state, algebra.exponential(algebra.scale(increment, bi))
+        )
+    extra = algebra.add(
+        algebra.scale(stages[0], q(5, 48)), algebra.scale(stages[1], q(1, 16))
+    )
     companion = algebra.multiply(state, algebra.exponential(extra))
     leaf, chain = (), ((),)
-    assert companion == {(): q.one, (leaf,): q.one,
-                         (chain,): q(1, 3), (leaf, leaf): q(1, 2)}
-    print("Both final-increment companions and the georax penultimate companion verified.")
+    assert companion == {
+        (): q.one,
+        (leaf,): q.one,
+        (chain,): q(1, 3),
+        (leaf, leaf): q(1, 2),
+    }
+    print(
+        "Both final-increment companions and the georax penultimate companion verified."
+    )
 
 
 def main():

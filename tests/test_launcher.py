@@ -4,12 +4,12 @@ import contextlib
 import importlib.machinery
 import importlib.util
 import io
-from pathlib import Path
 import subprocess
 import sys
 import tempfile
-from types import SimpleNamespace
 import unittest
+from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import patch
 
 REPO = Path(__file__).resolve().parents[1]
@@ -26,17 +26,32 @@ class LauncherTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         for _, _, folder, config, _ in launcher.EXPERIMENTS.values():
             if config:
-                path = self.root / "experiments" / folder / config
+                path = self.root / folder / config
                 path.parent.mkdir(parents=True, exist_ok=True)
                 path.write_text("# configuration fixture\n")
-        for target, value in [("ROOT", self.root), ("shutil.which", lambda _: "/bin/uv")]:
-            patcher = patch.object(launcher, target, value) if "." not in target else patch("shutil.which", value)
+        for target, value in [
+            ("ROOT", self.root),
+            ("shutil.which", lambda _: "/bin/uv"),
+        ]:
+            patcher = (
+                patch.object(launcher, target, value)
+                if "." not in target
+                else patch("shutil.which", value)
+            )
             patcher.start()
             self.addCleanup(patcher.stop)
 
     def invoke(self, args, status=0):
         output = io.StringIO()
-        with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output), patch.object(launcher.subprocess, "run", return_value=SimpleNamespace(returncode=status)) as run:
+        with (
+            contextlib.redirect_stdout(output),
+            contextlib.redirect_stderr(output),
+            patch.object(
+                launcher.subprocess,
+                "run",
+                return_value=SimpleNamespace(returncode=status),
+            ) as run,
+        ):
             result = launcher.main(args)
         return result, run.call_args_list, output.getvalue()
 
@@ -63,12 +78,54 @@ class LauncherTests(unittest.TestCase):
                 self.assertIn("uv run --locked", output)
         self.assertEqual(before, set(self.root.rglob("*")))
 
+    def test_relocated_experiments_resolve_modules_and_outputs(self):
+        for arguments, module, folder in [
+            (
+                ["rough-vol"],
+                "neurips.stochastic_volatility.experiment.train",
+                "neurips/stochastic_volatility",
+            ),
+            (
+                ["rough-vol", "--table"],
+                "neurips.stochastic_volatility.scripts.paper_table",
+                None,
+            ),
+            (
+                ["convergence-fbm"],
+                "neurips.convergence_fbm.convergence",
+                "neurips/convergence_fbm",
+            ),
+            (
+                ["convergence-fbm", "--so3"],
+                "experiments.convergence_fbm.scripts.so3_reversibility_verify",
+                "experiments/convergence_fbm",
+            ),
+            (
+                ["torus-memory"],
+                "neurips.torus_memory.benchmark",
+                "neurips/torus_memory",
+            ),
+        ]:
+            with self.subTest(arguments=arguments):
+                _, calls, _ = self.invoke(arguments)
+                command = calls[0].args[0]
+                self.assertEqual(command[command.index("-m") + 1], module)
+                if folder:
+                    self.assertTrue(
+                        any(
+                            str(self.root / folder / "results") in arg
+                            for arg in command
+                        )
+                    )
+
     def test_memory_plot_reads_this_run(self):
         status, calls, _ = self.invoke(["kuramoto", "--memory"])
         self.assertEqual(status, 0)
         self.assertEqual(len(calls), 2)
         measure, plot = [call.args[0] for call in calls]
-        self.assertEqual(measure[measure.index("--output") + 1], plot[plot.index("--input") + 1])
+        self.assertEqual(
+            measure[measure.index("--output") + 1], plot[plot.index("--input") + 1]
+        )
 
     def test_adaptive_preset_and_explicit_overrides(self):
         with patch.object(Path, "is_dir", return_value=True):
@@ -77,8 +134,20 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual(command[command.index("--adjoint") + 1], "reversible")
             self.assertEqual(command[command.index("--n-steps") + 1], "10")
             self.assertEqual(command[command.index("--adaptive-dtmin") + 1], "1e-4")
-            _, calls, _ = self.invoke(["kuramoto", "--adaptive", "--adjoint", "checkpoint_recursive", "--n-steps", "25"])
-            self.assertEqual(calls[0].args[0][-4:], ["--adjoint", "checkpoint_recursive", "--n-steps", "25"])
+            _, calls, _ = self.invoke(
+                [
+                    "kuramoto",
+                    "--adaptive",
+                    "--adjoint",
+                    "checkpoint_recursive",
+                    "--n-steps",
+                    "25",
+                ]
+            )
+            self.assertEqual(
+                calls[0].args[0][-4:],
+                ["--adjoint", "checkpoint_recursive", "--n-steps", "25"],
+            )
 
     def test_failure_stops_before_plot_and_propagates(self):
         status, calls, output = self.invoke(["kuramoto", "--memory"], status=7)
@@ -113,12 +182,16 @@ class LauncherTests(unittest.TestCase):
     def test_training_allocation_keeps_benchmark_and_user_settings(self):
         with patch.dict(launcher.os.environ, {}, clear=True):
             _, calls, _ = self.invoke(["kuramoto"])
-            self.assertEqual(calls[0].kwargs["env"]["XLA_PYTHON_CLIENT_PREALLOCATE"], "false")
+            self.assertEqual(
+                calls[0].kwargs["env"]["XLA_PYTHON_CLIENT_PREALLOCATE"], "false"
+            )
             _, calls, _ = self.invoke(["kuramoto", "--memory"])
             self.assertNotIn("XLA_PYTHON_CLIENT_PREALLOCATE", calls[0].kwargs["env"])
         with patch.dict(launcher.os.environ, {"XLA_PYTHON_CLIENT_PREALLOCATE": "true"}):
             _, calls, _ = self.invoke(["kuramoto"])
-            self.assertEqual(calls[0].kwargs["env"]["XLA_PYTHON_CLIENT_PREALLOCATE"], "true")
+            self.assertEqual(
+                calls[0].kwargs["env"]["XLA_PYTHON_CLIENT_PREALLOCATE"], "true"
+            )
 
     def test_comparison_streams_failure_and_preserves_log(self):
         path = REPO / "experiments/kuramoto/scripts/run_comparison.py"
@@ -126,17 +199,35 @@ class LauncherTests(unittest.TestCase):
         comparison = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(comparison)
         _run_cell = comparison._run_cell
-        args = SimpleNamespace(config=self.root / "config.toml", N=3, batch_size=2, epochs=1, lr=.001)
+        args = SimpleNamespace(
+            config=self.root / "config.toml", N=3, batch_size=2, epochs=1, lr=0.001
+        )
         output_dir = self.root / "cg2_full_seed0"
         real_popen = subprocess.Popen
 
         def child(cmd, **kwargs):
-            self.assertFalse(any(output_dir.iterdir()), "Child must receive an empty output directory")
-            return real_popen([sys.executable, "-u", "-c", "print('visible failure'); raise SystemExit(7)"], **kwargs)
+            self.assertFalse(
+                any(output_dir.iterdir()),
+                "Child must receive an empty output directory",
+            )
+            return real_popen(
+                [
+                    sys.executable,
+                    "-u",
+                    "-c",
+                    "print('visible failure'); raise SystemExit(7)",
+                ],
+                **kwargs,
+            )
 
         terminal = io.StringIO()
-        with contextlib.redirect_stdout(terminal), patch("subprocess.Popen", side_effect=child):
-            result = _run_cell(args, "cg2_full", "cg2", "checkpoint_full", 75, 0, output_dir)
+        with (
+            contextlib.redirect_stdout(terminal),
+            patch("subprocess.Popen", side_effect=child),
+        ):
+            result = _run_cell(
+                args, "cg2_full", "cg2", "checkpoint_full", 75, 0, output_dir
+            )
         self.assertEqual(result["exit_code"], 7)
         self.assertIn("visible failure", terminal.getvalue())
         self.assertIn("visible failure", (output_dir / "train.log").read_text())

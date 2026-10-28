@@ -22,8 +22,9 @@ from __future__ import annotations
 import numpy as np
 from scipy.linalg import expm
 
-
-from experiments.convergence_fbm.scripts.so3_reversibility_verify import cfees25_step as driver_step
+from experiments.convergence_fbm.scripts.so3_reversibility_verify import (
+    cfees25_step as driver_step,
+)
 
 
 def antisym(M: np.ndarray) -> np.ndarray:
@@ -83,7 +84,7 @@ def main():
         # floating-point noise floor).
         tail = [(h, e) for h, e in zip(hs, errs) if e > 1e-14]
         tail = tail[2:-1]  # drop 2 coarsest and the very last in case
-                          # round-off is starting
+        # round-off is starting
         if len(tail) >= 3:
             hh, ee = zip(*tail)
             slope, intercept = np.polyfit(np.log(hh), np.log(ee), 1)

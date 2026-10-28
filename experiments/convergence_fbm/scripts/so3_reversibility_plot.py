@@ -19,7 +19,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 COLORS = {0.4: "tab:blue", 0.5: "tab:orange", 0.6: "tab:green"}
 MARKERS = {0.4: "o", 0.5: "s", 0.6: "^"}
 
@@ -28,8 +27,7 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("json_in")
     ap.add_argument("--output", default="so3_reversibility_convergence.pdf")
-    ap.add_argument("--title",
-                    default="CF-EES(2,5;1/10) reversibility on SO(3)")
+    ap.add_argument("--title", default="CF-EES(2,5;1/10) reversibility on SO(3)")
     args = ap.parse_args()
 
     with open(args.json_in) as f:
@@ -45,9 +43,15 @@ def main():
         color = COLORS.get(H, "gray")
         marker = MARKERS.get(H, "o")
 
-        ax.loglog(hs, errs, marker=marker, color=color,
-                  linewidth=1.2, markersize=6,
-                  label=f"H={H:.2f}  (slope={rec['fitted_slope']:.2f})")
+        ax.loglog(
+            hs,
+            errs,
+            marker=marker,
+            color=color,
+            linewidth=1.2,
+            markersize=6,
+            label=f"H={H:.2f}  (slope={rec['fitted_slope']:.2f})",
+        )
         all_hs.extend(hs.tolist())
 
         # Reference lines: 6H - 1 and 4H - 1
@@ -57,13 +61,25 @@ def main():
 
         # BCK order-5 line: slope 6H - 1
         c_bck = err_anchor / h_anchor ** (6 * H - 1)
-        ax.loglog(h_ref, c_bck * h_ref ** (6 * H - 1),
-                  color=color, linestyle="--", alpha=0.55, linewidth=1.0)
+        ax.loglog(
+            h_ref,
+            c_bck * h_ref ** (6 * H - 1),
+            color=color,
+            linestyle="--",
+            alpha=0.55,
+            linewidth=1.0,
+        )
 
         # MKW order-3 line: slope 4H - 1 (drawn with a longer dash)
         c_mkw = err_anchor / h_anchor ** (4 * H - 1)
-        ax.loglog(h_ref, c_mkw * h_ref ** (4 * H - 1),
-                  color=color, linestyle=":", alpha=0.55, linewidth=1.0)
+        ax.loglog(
+            h_ref,
+            c_mkw * h_ref ** (4 * H - 1),
+            color=color,
+            linestyle=":",
+            alpha=0.55,
+            linewidth=1.0,
+        )
 
     ax.set_xlabel("step size  $h$")
     ax.set_ylabel(r"$\|\Phi_{-h}\!\circ\!\Phi_{+h}(Y_0) - Y_0\|_F$ (mean over trials)")
@@ -73,16 +89,31 @@ def main():
     # Build a single custom legend: the empirical curves + two reference
     # entries (dashed = BCK 6H-1, dotted = MKW 4H-1).
     from matplotlib.lines import Line2D
+
     empirical_handles, empirical_labels = ax.get_legend_handles_labels()
     ref_handles = [
-        Line2D([0], [0], color="black", linestyle="--", alpha=0.65,
-               label="reference slope $6H-1$ (BCK order 5)"),
-        Line2D([0], [0], color="black", linestyle=":", alpha=0.65,
-               label="reference slope $4H-1$ (MKW order 3)"),
+        Line2D(
+            [0],
+            [0],
+            color="black",
+            linestyle="--",
+            alpha=0.65,
+            label="reference slope $6H-1$ (BCK order 5)",
+        ),
+        Line2D(
+            [0],
+            [0],
+            color="black",
+            linestyle=":",
+            alpha=0.65,
+            label="reference slope $4H-1$ (MKW order 3)",
+        ),
     ]
     ax.legend(
         handles=empirical_handles + ref_handles,
-        loc="lower right", fontsize=9, framealpha=0.9,
+        loc="lower right",
+        fontsize=9,
+        framealpha=0.9,
     )
 
     fig.tight_layout()

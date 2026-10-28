@@ -23,16 +23,16 @@ with high branching), set XI_DEGREE = 3 or 4.
 
 from __future__ import annotations
 
-import sympy as sp
-from sympy import Matrix, Rational, Symbol, eye, zeros, factorial, simplify, Poly
 import random
 
+import sympy as sp
+from sympy import Matrix, Rational, Symbol, eye, factorial, zeros
 
-N = 3               # dimension of GL(N)
-XI_DEGREE = 4       # polynomial degree of xi(Y) — covers xi^(0)..xi^(4),
-                    #   i.e. every planar tree up to weight 5 (whose root has
-                    #   at most 4 children).
-MAX_H = 6           # expand up to h^MAX_H
+N = 3  # dimension of GL(N)
+XI_DEGREE = 4  # polynomial degree of xi(Y) — covers xi^(0)..xi^(4),
+#   i.e. every planar tree up to weight 5 (whose root has
+#   at most 4 children).
+MAX_H = 6  # expand up to h^MAX_H
 h = Symbol("h")
 
 
@@ -45,7 +45,8 @@ BETA = [
 
 def random_rational_matrix(rng: random.Random, n: int, denom_max: int = 7) -> Matrix:
     return Matrix(
-        n, n,
+        n,
+        n,
         lambda i, j: Rational(rng.randint(-5, 5), rng.randint(1, denom_max)),
     )
 
@@ -138,7 +139,7 @@ def scheme_a_step(Y0: Matrix, h_sign: int, xi_coeffs: list, max_h: int) -> Matri
 
 def main():
     print("=" * 74)
-    print(f"  Algebraic (exact-rational) verification of Scheme A antisym order")
+    print("  Algebraic (exact-rational) verification of Scheme A antisym order")
     print(f"  Setup:  G = GL({N}, Q),   xi(Y) = sum_{{k=0..{XI_DEGREE}}} A_k Y^k")
     print(f"  Expanding forward-backward residual up to h^{MAX_H}.")
     print("=" * 74)
@@ -164,18 +165,19 @@ def main():
 
         y0 = eye(N) + Rational(1, 3) * random_rational_matrix(rng, N)
 
-        print(f"  computing Scheme A forward step Phi_{{+h}}(y0) ...", flush=True)
+        print("  computing Scheme A forward step Phi_{+h}(y0) ...", flush=True)
         Y_fwd = scheme_a_step(y0, +1, xi_coeffs, MAX_H)
 
         # --- Classical forward-order check ---
-        print(f"  computing exact flow Y(h) Taylor series up to h^{MAX_H} ...",
-              flush=True)
+        print(
+            f"  computing exact flow Y(h) Taylor series up to h^{MAX_H} ...", flush=True
+        )
         Y_exact = exact_flow_taylor(y0, xi_coeffs, MAX_H)
 
         fwd_err = truncate_matrix_in_h(Y_fwd - Y_exact, MAX_H)
         fwd_first = first_nonzero_h_degree(fwd_err, MAX_H)
         p = (fwd_first - 1) if fwd_first is not None else MAX_H
-        print(f"  forward error Phi_{{+h}}(y0) - Y(h):")
+        print("  forward error Phi_{+h}(y0) - Y(h):")
         for k in range(MAX_H + 1):
             zero = h_slice_zero(fwd_err, k)
             verdict = "ZERO" if zero else "NONZERO"
@@ -184,14 +186,16 @@ def main():
         print()
 
         # --- Antisymmetric-order check ---
-        print(f"  computing Scheme A backward step Phi_{{-h}}(Phi_{{+h}}(y0)) ...",
-              flush=True)
+        print(
+            "  computing Scheme A backward step Phi_{-h}(Phi_{+h}(y0)) ...",
+            flush=True,
+        )
         Y_round = scheme_a_step(Y_fwd, -1, xi_coeffs, MAX_H)
 
         rev_err = truncate_matrix_in_h(Y_round - y0, MAX_H)
         rev_first = first_nonzero_h_degree(rev_err, MAX_H)
         q = (rev_first - 1) if rev_first is not None else MAX_H
-        print(f"  reversibility error Phi_{{-h}}(Phi_{{+h}}(y0)) - y0:")
+        print("  reversibility error Phi_{-h}(Phi_{+h}(y0)) - y0:")
         for k in range(MAX_H + 1):
             zero = h_slice_zero(rev_err, k)
             verdict = "ZERO (antisymmetric)" if zero else "NONZERO"

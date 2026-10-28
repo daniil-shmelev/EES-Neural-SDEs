@@ -73,7 +73,7 @@ data/cache/
 # === Logs ===
 **/*.log
 **/stdout.log
-experiments/stochastic_volatility/results
+neurips/stochastic_volatility/results
 experiments/sphere_latent_nsde/results
 
 # === BUT keep result files (whitelist) ===
@@ -84,8 +84,15 @@ experiments/sphere_latent_nsde/results
 !experiments/**/results/**/*.png
 !experiments/**/results/**/*.pdf
 !experiments/**/results/**/*.md
+!neurips/**/results/**/*.json
+!neurips/**/results/**/*.npz
+!neurips/**/results/**/*.npy
+!neurips/**/results/**/*.csv
+!neurips/**/results/**/*.png
+!neurips/**/results/**/*.pdf
+!neurips/**/results/**/*.md
 
 # Retain the imported manuscript cohort; other local volatility runs stay ignored.
-!experiments/stochastic_volatility/results/
-experiments/stochastic_volatility/results/*
-!experiments/stochastic_volatility/results/neurips_20260421/
+!neurips/stochastic_volatility/results/
+neurips/stochastic_volatility/results/*
+!neurips/stochastic_volatility/results/neurips_20260421/

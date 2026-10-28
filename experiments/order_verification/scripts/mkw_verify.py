@@ -20,16 +20,16 @@ Usage:
 from __future__ import annotations
 
 import itertools
+from collections.abc import Iterator
 from dataclasses import dataclass
 from functools import lru_cache
-from typing import Callable, Iterator, Optional
 
 import sympy as sp
-
 
 # ============================================================================
 # Planar rooted tree data structure
 # ============================================================================
+
 
 @dataclass(frozen=True)
 class PTree:
@@ -38,7 +38,8 @@ class PTree:
     A leaf is PTree() with empty `children`. We DO NOT use this same object
     to represent the "empty tree" (unit of the coalgebra); that is a
     separate sentinel, Nil."""
-    children: tuple["PTree", ...] = ()
+
+    children: tuple[PTree, ...] = ()
 
     @property
     def weight(self) -> int:
@@ -56,6 +57,7 @@ LEAF = PTree(())
 @dataclass(frozen=True)
 class PForest:
     """Ordered forest; may be empty."""
+
     trees: tuple[PTree, ...] = ()
 
     @property
@@ -82,6 +84,7 @@ Nil = object()  # passes as the "empty tree" when evaluating phi
 # ============================================================================
 # Planar tree enumeration
 # ============================================================================
+
 
 @lru_cache(None)
 def ordered_compositions(n: int) -> tuple[tuple[int, ...], ...]:
@@ -122,6 +125,7 @@ def planar_trees_of_weight(w: int) -> tuple[PTree, ...]:
 # where P^c is the forest of pruned subtrees (in planar order) and R^c is
 # the remaining tree with the cut subtrees removed.
 # ============================================================================
+
 
 def shuffle_forests(a: PForest, b: PForest) -> list[tuple[int, PForest]]:
     """Shuffle product of two planar forests. Returns [(coeff, forest), ...]
@@ -186,7 +190,7 @@ def lac_recursive_cuts(tree: PTree) -> Iterator[tuple[int, PForest, PTree]]:
             combo_coeff = 1
             P_child_forests: list[PForest] = []
             R_trees: list[PTree] = []
-            for (ci, Pi, Ri) in combo:
+            for ci, Pi, Ri in combo:
                 combo_coeff *= ci
                 P_child_forests.append(Pi)
                 R_trees.append(Ri)
@@ -213,6 +217,7 @@ def lac_coproduct_terms(tree: PTree) -> list[tuple[int, PForest, object]]:
 # ============================================================================
 # Convolution of two characters against Δ
 # ============================================================================
+
 
 def eval_forest(phi, forest: PForest) -> sp.Expr:
     if forest.is_empty:
@@ -246,6 +251,7 @@ def convolve(phi, psi, tree: PTree) -> sp.Expr:
 # when we view planar trees as tree shapes with arbitrary child order.
 # ============================================================================
 
+
 def bck_recursive_cuts(tree: PTree) -> Iterator[tuple[PForest, PTree]]:
     m = len(tree.children)
     for subset in itertools.product([0, 1], repeat=m):
@@ -262,7 +268,7 @@ def bck_recursive_cuts(tree: PTree) -> Iterator[tuple[PForest, PTree]]:
         for combo in itertools.product(*subchoices) if subchoices else [()]:
             P_all = list(P_trees)
             Rs: list[PTree] = []
-            for (P_child, R_child) in combo:
+            for P_child, R_child in combo:
                 P_all.extend(P_child.trees)
                 Rs.append(R_child)
             yield PForest(tuple(P_all)), PTree(tuple(Rs))
@@ -285,6 +291,7 @@ def convolve_bck(phi, psi, tree: PTree) -> sp.Expr:
 # ============================================================================
 # Classical RK elementary weights character on planar trees
 # ============================================================================
+
 
 def classical_rk_character(A: list[list[sp.Expr]], b: list[sp.Expr]):
     s = len(b)
@@ -319,13 +326,14 @@ def classical_rk_character(A: list[list[sp.Expr]], b: list[sp.Expr]):
 # Main check
 # ============================================================================
 
+
 def main():
     x = sp.Symbol("x", real=True)
 
     # EES(2,5;x) tableau from Shmelev 2025
     a21 = (1 + 2 * x) / (4 * (1 - x))
-    a31 = (4 * x - 1) ** 2 / (4 * (x - 1) * (1 - 4 * x ** 2))
-    a32 = (1 - x) / (1 - 4 * x ** 2)
+    a31 = (4 * x - 1) ** 2 / (4 * (x - 1) * (1 - 4 * x**2))
+    a32 = (1 - x) / (1 - 4 * x**2)
     A = [[sp.Integer(0)] * 3, [a21, 0, 0], [a31, a32, 0]]
     b = [x, sp.Rational(1, 2), sp.Rational(1, 2) - x]
 
@@ -350,14 +358,16 @@ def main():
     print("=== MKW antisymmetric defect (phi_bar * phi)(tau) ===")
     print(f"{'w':>2} {'tree':<20} {'phi(tau)':<30} {'defect':<30}")
     print("-" * 90)
-    mkw_order: Optional[int] = None
+    mkw_order: int | None = None
     for w in range(1, 7):
         all_zero_at_w = True
         for t in planar_trees_of_weight(w):
             phi_t = sp.simplify(phi(t))
             D = sp.simplify(convolve(phi_bar, phi, t))
             marker = " <-- NONZERO" if D != 0 else ""
-            print(f"{w:>2} {repr(t):<20} {str(phi_t)[:28]:<30} {str(D)[:28]:<30}{marker}")
+            print(
+                f"{w:>2} {t!r:<20} {str(phi_t)[:28]:<30} {str(D)[:28]:<30}{marker}"
+            )
             if D != 0:
                 all_zero_at_w = False
         if not all_zero_at_w and mkw_order is None:
@@ -365,7 +375,9 @@ def main():
         print()
     if mkw_order is None:
         mkw_order = 6
-    print(f"==> MKW antisymmetric order of EES(2,5;x) is {mkw_order} (first non-zero at weight {mkw_order + 1 if mkw_order < 6 else '>6'})")
+    print(
+        f"==> MKW antisymmetric order of EES(2,5;x) is {mkw_order} (first non-zero at weight {mkw_order + 1 if mkw_order < 6 else '>6'})"
+    )
 
     # Cross-check: BCK antisymmetric defect on planar trees
     print()
@@ -373,13 +385,13 @@ def main():
     print("(should vanish up to weight 5 per Shmelev 2025)")
     print(f"{'w':>2} {'tree':<20} {'defect':<30}")
     print("-" * 65)
-    bck_order: Optional[int] = None
+    bck_order: int | None = None
     for w in range(1, 7):
         all_zero_at_w = True
         for t in planar_trees_of_weight(w):
             D = sp.simplify(convolve_bck(phi_bar, phi, t))
             marker = " <-- NONZERO" if D != 0 else ""
-            print(f"{w:>2} {repr(t):<20} {str(D)[:28]:<30}{marker}")
+            print(f"{w:>2} {t!r:<20} {str(D)[:28]:<30}{marker}")
             if D != 0:
                 all_zero_at_w = False
         if not all_zero_at_w and bck_order is None:

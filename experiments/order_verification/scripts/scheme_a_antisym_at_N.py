@@ -5,11 +5,14 @@ Goal: see whether the 'order 5' seen at N=3 persists at N=5 (no hidden
 linear dependence in the tangent space), or collapses to a lower order
 (= the tree-algebraic MKW antisym order).
 """
+
 from __future__ import annotations
-import sys
-import sympy as sp
-from sympy import Matrix, Rational, Symbol, eye, zeros, factorial
+
 import random
+import sys
+
+import sympy as sp
+from sympy import Matrix, Rational, Symbol, eye, factorial, zeros
 
 BETA = [
     [Rational(1, 3), Rational(0), Rational(0)],
@@ -23,7 +26,9 @@ h = Symbol("h")
 
 
 def random_rational_matrix(rng, n, denom_max=7):
-    return Matrix(n, n, lambda i, j: Rational(rng.randint(-5, 5), rng.randint(1, denom_max)))
+    return Matrix(
+        n, n, lambda i, j: Rational(rng.randint(-5, 5), rng.randint(1, denom_max))
+    )
 
 
 def xi(Y, coeffs):
@@ -45,7 +50,7 @@ def truncate_h_mat(M, max_h):
             new = sp.Integer(0)
             for (deg,), coef in poly.terms():
                 if deg <= max_h:
-                    new = new + coef * h ** deg
+                    new = new + coef * h**deg
             out[i, j] = new
     return out
 
@@ -90,7 +95,7 @@ def h_slice_zero(residual, N, k):
 
 
 def main():
-    import sys
+
     N = int(sys.argv[1]) if len(sys.argv) > 1 else 5
 
     print(f"=== Scheme A antisym on GL({N}, Q), xi degree {XI_DEGREE} ===", flush=True)
@@ -99,9 +104,9 @@ def main():
     xi_coeffs = [random_rational_matrix(rng, N) for _ in range(XI_DEGREE + 1)]
     y0 = eye(N) + Rational(1, 3) * random_rational_matrix(rng, N)
 
-    print(f"forward step ...", flush=True)
+    print("forward step ...", flush=True)
     Yf = scheme_a_step(y0, +1, xi_coeffs, MAX_H)
-    print(f"backward step ...", flush=True)
+    print("backward step ...", flush=True)
     Yb = scheme_a_step(Yf, -1, xi_coeffs, MAX_H)
     residual = truncate_h_mat(Yb - y0, MAX_H)
 

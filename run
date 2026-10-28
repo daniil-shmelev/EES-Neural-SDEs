@@ -13,17 +13,17 @@ import sys
 ROOT = Path(__file__).resolve().parent
 # module, uv extra, experiment directory, default configuration, output option
 EXPERIMENTS = {
-    "kuramoto": ("kuramoto.scripts.run_comparison", "jax-base", "kuramoto", "configs/kuramoto.toml", "--output-base"),
-    "sphere": ("sphere_latent_nsde.train_activity", "sphere", "sphere_latent_nsde", "configs/activity/sweep.toml", "--output-base"),
-    "rough-vol": ("stochastic_volatility.experiment.train", "stochastic-volatility", "stochastic_volatility", "configs/stoch_vol/sweep.toml", "--output-base"),
-    "convergence-ode": ("convergence_ode.convergence", "jax-base", "convergence_ode", None, "--output-dir"),
-    "convergence-fbm": ("convergence_fbm.convergence", "algebra", "convergence_fbm", None, "--output-dir"),
-    "stability-ode": ("stability_ode.stability_regions", "stability-ode", "stability_ode", None, "--output-dir"),
-    "stability": ("stability.stability", None, "stability", None, "--output-dir"),
-    "ou": ("ou.OU", "ou", "ou", None, "--output-dir"),
-    "stiff-gbm": ("stiff_gbm.GBM", "stiff-gbm", "stiff_gbm", None, "--output-dir"),
-    "torus-memory": ("torus_memory.benchmark", "torus-memory", "torus_memory", None, "--output"),
-    "order-verification": ("order_verification.siam.scripts.verify_cfees", "order-verification", "order_verification", None, None),
+    'kuramoto': ('experiments.kuramoto.scripts.run_comparison', 'jax-base', 'experiments/kuramoto', 'configs/kuramoto.toml', '--output-base'),
+    'sphere': ('experiments.sphere_latent_nsde.train_activity', 'sphere', 'experiments/sphere_latent_nsde', 'configs/activity/sweep.toml', '--output-base'),
+    'rough-vol': ('neurips.stochastic_volatility.experiment.train', 'stochastic-volatility', 'neurips/stochastic_volatility', 'configs/stoch_vol/sweep.toml', '--output-base'),
+    'convergence-ode': ('experiments.convergence_ode.convergence', 'jax-base', 'experiments/convergence_ode', None, '--output-dir'),
+    'convergence-fbm': ('neurips.convergence_fbm.convergence', 'algebra', 'neurips/convergence_fbm', None, '--output-dir'),
+    'stability-ode': ('neurips.stability_ode.stability_regions', 'stability-ode', 'neurips/stability_ode', None, '--output-dir'),
+    'stability': ('neurips.stability.stability', None, 'neurips/stability', None, '--output-dir'),
+    'ou': ('neurips.ou.OU', 'ou', 'neurips/ou', None, '--output-dir'),
+    'stiff-gbm': ('neurips.stiff_gbm.GBM', 'stiff-gbm', 'neurips/stiff_gbm', None, '--output-dir'),
+    'torus-memory': ('neurips.torus_memory.benchmark', 'torus-memory', 'neurips/torus_memory', None, '--output'),
+    'order-verification': ('experiments.order_verification.siam.scripts.verify_cfees', 'order-verification', 'experiments/order_verification', None, None),
 }
 
 
@@ -36,7 +36,7 @@ def main(argv=None):
         if output_option:
             sub.add_argument("--output-dir", type=Path, help="New run directory; defaults to a timestamped directory under this experiment's results/.")
         if config:
-            sub.add_argument("--config", type=Path, default=ROOT / "experiments" / folder / config)
+            sub.add_argument("--config", type=Path, default=ROOT / folder / config)
         if name == "kuramoto":
             mode = sub.add_mutually_exclusive_group()
             mode.add_argument("--memory", action="store_true", help="Measure and plot memory for the three methods.")
@@ -52,20 +52,21 @@ def main(argv=None):
     if any(arg.split("=", 1)[0] in ("--output", "--output-base", "--output_json") for arg in forwarded):
         parser.error("Use --output-dir to choose this run's output directory.")
     if getattr(args, "memory", False):
-        module, output_option = "kuramoto.scripts.run_memory_sweep", "--output"
+        module, output_option = "experiments.kuramoto.scripts.run_memory_sweep", "--output"
     elif getattr(args, "adaptive", False):
-        module, output_option = "kuramoto.experiment.train_kuramoto", "--output-dir"
+        module, output_option = "experiments.kuramoto.experiment.train_kuramoto", "--output-dir"
     elif getattr(args, "so3", False):
-        module, extra, output_option = "convergence_fbm.scripts.so3_reversibility_verify", "convergence-fbm", "--output_json"
+        module, extra, output_option = "experiments.convergence_fbm.scripts.so3_reversibility_verify", "convergence-fbm", "--output_json"
+        folder = "experiments/convergence_fbm"
     elif getattr(args, "table", False):
-        module, config, extra, output_option = "stochastic_volatility.scripts.paper_table", None, None, None
+        module, config, extra, output_option = "neurips.stochastic_volatility.scripts.paper_table", None, None, None
 
     if help_requested:
         subparsers.choices[name].print_help()
     if config:
         print(f"Configuration: {args.config}", flush=True)
     else:
-        print(f"Setup: experiments/{module.replace('.', '/')}.py", flush=True)
+        print(f"Setup: {module.replace('.', '/')}.py", flush=True)
 
     # There is one output directory for the whole invocation, including sweeps.
     output = None
@@ -75,7 +76,7 @@ def main(argv=None):
             parser.error(f"Configuration does not exist: {args.config}")
         native += (["--config"] if module.endswith(("run_comparison", "run_memory_sweep")) else []) + [str(args.config)]
     if output_option:
-        base = ROOT / "experiments" / folder / "results"
+        base = ROOT / folder / "results"
         if name == "kuramoto":
             base /= "unified"
         output = getattr(args, "output_dir", None) or base / "runs" / datetime.now().strftime("%Y%m%d_%H%M%S_%f")
@@ -97,12 +98,12 @@ def main(argv=None):
             if not any(arg == "--method" or arg.startswith("--method=") for arg in forwarded):
                 methods = ["reversible_heun", "ees25"] + (["ees27"] if name == "stiff-gbm" else [])
                 commands = [(module, native + ["--method", method] + forwarded) for method in methods]
-            plot = "ou.plot_OU" if name == "ou" else "stiff_gbm.plot_GBM"
+            plot = "neurips.ou.plot_OU" if name == "ou" else "neurips.stiff_gbm.plot_GBM"
             commands.append((plot, ["--input-dir", str(output)]))
         elif getattr(args, "memory", False):
-            commands.append(("kuramoto.scripts.plot_memory_sweep", ["--input", str(output / "memory.json"), "--output", str(output / "memory.pdf")]))
+            commands.append(("experiments.kuramoto.scripts.plot_memory_sweep", ["--input", str(output / "memory.json"), "--output", str(output / "memory.pdf")]))
         elif getattr(args, "so3", False):
-            commands.append(("convergence_fbm.scripts.so3_reversibility_plot", [str(output / "so3_reversibility_results.json"), "--output", str(output / "so3_reversibility_convergence.pdf")]))
+            commands.append(("experiments.convergence_fbm.scripts.so3_reversibility_plot", [str(output / "so3_reversibility_results.json"), "--output", str(output / "so3_reversibility_convergence.pdf")]))
 
     env = os.environ.copy()
     env.setdefault("MPLBACKEND", "Agg")
@@ -120,7 +121,7 @@ def main(argv=None):
     prefix = ["uv", "run", "--locked"] + (["--extra", extra] if extra else []) + ["python", "-u", "-m"]
     if args.dry_run:
         for target, options in commands:
-            print(shlex.join(prefix + ["experiments." + target] + options))
+            print(shlex.join(prefix + [target] + options))
         return 0
     if shutil.which("uv") is None:
         parser.error("uv is not on PATH; install uv before running experiments.")
@@ -133,7 +134,7 @@ def main(argv=None):
             parser.error(f"Output directory already exists: {output}. Omit --output-dir for a fresh run.")
         output.mkdir(parents=True)
     for target, options in commands:
-        status = subprocess.run(prefix + ["experiments." + target] + options, cwd=ROOT, env=env).returncode
+        status = subprocess.run(prefix + [target] + options, cwd=ROOT, env=env).returncode
         if status:
             print(f"Experiment failed (exit {status})." + (f" Outputs: {output}" if output else ""), file=sys.stderr)
             return status

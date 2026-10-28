@@ -23,24 +23,26 @@ it with its grading-twist via the LAC coproduct (not NCK).
 from __future__ import annotations
 
 import itertools
+from collections.abc import Iterator
 from functools import lru_cache
-from typing import Iterator, Optional
 
 import sympy as sp
-
 from mkw_verify import (  # reuse helpers
-    LEAF, PTree, PForest, EMPTY_FOREST, Nil,
-    planar_trees_of_weight,
-    lac_coproduct_terms,
+    Nil,
+    PForest,
+    PTree,
     convolve,
-    eval_forest, eval_tree_or_nil,
+    eval_forest,
+    eval_tree_or_nil,
+    lac_coproduct_terms,
+    planar_trees_of_weight,
 )
-
 
 # ============================================================================
 # NCK (admissible-cut, not LAC) coproduct on planar trees.
 # Foissy H_PR: admissible cut = no level-ordering constraint.
 # ============================================================================
+
 
 def nck_recursive_cuts(tree: PTree) -> Iterator[tuple[PForest, PTree]]:
     """Admissible-cut coproduct (planar): arbitrary SUBSET of children at
@@ -58,7 +60,7 @@ def nck_recursive_cuts(tree: PTree) -> Iterator[tuple[PForest, PTree]]:
         for combo in itertools.product(*subchoices) if subchoices else [()]:
             P_all = list(cut_children)
             Rs: list[PTree] = []
-            for (Pc, Rc) in combo:
+            for Pc, Rc in combo:
                 P_all.extend(Pc.trees)
                 Rs.append(Rc)
             yield PForest(tuple(P_all)), PTree(tuple(Rs))
@@ -81,6 +83,7 @@ def convolve_nck(phi, psi, tree: PTree) -> sp.Expr:
 # ============================================================================
 # Classical RK character (same as mkw_verify.py)
 # ============================================================================
+
 
 def classical_rk_character(A, b):
     s = len(b)
@@ -115,6 +118,7 @@ def classical_rk_character(A, b):
 # Derive 2N Williamson (A_i, B_i) from classical EES(2,5;x) tableau
 # ============================================================================
 
+
 def williamson_2N_coeffs(x):
     """Explicit 2N Williamson coefficients for EES(2,5;x).
 
@@ -147,8 +151,8 @@ def williamson_2N_coeffs(x):
     Check consistency: b_1 should equal a_{31} + B_3 A_3 A_2.
     """
     a21 = (1 + 2 * x) / (4 * (1 - x))
-    a31 = (4 * x - 1) ** 2 / (4 * (x - 1) * (1 - 4 * x ** 2))
-    a32 = (1 - x) / (1 - 4 * x ** 2)
+    a31 = (4 * x - 1) ** 2 / (4 * (x - 1) * (1 - 4 * x**2))
+    a32 = (1 - x) / (1 - 4 * x**2)
     b1 = x
     b2 = sp.Rational(1, 2)
     b3 = sp.Rational(1, 2) - x
@@ -180,6 +184,7 @@ def cf_lift_beta_vectors(x):
 # Build CF-scheme LB character via NCK convolution of individual exponential
 # characters. This is what kauri.CFMethod.lb_character does.
 # ============================================================================
+
 
 def cf_scheme_character(A, betas):
     """Return a callable phi(tree) for the CF scheme with STAGE matrix A
@@ -215,12 +220,14 @@ def cf_scheme_character(A, betas):
 
 def _nck_conv_map(phi, psi):
     """Return a callable that, given a tree, returns (phi *_NCK psi)(tree)."""
+
     @lru_cache(None)
     def out(tree: PTree) -> sp.Expr:
         total = sp.Integer(0)
         for P, R in nck_coproduct_terms(tree):
             total += eval_forest(phi, P) * eval_tree_or_nil(psi, R)
         return total
+
     return out
 
 
@@ -229,12 +236,14 @@ def _lac_conv_map(phi, psi):
     This is the MKW/LAC convolution; by LMK-2011 Thm 4.3.4 / Lundervold
     thesis Thm 2.15, this is the one that computes composition of LB
     series on a homogeneous space."""
+
     @lru_cache(None)
     def out(tree: PTree) -> sp.Expr:
         total = sp.Integer(0)
         for coeff, P, R in lac_coproduct_terms(tree):
             total += sp.Integer(coeff) * eval_forest(phi, P) * eval_tree_or_nil(psi, R)
         return total
+
     return out
 
 
@@ -258,13 +267,14 @@ def cf_scheme_character_lac(A, betas):
 # Main
 # ============================================================================
 
+
 def main():
     x = sp.Symbol("x", real=True)
 
     # Classical RK tableau (stage matrix A shared across exponentials)
     a21 = (1 + 2 * x) / (4 * (1 - x))
-    a31 = (4 * x - 1) ** 2 / (4 * (x - 1) * (1 - 4 * x ** 2))
-    a32 = (1 - x) / (1 - 4 * x ** 2)
+    a31 = (4 * x - 1) ** 2 / (4 * (x - 1) * (1 - 4 * x**2))
+    a32 = (1 - x) / (1 - 4 * x**2)
     A_stage = [
         [sp.Integer(0)] * 3,
         [a21, 0, 0],
@@ -274,7 +284,7 @@ def main():
     betas = cf_lift_beta_vectors(x)
     print("CF scheme betas for EES(2,5;x):")
     for l, b in enumerate(betas):
-        print(f"  beta_{l+1} =", [sp.simplify(v) for v in b])
+        print(f"  beta_{l + 1} =", [sp.simplify(v) for v in b])
 
     phi_cf_nck = cf_scheme_character(A_stage, betas)
     phi_cf_lac = cf_scheme_character_lac(A_stage, betas)
@@ -293,7 +303,7 @@ def main():
         print(f"--- MKW antisym defect of {label}-composed character ---")
         print(f"{'w':>2} {'tree':<22} {'phi_CF(tau)':<30} {'MKW defect':<30}")
         print("-" * 90)
-        mkw_order: Optional[int] = None
+        mkw_order: int | None = None
         for w in range(1, 6):
             all_zero_at_w = True
             for t in planar_trees_of_weight(w):
@@ -301,7 +311,7 @@ def main():
                 D = sp.simplify(convolve(phi_cf_bar, phi_cf, t))
                 flag = " <-- NONZERO" if D != 0 else ""
                 print(
-                    f"{w:>2} {repr(t):<22} {str(phi_t)[:28]:<30} {str(D)[:28]:<30}{flag}"
+                    f"{w:>2} {t!r:<22} {str(phi_t)[:28]:<30} {str(D)[:28]:<30}{flag}"
                 )
                 if D != 0:
                     all_zero_at_w = False
@@ -317,13 +327,13 @@ def main():
         print(f"--- NCK antisym defect of {label}-composed character ---")
         print(f"{'w':>2} {'tree':<22} {'NCK defect':<30}")
         print("-" * 60)
-        nck_order: Optional[int] = None
+        nck_order: int | None = None
         for w in range(1, 6):
             all_zero_at_w = True
             for t in planar_trees_of_weight(w):
                 D = sp.simplify(convolve_nck(phi_cf_bar, phi_cf, t))
                 flag = " <-- NONZERO" if D != 0 else ""
-                print(f"{w:>2} {repr(t):<22} {str(D)[:28]:<30}{flag}")
+                print(f"{w:>2} {t!r:<22} {str(D)[:28]:<30}{flag}")
                 if D != 0:
                     all_zero_at_w = False
             if not all_zero_at_w and nck_order is None:
@@ -343,11 +353,11 @@ def main():
     print("=" * 78)
     print("  Summary")
     print("=" * 78)
-    print(f"  Empirical reversibility rate (6H-1) suggests antisym order 5.")
-    print(f"  Theorem-2.1 prescribes LAC composition; result:")
+    print("  Empirical reversibility rate (6H-1) suggests antisym order 5.")
+    print("  Theorem-2.1 prescribes LAC composition; result:")
     print(f"    - MKW antisym of LAC-composed char: {mkw_lac}")
     print(f"    - NCK antisym of LAC-composed char: {nck_lac}")
-    print(f"  kauri uses NCK composition; result:")
+    print("  kauri uses NCK composition; result:")
     print(f"    - MKW antisym of NCK-composed char: {mkw_nck}")
     print(f"    - NCK antisym of NCK-composed char: {nck_nck}")
 

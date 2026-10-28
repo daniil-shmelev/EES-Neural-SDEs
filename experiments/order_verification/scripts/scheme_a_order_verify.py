@@ -34,21 +34,23 @@ from __future__ import annotations
 import numpy as np
 from scipy.linalg import expm
 
-
 # ============================================================================
 # CF-EES(2,5; 1/10) weight vectors (from the Proposition we added to the main ms)
 # ============================================================================
 
-BETA = np.array([
-    [1/3,     0,       0],
-    [-7/16,   15/16,   0],
-    [49/240, -7/16,   2/5],
-])
+BETA = np.array(
+    [
+        [1 / 3, 0, 0],
+        [-7 / 16, 15 / 16, 0],
+        [49 / 240, -7 / 16, 2 / 5],
+    ]
+)
 
 
 # ============================================================================
 # Generic vector field on GL(3, R)  (xi : G -> gl(3))
 # ============================================================================
+
 
 def make_generic_xi(seed: int = 0):
     rng = np.random.default_rng(seed)
@@ -68,6 +70,7 @@ def make_generic_xi(seed: int = 0):
 # Scheme A: one step of CF-EES(2,5; 1/10) via the 2N-register recurrence.
 # Action Λ(g, Y) = g @ Y (left translation on GL(3, R)).
 # ============================================================================
+
 
 def cfees25_scheme_A_step(Y: np.ndarray, xi, h: float) -> np.ndarray:
     """One step of CF-EES(2,5; 1/10) from Y, step size h, using Scheme A
@@ -91,6 +94,7 @@ def cfees25_scheme_A_step(Y: np.ndarray, xi, h: float) -> np.ndarray:
 # Local reversibility test
 # ============================================================================
 
+
 def local_reversibility_error(Y0: np.ndarray, xi, h: float) -> float:
     """One step forward with step h, then one step backward with step -h.
     Returns || Phi_{-h}(Phi_h(Y0)) - Y0 ||_F."""
@@ -109,6 +113,7 @@ def fit_slope(hs, errs):
 # ============================================================================
 # Main
 # ============================================================================
+
 
 def main():
     print("=" * 72)
@@ -133,7 +138,7 @@ def main():
         print(f"  --- seed = {seed} ---")
         print(f"  {'h':>12} {'err':>15} {'err/h^6':>15}")
         for h, err in zip(hs, errs):
-            ratio = err / (h ** 6)
+            ratio = err / (h**6)
             print(f"  {h:>12.6g} {err:>15.3e} {ratio:>15.3e}")
 
         # Fit only on the asymptotic tail (small h, above roundoff).
@@ -146,7 +151,7 @@ def main():
             slope, _ = fit_slope(fit_hs, fit_errs)
             print(f"  fitted slope (asymptotic tail) = {slope:.4f}  (expected 6)")
         else:
-            print(f"  not enough clean points to fit")
+            print("  not enough clean points to fit")
         print()
 
 

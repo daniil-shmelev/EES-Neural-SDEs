@@ -4,18 +4,21 @@ Experiments for the NeurIPS 2026 manuscript and SIAM resubmission by Daniil Shme
 
 ## Experiments
 
-| Directory under `experiments/` | Purpose | Manuscript |
+| Directory | Purpose | Manuscript |
 |---|---|---|
 | [kuramoto](experiments/kuramoto/README.md) | Geometric learning, adjoint diagnostics and memory | Both |
 | [sphere_latent_nsde](experiments/sphere_latent_nsde/README.md) | JAX sphere-valued activity classification | Both |
-| [convergence_fbm](experiments/convergence_fbm/README.md) | Euclidean and SO(3) rough-driver convergence | Both; SO(3) only in SIAM |
+| [convergence_fbm](experiments/convergence_fbm/README.md) | SO(3) rough-driver convergence | Both |
+| [neurips/convergence_fbm](neurips/convergence_fbm/README.md) | Euclidean rough-driver convergence | NeurIPS |
 | [convergence_ode](experiments/convergence_ode/README.md) | SO(3) ODE forward and recovery orders | SIAM |
 | [order_verification](experiments/order_verification/siam/README.md) | Symbolic order conditions and saved SIAM measurements | Both |
-| [stability_ode](experiments/stability_ode/README.md), [stability](experiments/stability/README.md) | Deterministic and stochastic stability regions | NeurIPS |
-| [ou](experiments/ou/README.md) | High-volatility Ornstein–Uhlenbeck learning | NeurIPS |
-| [stiff_gbm](experiments/stiff_gbm/README.md) | Stiff geometric Brownian motion | NeurIPS |
-| [stochastic_volatility](experiments/stochastic_volatility/README.md) | Main-text rough Bergomi comparison | NeurIPS |
-| [torus_memory](experiments/torus_memory/README.md) | Seven-torus memory benchmark in the introduction | NeurIPS |
+| [stability_ode](neurips/stability_ode/README.md), [stability](neurips/stability/README.md) | Deterministic and stochastic stability regions | NeurIPS |
+| [ou](neurips/ou/README.md) | High-volatility Ornstein–Uhlenbeck learning | NeurIPS |
+| [stiff_gbm](neurips/stiff_gbm/README.md) | Stiff geometric Brownian motion | NeurIPS |
+| [stochastic_volatility](neurips/stochastic_volatility/README.md) | Main-text rough Bergomi comparison | NeurIPS |
+| [torus_memory](neurips/torus_memory/README.md) | Seven-torus memory benchmark in the introduction | NeurIPS |
+
+NeurIPS-only experiments and historical measurements are under [`neurips/`](neurips/README.md). SIAM experiments remain under `experiments/`.
 
 The [figure/table index](docs/figure_table_index.md) links manuscript results to scripts, saved records and external companion repositories.
 
@@ -29,7 +32,7 @@ Install `uv`, then run experiments from this repository root. `./run` selects th
 | `./run kuramoto --memory` | Measure and plot memory for those three methods |
 | `./run kuramoto --adaptive` | Adaptive reversible CF-EES; uses the existing local Diffrax fix described in its README |
 | `./run sphere` | Activity-classification [sweep](experiments/sphere_latent_nsde/configs/activity/sweep.toml) |
-| `./run rough-vol` | Rough Bergomi [sweep](experiments/stochastic_volatility/configs/stoch_vol/sweep.toml) |
+| `./run rough-vol` | Rough Bergomi [sweep](neurips/stochastic_volatility/configs/stoch_vol/sweep.toml) |
 | `./run rough-vol --table` | Print the table from saved predictions |
 | `./run convergence-ode` | SO(3) forward and recovery convergence |
 | `./run convergence-fbm` | Euclidean fBm convergence |

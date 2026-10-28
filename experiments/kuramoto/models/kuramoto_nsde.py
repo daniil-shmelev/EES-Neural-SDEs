@@ -29,7 +29,7 @@ from diffrax import (
 )
 from georax import CFEES25, GeometricTerm, TangentTorus
 
-from experiments.torus_memory.models.torus import wrap_to_pi
+from ees_core.torus import wrap_to_pi
 
 _ACTIVATIONS = {
     "silu": jax.nn.silu,

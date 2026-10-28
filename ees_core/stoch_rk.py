@@ -10,17 +10,19 @@ directory.
 """
 
 import copy
-from typing import Union, Callable, Tuple
+from collections.abc import Callable
 
-import numpy as np
-import matplotlib.pyplot as plt
 import kauri as kr
+import matplotlib.pyplot as plt
+import numpy as np
 
-def from_kauri(method : kr.RK):
+
+def from_kauri(method: kr.RK):
     return StochRK(method.a, method.b, method.name)
 
+
 class StochRK:
-    def __init__(self, a, b, name = None):
+    def __init__(self, a, b, name=None):
         if not isinstance(a, (list, np.ndarray)):
             raise TypeError("a must be a list or array, not " + str(type(a)))
         if not isinstance(b, (list, np.ndarray)):
@@ -29,7 +31,9 @@ class StochRK:
         self.name = name
         self.s = len(b)
         if len(a) != self.s or len(a[0]) != self.s:
-            raise ValueError("Parameter 'a' must be a square s x s matrix and b a vector of length s")
+            raise ValueError(
+                "Parameter 'a' must be a square s x s matrix and b a vector of length s"
+            )
 
         self.a = a
         self.b = b
@@ -67,16 +71,23 @@ class StochRK:
         Y_h = [None] * self.s
 
         for i in range(self.s):
-            Y_h[i] = y0 + sum(sum(self.a[i][j] * f(Y_h[j])[k] * dX[k] for j in range(i)) for k in range(d))
+            Y_h[i] = y0 + sum(
+                sum(self.a[i][j] * f(Y_h[j])[k] * dX[k] for j in range(i))
+                for k in range(d)
+            )
 
-        y_next = y0 + sum(sum(self.b[i] * f(Y_h[i])[k] * dX[k] for i in range(self.s)) for k in range(d))
+        y_next = y0 + sum(
+            sum(self.b[i] * f(Y_h[i])[k] * dX[k] for i in range(self.s))
+            for k in range(d)
+        )
         return y_next
 
-    def step(self,
-             y0 : Union[list, np.ndarray],
-             f : Callable[[float], Union[list, np.ndarray]],
-             dX : Union[list, np.ndarray]
-             ) -> Union[list, np.ndarray]:
+    def step(
+        self,
+        y0: list | np.ndarray,
+        f: Callable[[float], list | np.ndarray],
+        dX: list | np.ndarray,
+    ) -> list | np.ndarray:
 
         if not isinstance(y0, (list, np.ndarray)):
             raise TypeError("y0 must be a list or array, not " + str(type(y0)))
@@ -86,19 +97,21 @@ class StochRK:
             raise TypeError("X must be a list or array, not " + str(type(dX)))
 
         def f_(t_, y_):
-            return np.array(f(t_,y_))
+            return np.array(f(t_, y_))
+
         y0_ = np.array(y0).copy()
 
         return self._explicit_step(y0_, f_, dX, dX.shape[1])
 
-    def run(self,
-            y0 : Union[list, np.ndarray],
-            f : Callable[[float], Union[list, np.ndarray]],
-            X: Union[list, np.ndarray],
-            plot : bool = False,
-            plot_dims : Union[list, np.ndarray] = None,
-            plot_kwargs : dict = None
-            ) -> Tuple[list, list]:
+    def run(
+        self,
+        y0: list | np.ndarray,
+        f: Callable[[float], list | np.ndarray],
+        X: list | np.ndarray,
+        plot: bool = False,
+        plot_dims: list | np.ndarray = None,
+        plot_kwargs: dict = None,
+    ) -> tuple[list, list]:
 
         if not isinstance(y0, (list, np.ndarray)):
             raise TypeError("y0 must be a list or array, not " + str(type(y0)))
@@ -107,7 +120,9 @@ class StochRK:
         if not (isinstance(plot, bool) or plot is None):
             raise TypeError("plot must be a bool, not " + str(type(plot)))
         if not (isinstance(plot_dims, (list, np.ndarray)) or plot_dims is None):
-            raise TypeError("plot_dims must be a list or array, not " + str(type(plot_dims)))
+            raise TypeError(
+                "plot_dims must be a list or array, not " + str(type(plot_dims))
+            )
         if not (isinstance(plot_kwargs, dict) or plot_kwargs is None):
             raise TypeError("plot_kwargs must be a dict, not " + str(type(plot_kwargs)))
 
@@ -118,6 +133,7 @@ class StochRK:
 
         def f_(y_):
             return np.array(f(y_))
+
         y0_ = np.array(y0).copy()
 
         X_ = np.array(X)
@@ -133,6 +149,6 @@ class StochRK:
             y_vals.append(copy.deepcopy(y))
 
         if plot:
-            plt.plot(range(n+1), np.array(y_vals)[:, plot_dims], **plot_kwargs)
+            plt.plot(range(n + 1), np.array(y_vals)[:, plot_dims], **plot_kwargs)
 
         return y_vals

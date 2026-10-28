@@ -26,7 +26,7 @@ import equinox as eqx
 import jax
 import jax.numpy as jnp
 
-from experiments.torus_memory.models.torus import wrap_to_pi
+from ees_core.torus import wrap_to_pi
 
 PyTree = Any
 LossFn = Callable[[eqx.Module, PyTree, jax.Array, jax.Array], jax.Array]

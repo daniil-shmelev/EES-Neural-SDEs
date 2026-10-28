@@ -1,0 +1,2808 @@
+{
+  "date": "2026-10-27",
+  "moves": [
+    {
+      "from": "experiments/torus_memory/models/torus.py",
+      "to": "ees_core/torus.py"
+    },
+    {
+      "from": "experiments/ou",
+      "to": "neurips/ou"
+    },
+    {
+      "from": "experiments/stiff_gbm",
+      "to": "neurips/stiff_gbm"
+    },
+    {
+      "from": "experiments/stability",
+      "to": "neurips/stability"
+    },
+    {
+      "from": "experiments/stability_ode",
+      "to": "neurips/stability_ode"
+    },
+    {
+      "from": "experiments/stochastic_volatility",
+      "to": "neurips/stochastic_volatility"
+    },
+    {
+      "from": "experiments/torus_memory",
+      "to": "neurips/torus_memory"
+    },
+    {
+      "from": "experiments/convergence_fbm/convergence.py",
+      "to": "neurips/convergence_fbm/convergence.py"
+    },
+    {
+      "from": "experiments/convergence_fbm/results/convergence_fbm_24up.pdf",
+      "to": "neurips/convergence_fbm/results/convergence_fbm_24up.pdf"
+    },
+    {
+      "from": "experiments/convergence_fbm/results/ees_stochastic_convergence_12up.pdf",
+      "to": "neurips/convergence_fbm/results/ees_stochastic_convergence_12up.pdf"
+    },
+    {
+      "from": "experiments/convergence_fbm/results/ees_stochastic_convergence_H40.pdf",
+      "to": "neurips/convergence_fbm/results/ees_stochastic_convergence_H40.pdf"
+    },
+    {
+      "from": "experiments/convergence_fbm/results/ees_stochastic_convergence_H50.pdf",
+      "to": "neurips/convergence_fbm/results/ees_stochastic_convergence_H50.pdf"
+    },
+    {
+      "from": "experiments/convergence_fbm/results/ees_stochastic_convergence_H60.pdf",
+      "to": "neurips/convergence_fbm/results/ees_stochastic_convergence_H60.pdf"
+    },
+    {
+      "from": "experiments/order_verification/siam/experiment_records/sphere_memory.csv",
+      "to": "neurips/sphere_memory/results/memory_sweep_integrator.csv"
+    },
+    {
+      "from": "experiments/order_verification/siam/experiment_records/kuramoto_runtime_parity.json",
+      "to": "neurips/kuramoto/results/kuramoto_runtime_parity.json"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50"
+    }
+  ],
+  "relocated_files": [
+    {
+      "from": "experiments/torus_memory/models/torus.py",
+      "to": "ees_core/torus.py",
+      "sha256": "d60173fff37a0ab0b3b60d1fda3d786722afaff3217f639aba368291b1bf5c3b"
+    },
+    {
+      "from": "experiments/ou/OU.py",
+      "to": "neurips/ou/OU.py",
+      "sha256": "98a0d7ba222d7835b64a14759616ae12f7654285e5b4e3f1425444954949e599"
+    },
+    {
+      "from": "experiments/ou/OU_mse_grads (1).pdf",
+      "to": "neurips/ou/OU_mse_grads (1).pdf",
+      "sha256": "91aa4ee8324819abb9e39a18108626880b063ab677f9deb9acacaab46020141c"
+    },
+    {
+      "from": "experiments/ou/README.md",
+      "to": "neurips/ou/README.md",
+      "sha256": "e52835dc4a9f1573debb678c9b8de0043e5b6f3c2b5ded666103c4dace30632e"
+    },
+    {
+      "from": "experiments/ou/__init__.py",
+      "to": "neurips/ou/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "experiments/ou/plot_OU.py",
+      "to": "neurips/ou/plot_OU.py",
+      "sha256": "24bb0c119d5fdef7250fffd80370b9cabfbfd2679a4566456fd558b19b24c045"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/distr.eps",
+      "to": "neurips/ou/plots/reversible_heun/distr.eps",
+      "sha256": "7fff07d3bcf420e81c34129a351bafeda284a2aec1d2d239635519480d1df7f8"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/distr.pdf",
+      "to": "neurips/ou/plots/reversible_heun/distr.pdf",
+      "sha256": "54bbcc7cfe21676e5976fe8d6ab730a48b8fb75a239dc049cb394f75d0ee7fa6"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/distr.png",
+      "to": "neurips/ou/plots/reversible_heun/distr.png",
+      "sha256": "3ccb842ada04ceebc25f10ee0b7c22c8f7388c1fcf8be374f74bb7bb11b8a030"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/grad_error.pickle",
+      "to": "neurips/ou/plots/reversible_heun/grad_error.pickle",
+      "sha256": "18b2a9927cdd507cc0a60f4da0ee3c8bddd23462265a386f740608022e4094a0"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/grad_error.png",
+      "to": "neurips/ou/plots/reversible_heun/grad_error.png",
+      "sha256": "4b7fe8991a355bd3cb66e2ca97271474e9ae9d011f9daf04434e4adcc8c869a0"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/loss.png",
+      "to": "neurips/ou/plots/reversible_heun/loss.png",
+      "sha256": "4e8b76b419653d3cfa12135138c4dbb6854d1925067448b2bf237aabbc7f36f2"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred.eps",
+      "sha256": "87fb53af949e3038f59c16d477295b277216f39a2e5d94ac324a573f75a75155"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred.pdf",
+      "sha256": "610452e9203a024c71489e4ab938fe8f9a0377fa1e429cdde9fe6431edb28793"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred.png",
+      "sha256": "4bccfc1ffb0478f0e915fc2e8ba34a3082f85baeabe376b9df5df2e0eecd6fd9"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred10.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred10.eps",
+      "sha256": "d6544b73bbd1c071927782c83a3a7b5e39241dde5391bae86107088be9ef46fb"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred10.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred10.pdf",
+      "sha256": "b5de1dbf4967f1d71d51320784bb88f91139b0a0db36a9b51d53c7887e42f209"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred10.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred10.png",
+      "sha256": "6417ef141d20da38c21d8bb28b9849897da34a857d9e5403c843c05dff9aa668"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred100.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred100.eps",
+      "sha256": "dca019f380aefed784656717c84f938dc8cfe61c1ea7ed3a543592bc6797a40f"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred100.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred100.pdf",
+      "sha256": "4f03641102c494e24f5158a924024b989220f37ecc7967677867fe7b8f32e00c"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred100.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred100.png",
+      "sha256": "b60f813cc7ae6ad6e7ef6646b7fcad865c16735ab2d2433cccb1af57ff590ea1"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred110.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred110.eps",
+      "sha256": "ece4e63c6b072820f9613f137f9ae5a0c23d267a212234c0e429dd10534dce87"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred110.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred110.pdf",
+      "sha256": "e1f702785b6aaecd77197691ef01ed1ce496d457765132befae7c7ee482825fe"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred110.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred110.png",
+      "sha256": "531743d11c2fca6352f2017df8e5dcbf5f05072a23d43d4b809ad9a624724906"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred120.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred120.eps",
+      "sha256": "f4da4f85d9bbf55e117bdcc55dc4120bac8a1e0213d55cb88a32209494f9aca4"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred120.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred120.pdf",
+      "sha256": "7033f5c0cb77547d3325b156dbe82e2efcd6ae7cd2b9081cfc50ec8130e2c8f7"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred120.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred120.png",
+      "sha256": "491a34f5fdc99f8f966464cb8084408c3ff5590f7eefea2cd9010174456bf4c6"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred130.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred130.eps",
+      "sha256": "f87dc3a425860bbf5ebb7b83ec188d35043aa4c5cc8e4ffd7fbf803f72bce97a"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred130.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred130.pdf",
+      "sha256": "357372b29de5d04733e7e426ffbc270003595b974e8efa5c6a934bcd7c4efe8d"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred130.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred130.png",
+      "sha256": "6f87aa485c7c75124b8646182de5dce3a47ec135f04a0e243c6ab62ce0e2fdb0"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred140.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred140.eps",
+      "sha256": "9911a193b97a2eb0563e54adc8e443ab4d89163133ab26d5e58db4619719e989"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred140.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred140.pdf",
+      "sha256": "53c229f46ac93ff2702083e2cc9ba8b1e5ac507463f6306b26a55fb9bfd0fe54"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred140.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred140.png",
+      "sha256": "fe8e1079fa8d13413254d0032d0bf840757003c4647327c762a967f9ab85d051"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred150.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred150.eps",
+      "sha256": "ee386fa46aae540c24a6239f116a119b82013cc09b4533e78d29608d878eb8ed"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred150.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred150.pdf",
+      "sha256": "ca6f4db542abedd5bd4844966c310c0b8483e5cab9e608077e7be376aa5d4e18"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred150.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred150.png",
+      "sha256": "c73008f2998eb78216d8b7f92bd9d8a4e534989ebad80672426790309585568b"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred160.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred160.eps",
+      "sha256": "50c715145254b8de1d83fcc1408b0a0a33b2530129a7b42f42fe44c6dbca0d56"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred160.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred160.pdf",
+      "sha256": "eeb174a7e846430c1d5d8f2cb0ce83dc0a97de4bf66ecff0e492a57a4066b916"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred160.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred160.png",
+      "sha256": "949335967f36514905adaff112ec0df4dbbf99869162bfaf3240dd28a97e6bd6"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred170.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred170.eps",
+      "sha256": "69f7daab4eee537f8968a671d219d31e0f6157e27063716ecadfd305446fb22e"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred170.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred170.pdf",
+      "sha256": "3b3de2377f4fe0ded4f6249cfcd2e06b4fb8256d209e7f944352ca9d27c2d7aa"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred170.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred170.png",
+      "sha256": "6531eab4570c208a6f407ccb8509bab128d19eab5e6d3ec900839bf617ab1c23"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred180.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred180.eps",
+      "sha256": "679c710614534cad8c5fae7cb2c6dd6655395c600c1b4348386a48cedb8126b1"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred180.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred180.pdf",
+      "sha256": "1d69152b0d68e8d5a36bcdc98bbf203f14d0aa7698237d2eff69b3985d46b685"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred180.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred180.png",
+      "sha256": "e737a576d90c1bfbf94aefd255277442abe5b4c0b061fc38b8ce2f23a5cc85d0"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred190.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred190.eps",
+      "sha256": "db3eb0f69589ea2a4d79b06dce780ab64c2462c037959094a66047bf7c772fe0"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred190.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred190.pdf",
+      "sha256": "457ef0fe2f62e47b5620fb6b27290326aa2c28ee1042cc25107d21b373864b6e"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred190.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred190.png",
+      "sha256": "bd06b8c36e1697c73376821a2f74339941d4e640f35945da0dc92dd2babe5b5e"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred20.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred20.eps",
+      "sha256": "f0701fd99fe4fb1b9b6043b816c662f28ecc6148ee5833179df3c5f206bf7102"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred20.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred20.pdf",
+      "sha256": "2eaa776842da7da6e2b88df427ed57749488244bdb0c034506a105eab4cba0da"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred20.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred20.png",
+      "sha256": "20160475181bd1aa3a5110fd945c6724713a801dd32598a00850b85642bf777b"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred200.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred200.eps",
+      "sha256": "4211a8de5f04fb717a9ce2b54f4ec0095f8711f55368ef97600d130f535be1a9"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred200.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred200.pdf",
+      "sha256": "7a323e2c8eab9d60ed65f36d10e73f7f2c29b750a10ca0c5541bae6d9063f7ea"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred200.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred200.png",
+      "sha256": "7c306917fe3c92c900c30f2a0d927d4ee53fe0a78b6299390cb30bc01c2a37eb"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred210.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred210.eps",
+      "sha256": "3e31325a84d8cb0a21cfbfeb620210c27b8b984d8600b2387f02aca356110dab"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred210.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred210.pdf",
+      "sha256": "f3460f1462086d8dce5b8318a211deca60b4a483887e57a8c6c6670620d31c8a"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred210.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred210.png",
+      "sha256": "86c0e39cb8e0a5bbe1f6be2d0f80e31ddad628f5a170d7c93e0d4619d71471dd"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred220.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred220.eps",
+      "sha256": "e00ce0b509e10f42c9e4a0b2e1c88c20b691d9e1a82d09f396c39169638afabd"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred220.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred220.pdf",
+      "sha256": "a169ad6ac920beca282440e229a42b43346d7316e0b92e7fda128f7fa1e759b6"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred220.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred220.png",
+      "sha256": "a9f186cdde6ca6744cadca2965a7cc6b52e1cf4de8c333df677adfe4a7f12018"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred230.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred230.eps",
+      "sha256": "c76443c4a39f1e8b0ef0144aec927bebabd1d199b7bc18e652384d87f6b61e29"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred230.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred230.pdf",
+      "sha256": "0de02361a01a38532707b90750d74dd56b3ab352df5d2f5b0ba98f682356ded4"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred230.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred230.png",
+      "sha256": "2934d2d2ae453b65616f6a86bcc0a959add98f1ce5ceca4af0d40620ce71d3d9"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred240.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred240.eps",
+      "sha256": "54ec9d19ab8408f4accc5cd567b01f1a41f31175ce4d2e2fda4a292a68bc0419"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred240.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred240.pdf",
+      "sha256": "4e46ab6e0e6b9361ed003fe5b8296aa8445b9b202ea184f7325d9eea49d7a660"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred240.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred240.png",
+      "sha256": "29c681fc928a4c33315fe78abe58618e698d8ee8efcd03a2dd5394b817d32247"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred250.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred250.eps",
+      "sha256": "f9bccf6ef4e10b65e9fa08df43e45506ed01479448816d3981520c63d8cdab56"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred250.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred250.pdf",
+      "sha256": "3dbaaabec7e350dec99519ece314061d6437345f221ddb15358d73e1e93b05d1"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred250.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred250.png",
+      "sha256": "5f3e0b335087436944976b224139ff25619e4b3af1fd985b82228d92744e9074"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred30.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred30.eps",
+      "sha256": "ad5024437f82cb7e10cc7b3fb334140189c8bc0d850494110ca29724e0a53bc3"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred30.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred30.pdf",
+      "sha256": "b057c3a9a83814084b57ea2139d4c6d1596ee803ef26c8000eb6a1384dab9f84"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred30.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred30.png",
+      "sha256": "3058922e42f102873b8bf70bc21cd7ebb74d5c279e98d00d8e7c4f29b0261943"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred40.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred40.eps",
+      "sha256": "06bf005fb14dffa8bacafcb878597ae9e1ed6bcdeb8ff672ef503cf2a670b7df"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred40.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred40.pdf",
+      "sha256": "2578761786e3d36652fcd302282729a207e1b72dddb47ac3218174b204869c8d"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred40.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred40.png",
+      "sha256": "e97ed8c44a2c09edb1ff81eb1379f9a701b42f2106275a7a6dd48decb1640544"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred50.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred50.eps",
+      "sha256": "53986963f0cb429beabe8c1f37864bcb7a573e6f79b44d762fdb482095c8b0c6"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred50.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred50.pdf",
+      "sha256": "4a07940deacdbba218bc74119ba95cfd728b22f57ced3750fab17846b8d99b28"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred50.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred50.png",
+      "sha256": "ddbbd585cea32f3ce8ae585bd808872ec802f0ce3d6ff58782a3c6e56ea47648"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred60.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred60.eps",
+      "sha256": "f32daee5ebb6a34c4f2f3ecfcd96c20595433988b764a0214c1f0ac428976570"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred60.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred60.pdf",
+      "sha256": "620eb0481cf27e87ad0521dae0e8ddb89f9e2d6d409c43880511b1340a32b9fd"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred60.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred60.png",
+      "sha256": "0aed0b8e0d75bc79f78c7bd8e0b1ef7a4b51df745f3dd20e2e3ab7b34c222277"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred70.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred70.eps",
+      "sha256": "90a2878feb164326a38121aef797c6500e80d1a046b5bdc236fae62b1f1b1e30"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred70.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred70.pdf",
+      "sha256": "e772747314a1a667141560c30436b6d81bd2b72e64788c88c0fdc0ef6566c735"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred70.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred70.png",
+      "sha256": "b6a8554656d2770ac9f77b9002a6906ad057ba18d8f95df6db56b0e928889e48"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred80.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred80.eps",
+      "sha256": "0d3c1d1e19dbf0e90af4c3734ab66eb4e97c64f78e3c7aeb26ebbca9304bec09"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred80.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred80.pdf",
+      "sha256": "5258738012192147391496d1236405f0a97b67dcf32c3807accb7ef39916012c"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred80.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred80.png",
+      "sha256": "1e42e5495886d327350a4b5e5cb837697c52765d8adbfb4ee8aeb12a4581294e"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred90.eps",
+      "to": "neurips/ou/plots/reversible_heun/model_pred90.eps",
+      "sha256": "870eac0b11a7644e2ed88e27422415003573db4e4dababa04fda8120641a0a9a"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred90.pdf",
+      "to": "neurips/ou/plots/reversible_heun/model_pred90.pdf",
+      "sha256": "3fb0267ce49553f09718eeb12f23aff2ca4c52e335c022a905fab6e64f1ee857"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/model_pred90.png",
+      "to": "neurips/ou/plots/reversible_heun/model_pred90.png",
+      "sha256": "cb3834089229dd4097268799b85e56e3766f77c54bba05d24edc5030093a9deb"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/mse.pickle",
+      "to": "neurips/ou/plots/reversible_heun/mse.pickle",
+      "sha256": "a1400f2c628127207e516fa23e9622b1c1b6dd9812927d252f6aea603a4246e5"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/sample_path.eps",
+      "to": "neurips/ou/plots/reversible_heun/sample_path.eps",
+      "sha256": "2b23cdc0b7e2b5e7eebc94c1d2c23694ad6a239ac6878df695e1c23cf6055e54"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/sample_path.pdf",
+      "to": "neurips/ou/plots/reversible_heun/sample_path.pdf",
+      "sha256": "3c7f2ca1ae1014dd04cfee683777254574954928c5d298a8c2d1acff5fa83b75"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/sample_path.png",
+      "to": "neurips/ou/plots/reversible_heun/sample_path.png",
+      "sha256": "85a71016fe3b899647d172249167e3bf533478824c6c4a43885ea4b6f66b024e"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/total_sample_path.eps",
+      "to": "neurips/ou/plots/reversible_heun/total_sample_path.eps",
+      "sha256": "60cac5e38a2c93f214b89ad79407188914a6a63b95bf42cda60cddaf24164bd4"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/total_sample_path.pdf",
+      "to": "neurips/ou/plots/reversible_heun/total_sample_path.pdf",
+      "sha256": "926dc39c09c733484a268b21f3bfe4f3cbf9d22796eaacf8fa59a1907197d605"
+    },
+    {
+      "from": "experiments/ou/plots/reversible_heun/total_sample_path.png",
+      "to": "neurips/ou/plots/reversible_heun/total_sample_path.png",
+      "sha256": "f10334eab784d1ede359207de3745fe60aaeee80e0b7b2aded7dcab868621d06"
+    },
+    {
+      "from": "experiments/ou/results/grad_error/single_step/OU_grad_error.pdf",
+      "to": "neurips/ou/results/grad_error/single_step/OU_grad_error.pdf",
+      "sha256": "8f04ced7151a2a42aff45940cfc0f2fdcab25311471f869243952e60a50cba04"
+    },
+    {
+      "from": "experiments/ou/results/grad_error/single_step/OU_grad_error.png",
+      "to": "neurips/ou/results/grad_error/single_step/OU_grad_error.png",
+      "sha256": "2f24ffb92337ab7c3ef348eeaff3018c6face6b2c77113f0f37d6c8245fe83ad"
+    },
+    {
+      "from": "experiments/ou/results/grad_error/single_step/manifest.json",
+      "to": "neurips/ou/results/grad_error/single_step/manifest.json",
+      "sha256": "73ca2a9cca5411caf891ea3777824d2a0251cc9ef3e8d529c8cdffeed051c957"
+    },
+    {
+      "from": "experiments/ou/results/grad_error/single_step/summary.json",
+      "to": "neurips/ou/results/grad_error/single_step/summary.json",
+      "sha256": "1f43bd6372b74ac23d8286793069670322a7783db05f839ffa49d70bd0d0055c"
+    },
+    {
+      "from": "experiments/ou/scripts/__init__.py",
+      "to": "neurips/ou/scripts/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "experiments/ou/scripts/_ou_grad_helpers.py",
+      "to": "neurips/ou/scripts/_ou_grad_helpers.py",
+      "sha256": "4a491d021aa7677d09791b13ea20ed54e6edeb68caa9765d6e140e267dda41a6"
+    },
+    {
+      "from": "experiments/ou/scripts/plot_grad_error.py",
+      "to": "neurips/ou/scripts/plot_grad_error.py",
+      "sha256": "945a7048fef69a2339b8bd46575452d0709eedcb2eb3668000f5d78f983f06cf"
+    },
+    {
+      "from": "experiments/ou/scripts/single_step_grad_error.py",
+      "to": "neurips/ou/scripts/single_step_grad_error.py",
+      "sha256": "0c80f2b3ce905a87ce69b78342a565b91fdd76113e7a989d34dccbe7a517b310"
+    },
+    {
+      "from": "experiments/stiff_gbm/GBM.py",
+      "to": "neurips/stiff_gbm/GBM.py",
+      "sha256": "8cbbe4afaddf189654b59d13814febe3b4986e3bce6831c3ed2bca78c4d0ad4c"
+    },
+    {
+      "from": "experiments/stiff_gbm/README.md",
+      "to": "neurips/stiff_gbm/README.md",
+      "sha256": "22677a56d29fd6039f9f9d824f8e9e72d58ebb41027535d5140932b86cec5912"
+    },
+    {
+      "from": "experiments/stiff_gbm/__init__.py",
+      "to": "neurips/stiff_gbm/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "experiments/stiff_gbm/plot_GBM.py",
+      "to": "neurips/stiff_gbm/plot_GBM.py",
+      "sha256": "857701fbc06344a8bf48ff47a2c9c410ee9fba59fd830f75cf683aec065f1c63"
+    },
+    {
+      "from": "experiments/stability/README.md",
+      "to": "neurips/stability/README.md",
+      "sha256": "fcd639fd310e52c9e193b104b0bfb584b7091ae53c19ded06c9beaaba0d72c18"
+    },
+    {
+      "from": "experiments/stability/__init__.py",
+      "to": "neurips/stability/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "experiments/stability/results/stoch_stability.eps",
+      "to": "neurips/stability/results/stoch_stability.eps",
+      "sha256": "ef9af85ec7ffb49f6c51d2beeff0707bab674a69f1165316d7b65cb585843b22"
+    },
+    {
+      "from": "experiments/stability/results/stoch_stability.pdf",
+      "to": "neurips/stability/results/stoch_stability.pdf",
+      "sha256": "5046399402d7d7fe7563f898f36397ad90b20869aae6aabb661a22e93d3b81ac"
+    },
+    {
+      "from": "experiments/stability/results/stoch_stability.png",
+      "to": "neurips/stability/results/stoch_stability.png",
+      "sha256": "2d89d5634f1ef5b150b4347f03040cec6964655099d4e016f252537eb76573ec"
+    },
+    {
+      "from": "experiments/stability/stability.py",
+      "to": "neurips/stability/stability.py",
+      "sha256": "04b4e64ae862736e48d4ece41b9bf3c987a0e9176f73110f2bb69bd32430b49c"
+    },
+    {
+      "from": "experiments/stability_ode/README.md",
+      "to": "neurips/stability_ode/README.md",
+      "sha256": "ba7ede5b3433d0bd10654a726eea48c5d9fef76741cf4353acc5ca0bd760d99c"
+    },
+    {
+      "from": "experiments/stability_ode/__init__.py",
+      "to": "neurips/stability_ode/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "experiments/stability_ode/results/stability_regions_1.pdf",
+      "to": "neurips/stability_ode/results/stability_regions_1.pdf",
+      "sha256": "218a857d6cf75613a26113b661b6477a7c389c95c430813701469b76c1e8c86c"
+    },
+    {
+      "from": "experiments/stability_ode/stability_regions.py",
+      "to": "neurips/stability_ode/stability_regions.py",
+      "sha256": "884a0c54918eb37ea4c5c789e43b447589096d22edb6c7a54b17cd33e57fe3eb"
+    },
+    {
+      "from": "experiments/stochastic_volatility/README.md",
+      "to": "neurips/stochastic_volatility/README.md",
+      "sha256": "e88bdb3d78a2a646f1e61bbea4c6ce4a001906677f64fdcb23d280145cee0905"
+    },
+    {
+      "from": "experiments/stochastic_volatility/__init__.py",
+      "to": "neurips/stochastic_volatility/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "experiments/stochastic_volatility/configs/stoch_vol/sweep.toml",
+      "to": "neurips/stochastic_volatility/configs/stoch_vol/sweep.toml",
+      "sha256": "01277746dae44a0ddd68b08e305c6ec4a71aedd4a89b328a8511807ce04c1971"
+    },
+    {
+      "from": "experiments/stochastic_volatility/data/rough_bergomi_data.npz",
+      "to": "neurips/stochastic_volatility/data/rough_bergomi_data.npz",
+      "sha256": "46050f183563d9afec44768bb38205b32eeaa6282de7e70d3dc72de78aa78c95"
+    },
+    {
+      "from": "experiments/stochastic_volatility/experiment/__init__.py",
+      "to": "neurips/stochastic_volatility/experiment/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "experiments/stochastic_volatility/experiment/config.py",
+      "to": "neurips/stochastic_volatility/experiment/config.py",
+      "sha256": "9f9c4a0cbac705dbdcc96f559515ebff97387713c345b51badf9ad0df81ee95c"
+    },
+    {
+      "from": "experiments/stochastic_volatility/experiment/count_nfe.py",
+      "to": "neurips/stochastic_volatility/experiment/count_nfe.py",
+      "sha256": "af6af7e91811fb8078d134e7806bcfc685423a6938fbd3dd0ddc373616e2492d"
+    },
+    {
+      "from": "experiments/stochastic_volatility/experiment/dataset.py",
+      "to": "neurips/stochastic_volatility/experiment/dataset.py",
+      "sha256": "70571be9304d18ea64b7c43112f15b1bae382b604e81f9cb9f4eccb09bbfbf98"
+    },
+    {
+      "from": "experiments/stochastic_volatility/experiment/factories.py",
+      "to": "neurips/stochastic_volatility/experiment/factories.py",
+      "sha256": "eaf0aaebd0a85b1c4b98cb0c22da061af701acbdc5d63d82db20e5d2284887b6"
+    },
+    {
+      "from": "experiments/stochastic_volatility/experiment/losses.py",
+      "to": "neurips/stochastic_volatility/experiment/losses.py",
+      "sha256": "afce657777758feeb6f48cf70e78631c7396b8b863a1b6d6dc2e3690431cd360"
+    },
+    {
+      "from": "experiments/stochastic_volatility/experiment/plots.py",
+      "to": "neurips/stochastic_volatility/experiment/plots.py",
+      "sha256": "ac0a2ceda0a9a296838421104a6d3e80659e402a1eadb41c8853529eff4b9e87"
+    },
+    {
+      "from": "experiments/stochastic_volatility/experiment/repeated_inference.py",
+      "to": "neurips/stochastic_volatility/experiment/repeated_inference.py",
+      "sha256": "2621e949e4545e02a8f0430b51862d4f25276bad163d961216311fe218a2e144"
+    },
+    {
+      "from": "experiments/stochastic_volatility/experiment/train.py",
+      "to": "neurips/stochastic_volatility/experiment/train.py",
+      "sha256": "c00ef20b450d19a741f961a83d1c3dd697f435788cc78c4514669bba640c5be9"
+    },
+    {
+      "from": "experiments/stochastic_volatility/models/__init__.py",
+      "to": "neurips/stochastic_volatility/models/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "experiments/stochastic_volatility/models/nsde.py",
+      "to": "neurips/stochastic_volatility/models/nsde.py",
+      "sha256": "200366e93a9e084ca287baeb78ed52f429ea324bba3577d307ce529913fc9ee8"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/README.md",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/README.md",
+      "sha256": "49a2dbb1450d7b181f41a6f7571d4f49a1234b1fca1da8f0b94345b7e856f696"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/config.toml",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/config.toml",
+      "sha256": "a721d2bb31c29145c9259b732e2a89be51324718521bcee6c574168fa7b9b7ae"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/history.json",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/history.json",
+      "sha256": "dc42a6088244328e9a3dd11d9b8c8e632f3c9f424cb842de5cf259c1befdaa66"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/latest_epoch_batch.npz",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/latest_epoch_batch.npz",
+      "sha256": "37e5e35e53a1992d7fca4016baced2c90a8093bca505e6da975464bd7ab4b219"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/latest_epoch_trajectories.png",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/latest_epoch_trajectories.png",
+      "sha256": "c59d9b60a5db2c0d0e7e32f7df6bc89e6417f99746f223e43b5768ce95d5ba86"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/metrics.json",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/metrics.json",
+      "sha256": "1f9d935e8a56cdd4f5557a8a08c4e6adda8920feada4522edf896746508792f3"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/nsde.eqx",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/nsde.eqx",
+      "sha256": "4157b643c80a41c1d6b8f08aa9b44311918b4b182b1263693ef66b8bbdecda3c"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/test_predictions.npz",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/test_predictions.npz",
+      "sha256": "0b10fe37074d50ea061a73bc70e4b7633eb9e1c2a30525f52acee90d6694e3fc"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/training_curves.png",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__ees25__seed0__20260422_012836/training_curves.png",
+      "sha256": "87b1c1761bb26de5f385d46dc18c504a50081724c968889261b67621e71de833"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/config.toml",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/config.toml",
+      "sha256": "e8b314f5b304b56653261774884fe64c3d5f9adcdf8b2947183740158aec3f29"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/history.json",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/history.json",
+      "sha256": "84bd80bdbd471cab4016cdfdf091265d889c488bcb285b5627d47594d20ecf34"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/latest_epoch_batch.npz",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/latest_epoch_batch.npz",
+      "sha256": "42d8903817857411bd92c418f6f9c28d2bb0c6d9ffd847d189f46f387749ec40"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/latest_epoch_trajectories.png",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/latest_epoch_trajectories.png",
+      "sha256": "7982402e2e534bc86f014b9aeed6f03430944aa9687df1e783c091be09cd51ab"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/metrics.json",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/metrics.json",
+      "sha256": "e7a0775797031bb6635e0edca6dc2630a5499876c4440c306de8348b67eae9cd"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/nsde.eqx",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/nsde.eqx",
+      "sha256": "72abb078da33c28bc1cb240da166fb0ebc355c43ea0b956ebc53e88d78e88153"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/test_predictions.npz",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/test_predictions.npz",
+      "sha256": "e0f7654a146619bb7c1a1fbae2e7cca0bb07cb615b4f05253047818d72e1765c"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/training_curves.png",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_euler__seed0__20260422_015206/training_curves.png",
+      "sha256": "2a68934fa6d5a21e0451edaa96c250348c6a66ab33645c28bbd4c10cba65d3a4"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/config.toml",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/config.toml",
+      "sha256": "9c7521580a46550d9c429ced3af9cdb942a6f9f83a56791468576284d143ac7e"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/history.json",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/history.json",
+      "sha256": "f3a5aaae5418217f1cc1228e03da28dbb90338811395fb2ecbac312077bbee37"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/latest_epoch_batch.npz",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/latest_epoch_batch.npz",
+      "sha256": "7bbe484acd69d9e76a5d69cc4c4d616545239373cf614b91bdcba1f82c453a8e"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/latest_epoch_trajectories.png",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/latest_epoch_trajectories.png",
+      "sha256": "5fd48988e2624477f07035eb32883912aee51172c280e55f444458b7d0f73520"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/metrics.json",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/metrics.json",
+      "sha256": "bacac4dd612d50ec0c2345f933eb78fe2b73053e265edbfa9399f1365a2e9e92"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/nsde.eqx",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/nsde.eqx",
+      "sha256": "739f9b44d3dc666a17917e1bd3783fdc9d98786acde227c67f00c57fe535ec1a"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/test_predictions.npz",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/test_predictions.npz",
+      "sha256": "7eb1fc3f5f5de42d018a92ba69c96f1269bb0a80350af4fee3bc7e10331b2419"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/training_curves.png",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__mcf_midpoint__seed0__20260422_020737/training_curves.png",
+      "sha256": "387f3baa06bdc5185a76d9d3f9391cc539f41c15112b8124ef05b642d4ae750e"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/config.toml",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/config.toml",
+      "sha256": "0a724259a47cca6055216264e509feb8790759304332b197329f38002592028b"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/history.json",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/history.json",
+      "sha256": "5f87bd17199716916e8e515811cd4797ec36b98d9509eae849745c4a8fb8ddbd"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/latest_epoch_batch.npz",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/latest_epoch_batch.npz",
+      "sha256": "f91c16ed89ee634b58bfb16a755bd7c002903dfafb681ccdc27875c8f96b3436"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/latest_epoch_trajectories.png",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/latest_epoch_trajectories.png",
+      "sha256": "960b7f8bfd6d10523e00c723c7514fc6d12dc5f688856081e00988f4e2ea469d"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/metrics.json",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/metrics.json",
+      "sha256": "9c331c85e2b0ab454e2443e13b66c18184a6374ac86ed2a936d150fa5c06e696"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/nsde.eqx",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/nsde.eqx",
+      "sha256": "b8d16b3b5d6fe11247eafb27e4c8d66413bd7b4e0ff6d76ab915b3b2fa5c8c65"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/test_predictions.npz",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/test_predictions.npz",
+      "sha256": "d4d456a04587de33817575c15b7db4adf2c21607f0e0b441ea6694aac67c443d"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/training_curves.png",
+      "to": "neurips/stochastic_volatility/results/neurips_20260421/rough_bergomi__reversible_heun__seed0__20260422_013524/training_curves.png",
+      "sha256": "567a1f09f1b6abbff007df1a3ec6d98bc0a1795d9641a4811386c3d9f56c8be0"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/repeated_inference_summary.md",
+      "to": "neurips/stochastic_volatility/results/repeated_inference_summary.md",
+      "sha256": "2606e74915b25a760849bae4e2b9d417af7490c0cb73f5832a88ad3750156208"
+    },
+    {
+      "from": "experiments/stochastic_volatility/results/rough_bergomi_fixed_stepsize_summary.md",
+      "to": "neurips/stochastic_volatility/results/rough_bergomi_fixed_stepsize_summary.md",
+      "sha256": "53e97a2f86cdb35060f2c8b31758ac6fe272a2c992152e43c240f4c5fea8b653"
+    },
+    {
+      "from": "experiments/stochastic_volatility/scripts/__init__.py",
+      "to": "neurips/stochastic_volatility/scripts/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "experiments/stochastic_volatility/scripts/paper_table.py",
+      "to": "neurips/stochastic_volatility/scripts/paper_table.py",
+      "sha256": "ea2bda0f47672c5f5d6c4765d2cb43e1d03fa82f15609afb54c9a28774227c42"
+    },
+    {
+      "from": "experiments/torus_memory/README.md",
+      "to": "neurips/torus_memory/README.md",
+      "sha256": "3f08db70d3ae4a5fcfbde991c15cac28f28c1cca638061c66be8be663f90f069"
+    },
+    {
+      "from": "experiments/torus_memory/__init__.py",
+      "to": "neurips/torus_memory/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "experiments/torus_memory/__pycache__/__init__.cpython-313.pyc",
+      "to": "neurips/torus_memory/__pycache__/__init__.cpython-313.pyc",
+      "sha256": "77d3fb0fc7e96d3ce55a6e5e6f8c15dd0b04132da944beb61d9a54f31ac1a9cf"
+    },
+    {
+      "from": "experiments/torus_memory/benchmark.py",
+      "to": "neurips/torus_memory/benchmark.py",
+      "sha256": "2805b14a931f277855d8110503c97e9cc154678811f69bb0279af72ab91a0ead"
+    },
+    {
+      "from": "experiments/torus_memory/benchmark_single.py",
+      "to": "neurips/torus_memory/benchmark_single.py",
+      "sha256": "bd6e69a89017851c049668971847e1829483f324c9675d0e6ed7919db9ba00d4"
+    },
+    {
+      "from": "experiments/torus_memory/models/__init__.py",
+      "to": "neurips/torus_memory/models/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "from": "experiments/torus_memory/models/__pycache__/__init__.cpython-313.pyc",
+      "to": "neurips/torus_memory/models/__pycache__/__init__.cpython-313.pyc",
+      "sha256": "7f1150e9350eb662df12a91aae1b2ff7c1d03b5fea6000134f6f5dfe5390defb"
+    },
+    {
+      "from": "experiments/torus_memory/models/__pycache__/torus.cpython-313.pyc",
+      "to": "neurips/torus_memory/models/__pycache__/torus.cpython-313.pyc",
+      "sha256": "8fe2383d8ac60d2bdd14dc75dc9b712920e144e672dc265c9b2b0600ab509d43"
+    },
+    {
+      "from": "experiments/torus_memory/models/torus_nsde.py",
+      "to": "neurips/torus_memory/models/torus_nsde.py",
+      "sha256": "2eaed5a797ac0898ddc0db80d4b3bb5f17b3a1bd29f496b6c6bed773c3504b61"
+    },
+    {
+      "from": "experiments/torus_memory/plot.py",
+      "to": "neurips/torus_memory/plot.py",
+      "sha256": "227fdd8f1b5a0dcee2ac4223414427da84b06fe709bcb37caebc3dd3472ba29d"
+    },
+    {
+      "from": "experiments/torus_memory/results/fig_scaling_compact_nogrid.pdf",
+      "to": "neurips/torus_memory/results/fig_scaling_compact_nogrid.pdf",
+      "sha256": "0de0bff3543db218498c64a9156912817a3c74bd1ae352b13a430b368d000c8b"
+    },
+    {
+      "from": "experiments/torus_memory/results/rna_benchmark_scaling.json",
+      "to": "neurips/torus_memory/results/rna_benchmark_scaling.json",
+      "sha256": "8393e07ce697342e3bd5a582c172a26bb69958a21f428e7ab9a98ef86a3a8f60"
+    },
+    {
+      "from": "experiments/torus_memory/solvers.py",
+      "to": "neurips/torus_memory/solvers.py",
+      "sha256": "869086519866920fe47b592c95df713b050341fffed581cc92cea03266352fad"
+    },
+    {
+      "from": "experiments/convergence_fbm/convergence.py",
+      "to": "neurips/convergence_fbm/convergence.py",
+      "sha256": "7804826df826a5b351e2d0989a77331538146bd6cf19a166d78c273281f1c104"
+    },
+    {
+      "from": "experiments/convergence_fbm/results/convergence_fbm_24up.pdf",
+      "to": "neurips/convergence_fbm/results/convergence_fbm_24up.pdf",
+      "sha256": "61d5f800d33b132b4cf10e5e2184b057713ad1b81c0d7dc65892dc8897334e87"
+    },
+    {
+      "from": "experiments/convergence_fbm/results/ees_stochastic_convergence_12up.pdf",
+      "to": "neurips/convergence_fbm/results/ees_stochastic_convergence_12up.pdf",
+      "sha256": "b7cf4c1b8d95fad43efaf10e6d4f2b8915b09ba64b1af7030c477888abff0c2d"
+    },
+    {
+      "from": "experiments/convergence_fbm/results/ees_stochastic_convergence_H40.pdf",
+      "to": "neurips/convergence_fbm/results/ees_stochastic_convergence_H40.pdf",
+      "sha256": "a263417137868ca032814eb70eb161d71376cb6264ec3fd70fca55e193c913dd"
+    },
+    {
+      "from": "experiments/convergence_fbm/results/ees_stochastic_convergence_H50.pdf",
+      "to": "neurips/convergence_fbm/results/ees_stochastic_convergence_H50.pdf",
+      "sha256": "117d3c7e5b5d2d148e5ee842bbaf61a0de1b11a3cbf318dac41957a877aa9283"
+    },
+    {
+      "from": "experiments/convergence_fbm/results/ees_stochastic_convergence_H60.pdf",
+      "to": "neurips/convergence_fbm/results/ees_stochastic_convergence_H60.pdf",
+      "sha256": "3d12025557cbea5f45a104a38dcb0a5f1c830804b095d880b39fbcda13e3a4f7"
+    },
+    {
+      "from": "experiments/order_verification/siam/experiment_records/sphere_memory.csv",
+      "to": "neurips/sphere_memory/results/memory_sweep_integrator.csv",
+      "sha256": "00fd0d416bb161780ee4cd34b544c7d76bdc1ab239bbeede10f3bf00a353cdcb"
+    },
+    {
+      "from": "experiments/order_verification/siam/experiment_records/kuramoto_runtime_parity.json",
+      "to": "neurips/kuramoto/results/kuramoto_runtime_parity.json",
+      "sha256": "560a6e5067b6f92b0d5fe81251194626cc948357290c6a0cea531811584db1fd"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed0/config.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed0/config.json",
+      "sha256": "a94eb4c0726da0e0821e12f9ae21206e98417eb3f54a850d57e09d7479a302b1"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed0/history.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed0/history.json",
+      "sha256": "c037bd8588fb3a054f4836de02c658b226d525a10acd1772bbbd54d133e102d3"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed0/metrics.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed0/metrics.json",
+      "sha256": "7c3cec7f277ad6d44984ed3fca9cecd19748153617ee5d44a9168299b29a4c52"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed1/config.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed1/config.json",
+      "sha256": "428d2821931693ab8704bbf39718360376e4c1a286264378ed820ea2cd608966"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed1/history.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed1/history.json",
+      "sha256": "f63960c8db66e741bb5eab285f6613ec0d9e3b2fa48fcf5bebb1f754a3077db9"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed1/metrics.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed1/metrics.json",
+      "sha256": "0ce6b252ed5d422e33b3ac2f37cc2a6cdcf607a1ada22dcb9745e2cfedc57994"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed2/config.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed2/config.json",
+      "sha256": "291741b696e591da2c1e55b9ea1cb514c8e748d4472b336df3ddbe5b4c429f6e"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed2/history.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed2/history.json",
+      "sha256": "591d9b3ad62ac92383d8a8b348e9925aa639f55b26cafec9df425759991ae32b"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed2/metrics.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cfees25_reversible_seed2/metrics.json",
+      "sha256": "26e396e50d87adf8b67001e4f306a9966d53c8a8f014bfb617b5f56abe6faedd"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed0/config.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed0/config.json",
+      "sha256": "85cccd7050052f9f08dee57707af115db7c877b580ff5d15167ad2ca79ce837e"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed0/history.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed0/history.json",
+      "sha256": "6ee32f34883cd7e9bb7be9b674f96b84a12a4ee7bc3c8589243fc3f2021c1045"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed0/metrics.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed0/metrics.json",
+      "sha256": "7d03e4d8f5037b184f03c0388240b13e6570cecda5922ee4b5b16dbf34718c61"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed1/config.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed1/config.json",
+      "sha256": "c4f9c606a31b9824b14bba76aabdad063ff53a246afff8cb0735f87c327f906c"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed1/history.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed1/history.json",
+      "sha256": "256bf908652ec95e75446601c69fa34562532076c1259ea63510abe62a2f2f0b"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed1/metrics.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed1/metrics.json",
+      "sha256": "dd273cc4fd02aca078807b868fd41111793b0a0441def302c1e14779c3ee610f"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed2/config.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed2/config.json",
+      "sha256": "f3d323194843b08af6da095b4e218b452b5d7099e32ac76924a8d0ca9cd3472b"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed2/history.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed2/history.json",
+      "sha256": "56b699493397ef98efc10d5f2b73345bbba20a06e80753757ca431ccec1d7b04"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed2/metrics.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_full_seed2/metrics.json",
+      "sha256": "2c01c7663b6bdbe979b5ee9095540c05b4e27d9d7e3478f58c7221215dcb6e81"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed0/config.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed0/config.json",
+      "sha256": "8b7a9455366ac64792ed8db7a2c4c67ccd69cb3b6ea3e031e60b40f9fa60be52"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed0/history.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed0/history.json",
+      "sha256": "dbc6818737f512cb1c46aaa31eaedf186dd187d95cd3029e8726094793bc1603"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed0/metrics.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed0/metrics.json",
+      "sha256": "83b9566c67e54b18d5cd5b160c002ea5bca4986727679bc30ef5e1f053f19f77"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed1/config.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed1/config.json",
+      "sha256": "b5dc262e5cc02b57c38a9c6578a1556585eca28cd9ce5938eba1a68887480537"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed1/history.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed1/history.json",
+      "sha256": "25f4eee11b1e5250e9d331b46586f7a51bcb5d6400ac434781244c16b8151a2d"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed1/metrics.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed1/metrics.json",
+      "sha256": "7d5527e585f3405971739ee4cc8d8a20311dcd0423e2213c061b71ceb1810332"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed2/config.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed2/config.json",
+      "sha256": "cae20a8b391fa525349c92d784394bc36ff8a7e8b6f96b86b0dec4ef90d0d65e"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed2/history.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed2/history.json",
+      "sha256": "5e80e134bb3b03b65c54cdaa79d3379d03b0c609a6d5583db87183fef25e35f0"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed2/metrics.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/cg2_recursive_seed2/metrics.json",
+      "sha256": "464ccc861a9402501c6426ae49fb911e3baf51c243547f4584d2cf4421568298"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/hlo_temp_bytes.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/hlo_temp_bytes.json",
+      "sha256": "a1433e60e5da2116c63bc24475be5ef982f38a3348ad78c4a97235112d115184"
+    },
+    {
+      "from": "experiments/kuramoto/results/runtime_parity_N1000_n50/runtime_parity_summary.json",
+      "to": "neurips/kuramoto/results/runtime_parity_N1000_n50/runtime_parity_summary.json",
+      "sha256": "560a6e5067b6f92b0d5fe81251194626cc948357290c6a0cea531811584db1fd"
+    }
+  ],
+  "preserved_siam_files": [
+    {
+      "path": "experiments/convergence_ode/results/cfees_ode_convergence.pdf",
+      "sha256": "feec6b3c06b4de2070b3699d6c0cdcc56ebbd18d67e5484207ebff90c66ee757"
+    },
+    {
+      "path": "experiments/convergence_ode/results/ode_convergence.csv",
+      "sha256": "30186ab4bdf7b4661fa4560b2bee2ec03e1654763891843200855337fdd3bd3b"
+    },
+    {
+      "path": "experiments/convergence_ode/results/ode_validation.json",
+      "sha256": "db420b9609263cf94779022ef416df9355f4c8cca482c9152c60e9bfc4baba06"
+    },
+    {
+      "path": "experiments/convergence_fbm/results/cfees_stochastic_convergence_12up.pdf",
+      "sha256": "e5097e4e74956c9b63c34d68c65963e55c19b607422b7ae6e3d952ff2b6c05ab"
+    },
+    {
+      "path": "experiments/convergence_fbm/results/cfees_stochastic_convergence_H40.pdf",
+      "sha256": "df0c0eb7447a88938e3c226281be7c1adb4ec93f9e52b8a3d8420a8593f104f4"
+    },
+    {
+      "path": "experiments/convergence_fbm/results/cfees_stochastic_convergence_H50.pdf",
+      "sha256": "840e94724b2e51faefc92bccba898d740aa34d76dc3fc2b98efd03fbc1a4c23a"
+    },
+    {
+      "path": "experiments/convergence_fbm/results/cfees_stochastic_convergence_H60.pdf",
+      "sha256": "9503cfdedeeb60ad576a18cdee527b352bf5c7f65fe0b49cbff930c9bc5df93e"
+    },
+    {
+      "path": "experiments/convergence_fbm/results/so3_reversibility_results.json",
+      "sha256": "a1e8a8bbf3f7cb8dc93de23a7f5bee9c7c426947fe390817d5a85e40a9d58600"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/config.json",
+      "sha256": "583bf8cce6ba98a37f35a0b90d5f29aabf6136be56404891c0086e2e0ff4fc63"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/history.json",
+      "sha256": "7e5ff655607922673d1f0ea59d40776146b216fe1c1bf2111f4f2a8b8ebba89e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/metrics.json",
+      "sha256": "279d6cd9bdc3c8c567b2c5bb93ad5abf9232445e52b40082ac02c0a3851b386d"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_best.eqx",
+      "sha256": "aff292fb127d2bf2ad25e0fe0b63c1261ea452dee781d312cd52ae8f00b680b2"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_000.eqx",
+      "sha256": "35e25d9c076ca5ed03bde899d1375143c6ec0530457d20dffa26cb69ec88ac52"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_001.eqx",
+      "sha256": "8af36ad1e59ee6be31d4294a72809019b69c76108876a35e56f9101a04352193"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_002.eqx",
+      "sha256": "3c7ed27d20cbf687a17b1b86460fc3cce433bb2c4e71a52563ef884f59e5ef73"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_003.eqx",
+      "sha256": "80e49dccf61f184d7457e380a926712ee736caf8acde785e66dca15032d5f710"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_004.eqx",
+      "sha256": "5874ae5686073063451a6220c654d79ac2d267be9fdbfba7dff1d00c3bdcbd6f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_005.eqx",
+      "sha256": "f9432267088fee54199114d1e08e4f183a816eef95cc55374a735698f0937be9"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_006.eqx",
+      "sha256": "0ace6bb0308734b4fe78ce13e217d91e0a3f8213f58198fb0cc7f6cc13e399d6"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_007.eqx",
+      "sha256": "9ba8f678ae27bc1f48c6557593b139105ab58990043257e794d342e19640e481"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_008.eqx",
+      "sha256": "647ed84faf7d2d4be224abdba9e1f26027d45f67a9b270c5687c345db12e0645"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_009.eqx",
+      "sha256": "944b6a293a0c812a6542364beba1a75ea52de6b39454e8f4351bd619528566fb"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_010.eqx",
+      "sha256": "8d133b006820fb0bf4266a452da0ab345bfd8a4f02082ea2eec940848a22727b"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_011.eqx",
+      "sha256": "be0b1b6dddefb2e704555d3b007de162df053e0ed5bda4c8236974e7af3b6cb6"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_012.eqx",
+      "sha256": "712f60d81f3692ca7a11e6f34fe312865864564c2cc5a9ae9dcddf5c18aa60e3"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_013.eqx",
+      "sha256": "aff292fb127d2bf2ad25e0fe0b63c1261ea452dee781d312cd52ae8f00b680b2"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_epoch_014.eqx",
+      "sha256": "d964c29eb7412c27dd296e5b9273d4e4d0741848b80bdc1a6b13a5b2589c775a"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/model_final.eqx",
+      "sha256": "d964c29eb7412c27dd296e5b9273d4e4d0741848b80bdc1a6b13a5b2589c775a"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/opt_state_best.eqx",
+      "sha256": "8181a230c06205b24438668aa83f1b71fb9534137750e36e8584aeeb1dd8d01e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/opt_state_final.eqx",
+      "sha256": "2deaae7f0bdb51703e6da633d119c6e19407f47e97857ef58deb05bbe7fc938f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/opt_state_latest.eqx",
+      "sha256": "2deaae7f0bdb51703e6da633d119c6e19407f47e97857ef58deb05bbe7fc938f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible/predictions_demo.npz",
+      "sha256": "efbe2b248c9e8b1538740406a051b544d9eb34cc1653c0a82721d4b491226636"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cfees25_reversible.log",
+      "sha256": "106f2ac18da6c2a10730847ee599cc0dedd654c770b5689489f1282475a1f0b7"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/config.json",
+      "sha256": "cc7b578a339ecca8bcff9b8ef6ceab7b0fcf7cc8cd8722e346045a92828b5c7f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/history.json",
+      "sha256": "ce407d8f78197c6cd2d79a245392e610042091fa8e164a5bc0a84b2e790b2896"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/metrics.json",
+      "sha256": "42e30300013bb36e8aafc58ffe9bb9177a444e2d82d8aa81b64dc70742e78c0f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_best.eqx",
+      "sha256": "670dafc33758ee024527173b4990bc77b43086cd24b639105fd3e44aba862acd"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_000.eqx",
+      "sha256": "dcd46ae01e985ee2ede61dab3ab390a84c34ad5169504d6fed053100c335bfd6"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_001.eqx",
+      "sha256": "e9fa8f124445762f8cef888bad90142a02491691cdccfbbdb61e2badb0e26da5"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_002.eqx",
+      "sha256": "fb85520d19b5514c66227bad39235fa1960f8e10f65486efd048cd3b7512e036"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_003.eqx",
+      "sha256": "ba8a28290a6c724ae60ad4e86c9e0813b8b702451a0b1ad818ba61b5626c7ec6"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_004.eqx",
+      "sha256": "55781a3d4b27a74b5ba10009008f69b1cd64e9e1b5e0425fe572b3957ddb2e9b"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_005.eqx",
+      "sha256": "bf5fd18925d0166177750128ec20c58d28538f626eeb8e1ca07dbe0fcb4dbd34"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_006.eqx",
+      "sha256": "6ae436c912199dd6b5e797c9e792b3ba6d51688b161525cdc008d17509991f80"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_007.eqx",
+      "sha256": "c4ccb27a4a7e848563970fa59cf7b42f1874cfce36c785699144c20ece56f907"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_008.eqx",
+      "sha256": "c2ae0be747956c9490f09beb24500767a06bcd65f06a9e302368077cb74f3aef"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_009.eqx",
+      "sha256": "6b0bc14893dea729c4f7ac29fef24c0382fb98cef74a351990c0d7783ab1e583"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_010.eqx",
+      "sha256": "31d7bbf2328ba506f25eee05ce4c01892ede392cbe2065d519eb99e8a67dac38"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_011.eqx",
+      "sha256": "7bb006ad7d9c3789e663cf6bae91fbc52b296cd892c4d55a11040a09ebd2139c"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_012.eqx",
+      "sha256": "c5a85e74040d6c736cb6a39a16fdc73401c0f9b43fdd98048e04cb361ef7a153"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_013.eqx",
+      "sha256": "670dafc33758ee024527173b4990bc77b43086cd24b639105fd3e44aba862acd"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_epoch_014.eqx",
+      "sha256": "cee1ac36368c7a0cbcf40850f03f3c8d7021d20d843d97ed949c44c560432673"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/model_final.eqx",
+      "sha256": "cee1ac36368c7a0cbcf40850f03f3c8d7021d20d843d97ed949c44c560432673"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/opt_state_best.eqx",
+      "sha256": "aa8e2b958ff204a9cdd584dedcb23023dea34bddd9367be851777a99a05e9935"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/opt_state_final.eqx",
+      "sha256": "0d6036a2e4d033a4609b99eba80894e1b832689a044e41ff45fe01c019a90cba"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/opt_state_latest.eqx",
+      "sha256": "0d6036a2e4d033a4609b99eba80894e1b832689a044e41ff45fe01c019a90cba"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full/predictions_demo.npz",
+      "sha256": "667827d9b79a33e4704ebbeb8414d96c80049d795e6c56554aa977d1a5b891c9"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/cg2_full.log",
+      "sha256": "e097427de76da33e906a22a9622d22b775eeed7fc173db2c24ee7901aaceaaea"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/comparison.json",
+      "sha256": "194f8c0c0b005b17f330446611cf247bb151783408fa782f35b61c26e6488b01"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/comparison.pdf",
+      "sha256": "a94b4c6ae174910b868a5fe7e23fdfb2f0c7fa0c385f6ded82b00b31f5b932e7"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/comparison.png",
+      "sha256": "a0c83e266e16513741ccd7019e04c63067bd53497186a412eccc572f901859a4"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/diagnostics.json",
+      "sha256": "1322552c6b8d34d39ab0d258cae223478f14642f6e57ca6c1b0705aed1ba875a"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/diffrax_worktree.patch",
+      "sha256": "2ad567ed44e8547808872aea3fb04f1cfe9412e5f2924695de1eae6bc55fcde5"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/provenance.json",
+      "sha256": "eae4299b63187072eec6ca0f2bd19dc44a46033f3a6e69acbe2f5a0526930135"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/summary.json",
+      "sha256": "0b6d57844c0a4c35b0113a37ef08e9661b64dcabe9f45cf7c9e7b6b0af6b0201"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_second_order_verified_20260925/validation.json",
+      "sha256": "e1f24adb5df0ac0b1c3222b6d02579b323a27496c91e2ef467150c838805170a"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed0__20260505_203627/config.toml",
+      "sha256": "dd5b753f519bd26ef0a6f1adf019c61b31153652a6d4112acf3ac11e5bf98d27"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed0__20260505_203627/history.json",
+      "sha256": "a7164b310612d019b1e64e257f2e72e3360570c67c2118f3bef08334fa1f7e9a"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed0__20260505_203627/metrics.json",
+      "sha256": "0c06ee0e6eb22619caba2429b1ce6a008a9a87b253eeeac139e7ac913e66d474"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed0__20260505_203627/nsde.eqx",
+      "sha256": "14e63964b479b274d4f769cc71bafce605f6091548f66043bf401d6c71bf4d59"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed1__20260505_211141/config.toml",
+      "sha256": "b72c253420b51875d18b46d2d03497bbcca77284c1eccf7603abdafb5fcfea5a"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed1__20260505_211141/history.json",
+      "sha256": "a01ad756eece5ff57bed9076c03b5c7716b6c21708ae6860970bd1c727ecda88"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed1__20260505_211141/metrics.json",
+      "sha256": "50d2a592a1206cc59a270123bc2e6254dcd1cf8abb480031e80474d89b194b99"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed1__20260505_211141/nsde.eqx",
+      "sha256": "ff10a4765623d7e584beb4b0b485e7a04a39c921f9581448de26224e842e82d8"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed2__20260505_213646/config.toml",
+      "sha256": "8644cf30483eb9bc07fc47885f23829e2002ddbc5836a4daf7379e01b64f0194"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed2__20260505_213646/history.json",
+      "sha256": "2acb8ebec9ca4a7a3cc7f160898a8166038c0a310f8bda2d15cf93ef752d32e1"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed2__20260505_213646/metrics.json",
+      "sha256": "4a4156c8f5c3534d3d8ad3070ccdf20db53e222273b415597e3a28c77a0afef6"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cfees25_reversible__seed2__20260505_213646/nsde.eqx",
+      "sha256": "370dc6df866e6d5e06c401f3157da664926d7563d2c593cc01973c574154b644"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed0__20260505_204306/config.toml",
+      "sha256": "792aa668f8fb8baa0731f97101dcfe4f92c45f8e5658b0c3f5b973a40d4159c7"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed0__20260505_204306/history.json",
+      "sha256": "3ea04ca90b330376753b701feef2b8e171a074186b749175c04fb3f2cd4b4f31"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed0__20260505_204306/metrics.json",
+      "sha256": "6c848ed049d77b863d6b2e3f45be8e29d3063d2dc522800c5c9febfaa83a94f9"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed0__20260505_204306/nsde.eqx",
+      "sha256": "e6722d19667b53addb16cfc959d81ac25ba32977b00fdcf574d5e548d8c6aa7b"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed1__20260505_211839/config.toml",
+      "sha256": "f9ce0af43300ccbe53bd8be66bee0ea20998caee73285b7e5d18f44e05b4b16f"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed1__20260505_211839/history.json",
+      "sha256": "1d7678f81f2a39ee38ea6c3c139c879e0e1f4e14a25c176e7454f4495d54a3b5"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed1__20260505_211839/metrics.json",
+      "sha256": "b94d91d3f0657a69b2fc091cfc7f62faf16dcd62c6bab2f67a9bc77a9f3633ca"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed1__20260505_211839/nsde.eqx",
+      "sha256": "b5d523bc47fc75b24108a110816f6b6f76eb16851c0dbb31178d8c0dcab789dd"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed2__20260505_214325/config.toml",
+      "sha256": "289e94abe0413d97bd9fb3e5d563a9c2338ef8e441a0f3e313c328bc1d901c4c"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed2__20260505_214325/history.json",
+      "sha256": "9dce534f080ecfbbbe058301bba495e760079cc9efa0d3dff31625df94c82880"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed2__20260505_214325/metrics.json",
+      "sha256": "e6f523e8aea40f90c506ad95f0e5dfc69544d017940b36bc420ffbb29104fefa"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__cg2_direct__seed2__20260505_214325/nsde.eqx",
+      "sha256": "9a05f63a82f95f21a7882be805e023bde77cf3eeef123767c89f3e4a6fd4181d"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed0__20260505_203015/config.toml",
+      "sha256": "99a5adb23e23b07056224dcc8dbcfc7d42ccecda6776b844c1d1d30754a7902e"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed0__20260505_203015/history.json",
+      "sha256": "921148ea7d323099b9ff64f11c429c3f86b030296121f2978467c46de7c9f663"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed0__20260505_203015/metrics.json",
+      "sha256": "7a65b73eaf2672adc322f3f9a70317f36705c44bea2fd6e126c66deb537e8287"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed0__20260505_203015/nsde.eqx",
+      "sha256": "2b28443ec00741dcb31e59158f2afae83dd426ee44ca480159d65ba76e315df4"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed1__20260505_210514/config.toml",
+      "sha256": "9eb13d490c5df5e65e37fd9d86722d8ca54317b2602f4150a19d0a48ed08fa94"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed1__20260505_210514/history.json",
+      "sha256": "6d003e43bc6b50b71a9ceefd50688ce983a8028ccac2191b20abd7d6aab36712"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed1__20260505_210514/metrics.json",
+      "sha256": "412a4cdb49e6a64b5bbdab7a13b1dfd60cb3c9ac76968dd5f3cbd021981dfff9"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed1__20260505_210514/nsde.eqx",
+      "sha256": "0e8f4124cdf391300327d9abdbfb0a7168a3510b46062cc59bd70684e360c1dc"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed2__20260505_213058/config.toml",
+      "sha256": "7c3226a9c0dc44cd174bef45f280f6af3f4a082f7ce1730e8a29b75372ff4eee"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed2__20260505_213058/history.json",
+      "sha256": "fe33abec39b7b39d550d5f3c3f7ecc82c3ad8c4ef5ea60e23ffc8f375cafa297"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed2__20260505_213058/metrics.json",
+      "sha256": "a8e59ec793f2f030b0118e7ad567bcd9506fd66c9589ee347c628afb66afa0e5"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_direct__seed2__20260505_213058/nsde.eqx",
+      "sha256": "cbb9b0c3a2736c355a20603192cfd5d7aa2bc27505047df3ef7ce23dd2d48c08"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed1__20260507_203629/config.toml",
+      "sha256": "e94765e91a1bf393fb4ab2bc028e84391272b05f6c1e3eeff5d3cecb5ea8684a"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed1__20260507_203629/history.json",
+      "sha256": "53a9f42a8e926b5f0bafaf57c1516e80dc355e38eea6a8fde54887104d458d60"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed1__20260507_203629/metrics.json",
+      "sha256": "9d08f79329c81aaa5f8d60360889dcc4fa0959813cf42ce2cd09fc14b02b73c4"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed1__20260507_203629/nsde.eqx",
+      "sha256": "2409d3ecc6a9a36e4f00e98c2a6b551f7356a182ca252fc52cd53d07b0fb935c"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed2__20260507_204807/config.toml",
+      "sha256": "88f74d29f790512cb92ad5f15026c59b357fdeff309f4597a39f9cd5152a2af2"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed2__20260507_204807/history.json",
+      "sha256": "aff3c438780c9773af7f318d246844294d4e3069b358bd48d7a47a84ad74becf"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed2__20260507_204807/metrics.json",
+      "sha256": "9c59ff9f11b72e07488e1619f42a42bc46ed44fa0ef563b8be532c58bc54a7c7"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__srkmk_general_shark_checkpoint_full__seed2__20260507_204807/nsde.eqx",
+      "sha256": "2ef8b475ac511d6b579df7effccf2646a9eaa5b60a8a16f0f2fa8f87d92c80f5"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity_parity_2sigma.csv",
+      "sha256": "0710043f74e18b9fc43a8d1a55976a51152ec55a34469611b78304eff869eae9"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity_parity_2sigma.tex",
+      "sha256": "a594402322deaac52f841315c2cc92191a54be193d84b2b562223eaa5794452c"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/kuramoto_config.toml",
+      "sha256": "82af9ac20f6d600b852cfc605c580a6206b1dc08244f3ab70a8f37dfd1760c18"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/kuramoto_memory.json",
+      "sha256": "bfad2aa6e0f7abf9ec3fc48c2df97535f501db4fe50d453dd34f1bd96af2f0c6"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sources.json",
+      "sha256": "fd0865508aa346f73a46bf8f2a40b83a365b3e546a0e922c91c52c0d6aaea7f4"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cfees25_reversible__seed0__20260505_203627/config.toml",
+      "sha256": "dd5b753f519bd26ef0a6f1adf019c61b31153652a6d4112acf3ac11e5bf98d27"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cfees25_reversible__seed0__20260505_203627/metrics.json",
+      "sha256": "0c06ee0e6eb22619caba2429b1ce6a008a9a87b253eeeac139e7ac913e66d474"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cfees25_reversible__seed1__20260505_211141/config.toml",
+      "sha256": "b72c253420b51875d18b46d2d03497bbcca77284c1eccf7603abdafb5fcfea5a"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cfees25_reversible__seed1__20260505_211141/metrics.json",
+      "sha256": "50d2a592a1206cc59a270123bc2e6254dcd1cf8abb480031e80474d89b194b99"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cfees25_reversible__seed2__20260505_213646/config.toml",
+      "sha256": "8644cf30483eb9bc07fc47885f23829e2002ddbc5836a4daf7379e01b64f0194"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cfees25_reversible__seed2__20260505_213646/metrics.json",
+      "sha256": "4a4156c8f5c3534d3d8ad3070ccdf20db53e222273b415597e3a28c77a0afef6"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cg2_direct__seed0__20260505_204306/config.toml",
+      "sha256": "792aa668f8fb8baa0731f97101dcfe4f92c45f8e5658b0c3f5b973a40d4159c7"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cg2_direct__seed0__20260505_204306/metrics.json",
+      "sha256": "6c848ed049d77b863d6b2e3f45be8e29d3063d2dc522800c5c9febfaa83a94f9"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cg2_direct__seed1__20260505_211839/config.toml",
+      "sha256": "f9ce0af43300ccbe53bd8be66bee0ea20998caee73285b7e5d18f44e05b4b16f"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cg2_direct__seed1__20260505_211839/metrics.json",
+      "sha256": "b94d91d3f0657a69b2fc091cfc7f62faf16dcd62c6bab2f67a9bc77a9f3633ca"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cg2_direct__seed2__20260505_214325/config.toml",
+      "sha256": "289e94abe0413d97bd9fb3e5d563a9c2338ef8e441a0f3e313c328bc1d901c4c"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__cg2_direct__seed2__20260505_214325/metrics.json",
+      "sha256": "e6f523e8aea40f90c506ad95f0e5dfc69544d017940b36bc420ffbb29104fefa"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__geometric_euler_direct__seed0__20260505_203015/config.toml",
+      "sha256": "99a5adb23e23b07056224dcc8dbcfc7d42ccecda6776b844c1d1d30754a7902e"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__geometric_euler_direct__seed0__20260505_203015/metrics.json",
+      "sha256": "7a65b73eaf2672adc322f3f9a70317f36705c44bea2fd6e126c66deb537e8287"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__geometric_euler_direct__seed1__20260505_210514/config.toml",
+      "sha256": "9eb13d490c5df5e65e37fd9d86722d8ca54317b2602f4150a19d0a48ed08fa94"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__geometric_euler_direct__seed1__20260505_210514/metrics.json",
+      "sha256": "412a4cdb49e6a64b5bbdab7a13b1dfd60cb3c9ac76968dd5f3cbd021981dfff9"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__geometric_euler_direct__seed2__20260505_213058/config.toml",
+      "sha256": "7c3226a9c0dc44cd174bef45f280f6af3f4a082f7ce1730e8a29b75372ff4eee"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__geometric_euler_direct__seed2__20260505_213058/metrics.json",
+      "sha256": "a8e59ec793f2f030b0118e7ad567bcd9506fd66c9589ee347c628afb66afa0e5"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__srkmk_general_shark_checkpoint_full__seed1__20260507_203629/config.toml",
+      "sha256": "e94765e91a1bf393fb4ab2bc028e84391272b05f6c1e3eeff5d3cecb5ea8684a"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__srkmk_general_shark_checkpoint_full__seed1__20260507_203629/metrics.json",
+      "sha256": "9d08f79329c81aaa5f8d60360889dcc4fa0959813cf42ce2cd09fc14b02b73c4"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__srkmk_general_shark_checkpoint_full__seed2__20260507_204807/config.toml",
+      "sha256": "88f74d29f790512cb92ad5f15026c59b357fdeff309f4597a39f9cd5152a2af2"
+    },
+    {
+      "path": "experiments/order_verification/siam/experiment_records/sphere_training/activity__srkmk_general_shark_checkpoint_full__seed2__20260507_204807/metrics.json",
+      "sha256": "9c59ff9f11b72e07488e1619f42a42bc46ed44fa0ef563b8be532c58bc54a7c7"
+    },
+    {
+      "path": "experiments/kuramoto/results/memory_sweep_N1000.json",
+      "sha256": "bfad2aa6e0f7abf9ec3fc48c2df97535f501db4fe50d453dd34f1bd96af2f0c6"
+    }
+  ],
+  "notes": [
+    "Original import manifests and saved configurations retain historical paths.",
+    "Historical Kuramoto runtime parity and sphere memory are still used by NeurIPS and were relocated rather than deleted.",
+    "All eleven used sphere runs and their SIAM metric/config snapshots remain; only the extra checkpoint-full sphere run was deleted."
+  ],
+  "deletion_status": "Completed after the user explicitly approved the 210-file (~426 MiB) inventory with \"Go ahead\".",
+  "deleted_roots": [
+    "experiments/order_verification/siam/experiment_records/kuramoto_adjoint_ablation.json",
+    "experiments/sphere_latent_nsde/results/activity__geometric_euler_checkpoint_full__seed1__20260507_200743",
+    "experiments/kuramoto/results/pilot",
+    "experiments/kuramoto/results/unified/adaptive",
+    "experiments/kuramoto/results/unified/recovery_20260925",
+    "experiments/kuramoto/results/unified/reversible_minibatch_20260925",
+    "experiments/kuramoto/results/unified/reversible_recovery_fixed_20260925",
+    "experiments/kuramoto/results/unified/reversible_recovery_small_20260925",
+    "experiments/kuramoto/results/unified/reversible_rerun_20260925",
+    "experiments/kuramoto/results/unified/reversible_small_20260925",
+    "experiments/kuramoto/results/unified/reversible_small_refined_20260925",
+    "experiments/kuramoto/results/unified/reversible_structured_20260925",
+    "experiments/kuramoto/results/unified/reversible_structured_fast_20260925",
+    "experiments/kuramoto/results/unified/reversible_tiny_20260925",
+    "experiments/kuramoto/results/unified/runs",
+    "experiments/kuramoto/results/unified/training",
+    "experiments/kuramoto/results/unified/training_rerun"
+  ],
+  "deleted_files": [
+    {
+      "path": "experiments/order_verification/siam/experiment_records/kuramoto_adjoint_ablation.json",
+      "bytes": 3969,
+      "sha256": "4fc49aba912c461c7bda1ccec68ab7d7d10b9a7a0a8693a2857f69c470cb6334"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_checkpoint_full__seed1__20260507_200743/config.toml",
+      "bytes": 594,
+      "sha256": "2f9c597a69ce706da4a9d391f3d762148e7111d7a648059edefdb1b9c4cb3acf"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_checkpoint_full__seed1__20260507_200743/history.json",
+      "bytes": 92689,
+      "sha256": "ec8d691f4008f27abcc22d732c580ea350bab553ecce338b40b8d2387ee97b5c"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_checkpoint_full__seed1__20260507_200743/metrics.json",
+      "bytes": 726,
+      "sha256": "e42fd42d25aeb1441b3f0054862572e29a09edeef6b094bad95a2b2cd0613945"
+    },
+    {
+      "path": "experiments/sphere_latent_nsde/results/activity__geometric_euler_checkpoint_full__seed1__20260507_200743/nsde.eqx",
+      "bytes": 231896,
+      "sha256": "82788d7fb8312c5f1c615beda1a5eb3e1d491a5abf984612e755b126802e6901"
+    },
+    {
+      "path": "experiments/kuramoto/results/pilot/trainparity_reversible_seed0/history.json",
+      "bytes": 3692,
+      "sha256": "af659fced947426ba8d16b67eee51900c70ec191ef55ff6cbd2bd0d71facecbd"
+    },
+    {
+      "path": "experiments/kuramoto/results/pilot/trainparity_reversible_seed1/history.json",
+      "bytes": 3700,
+      "sha256": "c2900ae800932856b378e3d836e8b1634b530b815fe5a4e4125523f2247b6d82"
+    },
+    {
+      "path": "experiments/kuramoto/results/pilot/trainparity_reversible_seed2/history.json",
+      "bytes": 3701,
+      "sha256": "1d435ec052aeb50ecef9f09d567d2ae88c5be0ce66152d05fc50734123c39354"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/config.json",
+      "bytes": 775,
+      "sha256": "566dbb4b0d80b328cab2ae288f9bedf478f3b2ee0f65fed3ff88c2efbf71cbff"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/dependency_provenance.json",
+      "bytes": 1779,
+      "sha256": "ef9149a6965a7e4f8adc41f3aba2c52f8ca32a11eb5bdec371988d5ddaaa6e83"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/diffrax-adaptive-vmap.patch",
+      "bytes": 1171,
+      "sha256": "2ad567ed44e8547808872aea3fb04f1cfe9412e5f2924695de1eae6bc55fcde5"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/diffrax-existing-failures.log",
+      "bytes": 49632,
+      "sha256": "8ac66b65c6dc39ca6186e1ba7f38a0ef38d42ec1743793195e7e9330edb87573"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/diffrax-tests.log",
+      "bytes": 65340,
+      "sha256": "ee7b9e48216dd12bf4321f33c0e9568c16b9d6ea344c7acfc0a163c383d449ea"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/environment.txt",
+      "bytes": 1399,
+      "sha256": "2308658e383f77a4d4824111e17f930e4ceb59a43db6196ecdf39f075de5c7d8"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/history.json",
+      "bytes": 22477,
+      "sha256": "44bb96b6afc64b38b4abc8a9a240e1e2845206eb3c3aaa7e9bcb578125b30461"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/kuramoto-tests.log",
+      "bytes": 100,
+      "sha256": "19e960597f0acacedfa41faa5c6e6aab58b6ff003a04066513ade447ee637139"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/model_best.eqx",
+      "bytes": 2330920,
+      "sha256": "a1767b7cfbaac213f607ef3c318927e98dff44ea6ac3328f65f988ec26e69371"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/model_epoch_000.eqx",
+      "bytes": 2330920,
+      "sha256": "a0223a939a8059b698abf56353810432f5a5484e6b7693e10b53d0fc0de6ed42"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/model_epoch_001.eqx",
+      "bytes": 2330920,
+      "sha256": "237d25adfd21eccfe9e2536929ba49ae0de8965a9664ac07162fc7d57f717cfb"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/model_epoch_002.eqx",
+      "bytes": 2330920,
+      "sha256": "10d94b4d56b63d41c2027db8bcfe563df7af8f4bcac27a09cf8ef374ebeb8b1d"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/model_epoch_003.eqx",
+      "bytes": 2330920,
+      "sha256": "5c81bd17aceaebf8c64814e48410aa8dfd5b5a1a05efadb940d3ed1a2dc9ba4e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/model_epoch_004.eqx",
+      "bytes": 2330920,
+      "sha256": "a1767b7cfbaac213f607ef3c318927e98dff44ea6ac3328f65f988ec26e69371"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/opt_state_best.eqx",
+      "bytes": 4662104,
+      "sha256": "85ee1d4f2b5ee78ed2303fe623d133fa43bd10416021e7f83672d19b170407e8"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/opt_state_latest.eqx",
+      "bytes": 4662104,
+      "sha256": "85ee1d4f2b5ee78ed2303fe623d133fa43bd10416021e7f83672d19b170407e8"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress/validation.json",
+      "bytes": 281,
+      "sha256": "d58ef610bda075c1cd5dad1d7198c4601d8e16e6c4b98306a0e5c5c82aa87920"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/adaptive/cfees25_seed0_atol1e-3_progress.log",
+      "bytes": 24194,
+      "sha256": "bc3a61fa6fe6bf9ebc9c4ef8996519f00a1714d672a30b136ac9c39ea940c0fd"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/README.md",
+      "bytes": 3395,
+      "sha256": "4572ad033f4b14430195b7f5a496ad3607fd66726d3369bb39fe4de76ff2fd91"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive/config.json",
+      "bytes": 738,
+      "sha256": "69a24acecc335d5a589e01020f7f492341c89bda81839643f633ff4c7af7782c"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive/history.json",
+      "bytes": 9589,
+      "sha256": "eb30a8a23629728c751461b5157dc9128af713bf6a540772d9cf38161338e85c"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive/model_best.eqx",
+      "bytes": 2330920,
+      "sha256": "da7cd948e1484adabf3c39b5ec16a34c1c54d54c3842da5a4722a1c829399a3b"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive/model_epoch_000.eqx",
+      "bytes": 2330920,
+      "sha256": "30fddb2206ae78a60e454ec15ff24685270ad8e7d2917abd79184ab1810de2f6"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive/model_epoch_001.eqx",
+      "bytes": 2330920,
+      "sha256": "da7cd948e1484adabf3c39b5ec16a34c1c54d54c3842da5a4722a1c829399a3b"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive/opt_state_best.eqx",
+      "bytes": 4662104,
+      "sha256": "e53088c569b680ed51c2d3f1d6a2e44c23c4f979d73903c26ce37c019f64fde0"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive/opt_state_latest.eqx",
+      "bytes": 4662104,
+      "sha256": "e53088c569b680ed51c2d3f1d6a2e44c23c4f979d73903c26ce37c019f64fde0"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive.log",
+      "bytes": 13289,
+      "sha256": "f6fb2d528765b1f21bcaeb584f21afa5906125232aab995f5d1fd36668a2f940"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/config.json",
+      "bytes": 747,
+      "sha256": "536c14fe55e7d0ea52e3032a316ef16000db1ad6a129872d5f18acda2f2d010f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/history.json",
+      "bytes": 66745,
+      "sha256": "b6f112487f6c3fa9bc9c3dab18f971302bd5a6372e0fa7391fee62113bc8441e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/metrics.json",
+      "bytes": 1716,
+      "sha256": "cafa308c8a079ac77dc93e7fe26ac76fbe4ad1dd7025e7f523b38e7d951841cd"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_best.eqx",
+      "bytes": 2330920,
+      "sha256": "ff45cec080554f3c795a9a36683e02f9dea375493ef29281d723cca407dec319"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_000.eqx",
+      "bytes": 2330920,
+      "sha256": "fb633f55580a3c7a7a03475dd16988284d718655aacc7b856353d91ba4b537d1"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_001.eqx",
+      "bytes": 2330920,
+      "sha256": "c7d47cd1861de34a0ccafebdaa8bd7ee6822e42a7d5947bca6a78901bafc7283"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_002.eqx",
+      "bytes": 2330920,
+      "sha256": "a8a348da9b3b94f41096c420ed303f1c77335c6b544b361f3219fd312c0b3e33"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_003.eqx",
+      "bytes": 2330920,
+      "sha256": "94f5e965f0e2670427a84ebec931dd4b8475b94e0483604cd79802e92a45cae6"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_004.eqx",
+      "bytes": 2330920,
+      "sha256": "48e67c0220a226e4236ddda4f270c6d2d35190e0f671f28fcb08d77d56aa8402"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_005.eqx",
+      "bytes": 2330920,
+      "sha256": "b9fd363958ba6ffe791b75c93d8a4744e709f25b8b5eb589c05330b1b0d22197"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_006.eqx",
+      "bytes": 2330920,
+      "sha256": "0607a1ad86042e586f0be8200ce0c6aac109ca2b96171df75634f5b8b95c4231"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_007.eqx",
+      "bytes": 2330920,
+      "sha256": "d739d09fbe19953c3778dd63abc4f00093e62fbf17c35b2843bcbe433ba40565"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_008.eqx",
+      "bytes": 2330920,
+      "sha256": "27992b40060c3c5a0b5ab8daa26e9041a59fd29f9ab2afb68a39061eace3f2fd"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_009.eqx",
+      "bytes": 2330920,
+      "sha256": "1422b5beb0f21ae58b41e31a67aa596f6924c07dbb955d24d50b1bce68b1dd0a"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_010.eqx",
+      "bytes": 2330920,
+      "sha256": "4bea3fd39b9a96579d48990cdb905d6e1109bdbab88f861ca5cdc80818063e33"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_011.eqx",
+      "bytes": 2330920,
+      "sha256": "1107ff0f189e45183f07a25047489f65ba1f9f5a6c5e8acbb600540ad3f0b927"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_012.eqx",
+      "bytes": 2330920,
+      "sha256": "c148b4a8d735f79f890b75cd0c2a15d8592288fd34d2a2e5e8e7ad9dcd423c9e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_013.eqx",
+      "bytes": 2330920,
+      "sha256": "ff45cec080554f3c795a9a36683e02f9dea375493ef29281d723cca407dec319"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_epoch_014.eqx",
+      "bytes": 2330920,
+      "sha256": "7ed9476ffa505d56cb4fd7c35561b9c331efce8432f296f22a645015b8f33a35"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/model_final.eqx",
+      "bytes": 2330920,
+      "sha256": "7ed9476ffa505d56cb4fd7c35561b9c331efce8432f296f22a645015b8f33a35"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/opt_state_best.eqx",
+      "bytes": 4662104,
+      "sha256": "c9f1fa8e34807eaf6dee357c708cc591651a7455f0103d787c93e80321a4a2de"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/opt_state_final.eqx",
+      "bytes": 4662104,
+      "sha256": "8ef7e38f2e8b4366baf94c5e0feb633c0791652e53b813dc58a0e7845683357f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/opt_state_latest.eqx",
+      "bytes": 4662104,
+      "sha256": "8ef7e38f2e8b4366baf94c5e0feb633c0791652e53b813dc58a0e7845683357f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed/predictions_demo.npz",
+      "bytes": 26479845,
+      "sha256": "c4236c73ddf365b9853a6a148b252b134b6d625225aaea8509e4b6cae72ff5db"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_checkpointed.log",
+      "bytes": 85221,
+      "sha256": "b5d1813296c36a0a6bcc1e1c92ccd7d52de30c00846bb65fa1fc33f2b7c94d64"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast/config.json",
+      "bytes": 747,
+      "sha256": "329131376cb317e618922c350e29733e04ae80390fe8c94bbb471f3001757e89"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast/history.json",
+      "bytes": 9594,
+      "sha256": "434bf15a30c6208b2011b0a6dcc2f1deb52fdb70b7cf52e21373d5370eed6444"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast/model_best.eqx",
+      "bytes": 2330920,
+      "sha256": "f9d8b70e4e470039c176886573479564b447aed927540b3d4c212691eb04acce"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast/model_epoch_000.eqx",
+      "bytes": 2330920,
+      "sha256": "d5b6e4f7ada6e5f783ff6daa88c3eda00bec785375bf9a91d0741ed98c915f6f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast/model_epoch_001.eqx",
+      "bytes": 2330920,
+      "sha256": "f9d8b70e4e470039c176886573479564b447aed927540b3d4c212691eb04acce"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast/opt_state_best.eqx",
+      "bytes": 4662104,
+      "sha256": "42a2da84f1d42e8820c9514e72f9893f5b2549ed8ba90dc0dde52f805681990b"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast/opt_state_latest.eqx",
+      "bytes": 4662104,
+      "sha256": "42a2da84f1d42e8820c9514e72f9893f5b2549ed8ba90dc0dde52f805681990b"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast.log",
+      "bytes": 18594,
+      "sha256": "86c0f9459a2145af18d1b8fc2522ed861b0209a4e19b0397b658658a6c6ec2ea"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/config.json",
+      "bytes": 747,
+      "sha256": "8f2970de33aa14d2afe332043d1ce422a244d1929d3f38b560e931beb585aaea"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/history.json",
+      "bytes": 66987,
+      "sha256": "13647911f3b7ba68a60769b52c72bfb46d0fc513ba268c91ed721bf0546ddead"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/metrics.json",
+      "bytes": 1705,
+      "sha256": "b8cee861fd6f2ed8a5b9b1ca3696777739158f672a098af259fb85481f6cb0bf"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_best.eqx",
+      "bytes": 2330920,
+      "sha256": "447ad5f10cb9c40aacbf5f4a933062d48a86d409959c31f7c56b7741186d5fff"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_000.eqx",
+      "bytes": 2330920,
+      "sha256": "45593ebe41a0888a503ba864e68b59bfcc185ab511f73258bd53de609c227650"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_001.eqx",
+      "bytes": 2330920,
+      "sha256": "4b3b1ae2aa380d63919945780379398ad02b46f11f98ad028483c4791819e345"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_002.eqx",
+      "bytes": 2330920,
+      "sha256": "ed928f8294fae3cecd0928c653c334030fbaab86ee028408261998d3e44ed964"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_003.eqx",
+      "bytes": 2330920,
+      "sha256": "ec9355c79307b1cb9fd11de2e705efaa4b955fbcaa08a9c3cefc00eb4f3b4929"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_004.eqx",
+      "bytes": 2330920,
+      "sha256": "c86c193d14ab293b61408e978f489dfe2c5be836cb81fd5635eb25c32b65d76a"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_005.eqx",
+      "bytes": 2330920,
+      "sha256": "1244f1e6d448b02b21b06b84a491983c207fc5b8d21aced6debae1c83befb54d"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_006.eqx",
+      "bytes": 2330920,
+      "sha256": "659489a6110cc5c96a7489501c4c60549fb4ee57e65702665f4b549f51bf71ea"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_007.eqx",
+      "bytes": 2330920,
+      "sha256": "5f58ad1ec1c3953be2dab8c2aa555fbdeb70e6be1d5707dae421cb5003fce856"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_008.eqx",
+      "bytes": 2330920,
+      "sha256": "c48c8b9c4b29b0edd448450eb57b40b50dc7d4d317b11ceee9ccf8df95188305"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_009.eqx",
+      "bytes": 2330920,
+      "sha256": "6a6f45a94450b5a4ae8ec08390e5cf20c4027d02d4bf97870c761de54fda0122"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_010.eqx",
+      "bytes": 2330920,
+      "sha256": "676532458610cf2a05148f7cabd5e445c08e1f21c16ff4adb2f5cb983bfbf148"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_011.eqx",
+      "bytes": 2330920,
+      "sha256": "e13ba92302a4dd1df3c8613bff15ee9eaf558012dd57044b0a1f5d07548ad41c"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_012.eqx",
+      "bytes": 2330920,
+      "sha256": "13203fb1a5c953a66e77a44244c1d93be0da2d5b19919c088f8a09328e5c21e3"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_013.eqx",
+      "bytes": 2330920,
+      "sha256": "447ad5f10cb9c40aacbf5f4a933062d48a86d409959c31f7c56b7741186d5fff"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_epoch_014.eqx",
+      "bytes": 2330920,
+      "sha256": "ca8fad082873a1c7464ab926f5505413db7cf534794dc68563b40b0617ec65a0"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/model_final.eqx",
+      "bytes": 2330920,
+      "sha256": "ca8fad082873a1c7464ab926f5505413db7cf534794dc68563b40b0617ec65a0"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/opt_state_best.eqx",
+      "bytes": 4662104,
+      "sha256": "169fd8cd8def7a9c0a5c08a692fa9a987b0c5c44c7eb4fdf1ed26e6a14259de3"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/opt_state_final.eqx",
+      "bytes": 4662104,
+      "sha256": "8207763ecfd9dcd4dfdde3fc66fd926d332afb569e137f6508ec28f2ddfe792a"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/opt_state_latest.eqx",
+      "bytes": 4662104,
+      "sha256": "8207763ecfd9dcd4dfdde3fc66fd926d332afb569e137f6508ec28f2ddfe792a"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified/predictions_demo.npz",
+      "bytes": 26473156,
+      "sha256": "689311ddc069c94cca37fb745bd980022424e1b515c46c1822ea14aaf8e7c481"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cfees25_adaptive_fast_verified.log",
+      "bytes": 85218,
+      "sha256": "83f526ebe8f9b984e4d826ccdcf23f1f5ed6db3bd5918361311dafd2409feeba"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/config.json",
+      "bytes": 740,
+      "sha256": "d1f3d843a09da5ae1085ada017c4d20b796196fcf616f229af09361d4d8e7dcd"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/history.json",
+      "bytes": 66613,
+      "sha256": "5d40a7434942dd4bbcefbdcceb68666744b3a5c183df7a52f5d0723db238dc69"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/metrics.json",
+      "bytes": 1161,
+      "sha256": "0a20f2a9becd04353327a68c306eaa1e8fb3bcd567f640f57c702480be28205b"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_best.eqx",
+      "bytes": 2330920,
+      "sha256": "e5a18f455b9e4b89b3cd94530cf1ed6fb82882d3f6c4269d70a190b7eb393ad4"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_000.eqx",
+      "bytes": 2330920,
+      "sha256": "60d51f871f93163bf9ce7eaa02f0a25e4aed85ef80fadde5eb57af127b50d491"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_001.eqx",
+      "bytes": 2330920,
+      "sha256": "dbf797b587ffeec65e193181a2efc240191eb873e825b0682e4d80c2541b21fc"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_002.eqx",
+      "bytes": 2330920,
+      "sha256": "f062f640c8952fc9d4091aa9787a29581c11508882a1e3f0d24ea2d58da1c3cd"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_003.eqx",
+      "bytes": 2330920,
+      "sha256": "18050a8f1d1dafe2fc20890ff743fc3d5d851e7395fac21fe7fbb341af40a3d9"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_004.eqx",
+      "bytes": 2330920,
+      "sha256": "83dad88cf8502f87c047de00c8e807f208e349dd44da8e5f33c3f0f5c8dfb2f3"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_005.eqx",
+      "bytes": 2330920,
+      "sha256": "ea34aa6a59cd27ed193d9f96bf67d96800408f806d24a0e47ae6cc9befeb973c"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_006.eqx",
+      "bytes": 2330920,
+      "sha256": "4fbbe65f8eec80a9bbcdf4503c067a840f8ffff2ce5ec17639815aade328af25"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_007.eqx",
+      "bytes": 2330920,
+      "sha256": "f7c4308978867a05c167b665b5b3f3e7d9537512e6da46bf06089c5be8eb2b54"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_008.eqx",
+      "bytes": 2330920,
+      "sha256": "1bf58e80021518519d932d56c4088643a3d4464f0f36c19c8c98da15126c40fa"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_009.eqx",
+      "bytes": 2330920,
+      "sha256": "44206f42ffc1e05ae3b101234526d3d84b520d3a61e0b62bb5eff0fd6119a823"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_010.eqx",
+      "bytes": 2330920,
+      "sha256": "f062a9d425a01e2764c586b36b37ab6f86fea1a32bdc669d03782ffc681a0ac8"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_011.eqx",
+      "bytes": 2330920,
+      "sha256": "c1e054ee6325d13a9b6f40b5ad1f021b920a6c2fcc4a2cd225f1606757a562ac"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_012.eqx",
+      "bytes": 2330920,
+      "sha256": "cfa12ef05add385b35d53b42c7b6dc37a976eeea9e9d4d0d1bf7b255ee36222e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_013.eqx",
+      "bytes": 2330920,
+      "sha256": "e5a18f455b9e4b89b3cd94530cf1ed6fb82882d3f6c4269d70a190b7eb393ad4"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_epoch_014.eqx",
+      "bytes": 2330920,
+      "sha256": "c62bbd87b31902e417c8d06657fba485fb97e93895a2c3ce88f16c795c98dd19"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/model_final.eqx",
+      "bytes": 2330920,
+      "sha256": "c62bbd87b31902e417c8d06657fba485fb97e93895a2c3ce88f16c795c98dd19"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/opt_state_best.eqx",
+      "bytes": 4662104,
+      "sha256": "bb3ba162832df49ce750e50340da3da4661f4d82bb11c78b8c63287b93d71114"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/opt_state_final.eqx",
+      "bytes": 4662104,
+      "sha256": "981313a351f22bb069af135f19f24804eb9de5c5e2911b9a55996a4aeafa8362"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/opt_state_latest.eqx",
+      "bytes": 4662104,
+      "sha256": "981313a351f22bb069af135f19f24804eb9de5c5e2911b9a55996a4aeafa8362"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full/predictions_demo.npz",
+      "bytes": 26482183,
+      "sha256": "fff670b7e8461d7ac30f313614f8728d55bc80f56e31285464aeb70af3173a43"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/cg2_full.log",
+      "bytes": 85379,
+      "sha256": "a718cd6ff7bc776e4e73ad4a74088c8323ccd8cb2608aae5a1cea18fa0772b4b"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/comparison.json",
+      "bytes": 8568,
+      "sha256": "fdf9190258b6ed90488ebddc01b32fe08f11f589f5fba3c65e24c9fcefd7bfb2"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/comparison.pdf",
+      "bytes": 18341,
+      "sha256": "f5ee28d5b83720682be3b93e14a7cbf23b703beb9ad1d688b01d92a474762106"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/comparison.png",
+      "bytes": 120911,
+      "sha256": "b439e51c8e501b8953bde96bb28375ef6ba3577d2aac9e33187600121d72e7a5"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/diffrax_worktree.patch",
+      "bytes": 1171,
+      "sha256": "2ad567ed44e8547808872aea3fb04f1cfe9412e5f2924695de1eae6bc55fcde5"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/failure_reproduction.json",
+      "bytes": 9038,
+      "sha256": "256a2fce04db215b19555e1d52ef89128b92c6293b9a4ab9c33e1d103908e6e6"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/provenance.json",
+      "bytes": 1071,
+      "sha256": "8f22f185712b3eb5db5592ab91d5c06ddd41c29cd3ddd26657c1ec6ad1643c70"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/summary.json",
+      "bytes": 1801,
+      "sha256": "0dbd54ea902bead78404d4c51476ca7f7bc5fd95802a3ad9ed97bcaf54fca748"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/recovery_20260925/validation.json",
+      "bytes": 1044,
+      "sha256": "5d87dbf196081316561d4b384a246a6d94ce1845a83a1918d714855c7bd90bd7"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_minibatch_20260925/cg2.eqx",
+      "bytes": 2330920,
+      "sha256": "16774ce164917aa31b9fb1808d95af4216706642b7411319dc0870e643ec99c0"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_minibatch_20260925/ees.eqx",
+      "bytes": 2330920,
+      "sha256": "4513ef96b54c460f1ef3b82d516ab4364481a69413bc0a165e81a4895ee736ca"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_minibatch_20260925/results.json",
+      "bytes": 4695,
+      "sha256": "880fd9eaf4d7492dc0238ca198b92320ef1c6cb5d4b7b6c0906be091e593356c"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_recovery_fixed_20260925/ees.eqx",
+      "bytes": 2330920,
+      "sha256": "abfa02515840a203cf8d154d5299b87096bcc3aa2615ffc13652c271f97b2ed4"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_recovery_fixed_20260925/results.json",
+      "bytes": 2307,
+      "sha256": "69159c2e5866e266f55052c28334f27b339d3ed3e2206de263714330af893460"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_recovery_small_20260925/cg2.eqx",
+      "bytes": 2330920,
+      "sha256": "ce159bb342543351d0e56e38b12510982715ac1c34876a47e08bb4c78fc1d312"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_recovery_small_20260925/ees_raw.eqx",
+      "bytes": 2330920,
+      "sha256": "48bfd41fdc48de97108708258d0721ece479ba582308c50bec5fb18055874d7e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_recovery_small_20260925/results.json",
+      "bytes": 4088,
+      "sha256": "dcf1a05c623605f663c7339049a6696a7b9ebcc7a7f242a91215bd85a3a82fd6"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/diffrax_worktree.patch",
+      "bytes": 1171,
+      "sha256": "2ad567ed44e8547808872aea3fb04f1cfe9412e5f2924695de1eae6bc55fcde5"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/provenance.json",
+      "bytes": 962,
+      "sha256": "a09ea9832d5b756be4cc4160eec495397a48cec360dd6135066478d4465a0b00"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/run.json",
+      "bytes": 614,
+      "sha256": "8c3caa2c948bdbb59ca87a9e3126e623d892453b73471daa013dbb1de4dfe7c6"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/config.json",
+      "bytes": 737,
+      "sha256": "ff94d7876f91e3a4ceaef4813257a14e3d29ee01c76f516999de93e44874b4d7"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/history.json",
+      "bytes": 50521,
+      "sha256": "ce365beb14c0f55a280da1fb8ca0ae8a0feb93535589decd3f4b0c1348d968b0"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_best.eqx",
+      "bytes": 2330920,
+      "sha256": "483c08c61d1b55c04bc4a432a2e29bb4d14d9d629a0d8d072f25e25dca1c47aa"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_000.eqx",
+      "bytes": 2330920,
+      "sha256": "d36b8ed9249fd22ead292cf8a20bf3204a75ef1d73a4a187d71fc4633ba42c31"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_001.eqx",
+      "bytes": 2330920,
+      "sha256": "6a500ef050e70ce007a2635902a0e6064b894073e77ca6f5b4482158d10210fe"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_002.eqx",
+      "bytes": 2330920,
+      "sha256": "34b511d2098b2e876e453dae316131a5c3437830c0d85d73cd7c8bfd76367366"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_003.eqx",
+      "bytes": 2330920,
+      "sha256": "e310579f170a5c85617c4952d98877c7cbe089ab1c266d2b56799fa170c5743c"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_004.eqx",
+      "bytes": 2330920,
+      "sha256": "483c08c61d1b55c04bc4a432a2e29bb4d14d9d629a0d8d072f25e25dca1c47aa"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_005.eqx",
+      "bytes": 2330920,
+      "sha256": "4fb214c77cdd7eb8140d7876a92051e4c5fad98f69045d53480d4e6d130cdb39"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_006.eqx",
+      "bytes": 2330920,
+      "sha256": "54e128fbb0e0086bb2fcfef3da708750a8ab1d7764813d89a3ac3d7f162b4de5"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_007.eqx",
+      "bytes": 2330920,
+      "sha256": "953efd1d054ee49448cb47d99324105e0f412a1bd473181cabd8c6b1434aecee"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_008.eqx",
+      "bytes": 2330920,
+      "sha256": "da521c62d4d328fbe5b19efae53c08310414e618245b60350e7c54be4ea40b46"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_009.eqx",
+      "bytes": 2330920,
+      "sha256": "b6e406b8c69ee6cc832cdabfd26df6f51c9ea4ead9068503b2c2041036c82c6c"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_010.eqx",
+      "bytes": 2330920,
+      "sha256": "0a1e87130de316306f6701c728005e30464539dd288aa3d135f9cd6d79bc38a8"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_011.eqx",
+      "bytes": 2330920,
+      "sha256": "a6803e16343b163467ad330acff558dd22ebaac93db422b46c1d791a6e0f6c8c"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/model_epoch_012.eqx",
+      "bytes": 2330920,
+      "sha256": "e1aca8f3cbd6f867b4cdcc3d55c081a011206112b13a353c392cd0a660f9f18e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/opt_state_best.eqx",
+      "bytes": 4662104,
+      "sha256": "0dc33dfb863c4db1a3c1de423a40954e649ca00090ba42f5a09fa9ee578a9639"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training/opt_state_latest.eqx",
+      "bytes": 4662104,
+      "sha256": "5fc9e31f37e25ec863362c7478bc4f0dc1382daf39a1a9b14ac950b6b336b4c6"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_rerun_20260925/training.log",
+      "bytes": 75671,
+      "sha256": "3b82527a3b2d778272a9204977add58fc4daf31da11ecc20a1cc8e1c184cca7f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_small_20260925/cg2.eqx",
+      "bytes": 36872,
+      "sha256": "04482897aafe48b17aba7bc2a18ceab9f07b7aa396ce2c8f050e01a390b9070d"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_small_20260925/results.json",
+      "bytes": 2293,
+      "sha256": "8a89584c2621857c693de4842ac64a1d2a442db4563a4ea500ba51399994d858"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_structured_20260925/cg2_structure.eqx",
+      "bytes": 2331052,
+      "sha256": "f1ac1542fc59d4cfd28a3a9bfbbd043704f3834ab4474517992aac28a862bbbb"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_structured_20260925/ees_structure.eqx",
+      "bytes": 2331052,
+      "sha256": "f653aa01e8acb973ae3d70eb4989a6e8221fdcad59bd2abf74cb93400523b411"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_structured_20260925/results.json",
+      "bytes": 4904,
+      "sha256": "f087f84c83689fb2f2bb41d1346bb43015820482b41ff1268bf2f9dca3913d95"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_structured_fast_20260925/ees.eqx",
+      "bytes": 2331052,
+      "sha256": "84e664c65c89766785776d7dd3a7ea7f420c81b74e3432e1ae941953e3f9040f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_structured_fast_20260925/results.json",
+      "bytes": 3231,
+      "sha256": "424b60adbf158782a86a5528b76b4ce5d33a745cf3a4ce592b499b28448f5995"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_tiny_20260925/cg2.eqx",
+      "bytes": 9640,
+      "sha256": "e9a5b134ed12087e183bd64d6cac5b7eb86af9be254820cd4e2986dfd4274d53"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_tiny_20260925/ees.eqx",
+      "bytes": 9640,
+      "sha256": "5661cc554805159782c20604321678f58f1ef996806b8019a3bd85e8e38a6ae0"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_tiny_20260925/ees_kinematic.eqx",
+      "bytes": 9640,
+      "sha256": "151ee44e6fb3c99606df707e114419468b3ea5644c0670961469154e6e9dd255"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_tiny_20260925/ees_refined.eqx",
+      "bytes": 9640,
+      "sha256": "a2c6bfded0ddc2c4a46f25d33d7c18d4d53df0366c45f4f2db5c7109af721cad"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/reversible_tiny_20260925/results.json",
+      "bytes": 9600,
+      "sha256": "c5eb04379a116b84a0cf5f43e6e0243ec2850673351261f2fc55405fc9542c55"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260924_233105_994680/config.json",
+      "bytes": 739,
+      "sha256": "d678082e09aaa4ee794ce615377c663c806558a2f794682cddf35c484002265e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260924_234917_001616/config.json",
+      "bytes": 739,
+      "sha256": "d678082e09aaa4ee794ce615377c663c806558a2f794682cddf35c484002265e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260924_234917_001616/history.json",
+      "bytes": 13825,
+      "sha256": "69fc51bc2d64963d20ec35365ff4adb8da05d1e5d816af9030aae5d855236514"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260924_234917_001616/model_best.eqx",
+      "bytes": 2330920,
+      "sha256": "38c128bca7375bf7f65f0cce58ed452af81decb89e542386473adda7a5e4b419"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260924_234917_001616/model_epoch_000.eqx",
+      "bytes": 2330920,
+      "sha256": "4a98295b20e12742ad15df536972381886f6c766d0ecaf035f96f4a8e830b7b1"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260924_234917_001616/model_epoch_001.eqx",
+      "bytes": 2330920,
+      "sha256": "de2e0108ecb73a75e74a1e6b129de86c653388b7a118e9444b8f202a2f7a9d8d"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260924_234917_001616/model_epoch_002.eqx",
+      "bytes": 2330920,
+      "sha256": "38c128bca7375bf7f65f0cce58ed452af81decb89e542386473adda7a5e4b419"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260924_234917_001616/opt_state_best.eqx",
+      "bytes": 4662104,
+      "sha256": "90c5639b072b69c3600b0da916c8f726d633cf516c526ea6322ed84641e6a522"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260924_234917_001616/opt_state_latest.eqx",
+      "bytes": 4662104,
+      "sha256": "90c5639b072b69c3600b0da916c8f726d633cf516c526ea6322ed84641e6a522"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/config.json",
+      "bytes": 738,
+      "sha256": "b0ef405723b37cac3887835fbadb9be64cbb0cb274a9e165edb04382cf02b43d"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/history.json",
+      "bytes": 34452,
+      "sha256": "4597a3cb7d666f8984c7182b9c4424ba7516b86601de408f93399ef58e3bbe5e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/model_best.eqx",
+      "bytes": 2330920,
+      "sha256": "24885aeb5b4f2683b1b7c80650f36ddc5f92d17a729cde8ded1516abde886886"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/model_epoch_000.eqx",
+      "bytes": 2330920,
+      "sha256": "164a268fe902c4626d0db60a7b882d7450c145c54c8ebf8a94d2e0012c21e7cd"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/model_epoch_001.eqx",
+      "bytes": 2330920,
+      "sha256": "828cb9c48cd4900a82d642249a7d7067a92628f76aba4f400f38185227d10572"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/model_epoch_002.eqx",
+      "bytes": 2330920,
+      "sha256": "c2121f597b281664c07e5835158a06af8e37032da1e6a933fe6395526b184367"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/model_epoch_003.eqx",
+      "bytes": 2330920,
+      "sha256": "ff120045302cf5f3a700f93f38ad687316b36e64407bc543021f587f02bcef62"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/model_epoch_004.eqx",
+      "bytes": 2330920,
+      "sha256": "24885aeb5b4f2683b1b7c80650f36ddc5f92d17a729cde8ded1516abde886886"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/model_epoch_005.eqx",
+      "bytes": 2330920,
+      "sha256": "3b30fbd9807dcaec885a8f291278bc0702c915a8b53d3bd6b33341fb8ddd1fc3"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/model_epoch_006.eqx",
+      "bytes": 2330920,
+      "sha256": "cf7a82934427597733edccdc805b79d9ea7327435121c3e6da2b507627222e40"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/model_epoch_007.eqx",
+      "bytes": 2330920,
+      "sha256": "50016f299e99ca18864009c4a20e4e7e51b91d9da47865f9fdb0a7f14199f704"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/opt_state_best.eqx",
+      "bytes": 4662104,
+      "sha256": "396d99b4ac9d0df6499bcdb22a2d62d4952af95a10a60a4e3c4f816fcf268243"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_002246_213674/opt_state_latest.eqx",
+      "bytes": 4662104,
+      "sha256": "dfb12deb76184e99c37f7a7821f524a51319cfef7230a0bafdb816843772fc22"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_004203_346818/config.json",
+      "bytes": 738,
+      "sha256": "b0ef405723b37cac3887835fbadb9be64cbb0cb274a9e165edb04382cf02b43d"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_004203_346818/history.json",
+      "bytes": 22372,
+      "sha256": "bffcf9ee40d5049cffe9157f5262a4b8a0315446d49bec8b786be87431dbba98"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_004203_346818/model_best.eqx",
+      "bytes": 2330920,
+      "sha256": "384f69430d2eba72c5b921f4d1691b05a2d0e72d4237797c3ff9a6152d2186e8"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_004203_346818/model_epoch_000.eqx",
+      "bytes": 2330920,
+      "sha256": "64f2f5f949ae541d92d96b31d16073ec0e419e1c6ed9c18bf8b5256a80a862fc"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_004203_346818/model_epoch_001.eqx",
+      "bytes": 2330920,
+      "sha256": "f90f11b7b809b68fa2b4ff29a42b4c6051ec5458ea39dd29ee158b21f823e3d8"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_004203_346818/model_epoch_002.eqx",
+      "bytes": 2330920,
+      "sha256": "8c3339eaf197517b6e2cb13fbe5114d304f43952dda8d3458a83bccbf3038563"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_004203_346818/model_epoch_003.eqx",
+      "bytes": 2330920,
+      "sha256": "f73fca036ae7265df8c9c6a7b294ec0cf65bc5828fe91d681d0047b36ae7ec06"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_004203_346818/model_epoch_004.eqx",
+      "bytes": 2330920,
+      "sha256": "384f69430d2eba72c5b921f4d1691b05a2d0e72d4237797c3ff9a6152d2186e8"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_004203_346818/opt_state_best.eqx",
+      "bytes": 4662104,
+      "sha256": "3af370aea2fa6394041bcae8ece4212a0ca3f90296ed9f315cc19e05304d1583"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/runs/20260925_004203_346818/opt_state_latest.eqx",
+      "bytes": 4662104,
+      "sha256": "3af370aea2fa6394041bcae8ece4212a0ca3f90296ed9f315cc19e05304d1583"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/training/cg2_full_seed0/train.log",
+      "bytes": 321,
+      "sha256": "ad135ffd969a48c6c55f00f42d26c209385fedd10ed221b9b3bc3a541201bc7f"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/training/comparison.json",
+      "bytes": 804,
+      "sha256": "3bc96868b0852028863dc1ebbaa08f964d7cf79227d4a3e44333d3d17f27b3b4"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/training_rerun/cg2_full_seed0/config.json",
+      "bytes": 741,
+      "sha256": "1e62b2bd7b4759027bd5afd9059a8406f552ff7b115d2842a2943e932b017834"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/training_rerun/cg2_full_seed0/history.json",
+      "bytes": 9501,
+      "sha256": "75305f1400da163dfdb829b7a466a2b5bb869474df9fbbe76916cdcd8c96d72d"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/training_rerun/cg2_full_seed0/model_best.eqx",
+      "bytes": 2330920,
+      "sha256": "db3d3fa82e77d2dbf8e9f3d7b1009e1bfbe97b8f52a713a724efbf20c824c22b"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/training_rerun/cg2_full_seed0/model_epoch_000.eqx",
+      "bytes": 2330920,
+      "sha256": "44ed5fd37ceaa7a1f2c6dc491843df7cf1604716fbf8993913bf9658d129c00e"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/training_rerun/cg2_full_seed0/model_epoch_001.eqx",
+      "bytes": 2330920,
+      "sha256": "db3d3fa82e77d2dbf8e9f3d7b1009e1bfbe97b8f52a713a724efbf20c824c22b"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/training_rerun/cg2_full_seed0/opt_state_best.eqx",
+      "bytes": 4662104,
+      "sha256": "57ad128b17f81477826a7ccf52672733d7f973cadff0960f59c8ab2c0b6b068a"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/training_rerun/cg2_full_seed0/opt_state_latest.eqx",
+      "bytes": 4662104,
+      "sha256": "57ad128b17f81477826a7ccf52672733d7f973cadff0960f59c8ab2c0b6b068a"
+    },
+    {
+      "path": "experiments/kuramoto/results/unified/training_rerun/cg2_full_seed0.log",
+      "bytes": 2738,
+      "sha256": "a652bf3f2d0ecaed69d99b978e81b64619d2be7c47e7b3bf6cc9c5d8362754ff"
+    }
+  ],
+  "deleted_bytes": 446909539
+}

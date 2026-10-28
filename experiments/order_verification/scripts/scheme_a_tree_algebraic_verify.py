@@ -42,15 +42,16 @@ from __future__ import annotations
 
 from fractions import Fraction
 from math import factorial
-from typing import Dict, Tuple
 
 from mkw_verify import (
-    LEAF, PTree, PForest, EMPTY_FOREST, Nil,
-    planar_trees_of_weight,
+    EMPTY_FOREST,
+    LEAF,
+    Nil,
+    PForest,
+    PTree,
     lac_coproduct_terms,
-    eval_forest, eval_tree_or_nil,
+    planar_trees_of_weight,
 )
-
 
 # ============================================================================
 # Types
@@ -63,8 +64,8 @@ from mkw_verify import (
 #   -- represents a Lie-algebra series (a vector field in LB language).
 # ============================================================================
 
-StateChar = Dict[Tuple[int, PForest], Fraction]
-LieChar   = Dict[Tuple[int, PTree],   Fraction]
+StateChar = dict[tuple[int, PForest], Fraction]
+LieChar = dict[tuple[int, PTree], Fraction]
 
 
 def state_zero() -> StateChar:
@@ -79,6 +80,7 @@ def prune_zero(d):
 # Operation 1:  xi applied to a state
 # ============================================================================
 
+
 def xi_of_state(state: StateChar) -> LieChar:
     """The LB character of xi(state).  For each (h, omega) term in the
     state with coefficient c, the Lie-algebra series contains the tree
@@ -86,7 +88,7 @@ def xi_of_state(state: StateChar) -> LieChar:
     and coefficient c."""
     out: LieChar = {}
     for (h_deg, forest), c in state.items():
-        tree = PTree(forest.trees)          # B_+ : forest -> tree
+        tree = PTree(forest.trees)  # B_+ : forest -> tree
         key = (h_deg, tree)
         out[key] = out.get(key, Fraction(0)) + c
     return prune_zero(out)
@@ -95,6 +97,7 @@ def xi_of_state(state: StateChar) -> LieChar:
 # ============================================================================
 # Operation 2:  scale by h and combine
 # ============================================================================
+
 
 def lin_combo_lie(scalars, lie_chars) -> LieChar:
     out: LieChar = {}
@@ -117,6 +120,7 @@ def scale_h_lie(lc: LieChar, power: int) -> LieChar:
 # front of the state's forest, then sum over k and divide by k!.
 # ============================================================================
 
+
 def action_V_on_state(V: LieChar, state: StateChar, max_h: int) -> StateChar:
     """Single left-action: V . state.
     For each (h_v, tau) in V and (h_s, omega) in state, contribute
@@ -135,8 +139,8 @@ def action_V_on_state(V: LieChar, state: StateChar, max_h: int) -> StateChar:
 
 def exp_action_on_state(V: LieChar, state: StateChar, max_h: int) -> StateChar:
     """exp(V) . state  = sum_{k>=0} V^k . state / k!, truncated at h^max_h."""
-    out: StateChar = dict(state)         # k = 0 term
-    Wk: StateChar = dict(state)          # W_0 = state; W_k = V^k . state
+    out: StateChar = dict(state)  # k = 0 term
+    Wk: StateChar = dict(state)  # W_0 = state; W_k = V^k . state
     for k in range(1, max_h + 1):
         Wk = action_V_on_state(V, Wk, max_h)
         if not Wk:
@@ -152,8 +156,8 @@ def exp_action_on_state(V: LieChar, state: StateChar, max_h: int) -> StateChar:
 # ============================================================================
 
 BETA = [
-    [Fraction(1, 3),    Fraction(0),      Fraction(0)],
-    [Fraction(-7, 16),  Fraction(15, 16), Fraction(0)],
+    [Fraction(1, 3), Fraction(0), Fraction(0)],
+    [Fraction(-7, 16), Fraction(15, 16), Fraction(0)],
     [Fraction(49, 240), Fraction(-7, 16), Fraction(2, 5)],
 ]
 
@@ -161,6 +165,7 @@ BETA = [
 # ============================================================================
 # Scheme A recurrence as a composition of tree-algebra operations
 # ============================================================================
+
 
 def scheme_a_character(max_h: int, h_sign: int = 1) -> StateChar:
     """Run Scheme A's 2N recurrence in the planar-forest Hopf algebra and
@@ -191,9 +196,10 @@ def scheme_a_character(max_h: int, h_sign: int = 1) -> StateChar:
 # Extract phi_A(tau) for planar trees, verify MKW antisymmetry
 # ============================================================================
 
-def extract_phi_tree(state: StateChar, w_max: int) -> Dict[PTree, Fraction]:
+
+def extract_phi_tree(state: StateChar, w_max: int) -> dict[PTree, Fraction]:
     """Extract phi on single-tree forests (for inspection / classical-order check)."""
-    phi: Dict[PTree, Fraction] = {}
+    phi: dict[PTree, Fraction] = {}
     for w in range(1, w_max + 1):
         for tau in planar_trees_of_weight(w):
             key = (w, PForest((tau,)))
@@ -242,9 +248,13 @@ def convolve_lac(state: StateChar, tree: PTree, convention: str = "forest") -> F
                              mkw_verify.py.
     """
     if convention == "forest":
-        def phi_on(P): return phi_on_forest(state, P)
+
+        def phi_on(P):
+            return phi_on_forest(state, P)
     elif convention == "tree_prod":
-        def phi_on(P): return phi_on_forest_treeprod(state, P)
+
+        def phi_on(P):
+            return phi_on_forest_treeprod(state, P)
     else:
         raise ValueError(f"unknown convention: {convention}")
 
@@ -260,6 +270,7 @@ def convolve_lac(state: StateChar, tree: PTree, convention: str = "forest") -> F
 # Main
 # ============================================================================
 
+
 def main():
     MAX_H = 6
 
@@ -269,8 +280,10 @@ def main():
     print("=" * 76)
     print()
 
-    print(f"  Building phi_A = LB character of Scheme A on H_N (up to h^{MAX_H}) ...",
-          flush=True)
+    print(
+        f"  Building phi_A = LB character of Scheme A on H_N (up to h^{MAX_H}) ...",
+        flush=True,
+    )
     state = scheme_a_character(MAX_H, h_sign=+1)
     phi_tree = extract_phi_tree(state, MAX_H)
     print(f"  Extracted phi_A on {len(phi_tree)} planar trees (weight 1..{MAX_H}).")
@@ -281,7 +294,7 @@ def main():
     #   phi(tau1 tau2) + phi(tau2 tau1) ?= phi(tau1) * phi(tau2)
     # ------------------------------------------------------------------
     print("  Shuffle consistency check (phi is shuffle-multiplicative):")
-    from itertools import product as iprod
+
     test_pairs = [
         (LEAF, LEAF),
         (LEAF, PTree((LEAF,))),
@@ -291,7 +304,8 @@ def main():
     ]
     for t1, t2 in test_pairs:
         w = t1.weight + t2.weight
-        if w > MAX_H: continue
+        if w > MAX_H:
+            continue
         f12 = PForest((t1, t2))
         f21 = PForest((t2, t1))
         v12 = state.get((w, f12), Fraction(0))
@@ -302,11 +316,23 @@ def main():
         if t1 == t2:
             expected = product_tree  # phi(t) * phi(t) = phi(t ⊔ t) = 2 * phi(tt) so phi(tt) = prod/2
             actual = v12  # single concatenation
-            check = "OK" if actual == product_tree / 2 else f"MISMATCH (should be {product_tree}/2 = {product_tree/2})"
-            print(f"    tau={t1!r}: phi(tau tau) = {actual}, phi(tau)^2/2 = {product_tree/2}  [{check}]")
+            check = (
+                "OK"
+                if actual == product_tree / 2
+                else f"MISMATCH (should be {product_tree}/2 = {product_tree / 2})"
+            )
+            print(
+                f"    tau={t1!r}: phi(tau tau) = {actual}, phi(tau)^2/2 = {product_tree / 2}  [{check}]"
+            )
         else:
-            check = "OK" if sum_shuffle == product_tree else f"MISMATCH (expected {product_tree})"
-            print(f"    tau1={t1!r}, tau2={t2!r}: phi(t1 t2) + phi(t2 t1) = {v12} + {v21} = {sum_shuffle}, phi(t1)*phi(t2) = {product_tree}  [{check}]")
+            check = (
+                "OK"
+                if sum_shuffle == product_tree
+                else f"MISMATCH (expected {product_tree})"
+            )
+            print(
+                f"    tau1={t1!r}, tau2={t2!r}: phi(t1 t2) + phi(t2 t1) = {v12} + {v21} = {sum_shuffle}, phi(t1)*phi(t2) = {product_tree}  [{check}]"
+            )
     print()
 
     # Show phi_A values on low-weight trees
@@ -342,10 +368,16 @@ def main():
     for conv in ("forest", "tree_prod"):
         print(f"  --- Convention: {conv} ---")
         if conv == "forest":
-            print("  phi(tau_1 tau_2 ...) = state's coefficient on the concatenated forest (true value)")
+            print(
+                "  phi(tau_1 tau_2 ...) = state's coefficient on the concatenated forest (true value)"
+            )
         else:
-            print("  phi(tau_1 tau_2 ...) = prod_i phi(tau_i) (shuffle-multiplicative; mkw_verify convention)")
-        print(f"  {'w':>2}  {'tree':<22} {'(bar phi *_N phi)(tau)':<30} {'verdict':<30}")
+            print(
+                "  phi(tau_1 tau_2 ...) = prod_i phi(tau_i) (shuffle-multiplicative; mkw_verify convention)"
+            )
+        print(
+            f"  {'w':>2}  {'tree':<22} {'(bar phi *_N phi)(tau)':<30} {'verdict':<30}"
+        )
         print("-" * 90)
         mkw_order = None
         for w in range(1, MAX_H + 1):
@@ -354,7 +386,9 @@ def main():
                 defect = convolve_lac(state, tau, convention=conv)
                 verdict = "ZERO (antisymmetric)" if defect == 0 else "NONZERO"
                 if w <= 5:  # show detail for low weights
-                    print(f"  {w:>2}  {repr(tau):<22} {str(defect)[:28]:<30} {verdict:<30}")
+                    print(
+                        f"  {w:>2}  {tau!r:<22} {str(defect)[:28]:<30} {verdict:<30}"
+                    )
                 if defect != 0:
                     all_zero = False
             if not all_zero and mkw_order is None:
@@ -363,7 +397,9 @@ def main():
                 print()
         if mkw_order is None:
             mkw_order = MAX_H
-        print(f"  ==>  Scheme A MKW antisym order (tree-algebraic, {conv}): {mkw_order}")
+        print(
+            f"  ==>  Scheme A MKW antisym order (tree-algebraic, {conv}): {mkw_order}"
+        )
         print()
 
 

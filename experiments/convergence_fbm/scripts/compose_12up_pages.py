@@ -7,7 +7,8 @@ SO(3) results. It can also write the two older 12-panel pages separately.
 
 This is intentionally a compositor rather than a rerun of the stochastic
 experiments. It keeps the plotted data exactly as committed in
-``experiments/convergence_fbm/results``.
+``experiments/convergence_fbm/results`` (SO(3)) and
+``neurips/convergence_fbm/results`` (Euclidean).
 """
 
 from __future__ import annotations
@@ -25,10 +26,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from PIL import Image
 
-
 SCRIPT_DIR = Path(__file__).resolve().parent
 EXPERIMENT_DIR = SCRIPT_DIR.parent
 DEFAULT_RESULTS_DIR = EXPERIMENT_DIR / "results"
+DEFAULT_EUCLIDEAN_RESULTS_DIR = (
+    EXPERIMENT_DIR.parents[1] / "neurips/convergence_fbm/results"
+)
 
 HURSTS = (0.4, 0.5, 0.6)
 H_CODES = (40, 50, 60)
@@ -93,7 +96,9 @@ def content_box(
     return (left, upper, right, lower)
 
 
-def trim_whitespace(image: Image.Image, pad: int = 18, threshold: int = 248) -> Image.Image:
+def trim_whitespace(
+    image: Image.Image, pad: int = 18, threshold: int = 248
+) -> Image.Image:
     """Trim white/transparent margins while retaining a small padding."""
     rgba = image.convert("RGBA")
     left, upper, right, lower = content_box(rgba, pad=pad, threshold=threshold)
@@ -244,14 +249,17 @@ def compose_vector_combined_page(
     results_dir: Path,
     output_path: Path,
     *,
+    euclidean_results_dir: Path,
     dpi: int,
     page_width: float,
     page_height: float,
 ) -> None:
     prefixes = [KINDS["euclidean"]["prefix"], KINDS["so3"]["prefix"]]
     source_paths_by_kind = [
-        [results_dir / f"{prefix}_H{code:02d}.pdf" for code in H_CODES]
-        for prefix in prefixes
+        [directory / f"{prefix}_H{code:02d}.pdf" for code in H_CODES]
+        for prefix, directory in zip(
+            prefixes, (euclidean_results_dir, results_dir), strict=True
+        )
     ]
     for source_paths in source_paths_by_kind:
         for source_path in source_paths:
@@ -280,7 +288,9 @@ def compose_vector_combined_page(
         (1, panel_idx) for panel_idx in range(4)
     ]
     for row_idx, (kind_idx, panel_idx) in enumerate(row_specs):
-        row = " & ".join(include_panel(kind_idx, h_idx, panel_idx) for h_idx in range(3))
+        row = " & ".join(
+            include_panel(kind_idx, h_idx, panel_idx) for h_idx in range(3)
+        )
         if row_idx == 3:
             gap = r"\\[0.025in]"
         elif row_idx < len(row_specs) - 1:
@@ -352,8 +362,12 @@ def compose_page(
     # Portrait layout: columns are Hurst values; rows are the four panels from
     # each per-Hurst source figure. Axes positions are computed in physical
     # units so the rasterised panels are not distorted.
-    panel_grid = [[rows[col_idx][row_idx] for col_idx in range(3)] for row_idx in range(4)]
-    aspect = float(np.mean([panel.width / panel.height for row in panel_grid for panel in row]))
+    panel_grid = [
+        [rows[col_idx][row_idx] for col_idx in range(3)] for row_idx in range(4)
+    ]
+    aspect = float(
+        np.mean([panel.width / panel.height for row in panel_grid for panel in row])
+    )
 
     left = 0.055
     right = 0.015
@@ -400,6 +414,12 @@ def parse_args() -> argparse.Namespace:
         help="Directory containing the per-Hurst convergence PDFs.",
     )
     parser.add_argument(
+        "--euclidean-results-dir",
+        type=Path,
+        default=DEFAULT_EUCLIDEAN_RESULTS_DIR,
+        help="Directory containing NeurIPS Euclidean panels and combined output.",
+    )
+    parser.add_argument(
         "--kind",
         choices=("combined", "all", *KINDS.keys()),
         default="combined",
@@ -438,24 +458,30 @@ def main() -> None:
             raise RuntimeError("The 24-panel vector compositor requires pdflatex.")
         compose_vector_combined_page(
             args.results_dir,
-            args.results_dir / COMBINED_OUTPUT,
+            args.euclidean_results_dir / COMBINED_OUTPUT,
+            euclidean_results_dir=args.euclidean_results_dir,
             dpi=args.dpi,
             page_width=args.page_width,
             page_height=args.page_height or 9.65,
         )
-        print(f"Wrote {(args.results_dir / COMBINED_OUTPUT).resolve()}")
+        print(f"Wrote {(args.euclidean_results_dir / COMBINED_OUTPUT).resolve()}")
 
-    kinds = KINDS.keys() if args.kind == "all" else (
-        () if args.kind == "combined" else (args.kind,)
+    kinds = (
+        KINDS.keys()
+        if args.kind == "all"
+        else (() if args.kind == "combined" else (args.kind,))
     )
 
     for kind in kinds:
         spec = KINDS[kind]
-        output_path = args.results_dir / spec["output"]
+        results_dir = (
+            args.euclidean_results_dir if kind == "euclidean" else args.results_dir
+        )
+        output_path = results_dir / spec["output"]
         page_height = args.page_height or 5.8
         if not args.raster and shutil.which("pdflatex") is not None:
             compose_vector_page(
-                args.results_dir,
+                results_dir,
                 spec["prefix"],
                 output_path,
                 dpi=args.dpi,
@@ -463,7 +489,7 @@ def main() -> None:
                 page_height=page_height,
             )
         else:
-            rows = load_panels(args.results_dir, spec["prefix"], dpi=args.dpi)
+            rows = load_panels(results_dir, spec["prefix"], dpi=args.dpi)
             compose_page(
                 rows,
                 output_path,

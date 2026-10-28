@@ -8,14 +8,17 @@ the matrix residual at h^4 should be (-1/4) * ED, nonzero.
 We compute both sides explicitly on a concrete random ξ to see which
 is right.
 """
-import sympy as sp
-from sympy import Matrix, Rational, Symbol, eye, zeros, factorial
+
 import random
 
+import sympy as sp
 from scheme_a_algebraic_verify import (
-    scheme_a_step, xi, random_rational_matrix, BETA, N as _ignore,
-    truncate_matrix_in_h, h, expm_series
+    h,
+    random_rational_matrix,
+    scheme_a_step,
+    truncate_matrix_in_h,
 )
+from sympy import Rational, eye, zeros
 
 # Override N to 3 for speed
 N = 3
@@ -79,14 +82,18 @@ def main():
         print(f"  {[ED_asym[i, j] for j in range(N)]}")
 
     # By symmetry of F'', EDiff([[•],•])(y0) should equal EDiff([•,[•]])(y0)
-    print("\nIf scheme A's MKW defect is -1/8 at both trees, matrix contribution at h^4:")
+    print(
+        "\nIf scheme A's MKW defect is -1/8 at both trees, matrix contribution at h^4:"
+    )
     tree_contrib = Rational(-1, 8) * ED_asym + Rational(-1, 8) * ED_asym
     print("  -1/4 * EDiff =")
     for i in range(N):
         print(f"  {[tree_contrib[i, j] for j in range(N)]}")
 
     # Now compute the ACTUAL matrix residual at h^4 from the real forward-backward run
-    print("\nComputing actual matrix residual at h^4 from scheme_a_step ...", flush=True)
+    print(
+        "\nComputing actual matrix residual at h^4 from scheme_a_step ...", flush=True
+    )
     Yf = scheme_a_step(y0, +1, xi_coeffs, MAX_H)
     Yb = scheme_a_step(Yf, -1, xi_coeffs, MAX_H)
     residual = truncate_matrix_in_h(Yb - y0, MAX_H)

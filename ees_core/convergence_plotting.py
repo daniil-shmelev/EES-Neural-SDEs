@@ -15,12 +15,13 @@ def plot_error_curve(h, log_error, rate, ax, *, backward=False, reference_mask=N
     dx = np.array([x[0], x[-1]])
     err_label = (
         r"$\log_{10}(\overleftarrow{\mathcal{E}}(h))$"
-        if backward else r"$\log_{10}(\mathcal{E}(h))$"
+        if backward
+        else r"$\log_{10}(\mathcal{E}(h))$"
     )
     points = ax.scatter(
         x, y, marker=mkr.MarkerStyle("x", fillstyle="none"), color="crimson"
     )
-    line, = ax.plot(dx, rate * dx + intercept, color="mediumblue")
+    (line,) = ax.plot(dx, rate * dx + intercept, color="mediumblue")
     ax.legend([points, line], [err_label, f"{rate:.1f}" + r"$x + c$"])
     ax.set_xlabel(r"$\log_{10}(h)$")
     ax.set_ylabel(err_label)
