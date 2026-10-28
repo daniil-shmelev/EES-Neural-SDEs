@@ -25,12 +25,12 @@ import jax.numpy as jnp
 import jax.random as jr
 from jaxtyping import Array, Float, PRNGKeyArray
 
+from ees_core.torus import wrap_to_pi
 from experiments.kuramoto.datasets.kuramoto import (
     KuramotoParams,
     make_state_diffusion,
     make_state_drift,
 )
-from ees_core.torus import wrap_to_pi
 
 
 class SimConfig(NamedTuple):
@@ -61,7 +61,11 @@ def simulate_one(
     N = params.N
 
     bm = diffrax.VirtualBrownianTree(
-        t0=0.0, t1=cfg.T, tol=cfg.dt_fine / 4.0, shape=(N,), key=key,
+        t0=0.0,
+        t1=cfg.T,
+        tol=cfg.dt_fine / 4.0,
+        shape=(N,),
+        key=key,
     )
     terms = diffrax.MultiTerm(
         diffrax.ODETerm(drift),

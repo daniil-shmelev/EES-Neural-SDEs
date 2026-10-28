@@ -12,32 +12,51 @@ from typing import Any, Literal
 from experiments.sphere_latent_nsde.dataset import NUM_TIMEPOINTS
 
 METHODS = {
-    "geometric_euler_direct": ("geometric_euler", "direct"),
-    "geometric_euler_checkpoint_full": (
-        "geometric_euler",
+    "geometric_euler_heun_direct": ("geometric_euler_heun", "direct"),
+    "geometric_euler_heun_checkpoint_full": (
+        "geometric_euler_heun",
         "checkpoint_full",
     ),
-    "geometric_euler_full": (
-        "geometric_euler",
+    "geometric_euler_heun_full": (
+        "geometric_euler_heun",
         "checkpoint_full",
     ),
-    "geometric_euler_recursive_checkpoint": (
-        "geometric_euler",
+    "geometric_euler_heun_recursive_checkpoint": (
+        "geometric_euler_heun",
         "recursive_checkpoint",
     ),
     "cfees25_reversible": ("cfees25", "reversible"),
+    "cfees25_adaptive_reversible": ("cfees25", "reversible"),
     "cg2_direct": ("cg2", "direct"),
     "srkmk_general_shark_direct": ("srkmk_general_shark", "direct"),
     "srkmk_general_shark_full": ("srkmk_general_shark", "checkpoint_full"),
 }
 
+# The normalisation budget counts drift evaluations only.
 SOLVER_NFE_PER_STEP = {
-    "geometric_euler": 1,
+    "geometric_euler_heun": 1,
     "cg2": 2,
     "cfees25": 3,
     "srkmk_general_shark": 2,
 }
+SOLVER_DIFFUSION_NFE_PER_STEP = {
+    "geometric_euler_heun": 2,
+    "cg2": 2,
+    "cfees25": 3,
+    "srkmk_general_shark": 3,
+}
 COMMON_NFE_GRANULARITY = math.lcm(*SOLVER_NFE_PER_STEP.values())
+
+
+def validate_adaptive_settings(solver, n_steps, atol, dtmin, max_steps):
+    if solver != "cfees25":
+        raise ValueError("Adaptive sphere solves require the CF-EES embedded pair.")
+    if not math.isfinite(atol) or atol <= 0:
+        raise ValueError("adaptive_atol must be finite and positive.")
+    if not math.isfinite(dtmin) or not 0 < dtmin <= 0.99 / n_steps:
+        raise ValueError("Require 0 < adaptive_dtmin <= 0.99 / solve_n_steps.")
+    if max_steps < n_steps:
+        raise ValueError("adaptive_max_steps must be at least solve_n_steps.")
 
 
 @dataclass(frozen=True)
@@ -58,11 +77,11 @@ class ActivityConfig:
     num_timepoints: int = NUM_TIMEPOINTS
     nfe_budget: int | None = None
     solver: Literal[
-        "geometric_euler",
+        "geometric_euler_heun",
         "cg2",
         "cfees25",
         "srkmk_general_shark",
-    ] = "geometric_euler"
+    ] = "geometric_euler_heun"
     adjoint: Literal[
         "auto",
         "direct",
@@ -72,6 +91,10 @@ class ActivityConfig:
         "full",
         "reversible",
     ] = "auto"
+    adaptive: bool = False
+    adaptive_atol: float = 1e-3
+    adaptive_dtmin: float = 1e-4
+    adaptive_max_steps: int = 4096
     learnable_prior: bool = False
     use_atanh: bool = False
     kl0_weight: float = 1e-4
@@ -88,13 +111,28 @@ class ActivityConfig:
     max_train_batches: int | None = None
     max_eval_batches: int | None = None
 
+    def __post_init__(self):
+        if self.adaptive:
+            validate_adaptive_settings(
+                self.solver,
+                self.solve_n_steps,
+                self.adaptive_atol,
+                self.adaptive_dtmin,
+                self.adaptive_max_steps,
+            )
+
     @property
     def method(self) -> str:
-        return f"{self.solver}_{self.adjoint}"
+        adaptive = "adaptive_" if self.adaptive else ""
+        return f"{self.solver}_{adaptive}{self.adjoint}"
 
     @property
     def nfe_per_step(self) -> int:
         return SOLVER_NFE_PER_STEP[self.solver]
+
+    @property
+    def diffusion_nfe_per_step(self) -> int:
+        return SOLVER_DIFFUSION_NFE_PER_STEP[self.solver]
 
     @property
     def effective_nfe_budget(self) -> int:
@@ -111,7 +149,10 @@ class ActivityConfig:
 
     @property
     def solve_n_steps(self) -> int:
+        """Fixed step count, or reference-grid intervals for adaptive solves."""
         budget = self.effective_nfe_budget
+        if budget <= 0:
+            raise ValueError("nfe_budget must be positive.")
         nfe_per_step = self.nfe_per_step
         if budget % nfe_per_step != 0:
             raise ValueError(
@@ -174,6 +215,10 @@ def to_toml(config: ActivityConfig) -> str:
         "nfe_budget",
         "solver",
         "adjoint",
+        "adaptive",
+        "adaptive_atol",
+        "adaptive_dtmin",
+        "adaptive_max_steps",
         "learnable_prior",
         "use_atanh",
         "kl0_weight",
@@ -204,6 +249,8 @@ def _build_config(data: dict[str, Any]) -> ActivityConfig:
         if method not in METHODS:
             raise ValueError(f"Unknown activity method: {method!r}")
         data["solver"], data["adjoint"] = METHODS[method]
+        if method == "cfees25_adaptive_reversible":
+            data["adaptive"] = True
     if "data_dir" in data:
         data["data_dir"] = Path(data["data_dir"])
 

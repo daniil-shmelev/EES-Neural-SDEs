@@ -112,6 +112,8 @@ def main() -> int:
             "cfees25:reversible",
             "cg2:checkpoint_full",
             "cg2:checkpoint_recursive",
+            "geometric_euler_heun:checkpoint_full",
+            "geometric_euler_heun:checkpoint_recursive",
             "cg4:checkpoint_full",
             "cg4:checkpoint_recursive",
         ],

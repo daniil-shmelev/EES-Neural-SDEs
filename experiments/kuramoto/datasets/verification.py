@@ -81,7 +81,7 @@ def two_oscillator_phase_lock_study(
             "relative_error": rel_err,
         }
         print(
-            f"[verify] n_fine={n_fine:>6d} dt={T/n_fine:.3e} "
+            f"[verify] n_fine={n_fine:>6d} dt={T / n_fine:.3e} "
             f"|Δθ|={abs(delta_wrapped):.5f} target={target:.5f} "
             f"rel_err={rel_err:.3e}",
             flush=True,
@@ -112,8 +112,8 @@ def stationarity_study(
     return {
         "r_mean_per_t": np.asarray(jnp.mean(r_per_t, axis=0)).tolist(),
         "r_std_per_t": np.asarray(jnp.std(r_per_t, axis=0)).tolist(),
-        "r_stationary_mean": float(jnp.mean(r_per_t[:, r_per_t.shape[1] // 2:])),
-        "r_stationary_std": float(jnp.std(r_per_t[:, r_per_t.shape[1] // 2:])),
+        "r_stationary_mean": float(jnp.mean(r_per_t[:, r_per_t.shape[1] // 2 :])),
+        "r_stationary_std": float(jnp.std(r_per_t[:, r_per_t.shape[1] // 2 :])),
     }
 
 
@@ -135,9 +135,7 @@ def run_verification(
     key = jr.PRNGKey(seed)
     k_lock, k_stat = jr.split(key)
 
-    print(
-        f"\n[verify] === Two-oscillator phase-lock study (P={P}, K={K}, T={T}) ==="
-    )
+    print(f"\n[verify] === Two-oscillator phase-lock study (P={P}, K={K}, T={T}) ===")
     t0 = time.perf_counter()
     if K > 2.0 * P:
         lock_results, target = two_oscillator_phase_lock_study(
@@ -145,7 +143,7 @@ def run_verification(
         )
     else:
         print(
-            f"[verify] K={K} <= 2P={2*P}: phase lock not predicted, skipping study."
+            f"[verify] K={K} <= 2P={2 * P}: phase lock not predicted, skipping study."
         )
         lock_results, target = {}, float("nan")
     print(f"[verify] phase-lock study took {time.perf_counter() - t0:.1f}s")
@@ -157,14 +155,21 @@ def run_verification(
     cfg_stat = SimConfig(T=T, n_fine=max(n_fine_grid), n_obs=64, D=D)
     params = KuramotoParams.bimodal(N=N, P=P, K=K, m=m)
     t0 = time.perf_counter()
-    stat = stationarity_study(params, cfg_stat, n_traj_stationarity, omega_scale, k_stat)
+    stat = stationarity_study(
+        params, cfg_stat, n_traj_stationarity, omega_scale, k_stat
+    )
     print(
         f"[verify] stationarity study took {time.perf_counter() - t0:.1f}s; "
         f"r_stat={stat['r_stationary_mean']:.3f} ± {stat['r_stationary_std']:.3f}"
     )
 
     summary = {
-        "N": N, "P": P, "K": K, "m": m, "D": D, "T": T,
+        "N": N,
+        "P": P,
+        "K": K,
+        "m": m,
+        "D": D,
+        "T": T,
         "phase_lock_target": target,
         "phase_lock": {str(k): v for k, v in lock_results.items()},
         "stationarity": {

@@ -9,7 +9,7 @@ from diffrax import (
     RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
 )
-from georax import CFEES25, CFEES27, CG2, CG4
+from georax import CFEES25, CFEES27, CG2, CG4, GeometricEulerHeun
 
 
 class Solvers(StrEnum):
@@ -17,6 +17,7 @@ class Solvers(StrEnum):
     CFEES27 = "cfees27"
     CG2 = "cg2"
     CG4 = "cg4"
+    GEOMETRIC_EULER_HEUN = "geometric_euler_heun"
 
 
 _SOLVER_CLASSES: dict[Solvers, type[AbstractSolver]] = {
@@ -24,6 +25,7 @@ _SOLVER_CLASSES: dict[Solvers, type[AbstractSolver]] = {
     Solvers.CFEES27: CFEES27,
     Solvers.CG2: CG2,
     Solvers.CG4: CG4,
+    Solvers.GEOMETRIC_EULER_HEUN: GeometricEulerHeun,
 }
 
 

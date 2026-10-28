@@ -35,9 +35,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--output",
         type=Path,
-        default=Path(
-            "experiments/kuramoto/results/same_noise_lyapunov.json"
-        ),
+        default=Path("experiments/kuramoto/results/same_noise_lyapunov.json"),
     )
     return parser.parse_args()
 

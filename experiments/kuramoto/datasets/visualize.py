@@ -18,9 +18,9 @@ import matplotlib
 
 matplotlib.use("Agg")  # headless
 
-import matplotlib.animation as mpl_animation  # noqa: E402
-import matplotlib.pyplot as plt  # noqa: E402
-import numpy as np  # noqa: E402
+import matplotlib.animation as mpl_animation
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def render_trajectory_gif(
@@ -75,7 +75,13 @@ def render_trajectory_gif(
     cmap = plt.get_cmap("viridis")
     osc_colors = [cmap(i / max(n_osc - 1, 1)) for i in range(n_osc)]
     osc_scatter = ax.scatter(
-        osc_x[0], osc_y[0], c=osc_colors, s=80, edgecolor="white", linewidth=1.0, zorder=3
+        osc_x[0],
+        osc_y[0],
+        c=osc_colors,
+        s=80,
+        edgecolor="white",
+        linewidth=1.0,
+        zorder=3,
     )
 
     arrow_artists: list = []  # repopulated each frame; fresh quiver per call
@@ -87,8 +93,15 @@ def render_trajectory_gif(
         trail_lines.append(l)
 
     time_text = ax.text(
-        0.02, 0.97, "", transform=ax.transAxes, va="top", ha="left",
-        fontsize=9, color="0.3", family="monospace",
+        0.02,
+        0.97,
+        "",
+        transform=ax.transAxes,
+        va="top",
+        ha="left",
+        fontsize=9,
+        color="0.3",
+        family="monospace",
     )
 
     def init():
@@ -105,9 +118,16 @@ def render_trajectory_gif(
 
         osc_scatter.set_offsets(np.column_stack([osc_x[frame], osc_y[frame]]))
         q = ax.quiver(
-            0.0, 0.0, psi_x[frame], psi_y[frame],
-            angles="xy", scale_units="xy", scale=1.0,
-            color="#d62728", width=0.012, zorder=2,
+            0.0,
+            0.0,
+            psi_x[frame],
+            psi_y[frame],
+            angles="xy",
+            scale_units="xy",
+            scale=1.0,
+            color="#d62728",
+            width=0.012,
+            zorder=2,
         )
         arrow_artists.append(q)
 

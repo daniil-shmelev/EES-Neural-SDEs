@@ -111,18 +111,20 @@ def activity_loss_value(
     pxz_weight: float = 1.0,
     aux_weight: float = 10.0,
     aux_weight_mul: Array | float = 1.0,
-) -> Array:
+    return_solver_stats: bool = False,
+) -> Array | tuple[Array, dict[str, Array]]:
     output = model(batch, key, mc_samples=mc_samples)
     decoder_scale = jnp.maximum(jnp.square(model.recon_sigma), 1e-6)
     log_pxz, numel = _reconstruction_terms(output, batch, decoder_scale=decoder_scale)
     elbo_per_example = (
-        kl0_weight * output.kl0
-        + klp_weight * output.klp
-        + pxz_weight * log_pxz
+        kl0_weight * output.kl0 + klp_weight * output.klp + pxz_weight * log_pxz
     ) / jnp.maximum(numel, 1.0)
     aux_per_example = auxiliary_loss(output, batch)
     total = elbo_per_example + aux_weight * aux_weight_mul * aux_per_example
-    return masked_mean(total, mask)
+    value = masked_mean(total, mask)
+    if return_solver_stats:
+        return value, output.solver_stats
+    return value
 
 
 def make_activity_metrics(
@@ -168,9 +170,7 @@ def activity_metrics_value(
     decoder_scale = jnp.maximum(jnp.square(model.recon_sigma), 1e-6)
     log_pxz, numel = _reconstruction_terms(output, batch, decoder_scale=decoder_scale)
     elbo_per_example = (
-        kl0_weight * output.kl0
-        + klp_weight * output.klp
-        + pxz_weight * log_pxz
+        kl0_weight * output.kl0 + klp_weight * output.klp + pxz_weight * log_pxz
     ) / jnp.maximum(numel, 1.0)
     aux_per_example = auxiliary_loss(output, batch)
     loss_per_example = elbo_per_example + aux_weight * aux_weight_mul * aux_per_example
@@ -184,4 +184,5 @@ def activity_metrics_value(
         "elbo_kl0": masked_mean(output.kl0, mask),
         "elbo_klp": masked_mean(output.klp, mask),
         "elbo_log_pxz": masked_mean(log_pxz, mask),
+        **{f"solver_{name}": value for name, value in output.solver_stats.items()},
     }

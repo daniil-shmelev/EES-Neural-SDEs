@@ -136,9 +136,7 @@ def generate_one_n(
         ("test", n_test, k_test),
     ]:
         t0 = time.perf_counter()
-        theta, omega = simulate_split(
-            params, cfg, n_split, omega_scale, key, batch_sim
-        )
+        theta, omega = simulate_split(params, cfg, n_split, omega_scale, key, batch_sim)
         print(
             f"[pipeline] split={name} n={n_split} shape={theta.shape} "
             f"time={time.perf_counter() - t0:.1f}s"
@@ -150,11 +148,21 @@ def generate_one_n(
     meta = {
         "model": "stochastic_second_order_kuramoto",
         "reference": "Olmi & Torcini 2024 eq.(1) with K2=0; "
-                     "deterministic part following Filatrella, Nielsen & Pedersen 2008.",
-        "N": N, "P": P, "K": K, "m": m, "K_c_estimate": K_c,
-        "n_train": n_train, "n_val": n_val, "n_test": n_test,
-        "D": cfg.D, "T": cfg.T, "n_fine": cfg.n_fine, "n_obs": cfg.n_obs,
-        "seed": seed, "omega_scale": omega_scale,
+        "deterministic part following Filatrella, Nielsen & Pedersen 2008.",
+        "N": N,
+        "P": P,
+        "K": K,
+        "m": m,
+        "K_c_estimate": K_c,
+        "n_train": n_train,
+        "n_val": n_val,
+        "n_test": n_test,
+        "D": cfg.D,
+        "T": cfg.T,
+        "n_fine": cfg.n_fine,
+        "n_obs": cfg.n_obs,
+        "seed": seed,
+        "omega_scale": omega_scale,
         "library_versions": library_versions(),
     }
     save_split(out_path, splits, t_grid, meta)
@@ -171,5 +179,7 @@ def generate_one_n(
             fps=gif_fps,
             trail_length=gif_trail,
         )
-        print(f"[pipeline] wrote {gif_path} ({gif_path.stat().st_size / 2**20:.1f} MiB)")
+        print(
+            f"[pipeline] wrote {gif_path} ({gif_path.stat().st_size / 2**20:.1f} MiB)"
+        )
     return out_path

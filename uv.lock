@@ -1,12 +1,12 @@
 version = 1
-revision = 3
+revision = 5
 requires-python = ">=3.13"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'linux'",
-    "python_full_version < '3.14' and sys_platform == 'linux'",
     "python_full_version >= '3.14' and sys_platform == 'win32'",
     "python_full_version >= '3.14' and sys_platform == 'emscripten'",
     "python_full_version >= '3.14' and sys_platform != 'emscripten' and sys_platform != 'linux' and sys_platform != 'win32'",
+    "python_full_version < '3.14' and sys_platform == 'linux'",
     "python_full_version < '3.14' and sys_platform == 'win32'",
     "python_full_version < '3.14' and sys_platform == 'emscripten'",
     "python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'linux' and sys_platform != 'win32'",
@@ -372,7 +372,7 @@ requires-dist = [
     { name = "ees-neural-sdes", extras = ["torchsde"], marker = "extra == 'stiff-gbm'" },
     { name = "equinox", marker = "extra == 'jax-base'", specifier = ">=0.13.6" },
     { name = "fbm", specifier = ">=0.3.0" },
-    { name = "georax", marker = "extra == 'jax-base'", git = "https://github.com/luke-a-thompson/georax.git?rev=8cbae326c64eccd0a2c37d1ea7767a14cc29b8ae" },
+    { name = "georax", marker = "extra == 'jax-base'", git = "https://github.com/luke-a-thompson/georax.git?rev=bf5c3554bfa8199427d4a3200fa58b69b657aa98" },
     { name = "jax", marker = "sys_platform != 'linux' and extra == 'jax-base'", specifier = ">=0.10.0" },
     { name = "jax", extras = ["cuda12"], marker = "sys_platform == 'linux' and extra == 'jax-base'", specifier = ">=0.10.0" },
     { name = "jaxtyping", marker = "extra == 'jax-base'", specifier = ">=0.2.36" },
@@ -498,7 +498,7 @@ wheels = [
 [[package]]
 name = "georax"
 version = "0.1.0"
-source = { git = "https://github.com/luke-a-thompson/georax.git?rev=8cbae326c64eccd0a2c37d1ea7767a14cc29b8ae#8cbae326c64eccd0a2c37d1ea7767a14cc29b8ae" }
+source = { git = "https://github.com/luke-a-thompson/georax.git?rev=bf5c3554bfa8199427d4a3200fa58b69b657aa98#bf5c3554bfa8199427d4a3200fa58b69b657aa98" }
 dependencies = [
     { name = "diffrax" },
     { name = "diffrax-lowstorage" },

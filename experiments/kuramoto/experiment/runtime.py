@@ -13,7 +13,9 @@ import numpy as np
 
 
 def make_output_dir(tag: str, base: Path | str | None = None) -> Path:
-    base_dir = Path(base) if base is not None else Path("experiments/kuramoto/results/runs/")
+    base_dir = (
+        Path(base) if base is not None else Path("experiments/kuramoto/results/runs/")
+    )
     stamp = datetime.now().strftime("%Y%m%dT%H%M%S")
     out = base_dir / f"{stamp}_{tag}"
     out.mkdir(parents=True, exist_ok=True)

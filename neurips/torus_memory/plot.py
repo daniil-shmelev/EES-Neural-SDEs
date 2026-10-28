@@ -38,6 +38,8 @@ _SCALING_MODE_LABEL = {
     "cfees25:reversible": r"CF-EES(2,5) + Reversible Adj.",
     "cg2:checkpoint_full": r"CG2 + Full Adj.",
     "cg2:checkpoint_recursive": r"CG2 + Recursive Adj.",
+    "geometric_euler_heun:checkpoint_full": "Geometric Euler–Heun + Full Adj.",
+    "geometric_euler_heun:checkpoint_recursive": "Geometric Euler–Heun + Recursive Adj.",
     "cg4:checkpoint_full": r"CG4 + Full Adj.",
     "cg4:checkpoint_recursive": r"CG4 + Recursive Adj.",
 }
@@ -45,6 +47,8 @@ _SCALING_MODE_COLOR = {
     "cfees25:reversible": "#d62728",
     "cg2:checkpoint_full": "#1f77b4",
     "cg2:checkpoint_recursive": "#1f77b4",
+    "geometric_euler_heun:checkpoint_full": "#9467bd",
+    "geometric_euler_heun:checkpoint_recursive": "#9467bd",
     "cg4:checkpoint_full": "#2ca02c",
     "cg4:checkpoint_recursive": "#2ca02c",
 }
@@ -52,6 +56,8 @@ _SCALING_MODE_MARKER = {
     "cfees25:reversible": "o",
     "cg2:checkpoint_full": "s",
     "cg2:checkpoint_recursive": "D",
+    "geometric_euler_heun:checkpoint_full": "P",
+    "geometric_euler_heun:checkpoint_recursive": "X",
     "cg4:checkpoint_full": "^",
     "cg4:checkpoint_recursive": "v",
 }
@@ -59,6 +65,8 @@ _SCALING_MODE_LINESTYLE = {
     "cfees25:reversible": "-",
     "cg2:checkpoint_full": "-",
     "cg2:checkpoint_recursive": "--",
+    "geometric_euler_heun:checkpoint_full": "-",
+    "geometric_euler_heun:checkpoint_recursive": "--",
     "cg4:checkpoint_full": "-",
     "cg4:checkpoint_recursive": "--",
 }
@@ -87,6 +95,8 @@ def fig_torus_scaling(
             "cfees25:reversible",
             "cg2:checkpoint_full",
             "cg2:checkpoint_recursive",
+            "geometric_euler_heun:checkpoint_full",
+            "geometric_euler_heun:checkpoint_recursive",
         ]
     _set_stix_params(8, 9, 10)
 

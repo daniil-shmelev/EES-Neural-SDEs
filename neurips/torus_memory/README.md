@@ -23,3 +23,9 @@ python -m neurips.torus_memory.plot --output /tmp/torus_memory_historical.pdf
 ```
 
 The launcher selects the uv dependencies and writes `benchmark.json` in a fresh `results/runs/<timestamp>/` directory. `--help` shows the default sweep and settings in `benchmark.py`.
+
+New sweeps also include `geometric_euler_heun:checkpoint_full` and `geometric_euler_heun:checkpoint_recursive`, using Georax's `GeometricEulerHeun()` on `Torus` at revision `bf5c3554bfa8199427d4a3200fa58b69b657aa98`. This is a Stratonovich baseline with one drift and two diffusion evaluations per step. The sweep compares methods at the requested step counts and reports measured runtime and memory; it does not impose an equal field-evaluation budget. To measure just these variants:
+
+```bash
+./run torus-memory --configs 7x50 --modes geometric_euler_heun:checkpoint_full geometric_euler_heun:checkpoint_recursive --batch-size 1024 --t1 1 --n-reps 3
+```

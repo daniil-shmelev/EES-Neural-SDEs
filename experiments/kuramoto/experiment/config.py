@@ -17,6 +17,7 @@ class Devices(StrEnum):
 class Solvers(StrEnum):
     CFEES25 = "cfees25"
     CG2 = "cg2"
+    GEOMETRIC_EULER_HEUN = "geometric_euler_heun"
 
 
 class ModelKind(StrEnum):
@@ -27,6 +28,13 @@ COMPARISON_METHODS = (
     ("cg2_full", Solvers.CG2, "checkpoint_full", 75),
     ("cg2_recursive", Solvers.CG2, "checkpoint_recursive", 75),
     ("cfees25_reversible", Solvers.CFEES25, "reversible", 50),
+    ("geometric_euler_heun_full", Solvers.GEOMETRIC_EULER_HEUN, "checkpoint_full", 150),
+    (
+        "geometric_euler_heun_recursive",
+        Solvers.GEOMETRIC_EULER_HEUN,
+        "checkpoint_recursive",
+        150,
+    ),
 )
 
 
@@ -36,7 +44,8 @@ def validate_method(solver, adjoint, *, adaptive=False):
         return
     if (solver, adjoint) not in {(s, a) for _, s, a, _ in COMPARISON_METHODS}:
         raise ValueError(
-            "Kuramoto supports only CG2 with checkpoint_full or checkpoint_recursive, "
+            "Kuramoto supports only CG2 or Geometric Euler–Heun with checkpoint_full "
+            "or checkpoint_recursive, "
             "and CF-EES(2,5) with reversible."
         )
 
@@ -84,22 +93,26 @@ class ExperimentConfig:
     save_every_epoch: bool = True
     skip_plots: bool = False
 
-
     def __post_init__(self):
         if self.adaptive:
             if self.solver != Solvers.CFEES25:
                 raise ValueError("Adaptive stepping requires a CF-EES embedded pair.")
             if self.adaptive_atol <= 0 or self.adaptive_dtmin <= 0:
-                raise ValueError("Adaptive tolerance and minimum step must be positive.")
+                raise ValueError(
+                    "Adaptive tolerance and minimum step must be positive."
+                )
             if self.adaptive_max_steps < self.n_steps:
                 raise ValueError("adaptive_max_steps must be at least n_steps.")
         validate_method(self.solver, self.adjoint, adaptive=self.adaptive)
-        if self.model != ModelKind.KURAMOTO_NSDE or self.drift_kind not in ("indexed_mean_field", "second_order_mean_field"):
+        if self.model != ModelKind.KURAMOTO_NSDE or self.drift_kind not in (
+            "indexed_mean_field",
+            "second_order_mean_field",
+        ):
             raise ValueError("Use a supported mean-field Kuramoto drift.")
 
 
 DEFAULT_CONFIG = Path(__file__).resolve().parents[1] / "configs" / "kuramoto.toml"
-PROTOCOL = "kuramoto_second_order_mean_field_georax8cbae32_v3"
+PROTOCOL = "kuramoto_second_order_mean_field_georaxbf5c355_v4"
 
 
 def make_config(**overrides) -> ExperimentConfig:

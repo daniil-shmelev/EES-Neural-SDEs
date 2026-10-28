@@ -25,8 +25,15 @@ from experiments.sphere_latent_nsde.config import (
     sweep_len,
     to_toml,
 )
-from experiments.sphere_latent_nsde.factories import make_dataset, make_loader, make_model
-from experiments.sphere_latent_nsde.losses import activity_loss_value, activity_metrics_value
+from experiments.sphere_latent_nsde.factories import (
+    make_dataset,
+    make_loader,
+    make_model,
+)
+from experiments.sphere_latent_nsde.losses import (
+    activity_loss_value,
+    activity_metrics_value,
+)
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 
@@ -97,6 +104,7 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
             pxz_weight=config.pxz_weight,
             aux_weight=config.aux_weight,
             aux_weight_mul=aux_mul,
+            return_solver_stats=True,
         )
 
     def metrics_fn(current_model, batch, mask, key, aux_mul, mc_samples):
@@ -115,22 +123,25 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
 
     @eqx.filter_jit
     def train_step(current_model, current_opt_state, batch, mask, key, aux_mul):
-        loss, grads = eqx.filter_value_and_grad(loss_fn)(
+        (loss, solver_stats), grads = eqx.filter_value_and_grad(loss_fn, has_aux=True)(
             current_model, batch, mask, key, aux_mul
         )
         updates, new_opt_state = optimizer.update(
             grads, current_opt_state, eqx.filter(current_model, eqx.is_array)
         )
         new_model = eqx.apply_updates(current_model, updates)
-        return new_model, new_opt_state, loss
+        return new_model, new_opt_state, loss, solver_stats
 
     eval_step = eqx.filter_jit(metrics_fn)
 
     def eval_split(current_model, loader_next, state, steps, key, aux_mul):
         totals: dict[str, float] = {}
+        total_examples = 0
         for _ in range(steps):
             key, step_key = jax.random.split(key)
             batch, state, mask = loader_next(state)
+            count = int(jnp.sum(mask))
+            total_examples += count
             metrics = _tree_float_dict(
                 eval_step(
                     current_model,
@@ -142,8 +153,13 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
                 )
             )
             for metric_name, metric_value in metrics.items():
-                totals[metric_name] = totals.get(metric_name, 0.0) + metric_value
-        averaged = {name: value / max(steps, 1) for name, value in totals.items()}
+                # Predictive metrics are per example; solver work is per solve.
+                weight = 1 if metric_name.startswith("solver_") else count
+                totals[metric_name] = totals.get(metric_name, 0.0) + weight * metric_value
+        averaged = {
+            name: value / max(steps if name.startswith("solver_") else total_examples, 1)
+            for name, value in totals.items()
+        }
         return averaged, state, key
 
     key = jax.random.key(config.seed)
@@ -156,6 +172,7 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
     best_model = model
     best_val_acc = -np.inf
     best_epoch = 0
+    fit_started = time.perf_counter()
 
     with tqdm(
         range(1, config.epochs + 1),
@@ -164,18 +181,28 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
         dynamic_ncols=True,
     ) as epochs:
         for epoch in epochs:
+            epoch_started = time.perf_counter()
             aux_mul_value = (epoch / 60.0) ** 2 if epoch < 60 else 1.0
             aux_mul = jnp.asarray(aux_mul_value, dtype=jnp.float32)
 
             train_loss = 0.0
+            solver_totals: dict[str, float] = {}
             for _ in range(train_steps):
                 key, step_key = jax.random.split(key)
                 batch, train_state, mask = train_next(train_state)
-                model, opt_state, loss = train_step(
+                model, opt_state, loss, solver_stats = train_step(
                     model, opt_state, batch, mask, step_key, aux_mul
                 )
                 train_loss += float(loss)
+                for name, value in _tree_float_dict(solver_stats).items():
+                    solver_totals[name] = solver_totals.get(name, 0.0) + value
             train_metrics = {"loss": train_loss / max(train_steps, 1)}
+            train_metrics.update(
+                {
+                    f"solver_{name}": value / max(train_steps, 1)
+                    for name, value in solver_totals.items()
+                }
+            )
 
             val_metrics, val_state, key = eval_split(
                 model, val_next, val_state, eval_steps["val"], key, aux_mul
@@ -187,6 +214,8 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
             val_metrics["aux_acc*"] = best_val_acc
             val_metrics["aux_acc_pct*"] = 100.0 * best_val_acc
             val_metrics["best_val_epoch"] = float(best_epoch)
+            train_metrics["epoch_time_s"] = time.perf_counter() - epoch_started
+            train_metrics["elapsed_time_s"] = time.perf_counter() - fit_started
 
             history["train"].append(train_metrics)
             history["val"].append(val_metrics)
@@ -215,7 +244,9 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
 
 
 def _save_json(path: Path, payload: dict[str, Any]) -> None:
-    path.write_text(json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(payload, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
 
 def _make_output_dir(config: ActivityConfig, output_base: Path | None = None) -> Path:
@@ -262,11 +293,29 @@ def _metrics_payload(
         "final_test_acc": float(final_test["aux_acc"]),
         "final_test_acc_pct": float(final_test["aux_acc_pct"]),
         "num_timepoints": int(config.num_timepoints),
-        "nfe_budget": int(config.effective_nfe_budget),
+        "nfe_budget": None if config.adaptive else int(config.effective_nfe_budget),
+        "reference_nfe_budget": int(config.effective_nfe_budget),
         "nfe_per_step": int(config.nfe_per_step),
-        "solve_n_steps": int(config.solve_n_steps),
+        "solve_n_steps": None if config.adaptive else int(config.solve_n_steps),
         "solve_num_timepoints": int(config.solve_n_steps + 1),
-        "actual_forward_nfe": int(config.solve_n_steps * config.nfe_per_step),
+        "actual_forward_nfe": None
+        if config.adaptive
+        else int(config.solve_n_steps * config.nfe_per_step),
+        "nfe_basis": "drift",
+        "diffusion_nfe_per_step": int(config.diffusion_nfe_per_step),
+        "actual_forward_diffusion_nfe": None
+        if config.adaptive
+        else int(config.solve_n_steps * config.diffusion_nfe_per_step),
+        "adaptive": config.adaptive,
+        "adaptive_atol": config.adaptive_atol if config.adaptive else None,
+        "adaptive_dtmin": config.adaptive_dtmin if config.adaptive else None,
+        "adaptive_max_steps": config.adaptive_max_steps if config.adaptive else None,
+        "test_solver_work": {
+            name.removeprefix("solver_"): value
+            for name, value in final_test.items()
+            if name.startswith("solver_")
+        },
+        "solver_work_unit": "mean per batched solve; includes rejected attempts",
         "solver": config.solver,
         "adjoint": config.adjoint,
     }
@@ -303,9 +352,11 @@ def _run_single_config(config: ActivityConfig, output_base: Path | None = None) 
         f"lr_schedule={config.lr_schedule}",
         f"lr_restart={config.lr_restart}",
         f"num_timepoints={config.num_timepoints}",
-        f"nfe_budget={config.effective_nfe_budget}",
+        f"reference_nfe_budget={config.effective_nfe_budget}",
         f"nfe_per_step={config.nfe_per_step}",
-        f"solve_n_steps={config.solve_n_steps}",
+        f"reference_grid_steps={config.solve_n_steps}",
+        f"adaptive={config.adaptive}",
+        f"adaptive_atol={config.adaptive_atol if config.adaptive else None}",
         flush=True,
     )
 
@@ -347,24 +398,37 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("config", type=Path, help="Path to TOML config or sweep")
     parser.add_argument("--index", type=int, default=None, help="Sweep index to run")
-    parser.add_argument("--output-base", type=Path, default=None, help="Parent directory for this sweep's run directories.")
+    parser.add_argument(
+        "--output-base",
+        type=Path,
+        default=None,
+        help="Parent directory for this sweep's run directories.",
+    )
     args = parser.parse_args()
 
     if args.index is not None:
         print(f"running sweep_index={args.index}", flush=True)
-        return _run_single_config(_configure_runtime(sweep_config_at(args.config, args.index)), args.output_base)
+        return _run_single_config(
+            _configure_runtime(sweep_config_at(args.config, args.index)),
+            args.output_base,
+        )
 
     if is_sweep_config(args.config):
         total = sweep_len(args.config)
         print(f"running sweep with {total} configurations", flush=True)
         for index in range(total):
             print(f"sweep_run={index + 1}/{total} sweep_index={index}", flush=True)
-            status = _run_single_config(_configure_runtime(sweep_config_at(args.config, index)), args.output_base)
+            status = _run_single_config(
+                _configure_runtime(sweep_config_at(args.config, index)),
+                args.output_base,
+            )
             if status != 0:
                 return status
         return 0
 
-    return _run_single_config(_configure_runtime(load_config(args.config)), args.output_base)
+    return _run_single_config(
+        _configure_runtime(load_config(args.config)), args.output_base
+    )
 
 
 if __name__ == "__main__":

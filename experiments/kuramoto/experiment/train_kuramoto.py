@@ -38,8 +38,8 @@ import numpy as np
 import optax
 
 from experiments.kuramoto.experiment.config import (
-    ExperimentConfig,
     DEFAULT_CONFIG,
+    ExperimentConfig,
     Solvers,
     load_config,
     serialize_config,
@@ -73,7 +73,10 @@ def _eval_split(
     total_examples = 0
     metric_accum = {}
     for batch_index in range(loader.steps_per_epoch):
-        print(f"{label} batch={batch_index + 1}/{loader.steps_per_epoch} starting", flush=True)
+        print(
+            f"{label} batch={batch_index + 1}/{loader.steps_per_epoch} starting",
+            flush=True,
+        )
         started = time.perf_counter()
         key, eval_key = jax.random.split(key)
         batch, state, mask = loader_next(state)
@@ -83,9 +86,14 @@ def _eval_split(
         total_loss += float(loss) * count
         for name, value in metrics.items():
             metric_accum[name] = metric_accum.get(name, 0.0) + np.asarray(value) * count
-        print(f"{label} batch={batch_index + 1}/{loader.steps_per_epoch} loss={float(loss):.4f} time={time.perf_counter() - started:.2f}s", flush=True)
+        print(
+            f"{label} batch={batch_index + 1}/{loader.steps_per_epoch} loss={float(loss):.4f} time={time.perf_counter() - started:.2f}s",
+            flush=True,
+        )
     avg_loss = total_loss / total_examples
-    avg_metrics = {name: (value / total_examples).tolist() for name, value in metric_accum.items()}
+    avg_metrics = {
+        name: (value / total_examples).tolist() for name, value in metric_accum.items()
+    }
     return avg_loss, avg_metrics, key, state
 
 
@@ -156,14 +164,17 @@ def fit(
         model = eqx.tree_deserialise_leaves(model_path, model)
         opt_state_template = optim.init(eqx.filter(model, eqx.is_array))
         opt_state = eqx.tree_deserialise_leaves(
-            opt_path, opt_state_template,
+            opt_path,
+            opt_state_template,
         )
     else:
         opt_state = optim.init(eqx.filter(model, eqx.is_array))
 
     @eqx.filter_jit
     def train_step(current_model, opt_state, batch, mask, key):
-        loss, grads = eqx.filter_value_and_grad(loss_fn)(current_model, batch, mask, key)
+        loss, grads = eqx.filter_value_and_grad(loss_fn)(
+            current_model, batch, mask, key
+        )
         # Global gradient L2 norm (pre-clip) for diagnostics.
         flat_grads = jax.tree.leaves(eqx.filter(grads, eqx.is_array))
         grad_norm = jnp.sqrt(sum(jnp.sum(g * g) for g in flat_grads))
@@ -176,12 +187,15 @@ def fit(
         cand_arr, model_static = eqx.partition(candidate_model, eqx.is_array)
         cur_arr, _ = eqx.partition(current_model, eqx.is_array)
         merged_arr = jax.tree.map(
-            lambda new, old: jnp.where(update_ok, new, old), cand_arr, cur_arr,
+            lambda new, old: jnp.where(update_ok, new, old),
+            cand_arr,
+            cur_arr,
         )
         new_model = eqx.combine(merged_arr, model_static)
         new_opt_state = jax.tree.map(
             lambda new, old: jnp.where(update_ok, new, old),
-            candidate_opt_state, opt_state,
+            candidate_opt_state,
+            opt_state,
         )
         return new_model, new_opt_state, loss, grad_norm
 
@@ -191,10 +205,13 @@ def fit(
     val_state = val_loader.init_state(val_key)
     test_state = test_loader.init_state(test_key)
 
-    n_params = sum(int(x.size) for x in jax.tree.leaves(eqx.filter(model, eqx.is_array)))
+    n_params = sum(
+        int(x.size) for x in jax.tree.leaves(eqx.filter(model, eqx.is_array))
+    )
 
     if resume_from is not None:
         import json as _json
+
         with (resume_from / "history.json").open() as f:
             history = _json.load(f)
         epoch_offset = len(history.get("train_loss", []))
@@ -211,21 +228,34 @@ def fit(
     else:
         history = {
             # Per-epoch reductions
-            "train_loss": [], "val_loss": [], "test_loss": [],
+            "train_loss": [],
+            "val_loss": [],
+            "test_loss": [],
             "epoch_walltime_s": [],
-            "val_theta_mae_mean": [], "val_omega_mae_mean": [],
-            "test_theta_mae_mean": [], "test_omega_mae_mean": [],
-            "val_theta_mae_per_horizon": [], "val_omega_mae_per_horizon": [],
-            "test_theta_mae_per_horizon": [], "test_omega_mae_per_horizon": [],
-            "epoch_train_loss_std": [], "epoch_grad_norm_mean": [],
-            "epoch_grad_norm_max": [], "epoch_grad_norm_p95": [],
-            "epoch_step_time_mean_s": [], "epoch_step_time_p95_s": [],
-            "epoch_peak_bytes": [], "epoch_bytes_in_use": [],
+            "val_theta_mae_mean": [],
+            "val_omega_mae_mean": [],
+            "test_theta_mae_mean": [],
+            "test_omega_mae_mean": [],
+            "val_theta_mae_per_horizon": [],
+            "val_omega_mae_per_horizon": [],
+            "test_theta_mae_per_horizon": [],
+            "test_omega_mae_per_horizon": [],
+            "epoch_train_loss_std": [],
+            "epoch_grad_norm_mean": [],
+            "epoch_grad_norm_max": [],
+            "epoch_grad_norm_p95": [],
+            "epoch_step_time_mean_s": [],
+            "epoch_step_time_p95_s": [],
+            "epoch_peak_bytes": [],
+            "epoch_bytes_in_use": [],
             # Fine-grained per-step traces (one entry per training step, every epoch)
-            "step_train_loss": [], "step_grad_norm": [], "step_time_s": [],
+            "step_train_loss": [],
+            "step_grad_norm": [],
+            "step_time_s": [],
             "step_epoch_index": [],
             # Constants
-            "n_params": n_params, "n_train_steps_per_epoch": train_loader.steps_per_epoch,
+            "n_params": n_params,
+            "n_train_steps_per_epoch": train_loader.steps_per_epoch,
         }
         epoch_offset = 0
         best_val_loss = float("inf")
@@ -245,8 +275,10 @@ def fit(
     def _peak_mem() -> tuple[int | None, int | None]:
         try:
             ms = device.memory_stats() or {}
-            return (int(ms.get("peak_bytes_in_use", 0)) or None,
-                    int(ms.get("bytes_in_use", 0)) or None)
+            return (
+                int(ms.get("peak_bytes_in_use", 0)) or None,
+                int(ms.get("bytes_in_use", 0)) or None,
+            )
         except Exception:
             return None, None
 
@@ -262,18 +294,26 @@ def fit(
         per_step_time: list[float] = []
 
         for batch_index in range(train_loader.steps_per_epoch):
-            print(f"epoch={epoch + 1}/{config.epochs} train batch={batch_index + 1}/{train_loader.steps_per_epoch} starting", flush=True)
+            print(
+                f"epoch={epoch + 1}/{config.epochs} train batch={batch_index + 1}/{train_loader.steps_per_epoch} starting",
+                flush=True,
+            )
             key, step_key = jax.random.split(key)
             batch, train_state, mask = train_next(train_state)
             t_step = time.perf_counter()
-            model, opt_state, loss, gnorm = train_step(model, opt_state, batch, mask, step_key)
+            model, opt_state, loss, gnorm = train_step(
+                model, opt_state, batch, mask, step_key
+            )
             jax.block_until_ready(loss)
             dt_step = time.perf_counter() - t_step
 
             per_step_loss.append(float(loss))
             per_step_grad.append(float(gnorm))
             per_step_time.append(dt_step)
-            print(f"batch_loss={float(loss):.4f} |g|={float(gnorm):.3f} time={dt_step:.2f}s", flush=True)
+            print(
+                f"batch_loss={float(loss):.4f} |g|={float(gnorm):.3f} time={dt_step:.2f}s",
+                flush=True,
+            )
 
         train_loss = float(np.mean(per_step_loss))
         history["train_loss"].append(train_loss)
@@ -290,15 +330,27 @@ def fit(
 
         # Preserve the trained weights even if evaluation is interrupted.
         if config.save_every_epoch:
-            eqx.tree_serialise_leaves(output_dir / f"model_epoch_{epoch:03d}.eqx", model)
+            eqx.tree_serialise_leaves(
+                output_dir / f"model_epoch_{epoch:03d}.eqx", model
+            )
             eqx.tree_serialise_leaves(output_dir / "opt_state_latest.eqx", opt_state)
 
         val_loss, val_metrics, key, val_state = _eval_split(
-            model, val_loader, val_next, eval_step, val_state, key,
+            model,
+            val_loader,
+            val_next,
+            eval_step,
+            val_state,
+            key,
             label=f"epoch={epoch + 1}/{config.epochs} val",
         )
         test_loss, test_metrics, key, test_state = _eval_split(
-            model, test_loader, test_next, eval_step, test_state, key,
+            model,
+            test_loader,
+            test_next,
+            eval_step,
+            test_state,
+            key,
             label=f"epoch={epoch + 1}/{config.epochs} test",
         )
 
@@ -306,12 +358,20 @@ def fit(
         history["test_loss"].append(test_loss)
         history["val_theta_mae_mean"].append(val_metrics["theta_mae_mean"])
         history["val_omega_mae_mean"].append(val_metrics["omega_mae_mean"])
-        history["val_theta_mae_per_horizon"].append(val_metrics["theta_mae_per_horizon"])
-        history["val_omega_mae_per_horizon"].append(val_metrics["omega_mae_per_horizon"])
+        history["val_theta_mae_per_horizon"].append(
+            val_metrics["theta_mae_per_horizon"]
+        )
+        history["val_omega_mae_per_horizon"].append(
+            val_metrics["omega_mae_per_horizon"]
+        )
         history["test_theta_mae_mean"].append(test_metrics["theta_mae_mean"])
         history["test_omega_mae_mean"].append(test_metrics["omega_mae_mean"])
-        history["test_theta_mae_per_horizon"].append(test_metrics["theta_mae_per_horizon"])
-        history["test_omega_mae_per_horizon"].append(test_metrics["omega_mae_per_horizon"])
+        history["test_theta_mae_per_horizon"].append(
+            test_metrics["theta_mae_per_horizon"]
+        )
+        history["test_omega_mae_per_horizon"].append(
+            test_metrics["omega_mae_per_horizon"]
+        )
 
         peak, in_use = _peak_mem()
         history["epoch_peak_bytes"].append(peak)
@@ -389,30 +449,43 @@ def predict_demo(
     }
 
 
-
 def solver_work(model, config):
     """Count attempted/accepted/rejected steps on eight validation trajectories."""
-    from experiments.kuramoto.datasets.kuramoto_dataset import KuramotoDataset, default_npz_path
+    from experiments.kuramoto.datasets.kuramoto_dataset import (
+        KuramotoDataset,
+        default_npz_path,
+    )
 
-    dataset = KuramotoDataset(default_npz_path(Path(config.data_dir), config.N, config.data_seed), "val")
+    dataset = KuramotoDataset(
+        default_npz_path(Path(config.data_dir), config.N, config.data_seed), "val"
+    )
     theta0 = jnp.asarray(dataset.theta[:8, 0])
     omega0 = jnp.asarray(dataset.omega[:8, 0])
     keys = jax.random.split(jax.random.key(config.seed + 731), len(theta0))
 
     @eqx.filter_jit
     def measure(m):
-        return jax.vmap(lambda th, om, key: m.solve(th, om, key).stats)(theta0, omega0, keys)
+        return jax.vmap(lambda th, om, key: m.solve(th, om, key).stats)(
+            theta0, omega0, keys
+        )
 
     stats = measure(model)
-    summary = {name: np.asarray(stats[name]).tolist() for name in
-               ("num_steps", "num_accepted_steps", "num_rejected_steps")}
-    summary.update(split="val", model_checkpoint="model_best.eqx", brownian_seed=config.seed + 731)
+    summary = {
+        name: np.asarray(stats[name]).tolist()
+        for name in ("num_steps", "num_accepted_steps", "num_rejected_steps")
+    }
+    summary.update(
+        split="val", model_checkpoint="model_best.eqx", brownian_seed=config.seed + 731
+    )
     summary["forward_generator_evaluations"] = (
         np.asarray(stats["num_steps"]) * model.solver.recurrence.num_stages
     ).tolist()
     return summary
 
-def _override_from_args(config: ExperimentConfig, args: argparse.Namespace) -> ExperimentConfig:
+
+def _override_from_args(
+    config: ExperimentConfig, args: argparse.Namespace
+) -> ExperimentConfig:
     overrides: dict[str, Any] = {}
     if args.solver is not None:
         overrides["solver"] = Solvers(args.solver)
@@ -441,16 +514,30 @@ def _override_from_args(config: ExperimentConfig, args: argparse.Namespace) -> E
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("config", type=Path, nargs="?", default=DEFAULT_CONFIG, help="Path to experiment config TOML")
+    parser.add_argument(
+        "config",
+        type=Path,
+        nargs="?",
+        default=DEFAULT_CONFIG,
+        help="Path to experiment config TOML",
+    )
     parser.add_argument("--output-dir", type=Path, default=None)
     parser.add_argument("--solver", type=str, choices=tuple(Solvers), default=None)
     parser.add_argument(
-        "--adjoint", type=str, default=None,
+        "--adjoint",
+        type=str,
+        default=None,
         choices=("reversible", "checkpoint_recursive", "checkpoint_full"),
     )
-    parser.add_argument("--n-steps", type=int, default=None,
-                        help="Fixed step count, or T/dtmax for adaptive solves.")
-    parser.add_argument("--adaptive", action=argparse.BooleanOptionalAction, default=None)
+    parser.add_argument(
+        "--n-steps",
+        type=int,
+        default=None,
+        help="Fixed step count, or T/dtmax for adaptive solves.",
+    )
+    parser.add_argument(
+        "--adaptive", action=argparse.BooleanOptionalAction, default=None
+    )
     parser.add_argument("--adaptive-atol", type=float, default=None)
     parser.add_argument("--adaptive-dtmin", type=float, default=None)
     parser.add_argument("--adaptive-max-steps", type=int, default=None)
@@ -460,9 +547,11 @@ def main() -> int:
     parser.add_argument("--N", type=int, default=None)
     parser.add_argument("--lr", type=float, default=None)
     parser.add_argument(
-        "--resume-from", type=Path, default=None,
+        "--resume-from",
+        type=Path,
+        default=None,
         help="Resume from final checkpoints or the last fully evaluated epoch. "
-             "Interpret --epochs as the *total* (resumed + new) count.",
+        "Interpret --epochs as the *total* (resumed + new) count.",
     )
     args = parser.parse_args()
 
@@ -470,7 +559,11 @@ def main() -> int:
     config = _override_from_args(config, args)
     if args.resume_from is not None:
         source_config = json.loads((args.resume_from / "config.json").read_text())
-        validate_method(source_config["solver"], source_config["adjoint"], adaptive=source_config.get("adaptive", False))
+        validate_method(
+            source_config["solver"],
+            source_config["adjoint"],
+            adaptive=source_config.get("adaptive", False),
+        )
 
     _, train_dataset = make_loader(config, "train")
     metadata = train_dataset.metadata()
@@ -479,10 +572,12 @@ def main() -> int:
     model = make_model(config, metadata, model_key)
 
     loss_fn = make_multi_horizon_energy_score(
-        horizons=config.loss_horizons, n_samples=config.loss_n_samples,
+        horizons=config.loss_horizons,
+        n_samples=config.loss_n_samples,
     )
     eval_step = make_eval_step(
-        horizons=config.loss_horizons, n_samples=config.loss_n_samples,
+        horizons=config.loss_horizons,
+        n_samples=config.loss_n_samples,
     )
 
     tag = f"N{config.N}_{config.model.value}_{config.solver.value}_{config.adjoint}_seed{config.seed}"
@@ -502,14 +597,17 @@ def main() -> int:
     print(
         f"model: {config.model.value} hidden={config.hidden_dim} "
         f"n_steps={config.n_steps} solver={config.solver.value} "
-        f"adjoint={config.adjoint} dt={metadata['T']/config.n_steps:.4f} "
+        f"adjoint={config.adjoint} dt={metadata['T'] / config.n_steps:.4f} "
         f"adaptive={config.adaptive} atol={config.adaptive_atol:g} "
         f"drift={config.drift_kind}",
         flush=True,
     )
     print(f"output_dir: {output_dir}", flush=True)
 
-    if args.resume_from is not None and args.resume_from.resolve() == output_dir.resolve():
+    if (
+        args.resume_from is not None
+        and args.resume_from.resolve() == output_dir.resolve()
+    ):
         raise ValueError(
             "--resume-from must point to a different directory than --output-dir; "
             "training overwrites model_final.eqx etc. in the output dir."
@@ -518,8 +616,10 @@ def main() -> int:
     train_t0 = time.perf_counter()
     best_model, history = fit(
         model,
-        loss_fn=loss_fn, eval_step=eval_step,
-        config=config, output_dir=output_dir,
+        loss_fn=loss_fn,
+        eval_step=eval_step,
+        config=config,
+        output_dir=output_dir,
         resume_from=args.resume_from,
     )
     train_walltime_s = float(time.perf_counter() - train_t0)
@@ -532,13 +632,27 @@ def main() -> int:
         output_dir / "metrics.json",
         {
             "train_walltime_s": train_walltime_s,
-            "adaptive_solver_work": solver_work(best_model, config) if config.adaptive else None,
-            "best_val_loss": float(min(history["val_loss"])) if history["val_loss"] else float("nan"),
-            "final_train_loss": float(history["train_loss"][-1]) if history["train_loss"] else float("nan"),
-            "final_val_loss": float(history["val_loss"][-1]) if history["val_loss"] else float("nan"),
-            "final_test_loss": float(history["test_loss"][-1]) if history["test_loss"] else float("nan"),
-            "final_test_theta_mae_mean": float(history["test_theta_mae_mean"][-1]) if history["test_theta_mae_mean"] else float("nan"),
-            "final_test_omega_mae_mean": float(history["test_omega_mae_mean"][-1]) if history["test_omega_mae_mean"] else float("nan"),
+            "adaptive_solver_work": solver_work(best_model, config)
+            if config.adaptive
+            else None,
+            "best_val_loss": float(min(history["val_loss"]))
+            if history["val_loss"]
+            else float("nan"),
+            "final_train_loss": float(history["train_loss"][-1])
+            if history["train_loss"]
+            else float("nan"),
+            "final_val_loss": float(history["val_loss"][-1])
+            if history["val_loss"]
+            else float("nan"),
+            "final_test_loss": float(history["test_loss"][-1])
+            if history["test_loss"]
+            else float("nan"),
+            "final_test_theta_mae_mean": float(history["test_theta_mae_mean"][-1])
+            if history["test_theta_mae_mean"]
+            else float("nan"),
+            "final_test_omega_mae_mean": float(history["test_omega_mae_mean"][-1])
+            if history["test_omega_mae_mean"]
+            else float("nan"),
             "config": json.loads(serialize_config(config)),
         },
     )
@@ -550,5 +664,8 @@ if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except KeyboardInterrupt:
-        print("Training interrupted. Completed training epochs retain their saved weights when save_every_epoch is enabled.", flush=True)
+        print(
+            "Training interrupted. Completed training epochs retain their saved weights when save_every_epoch is enabled.",
+            flush=True,
+        )
         raise SystemExit(130)

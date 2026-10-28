@@ -20,7 +20,8 @@ The total loss is a uniform mean across horizons.
 
 from __future__ import annotations
 
-from typing import Any, Callable, Sequence
+from collections.abc import Callable, Sequence
+from typing import Any
 
 import equinox as eqx
 import jax
@@ -53,7 +54,11 @@ def _state_distance(
 
 
 def _kuramoto_predict_batch(
-    model: eqx.Module, batch: PyTree, key: jax.Array, *, save_indices=None,
+    model: eqx.Module,
+    batch: PyTree,
+    key: jax.Array,
+    *,
+    save_indices=None,
 ) -> tuple[jax.Array, jax.Array]:
     """vmap the NSDE over the batch dimension. Returns (theta, omega) trajectories."""
     theta0 = batch["theta0"]
@@ -62,7 +67,9 @@ def _kuramoto_predict_batch(
     if save_indices is None:
         return jax.vmap(model)(theta0, omega0, sample_keys)
     return jax.vmap(lambda th, om, sk: model(th, om, sk, save_indices=save_indices))(
-        theta0, omega0, sample_keys,
+        theta0,
+        omega0,
+        sample_keys,
     )
 
 
@@ -85,8 +92,10 @@ def _sample_horizons(model, batch, key, horizons, n_samples):
         lambda sk: _kuramoto_predict_batch(model, batch, sk, save_indices=idx)
     )(sample_keys)
     return (
-        sample_theta, sample_omega,
-        target_theta[:, idx, :], target_omega[:, idx, :],
+        sample_theta,
+        sample_omega,
+        target_theta[:, idx, :],
+        target_omega[:, idx, :],
     )
 
 
@@ -102,13 +111,17 @@ def _batch_mean(values, mask):
 def _energy_score(samples, mask, aux_r_weight):
     theta_s, omega_s, theta_t, omega_t = samples
     divergence = jnp.mean(
-        _state_distance(theta_s, omega_s, theta_t[None], omega_t[None]), axis=0,
+        _state_distance(theta_s, omega_s, theta_t[None], omega_t[None]),
+        axis=0,
     )  # (B, H)
     diversity = 0.5 * jnp.mean(
         _state_distance(
-            theta_s[:, None], omega_s[:, None],
-            theta_s[None, :], omega_s[None, :],
-        ), axis=(0, 1),
+            theta_s[:, None],
+            omega_s[:, None],
+            theta_s[None, :],
+            omega_s[None, :],
+        ),
+        axis=(0, 1),
     )
     main = jnp.mean(_batch_mean(divergence - diversity, mask))
     if aux_r_weight == 0.0:
@@ -122,7 +135,9 @@ def _forecast_metrics(samples, mask):
     theta_s, omega_s, theta_t, omega_t = samples
     theta_h = jnp.mean(theta_s, axis=0)
     omega_h = jnp.mean(omega_s, axis=0)
-    wrapped_mae = _batch_mean(jnp.mean(jnp.abs(_wrapped_diff(theta_h, theta_t)), axis=-1), mask)
+    wrapped_mae = _batch_mean(
+        jnp.mean(jnp.abs(_wrapped_diff(theta_h, theta_t)), axis=-1), mask
+    )
     omega_mae = _batch_mean(jnp.mean(jnp.abs(omega_h - omega_t), axis=-1), mask)
     return {
         "theta_mae_per_horizon": wrapped_mae,
@@ -173,6 +188,8 @@ def make_eval_step(
     @eqx.filter_jit
     def eval_step(model, batch, mask, key):
         samples = _sample_horizons(model, batch, key, horizons_t, n_samples)
-        return _energy_score(samples, mask, aux_r_weight), _forecast_metrics(samples, mask)
+        return _energy_score(samples, mask, aux_r_weight), _forecast_metrics(
+            samples, mask
+        )
 
     return eval_step

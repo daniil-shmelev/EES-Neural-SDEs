@@ -15,7 +15,7 @@ from diffrax import (
     RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
 )
-from georax import CFEES25, CG2
+from georax import CFEES25, CG2, GeometricEulerHeun
 
 from experiments.kuramoto.datasets.kuramoto_dataset import (
     KuramotoDataset,
@@ -31,6 +31,7 @@ from experiments.kuramoto.experiment.config import (
 _GEORAX_SOLVERS: dict[Solvers, type[AbstractSolver]] = {
     Solvers.CFEES25: CFEES25,
     Solvers.CG2: CG2,
+    Solvers.GEOMETRIC_EULER_HEUN: GeometricEulerHeun,
 }
 
 
@@ -39,8 +40,10 @@ def build_solver(name: Solvers) -> AbstractSolver:
     return cls()
 
 
-def build_adjoint(solver: Solvers, name: str, n_steps: int, *, adaptive=False) -> AbstractAdjoint:
-    """Build the adjoint for one of the three Kuramoto methods."""
+def build_adjoint(
+    solver: Solvers, name: str, n_steps: int, *, adaptive=False
+) -> AbstractAdjoint:
+    """Build the adjoint for a supported Kuramoto method."""
     validate_method(solver, name, adaptive=adaptive)
     if name == "reversible":
         return ReversibleAdjoint()
@@ -81,7 +84,9 @@ def make_model(
     T = float(metadata["T"])
     dt = T / config.n_steps
     step_limit = config.adaptive_max_steps if config.adaptive else config.n_steps
-    adjoint = build_adjoint(config.solver, config.adjoint, step_limit, adaptive=config.adaptive)
+    adjoint = build_adjoint(
+        config.solver, config.adjoint, step_limit, adaptive=config.adaptive
+    )
 
     if config.model is ModelKind.KURAMOTO_NSDE:
         from experiments.kuramoto.models.kuramoto_nsde import KuramotoNSDE

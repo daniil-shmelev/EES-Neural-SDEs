@@ -15,12 +15,12 @@ from diffrax import (
     AbstractAdjoint,
     AbstractReversibleSolver,
     AbstractSolver,
+    ClipStepSizeController,
     ConstantStepSize,
     ControlTerm,
-    RecursiveCheckpointAdjoint,
-    RESULTS,
     MultiTerm,
     PIDController,
+    RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
     SaveAt,
     StepTo,
@@ -67,26 +67,6 @@ def tangent_torus_error_norm(error, *, atol):
     n = error.shape[-1] // 2
     difference = jnp.concatenate([wrap_to_pi(error[:n]), error[n:]])
     return jnp.sqrt(jnp.mean(jnp.square(difference / atol)))
-
-
-class EndpointPIDController(PIDController):
-    """Do not reject an accepted final step because its proposed next step is short."""
-
-    end_time: float = eqx.field(static=True, default=float("inf"))
-
-    def adapt_step_size(self, t0, t1, y0, y1_candidate, args, y_error,
-                        error_order, controller_state):
-        keep, next_t0, next_t1, jump, state, result = super().adapt_step_size(
-            t0, t1, y0, y1_candidate, args, y_error, error_order, controller_state,
-        )
-        # Diffrax clips a final step to the remaining interval, which may be
-        # shorter than dtmin. PIDController checks the *next* proposed step;
-        # that check is irrelevant once this accepted step has reached t1.
-        completed = keep & (next_t0 >= self.end_time)
-        result = RESULTS.where(
-            completed & (result == RESULTS.dt_min_reached), RESULTS.successful, result,
-        )
-        return keep, next_t0, next_t1, jump, state, result
 
 
 class IndexedMeanFieldDriftField(eqx.Module):
@@ -194,7 +174,7 @@ class SecondOrderMeanFieldDriftField(IndexedMeanFieldDriftField):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.damping_logit = jnp.array(0., dtype=self.embedding.dtype)
+        self.damping_logit = jnp.array(0.0, dtype=self.embedding.dtype)
 
     def __call__(self, t, y, args):
         n = self.N
@@ -252,6 +232,7 @@ class KuramotoDiffusionField(eqx.Module):
         del t, args
         N = self.geometry.state_shape[0] // 2
         scales = jax.nn.softplus(self.mlp(state_features(y, N))) * self.diffusion_scale
+
         # Apply the rectangular diagonal matrix directly: materialising it costs
         # 2*N*N entries per trajectory at every solver stage.
         def product(dw):
@@ -261,7 +242,9 @@ class KuramotoDiffusionField(eqx.Module):
                 return jnp.concatenate([noise, zero])
             return jnp.concatenate([zero, noise])
 
-        return lx.FunctionLinearOperator(product, jax.ShapeDtypeStruct((N,), scales.dtype))
+        return lx.FunctionLinearOperator(
+            product, jax.ShapeDtypeStruct((N,), scales.dtype)
+        )
 
 
 class KuramotoNSDE(eqx.Module):
@@ -337,8 +320,11 @@ class KuramotoNSDE(eqx.Module):
         if drift_kind not in drift_classes:
             raise ValueError(f"Unknown Kuramoto drift: {drift_kind}")
         self.drift_field = drift_classes[drift_kind](
-            geometry=geometry, hidden_dim=hidden_dim, depth=drift_depth,
-            activation=act_fn, key=k_drift,
+            geometry=geometry,
+            hidden_dim=hidden_dim,
+            depth=drift_depth,
+            activation=act_fn,
+            key=k_drift,
         )
         self.diffusion_field = KuramotoDiffusionField(
             geometry=geometry,
@@ -357,10 +343,18 @@ class KuramotoNSDE(eqx.Module):
             times = jnp.linspace(0.0, self.n_steps * self.dt, self.n_obs)
             saveat = SaveAt(ts=times[save_indices])
         ys = self.solve(theta0, omega0, key, saveat=saveat).ys
-        return ys[:, :self.N], ys[:, self.N:]
+        return ys[:, : self.N], ys[:, self.N :]
 
-    def solve(self, theta0, omega0, key, *, saveat=None, adjoint=None,
-              stepsize_controller=None):
+    def solve(
+        self,
+        theta0,
+        omega0,
+        key,
+        *,
+        saveat=None,
+        adjoint=None,
+        stepsize_controller=None,
+    ):
         """Return the Diffrax solution, including accepted/rejected step counts.
 
         The optional Diffrax arguments support diagnostics on the accepted mesh.
@@ -372,9 +366,11 @@ class KuramotoNSDE(eqx.Module):
 
         y0 = jnp.concatenate([theta0, omega0])
         brownian_path = VirtualBrownianTree(
-            t0=0.0, t1=t1,
+            t0=0.0,
+            t1=t1,
             tol=self.adaptive_dtmin / 10.0 if self.adaptive else self.dt / 4.0,
-            shape=(N,), key=key,
+            shape=(N,),
+            key=key,
         )
         term = MultiTerm(
             GeometricTerm(self.drift_field, self.drift_field.geometry),
@@ -391,12 +387,19 @@ class KuramotoNSDE(eqx.Module):
 
         if stepsize_controller is None:
             if self.adaptive:
-                stepsize_controller = EndpointPIDController(
-                    rtol=0.0, atol=1.0,
+                stepsize_controller = PIDController(
+                    rtol=0.0,
+                    atol=1.0,
                     norm=eqx.Partial(tangent_torus_error_norm, atol=self.adaptive_atol),
-                    pcoeff=0.1, icoeff=0.3,
-                    dtmin=self.adaptive_dtmin, dtmax=self.dt, force_dtmin=False,
-                    end_time=t1,
+                    pcoeff=0.1,
+                    icoeff=0.3,
+                    dtmin=self.adaptive_dtmin,
+                    dtmax=self.dt,
+                    force_dtmin=True,
+                )
+                # Full-state-dependent diffusion need not commute: retain revealed endpoints.
+                stepsize_controller = ClipStepSizeController(
+                    stepsize_controller, store_rejected_steps=100
                 )
             else:
                 stepsize_controller = ConstantStepSize()
@@ -404,8 +407,14 @@ class KuramotoNSDE(eqx.Module):
         max_steps = self.adaptive_max_steps if self.adaptive else self.n_steps + 16
 
         return diffeqsolve(
-            term, self.solver, t0=0.0, t1=t1,
-            dt0=None if isinstance(stepsize_controller, StepTo) else self.dt, y0=y0,
-            saveat=SaveAt(ts=t_save) if saveat is None else saveat, adjoint=adjoint,
-            stepsize_controller=stepsize_controller, max_steps=max_steps,
+            term,
+            self.solver,
+            t0=0.0,
+            t1=t1,
+            dt0=None if isinstance(stepsize_controller, StepTo) else self.dt,
+            y0=y0,
+            saveat=SaveAt(ts=t_save) if saveat is None else saveat,
+            adjoint=adjoint,
+            stepsize_controller=stepsize_controller,
+            max_steps=max_steps,
         )

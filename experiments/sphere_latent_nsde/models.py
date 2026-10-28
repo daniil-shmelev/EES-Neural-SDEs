@@ -14,22 +14,34 @@ from diffrax import (
     AbstractAdjoint,
     AbstractReversibleSolver,
     AbstractSolver,
+    ClipStepSizeController,
+    ConstantStepSize,
     ControlTerm,
     DirectAdjoint,
     GeneralShARK,
     MultiTerm,
+    PIDController,
     RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
     SaveAt,
     SpaceTimeLevyArea,
+    StepTo,
     VirtualBrownianTree,
     diffeqsolve,
 )
-from georax import CFEES25, CG2, GeometricEuler, GeometricTerm, SRKMK, Sphere
+from georax import CFEES25, CG2, SRKMK, GeometricEulerHeun, GeometricTerm, Sphere
 from jaxtyping import Array
 
-from experiments.sphere_latent_nsde.config import SOLVER_NFE_PER_STEP
-from experiments.sphere_latent_nsde.dataset import INPUT_DIM, NUM_CLASSES, NUM_TIMEPOINTS
+from experiments.sphere_latent_nsde.config import (
+    SOLVER_DIFFUSION_NFE_PER_STEP,
+    SOLVER_NFE_PER_STEP,
+    validate_adaptive_settings,
+)
+from experiments.sphere_latent_nsde.dataset import (
+    INPUT_DIM,
+    NUM_CLASSES,
+    NUM_TIMEPOINTS,
+)
 from experiments.sphere_latent_nsde.distributions import PowerSpherical
 from experiments.sphere_latent_nsde.geometry import normalize
 
@@ -41,11 +53,16 @@ def apply_linear(linear: eqx.nn.Linear, x: Array) -> Array:
     return y
 
 
+def sphere_error_norm(error: Array) -> Array:
+    """Largest endpoint chord length across Monte Carlo samples and examples."""
+    return jnp.max(jnp.linalg.norm(error, axis=-1))
+
+
 def build_solver(
-    name: Literal["geometric_euler", "cg2", "cfees25", "srkmk_general_shark"],
+    name: Literal["geometric_euler_heun", "cg2", "cfees25", "srkmk_general_shark"],
 ) -> AbstractSolver:
-    if name == "geometric_euler":
-        return GeometricEuler()
+    if name == "geometric_euler_heun":
+        return GeometricEulerHeun()
     if name == "cg2":
         return CG2()
     if name == "cfees25":
@@ -327,9 +344,13 @@ class ActivityRecogNetwork(eqx.Module):
         )
         self.use_atanh = use_atanh
 
-    def __call__(self, observed_data: Array, observed_mask: Array, observed_tp: Array) -> Array:
+    def __call__(
+        self, observed_data: Array, observed_mask: Array, observed_tp: Array
+    ) -> Array:
         h = self.mtan(
-            jnp.concatenate([observed_data, observed_mask.astype(observed_data.dtype)], axis=-1),
+            jnp.concatenate(
+                [observed_data, observed_mask.astype(observed_data.dtype)], axis=-1
+            ),
             observed_tp,
         )
         if self.use_atanh:
@@ -427,7 +448,9 @@ class PathEncoder(eqx.Module):
         if self.learnable_prior:
             assert self.prior_h is not None
             return self.time_fn(self.prior_h, times)
-        return jnp.zeros((times.shape[0], self.geometry.coordinate_shape[0]), dtype=times.dtype)
+        return jnp.zeros(
+            (times.shape[0], self.geometry.coordinate_shape[0]), dtype=times.dtype
+        )
 
     def _posterior_drift_batched(self, h: Array, times: Array) -> Array:
         if h.ndim == 1:
@@ -445,6 +468,7 @@ class PathEncoder(eqx.Module):
         times: Array,
         solver: AbstractSolver,
         adjoint: AbstractAdjoint,
+        **solve_kwargs,
     ) -> Array:
         """Integrate all Monte Carlo samples and batch elements in one solve.
 
@@ -452,10 +476,39 @@ class PathEncoder(eqx.Module):
         ``(mc, batch, time, z_dim)``.
         """
 
+        sol = self.solve_paths(
+            h, z0, key, times=times, solver=solver, adjoint=adjoint, **solve_kwargs
+        )
+        return jnp.moveaxis(sol.ys, 0, 2)
+
+    def solve_paths(
+        self,
+        h: Array,
+        z0: Array,
+        key: Array,
+        *,
+        times: Array,
+        solver: AbstractSolver,
+        adjoint: AbstractAdjoint,
+        adaptive: bool = False,
+        adaptive_atol: float = 1e-3,
+        adaptive_dtmin: float = 1e-4,
+        adaptive_max_steps: int = 4096,
+        saveat=None,
+        stepsize_controller=None,
+    ):
+        """Solve on one shared batch mesh and return states plus solver statistics.
+
+        The requested save times are independent of the adaptive integration mesh.
+        Optional save/controller arguments support accepted-mesh replay tests.
+        """
         dt = times[1] - times[0]
         t0 = times[0]
         t1 = times[-1]
-        max_steps = int(times.shape[0]) + 8
+        if adaptive and not isinstance(solver, CFEES25):
+            raise ValueError("Adaptive sphere solves require the CF-EES embedded pair.")
+        max_steps = adaptive_max_steps if adaptive else int(times.shape[0]) + 8
+        brownian_tol = adaptive_dtmin / 10.0 if adaptive else dt / 4.0
         driver_dim = self.geometry.coordinate_shape[0]
         z0 = normalize(z0)
         solve_args = (self.time_fn, h, self.sigma.astype(z0.dtype))
@@ -465,7 +518,7 @@ class PathEncoder(eqx.Module):
             VirtualBrownianTree(
                 t0=t0,
                 t1=t1,
-                tol=dt / 4.0,
+                tol=brownian_tol,
                 shape=brownian_shape,
                 key=key,
                 levy_area=SpaceTimeLevyArea,
@@ -474,7 +527,7 @@ class PathEncoder(eqx.Module):
             else VirtualBrownianTree(
                 t0=t0,
                 t1=t1,
-                tol=dt / 4.0,
+                tol=brownian_tol,
                 shape=brownian_shape,
                 key=key,
             )
@@ -483,19 +536,38 @@ class PathEncoder(eqx.Module):
             GeometricTerm(_sphere_drift_coeffs, self.geometry),
             ControlTerm(_sphere_diffusion_coeffs, brownian),
         )
-        sol = diffeqsolve(
+        if stepsize_controller is None:
+            if adaptive:
+                stepsize_controller = ClipStepSizeController(
+                    PIDController(
+                        rtol=0.0,
+                        atol=adaptive_atol,
+                        norm=sphere_error_norm,
+                        pcoeff=0.1,
+                        icoeff=0.3,
+                        dtmin=adaptive_dtmin,
+                        dtmax=dt,
+                        force_dtmin=True,
+                    ),
+                    # Sphere rotation fields need not commute. Preserve rejected
+                    # endpoints so refinement does not skip observed noise.
+                    store_rejected_steps=100,
+                )
+            else:
+                stepsize_controller = ConstantStepSize()
+        return diffeqsolve(
             term,
             solver,
             t0=t0,
             t1=t1,
-            dt0=dt,
+            dt0=None if isinstance(stepsize_controller, StepTo) else dt,
             y0=z0,
             args=solve_args,
-            saveat=SaveAt(ts=times),
+            saveat=SaveAt(ts=times) if saveat is None else saveat,
             adjoint=adjoint,
+            stepsize_controller=stepsize_controller,
             max_steps=max_steps,
         )
-        return jnp.moveaxis(sol.ys, 0, 2)
 
     def path_kl(self, paths: Array, h: Array, times: Array) -> Array:
         grid = times[:-1]
@@ -527,6 +599,7 @@ class LatentSDEOutput:
     aux_logits: Array
     kl0: Array
     klp: Array
+    solver_stats: dict[str, Array]
 
 
 class ActivityLatentSDE(eqx.Module):
@@ -540,9 +613,14 @@ class ActivityLatentSDE(eqx.Module):
     num_timepoints: int = eqx.field(static=True)
     nfe_budget: int = eqx.field(static=True)
     nfe_per_step: int = eqx.field(static=True)
+    diffusion_nfe_per_step: int = eqx.field(static=True)
     solve_n_steps: int = eqx.field(static=True)
     solve_num_timepoints: int = eqx.field(static=True)
     time_end: float = eqx.field(static=True)
+    adaptive: bool = eqx.field(static=True)
+    adaptive_atol: float = eqx.field(static=True)
+    adaptive_dtmin: float = eqx.field(static=True)
+    adaptive_max_steps: int = eqx.field(static=True)
     recon_sigma: Array
 
     def __init__(
@@ -556,11 +634,11 @@ class ActivityLatentSDE(eqx.Module):
         n_deg: int = 4,
         nfe_budget: int | None = None,
         solver_name: Literal[
-            "geometric_euler",
+            "geometric_euler_heun",
             "cg2",
             "cfees25",
             "srkmk_general_shark",
-        ] = "geometric_euler",
+        ] = "geometric_euler_heun",
         adjoint_name: Literal[
             "auto",
             "direct",
@@ -570,6 +648,10 @@ class ActivityLatentSDE(eqx.Module):
             "full",
             "reversible",
         ] = "auto",
+        adaptive: bool = False,
+        adaptive_atol: float = 1e-3,
+        adaptive_dtmin: float = 1e-4,
+        adaptive_max_steps: int = 4096,
         learnable_prior: bool = False,
         use_atanh: bool = False,
         key: Array,
@@ -604,16 +686,29 @@ class ActivityLatentSDE(eqx.Module):
         self.recon_net = eqx.nn.Linear(z_dim, input_dim, key=k3)
         self.aux_net = eqx.nn.Linear(z_dim, num_classes, key=k4)
         solve_n_steps = int(nfe_budget) // int(nfe_per_step)
-        max_steps = solve_n_steps + 1 + 8
+        if adaptive:
+            validate_adaptive_settings(
+                solver_name,
+                solve_n_steps,
+                adaptive_atol,
+                adaptive_dtmin,
+                adaptive_max_steps,
+            )
+        max_steps = adaptive_max_steps if adaptive else solve_n_steps + 1 + 8
         self.solver = solver
         self.adjoint = build_adjoint(solver, adjoint_name, max_steps=max_steps)
         self.z_dim = z_dim
         self.num_timepoints = int(num_timepoints)
         self.nfe_budget = int(nfe_budget)
         self.nfe_per_step = int(nfe_per_step)
+        self.diffusion_nfe_per_step = SOLVER_DIFFUSION_NFE_PER_STEP[solver_name]
         self.solve_n_steps = solve_n_steps
         self.solve_num_timepoints = self.solve_n_steps + 1
         self.time_end = 0.99
+        self.adaptive = adaptive
+        self.adaptive_atol = adaptive_atol
+        self.adaptive_dtmin = adaptive_dtmin
+        self.adaptive_max_steps = adaptive_max_steps
         self.recon_sigma = jnp.asarray(1.0, dtype=jnp.float32)
 
     def desired_times(self, dtype=jnp.float32) -> Array:
@@ -622,7 +717,9 @@ class ActivityLatentSDE(eqx.Module):
     def solve_times(self, dtype=jnp.float32) -> Array:
         return jnp.linspace(0.0, self.time_end, self.solve_num_timepoints, dtype=dtype)
 
-    def __call__(self, batch: dict[str, Array], key: Array, *, mc_samples: int = 1) -> LatentSDEOutput:
+    def __call__(
+        self, batch: dict[str, Array], key: Array, *, mc_samples: int = 1
+    ) -> LatentSDEOutput:
         h = jax.vmap(self.recog_net)(
             batch["inp_obs"], batch["inp_msk"], batch["inp_tps"]
         )
@@ -631,14 +728,19 @@ class ActivityLatentSDE(eqx.Module):
         z0 = posterior.rsample(k_z0, (mc_samples,))
         output_times = self.desired_times(dtype=batch["inp_obs"].dtype)
         solve_times = self.solve_times(dtype=batch["inp_obs"].dtype)
-        solve_paths = self.path_encoder.integrate_paths(
+        sol = self.path_encoder.solve_paths(
             h,
             z0,
             k_path,
             times=solve_times,
             solver=self.solver,
             adjoint=self.adjoint,
+            adaptive=self.adaptive,
+            adaptive_atol=self.adaptive_atol,
+            adaptive_dtmin=self.adaptive_dtmin,
+            adaptive_max_steps=self.adaptive_max_steps,
         )
+        solve_paths = jnp.moveaxis(sol.ys, 0, 2)
         kl0 = posterior.kl_to_uniform()
         klp = self.path_encoder.path_kl(solve_paths, h, solve_times)
         if self.solve_num_timepoints == self.num_timepoints:
@@ -657,4 +759,17 @@ class ActivityLatentSDE(eqx.Module):
             aux_logits=aux_logits,
             kl0=kl0,
             klp=klp,
+            solver_stats={
+                **{
+                    name: sol.stats[name]
+                    for name in (
+                        "num_steps",
+                        "num_accepted_steps",
+                        "num_rejected_steps",
+                    )
+                },
+                "forward_drift_evaluations": sol.stats["num_steps"] * self.nfe_per_step,
+                "forward_diffusion_evaluations": sol.stats["num_steps"]
+                * self.diffusion_nfe_per_step,
+            },
         )

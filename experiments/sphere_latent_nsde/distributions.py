@@ -52,12 +52,16 @@ class PowerSpherical:
         k_t, k_s = jax.random.split(key)
         alpha = (dim - 1) / 2 + self.scale
         beta = jnp.full_like(self.scale, (dim - 1) / 2)
-        t = 2.0 * jax.random.beta(
-            k_t,
-            alpha,
-            beta,
-            shape=sample_shape + self.scale.shape,
-        ) - 1.0
+        t = (
+            2.0
+            * jax.random.beta(
+                k_t,
+                alpha,
+                beta,
+                shape=sample_shape + self.scale.shape,
+            )
+            - 1.0
+        )
         s = hyperspherical_uniform_sample(
             k_s,
             shape=sample_shape + self.scale.shape,
@@ -95,11 +99,14 @@ class PowerSpherical:
         return -(
             self.log_normalizer()
             + self.scale
-            * (jnp.log(2.0) + jsp_special.digamma(alpha) - jsp_special.digamma(alpha + beta))
+            * (
+                jnp.log(2.0)
+                + jsp_special.digamma(alpha)
+                - jsp_special.digamma(alpha + beta)
+            )
         )
 
     def kl_to_uniform(self) -> Array:
         return -self.entropy() + hyperspherical_uniform_entropy(
             self.dim, dtype=self.loc.dtype
         )
-

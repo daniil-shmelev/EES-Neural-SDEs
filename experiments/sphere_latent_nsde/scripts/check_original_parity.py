@@ -21,12 +21,11 @@ import equinox as eqx
 import jax
 import jax.numpy as jnp
 import numpy as np
+from georax import Sphere
 
 from experiments.sphere_latent_nsde.dataset import load_activity_arrays
-from georax import Sphere
 from experiments.sphere_latent_nsde.losses import _cross_entropy_per_time, gather_time
 from experiments.sphere_latent_nsde.models import Chebyshev
-
 
 ORIGINAL_REPO = Path("/home/luke/EES-LatentSDEonHS")
 ORIGINAL_PYTHON = ORIGINAL_REPO / ".venv" / "bin" / "python"
@@ -44,7 +43,9 @@ def _run_original(code: str, out_file: Path) -> None:
     )
 
 
-def _assert_close(name: str, actual: np.ndarray, expected: np.ndarray, *, atol: float = 1e-6) -> None:
+def _assert_close(
+    name: str, actual: np.ndarray, expected: np.ndarray, *, atol: float = 1e-6
+) -> None:
     max_abs = float(np.max(np.abs(actual - expected))) if actual.size else 0.0
     if not np.allclose(actual, expected, atol=atol, rtol=atol):
         raise AssertionError(f"{name} mismatch: max_abs={max_abs:.3e}, atol={atol}")
@@ -54,7 +55,7 @@ def _assert_close(name: str, actual: np.ndarray, expected: np.ndarray, *, atol: 
 def check_dataset(tmp: Path) -> None:
     out = tmp / "activity_original.npz"
     _run_original(
-        r'''
+        r"""
 import sys
 import numpy as np
 import torch
@@ -64,7 +65,7 @@ mask = torch.stack([r[3] for r in data]).numpy().astype(np.float32)
 tid = torch.stack([r[1] for r in data]).long().numpy().astype(np.int32)
 labels = torch.stack([r[4] for r in data])[:, :, :7].argmax(dim=2).long().numpy().astype(np.int32)
 np.savez(sys.argv[1], obs=obs, mask=mask, tid=tid, labels=labels)
-''',
+""",
         out,
     )
     original = np.load(out)
@@ -82,7 +83,7 @@ np.savez(sys.argv[1], obs=obs, mask=mask, tid=tid, labels=labels)
 def check_chebyshev(tmp: Path) -> None:
     out = tmp / "chebyshev_original.npz"
     _run_original(
-        r'''
+        r"""
 import sys
 import numpy as np
 import torch
@@ -103,21 +104,23 @@ np.savez(
     t=t.numpy(),
     out=out.detach().numpy(),
 )
-''',
+""",
         out,
     )
     original = np.load(out)
     cheb = Chebyshev(5, 4, 6, time_min=0.0, time_max=1.98, key=jax.random.key(0))
     cheb = eqx.tree_at(lambda m: m.linear.weight, cheb, jnp.asarray(original["weight"]))
     cheb = eqx.tree_at(lambda m: m.linear.bias, cheb, jnp.asarray(original["bias"]))
-    ours = jax.vmap(lambda h: cheb(h, jnp.asarray(original["t"])))(jnp.asarray(original["h"]))
+    ours = jax.vmap(lambda h: cheb(h, jnp.asarray(original["t"])))(
+        jnp.asarray(original["h"])
+    )
     _assert_close("chebyshev", np.asarray(ours), original["out"], atol=1e-3)
 
 
 def check_sphere_action(tmp: Path) -> None:
     out = tmp / "sphere_original.npz"
     _run_original(
-        r'''
+        r"""
 import sys
 import numpy as np
 import torch
@@ -135,7 +138,7 @@ a = torch.linspace(-0.2, 0.3, group_dim)
 omega = vec_to_matrix(a, basis)
 y = torch.matrix_exp(omega) @ z
 np.savez(sys.argv[1], z=z.numpy(), a=a.numpy(), y=y.numpy(), basis=basis.numpy())
-''',
+""",
         out,
     )
     original = np.load(out)
@@ -145,13 +148,15 @@ np.savez(sys.argv[1], z=z.numpy(), a=a.numpy(), y=y.numpy(), basis=basis.numpy()
     _assert_close("sphere action", np.asarray(ours), original["y"], atol=2e-6)
     tangent = sphere.detrivialise(z, a)
     expected = np.einsum("d,dij,j->i", original["a"], original["basis"], original["z"])
-    _assert_close("sphere coordinate convention", np.asarray(tangent), expected, atol=2e-6)
+    _assert_close(
+        "sphere coordinate convention", np.asarray(tangent), expected, atol=2e-6
+    )
 
 
 def check_aux_loss(tmp: Path) -> None:
     out = tmp / "aux_original.npz"
     _run_original(
-        r'''
+        r"""
 import sys
 import numpy as np
 import torch
@@ -164,7 +169,7 @@ loss = PerTimePointCrossEntropyLoss(reduction="none")(logits, target, tids)
 idx = tids.view(1, 3, 5, 1).repeat(2, 1, 1, 4).long()
 acc = (logits.gather(2, idx).mean(dim=0).flatten(0, 1).argmax(1) == target.flatten()).float().mean()
 np.savez(sys.argv[1], logits=logits.numpy(), target=target.numpy(), tids=tids.numpy(), loss=loss.detach().numpy(), acc=np.asarray(acc.item(), dtype=np.float32))
-''',
+""",
         out,
     )
     original = np.load(out)

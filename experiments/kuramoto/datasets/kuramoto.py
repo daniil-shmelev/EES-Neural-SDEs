@@ -41,10 +41,9 @@ References
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 import equinox as eqx
-import jax
 import jax.numpy as jnp
 from jaxtyping import Array, Float
 
@@ -74,7 +73,9 @@ class KuramotoParams(eqx.Module):
         self.natural_freqs = jnp.asarray(natural_freqs)
 
     @staticmethod
-    def bimodal(N: int, P: float = 0.5, K: float = 1.0, m: float = 1.0) -> "KuramotoParams":
+    def bimodal(
+        N: int, P: float = 0.5, K: float = 1.0, m: float = 1.0
+    ) -> KuramotoParams:
         """Filatrella-style bimodal natural frequencies: half +P, half -P.
 
         Requires even $N$ for exact balance ($\\sum_i \\Omega_i = 0$). For
@@ -108,7 +109,9 @@ def kuramoto_drift(
     return omega, omega_dot
 
 
-def order_parameter(theta: Float[Array, " N"]) -> tuple[Float[Array, ""], Float[Array, ""]]:
+def order_parameter(
+    theta: Float[Array, " N"],
+) -> tuple[Float[Array, ""], Float[Array, ""]]:
     r"""Kuramoto complex order parameter $r e^{i\Psi} = \frac{1}{N}\sum_j e^{i\theta_j}$.
 
     Returns the magnitude $r \in [0, 1]$ (coherence) and mean phase $\Psi$.

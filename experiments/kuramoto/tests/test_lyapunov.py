@@ -49,12 +49,8 @@ def test_heun_tangent_matches_finite_difference():
 
     finite_difference_theta = (perturbed[0] - base[0]) / epsilon
     finite_difference_omega = (perturbed[1] - base[1]) / epsilon
-    np.testing.assert_allclose(
-        finite_difference_theta, base[2], rtol=2e-7, atol=5e-9
-    )
-    np.testing.assert_allclose(
-        finite_difference_omega, base[3], rtol=2e-7, atol=5e-9
-    )
+    np.testing.assert_allclose(finite_difference_theta, base[2], rtol=2e-7, atol=5e-9)
+    np.testing.assert_allclose(finite_difference_omega, base[3], rtol=2e-7, atol=5e-9)
 
 
 def test_global_phase_mode_is_exactly_neutral():
@@ -88,9 +84,7 @@ def test_projection_removes_common_components_and_normalizes():
     )
     np.testing.assert_allclose(np.mean(projected_theta, axis=1), 0.0, atol=1e-16)
     np.testing.assert_allclose(np.mean(projected_omega, axis=1), 0.0, atol=1e-16)
-    norms = np.sqrt(
-        np.sum(projected_theta**2 + projected_omega**2, axis=1)
-    )
+    norms = np.sqrt(np.sum(projected_theta**2 + projected_omega**2, axis=1))
     np.testing.assert_allclose(norms, 1.0, atol=1e-15)
 
 

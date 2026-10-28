@@ -42,8 +42,10 @@ class KuramotoDataset:
             self.t_grid = np.asarray(npz["t_grid"])  # (T_obs,)
         self.meta = json.loads(meta_path.read_text())
         if self.theta.shape[0] != self.omega.shape[0]:
-            raise ValueError(f"theta / omega split-length mismatch: "
-                             f"{self.theta.shape[0]} vs {self.omega.shape[0]}")
+            raise ValueError(
+                f"theta / omega split-length mismatch: "
+                f"{self.theta.shape[0]} vs {self.omega.shape[0]}"
+            )
         self.split = split
         self.N = int(self.meta["N"])
         self.n_obs = int(self.theta.shape[1])

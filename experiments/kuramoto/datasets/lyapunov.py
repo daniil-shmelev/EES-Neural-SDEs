@@ -91,16 +91,10 @@ def _tangent_drift(
 
     mean_cos = np.mean(cos_theta, axis=1, keepdims=True)
     mean_sin = np.mean(sin_theta, axis=1, keepdims=True)
-    mean_cos_delta = np.mean(
-        cos_theta * delta_theta, axis=1, keepdims=True
-    )
-    mean_sin_delta = np.mean(
-        sin_theta * delta_theta, axis=1, keepdims=True
-    )
+    mean_cos_delta = np.mean(cos_theta * delta_theta, axis=1, keepdims=True)
+    mean_sin_delta = np.mean(sin_theta * delta_theta, axis=1, keepdims=True)
 
-    weighted_delta = (
-        cos_theta * mean_cos_delta + sin_theta * mean_sin_delta
-    )
+    weighted_delta = cos_theta * mean_cos_delta + sin_theta * mean_sin_delta
     row_mean = cos_theta * mean_cos + sin_theta * mean_sin
     coupling_jvp = K * (weighted_delta - row_mean * delta_theta)
     return delta_omega, (-delta_omega + coupling_jvp) / m
@@ -118,9 +112,7 @@ def _heun_step(
     dt: float,
 ) -> tuple[FloatArray, FloatArray, FloatArray, FloatArray]:
     """Advance the base state and derivative of the same stochastic step."""
-    dtheta_0, domega_0 = _drift(
-        theta, omega, natural_frequencies, K, m
-    )
+    dtheta_0, domega_0 = _drift(theta, omega, natural_frequencies, K, m)
     ddelta_theta_0, ddelta_omega_0 = _tangent_drift(
         theta, delta_theta, delta_omega, K, m
     )
@@ -142,15 +134,9 @@ def _heun_step(
     )
 
     theta_next = theta + 0.5 * dt * (dtheta_0 + dtheta_1)
-    omega_next = (
-        omega + 0.5 * dt * (domega_0 + domega_1) + noise_increment
-    )
-    delta_theta_next = delta_theta + 0.5 * dt * (
-        ddelta_theta_0 + ddelta_theta_1
-    )
-    delta_omega_next = delta_omega + 0.5 * dt * (
-        ddelta_omega_0 + ddelta_omega_1
-    )
+    omega_next = omega + 0.5 * dt * (domega_0 + domega_1) + noise_increment
+    delta_theta_next = delta_theta + 0.5 * dt * (ddelta_theta_0 + ddelta_theta_1)
+    delta_omega_next = delta_omega + 0.5 * dt * (ddelta_omega_0 + ddelta_omega_1)
     theta_next = (theta_next + np.pi) % (2.0 * np.pi) - np.pi
     return (
         theta_next,
@@ -165,15 +151,9 @@ def _project_and_normalize(
     delta_omega: FloatArray,
 ) -> tuple[FloatArray, FloatArray, FloatArray]:
     """Project to phase/frequency differences, then normalize each vector."""
-    delta_theta = delta_theta - np.mean(
-        delta_theta, axis=1, keepdims=True
-    )
-    delta_omega = delta_omega - np.mean(
-        delta_omega, axis=1, keepdims=True
-    )
-    norms = np.sqrt(
-        np.sum(delta_theta**2 + delta_omega**2, axis=1)
-    )
+    delta_theta = delta_theta - np.mean(delta_theta, axis=1, keepdims=True)
+    delta_omega = delta_omega - np.mean(delta_omega, axis=1, keepdims=True)
+    norms = np.sqrt(np.sum(delta_theta**2 + delta_omega**2, axis=1))
     if np.any(~np.isfinite(norms)) or np.any(norms <= np.finfo(float).tiny):
         raise FloatingPointError("Tangent norm vanished or became non-finite.")
     return (
@@ -224,13 +204,9 @@ def estimate_largest_nontrivial_exponent(
 
     burn_steps = _integer_steps(cfg.burn_in, cfg.dt, "burn_in")
     accumulation_steps = _integer_steps(cfg.horizon, cfg.dt, "horizon")
-    renorm_steps = _integer_steps(
-        cfg.renorm_interval, cfg.dt, "renorm_interval"
-    )
+    renorm_steps = _integer_steps(cfg.renorm_interval, cfg.dt, "renorm_interval")
     if burn_steps % renorm_steps or accumulation_steps % renorm_steps:
-        raise ValueError(
-            "burn_in and horizon must be multiples of renorm_interval."
-        )
+        raise ValueError("burn_in and horizon must be multiples of renorm_interval.")
 
     rng = np.random.default_rng(cfg.seed)
     shape = (cfg.n_realizations, cfg.N)
@@ -238,9 +214,7 @@ def estimate_largest_nontrivial_exponent(
     omega = cfg.omega_scale * rng.standard_normal(size=shape)
     delta_theta = rng.standard_normal(size=shape)
     delta_omega = rng.standard_normal(size=shape)
-    delta_theta, delta_omega, _ = _project_and_normalize(
-        delta_theta, delta_omega
-    )
+    delta_theta, delta_omega, _ = _project_and_normalize(delta_theta, delta_omega)
 
     natural_frequencies = _bimodal_frequencies(cfg.N, cfg.P)
     noise_scale = np.sqrt(2.0 * cfg.D * cfg.dt) / cfg.m
@@ -268,9 +242,7 @@ def estimate_largest_nontrivial_exponent(
             )
 
     n_intervals = accumulation_steps // renorm_steps
-    log_growth = np.empty(
-        (cfg.n_realizations, n_intervals), dtype=np.float64
-    )
+    log_growth = np.empty((cfg.n_realizations, n_intervals), dtype=np.float64)
     for step in range(1, accumulation_steps + 1):
         advance_one_step()
         if step % renorm_steps == 0:

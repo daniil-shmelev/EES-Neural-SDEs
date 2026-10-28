@@ -13,7 +13,6 @@ from cyreal.datasets.dataset_protocol import DatasetProtocol
 from cyreal.datasets.utils import to_host_jax_array
 from cyreal.sources import ArraySource
 
-
 INPUT_DIM = 12
 NUM_TIMEPOINTS = 228
 NUM_CLASSES = 7
@@ -173,9 +172,13 @@ def _parse_raw_file(raw_file: Path, *, max_seq_length: int) -> dict[str, np.ndar
         for line in f:
             parts = line.rstrip("\n").split(",")
             if len(parts) != 8:
-                raise ValueError(f"Unexpected row with {len(parts)} columns in {raw_file}")
+                raise ValueError(
+                    f"Unexpected row with {len(parts)} columns in {raw_file}"
+                )
             cur_record_id, tag_id, time_s, _date, val1, val2, val3, label = parts
-            value_vec = np.asarray((float(val1), float(val2), float(val3)), dtype=np.float32)
+            value_vec = np.asarray(
+                (float(val1), float(val2), float(val3)), dtype=np.float32
+            )
             absolute_time = float(time_s)
 
             if cur_record_id != record_id:
@@ -242,9 +245,9 @@ def _parse_raw_file(raw_file: Path, *, max_seq_length: int) -> dict[str, np.ndar
     tids = np.stack([r[1] for r in records]).astype(np.int32)
     obs = np.stack([r[2] for r in records]).astype(np.float32)
     masks_arr = np.stack([r[3] for r in records]).astype(np.float32)
-    labels_arr = np.stack([r[4][:, :NUM_CLASSES].argmax(axis=1) for r in records]).astype(
-        np.int32
-    )
+    labels_arr = np.stack(
+        [r[4][:, :NUM_CLASSES].argmax(axis=1) for r in records]
+    ).astype(np.int32)
     return {
         "obs": obs,
         "mask": masks_arr,

@@ -32,7 +32,10 @@ def test_bimodal_balanced():
 def test_drift_zero_at_synced_no_freq():
     """All-equal phases + zero natural frequencies + zero velocity -> zero drift on omega."""
     p = KuramotoParams(
-        N=3, m=1.0, K=1.0, natural_freqs=jnp.zeros(3),
+        N=3,
+        m=1.0,
+        K=1.0,
+        natural_freqs=jnp.zeros(3),
     )
     theta = jnp.array([0.4, 0.4, 0.4])
     omega = jnp.zeros(3)
@@ -77,7 +80,9 @@ def test_simulate_one_smoke():
     """End-to-end shape + wrap check on the SDE simulator."""
     params = KuramotoParams.bimodal(N=4, P=0.5, K=1.0)
     cfg = SimConfig(T=0.2, n_fine=128, n_obs=8, D=0.05)
-    theta0, omega0 = sample_initial_conditions(params, n_traj=1, omega_scale=0.5, key=jr.PRNGKey(0))
+    theta0, omega0 = sample_initial_conditions(
+        params, n_traj=1, omega_scale=0.5, key=jr.PRNGKey(0)
+    )
     th, om = simulate_one(params, cfg, theta0[0], omega0[0], jr.PRNGKey(1))
     assert th.shape == (8, 4)
     assert om.shape == (8, 4)
