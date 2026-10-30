@@ -28,10 +28,8 @@ Install `uv`, then run experiments from this repository root. `./run` selects th
 
 | Command | Experiment / default setup |
 |---|---|
-| `./run kuramoto` | CG2 full, CG2 recursive and CF-EES reversible; [configuration](experiments/kuramoto/configs/kuramoto.toml) |
-| `./run kuramoto --memory` | Measure and plot memory for those three methods |
-| `./run kuramoto --adaptive` | Adaptive reversible CF-EES; uses the existing local Diffrax fix described in its README |
-| `./run sphere` | Activity-classification [sweep](experiments/sphere_latent_nsde/configs/activity/sweep.toml) |
+| `./run kuramoto` | Fixed and adaptive learning sweep; [config.toml](experiments/kuramoto/config.toml) |
+| `./run sphere` | Activity-classification [config.toml](experiments/sphere_latent_nsde/config.toml) |
 | `./run rough-vol` | Rough Bergomi [sweep](neurips/stochastic_volatility/configs/stoch_vol/sweep.toml) |
 | `./run rough-vol --table` | Print the table from saved predictions |
 | `./run convergence-ode` | SO(3) forward and recovery convergence |
@@ -44,7 +42,9 @@ Install `uv`, then run experiments from this repository root. `./run` selects th
 | `./run torus-memory` | Seven-torus benchmark |
 | `./run order-verification --manuscript /path/to/SIAM/ees_simods.tex` | Exact order and printed-coefficient checks (read-only) |
 
-Use `./run <experiment> --help` for settings and setup locations, or `--dry-run` to inspect the commands without installing dependencies or running computations. Training sweeps accept `--config PATH`; `--output-dir PATH` selects a new output directory. Additional options are passed to the experiment, for example `./run kuramoto --seeds 0` or `./run sphere --index 0`. OU/GBM accept `--method`, `--epochs` and `--seed`; their remaining settings are in the training scripts linked by `--help`.
+Use `./run <experiment> --help` for settings and setup locations, or `--dry-run` to inspect the commands without installing dependencies or running computations. Training sweeps accept `--config PATH`; `--output-dir PATH` selects a new output directory. Kuramoto and sphere each have one `config.toml` directly in their experiment directory: `[base]` holds shared settings, `[sweep]` selects seeds, and `[integrators.<name>]` lists adjoints, step counts and stepping modes. Edit that file to change run parameters; `--index N` selects one sweep entry. Other experiments forward additional options to their entrypoint. OU/GBM accept `--method`, `--epochs` and `--seed`; their remaining settings are in the training scripts linked by `--help`.
+
+Every Kuramoto and sphere training run records `peak_gpu_memory_bytes` alongside runtime in `metrics.json`. This is the peak JAX GPU allocation through training and evaluation, including data, model and optimiser memory. CPU runs or backends without allocator statistics record `null`. Each configuration runs in a fresh process so peaks are independent.
 
 No environment activation or separate installation command is needed. The launcher uses the shared `uv.lock`; the underlying modules remain available for development. Saved manuscript results retain their original provenance and are not replaced by new runs.
 

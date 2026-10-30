@@ -4,7 +4,7 @@ JAX/Equinox reimplementation of the HumanActivity experiment from `/home/luke/EE
 
 The latent state lives on `S^{z_dim-1}` and uses Georax's public batched `Sphere`. Its generator coordinates match the original PyTorch lower-triangular `so(n)` convention. All four methods now use `diffeqsolve`, the library's charts and the selected Diffrax adjoint. The former custom CF-EES adjoint, Euler stepping loop and SRKMK wrapper have been removed. The parity script checks the action using the library's high-order chart.
 
-Existing results retain their original implementation and Brownian-driver provenance. New runs use Georax `bf5c3554bfa8199427d4a3200fa58b69b657aa98`, including CF-EES(2,5;1/10), and must be measured again before replacing manuscript results. The default sweep replaces Itô Geometric Euler with Stratonovich `GeometricEulerHeun()` on `Sphere`, using the `geometric_euler_heun_direct` and `geometric_euler_heun_checkpoint_full` methods. Old Euler results are not Euler–Heun measurements.
+Existing results retain their original implementation and Brownian-driver provenance. New runs use Georax `bf5c3554bfa8199427d4a3200fa58b69b657aa98`, including CF-EES(2,5;1/10), and must be measured again before replacing manuscript results. The default sweep replaces Itô Geometric Euler with Stratonovich `GeometricEulerHeun()` on `Sphere`, using direct and full adjoints. Old Euler results are not Euler–Heun measurements.
 
 ## Data
 
@@ -37,11 +37,19 @@ Run the solver sweep from the repository root:
 ./run sphere --index 0
 ```
 
-The first command runs all entries in [configs/activity/sweep.toml](configs/activity/sweep.toml); the second selects one. Use `--config PATH` to select another configuration and `--help` for options. The launcher installs the required uv dependencies.
+The first command runs all entries in [config.toml](config.toml); the second selects one. As in Kuramoto, `[base]` holds shared settings, `[sweep]` selects seeds, and `[integrators.<name>]` lists each integrator's adjoints and step settings. Adjoint names are `direct`, `full`, `recursive` and `reversible`; reversible reconstruction requires CF-EES. Change run parameters in that TOML; there are no CLI overrides for them. Use `--config PATH` to select another configuration and `--help` for options. The launcher installs the required uv dependencies. For example:
+
+```toml
+[integrators.geometric_euler_heun]
+adjoints = ["direct", "full"]
+n_steps = 30
+```
+
+Each listed adjoint runs with the same integrator settings. Stepping defaults to `["fixed"]`, and output method labels are generated automatically.
 
 The exact original output grid has 228 points. For faster JAX development runs, set `num_timepoints = 64` or `num_timepoints = 32` in a TOML config; the dataloader remaps reconstruction/classification time IDs onto that grid.
 
-Fixed-step SDE solves are normalised by forward drift evaluations: `nfe_budget` counts drift evaluations, Geometric Euler–Heun costs 1 per solver step, CG2 and SRKMK-GeneralShARK cost 2 per step, and CFEES25 costs 3 per step. Euler–Heun also evaluates diffusion twice per step; matching drift evaluations does not match total field evaluations or runtime. The metrics separately record forward drift and diffusion evaluation counts. If `nfe_budget` is omitted, the largest common multiple of 6 not exceeding `num_timepoints - 1` is used, and the latent path is interpolated back to the configured output grid for reconstruction and classification losses.
+Set `n_steps` under each integrator. The supplied fixed-step counts match 30 forward drift evaluations: 30 Euler–Heun steps, 15 CG2 or SRKMK-GeneralShARK steps, and 10 CF-EES steps. Euler–Heun also evaluates diffusion twice per step; matching drift evaluations does not match total field evaluations or runtime. The metrics derive the drift budget from `n_steps` and separately record forward drift and diffusion evaluation counts. The latent path is interpolated back to the configured output grid for reconstruction and classification losses.
 
 ## Adaptive CF-EES
 
@@ -51,9 +59,9 @@ The default sweep includes `cfees25_adaptive_reversible` as well as the fixed-st
 ./run sphere --index 6
 ```
 
-A single-run TOML can instead set `method = "cfees25_adaptive_reversible"`, or set `solver = "cfees25"`, `adjoint = "reversible"` and `adaptive = true`. The adaptive settings are `adaptive_atol = 1e-3`, `adaptive_dtmin = 1e-4` and `adaptive_max_steps = 4096`. Euler–Heun remains fixed-step. Tolerances can be varied in separate configurations for an accuracy–time comparison.
+The `[integrators.cfees25]` table selects `adjoints = ["reversible"]` and `stepping = ["fixed", "adaptive"]`. Its nested `[integrators.cfees25.adaptive]` table sets `atol = 1e-2`, `dtmin = 1e-4` and `max_steps = 4096`. Adaptive runs inherit `n_steps = 10` from the parent table; adding `n_steps` to the nested table overrides it only for adaptive runs. Euler–Heun remains fixed-step. Tolerances can be varied in separate configurations for an accuracy–time comparison.
 
-The controller uses CF-EES's final-increment embedded estimate. Its error measure is the largest chordal endpoint difference over all examples and Monte Carlo samples; it is invariant under rotations and does not dilute one difficult trajectory into a batch average. One PI controller governs the shared batch mesh, so batch size is part of the adaptive protocol. Its initial and maximum step are `0.99 / (nfe_budget / 3)`. The loss quadrature grid and output interpolation are the same as fixed-step CF-EES at that reference budget; accepted integration times are free to vary between them. Thus `nfe_budget` sets a reference grid and maximum step, not an adaptive evaluation budget.
+The controller uses CF-EES's final-increment embedded estimate. Its error measure is the largest chordal endpoint difference over all examples and Monte Carlo samples; it is invariant under rotations and does not dilute one difficult trajectory into a batch average. One PI controller governs the shared batch mesh, so batch size is part of the adaptive protocol. Its initial and maximum step are `0.99 / n_steps`. The loss quadrature grid and output interpolation use the same reference step count as fixed-step CF-EES; accepted integration times are free to vary between them. For adaptive runs, `n_steps` therefore sets the reference grid and maximum step size; actual work is measured during the solve.
 
 The Brownian tree has tolerance `adaptive_dtmin / 10` and is retained through rejected attempts. Sphere rotation fields need not commute, so `ClipStepSizeController` stores rejected endpoints and forces later steps to visit them, following [Diffrax's adaptive SDE guidance](https://docs.kidger.site/diffrax/api/stepsize_controller/). Reversible gradients use the ordinary `ReversibleAdjoint` and reconstruct on the accepted mesh. The minimum-step policy matches Kuramoto: `force_dtmin=True` permits accepting a step at the minimum size even if the estimated error exceeds tolerance. The maximum-attempt limit still fails the solve when exceeded.
 
@@ -64,6 +72,8 @@ Verify adaptive rejection handling, accepted-mesh replay and reversible gradient
 ```bash
 uv run --extra sphere --extra dev python -m pytest experiments/sphere_latent_nsde/test_adaptive.py -q
 ```
+
+Every configuration runs in a fresh process and records `peak_gpu_memory_bytes` alongside `train_time_s` in `metrics.json`. Memory is the peak JAX GPU allocation from process startup through training and evaluation, including resident data, model, optimiser and temporary buffers. It is read from the allocator’s `peak_bytes_in_use`, so short-lived peaks are included. CPU runs or unsupported allocator statistics produce `null`. This uses the same definition as Kuramoto.
 
 Each run writes a timestamped directory under `experiments/sphere_latent_nsde/results/runs/<timestamp>/activity__<method>__seed<N>__<timestamp>/` containing `config.toml`, `nsde.eqx`, `history.json`, and `metrics.json`.
 
