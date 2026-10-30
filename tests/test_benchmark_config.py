@@ -1,6 +1,7 @@
 """Run settings edited in TOML reach the training entrypoints."""
 
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -149,3 +150,57 @@ def test_invalid_integrator_choices_fail_before_training(
     path.write_text(f"[integrators.geometric_euler_heun]\n{settings}\n")
     with pytest.raises(ValueError, match=match):
         loader(path)
+
+
+@pytest.mark.parametrize(
+    "platform,stats,expected",
+    [
+        (
+            "gpu",
+            {"peak_bytes_in_use": 4096, "bytes_in_use": 512, "bytes_reserved": 8192},
+            4096,
+        ),
+        ("cpu", {"peak_bytes_in_use": 4096}, None),
+        ("gpu", None, None),
+        ("gpu", {"bytes_in_use": 512}, None),
+    ],
+)
+def test_gpu_memory_reports_peak_allocation_or_unavailable(
+    monkeypatch, platform, stats, expected
+):
+    from experiments import metrics
+
+    device = SimpleNamespace(platform=platform, memory_stats=lambda: stats)
+    monkeypatch.setattr(metrics.jax, "devices", lambda: [device])
+    assert metrics.peak_gpu_memory_bytes() == expected
+
+
+@pytest.mark.parametrize("exit_code,run_count", [(0, 7), (7, 1)])
+def test_sphere_sweep_uses_fresh_processes_and_propagates_failure(
+    tmp_path, monkeypatch, exit_code, run_count
+):
+    from experiments.sphere_latent_nsde import train_activity
+
+    calls = []
+
+    def run(command, **kwargs):
+        calls.append(command)
+        return SimpleNamespace(returncode=exit_code)
+
+    monkeypatch.setattr(train_activity.subprocess, "run", run)
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["train_activity", str(SPHERE_CONFIG), "--output-base", str(tmp_path)],
+    )
+    assert train_activity.main() == exit_code
+    assert len(calls) == run_count
+    for index, command in enumerate(calls):
+        assert command[:4] == [
+            sys.executable,
+            "-u",
+            "-m",
+            "experiments.sphere_latent_nsde.train_activity",
+        ]
+        assert command[command.index("--index") + 1] == str(index)
+        assert command[command.index("--output-base") + 1] == str(tmp_path)

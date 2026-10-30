@@ -55,6 +55,7 @@ from experiments.kuramoto.experiment.runtime import (
     save_json,
     save_npz,
 )
+from experiments.metrics import peak_gpu_memory_bytes
 
 
 def _eval_split(
@@ -573,6 +574,13 @@ def main() -> int:
         resume_from=args.resume_from,
     )
     train_walltime_s = float(time.perf_counter() - train_t0)
+    peak_memory = peak_gpu_memory_bytes()
+    memory_label = (
+        f"{peak_memory / 2**20:.1f} MiB" if peak_memory is not None else "unavailable"
+    )
+    print(
+        f"train_time={train_walltime_s:.1f}s peak_gpu_memory={memory_label}", flush=True
+    )
 
     print("Saving demonstration forecasts...", flush=True)
     demo = predict_demo(best_model, config)
@@ -582,6 +590,7 @@ def main() -> int:
         output_dir / "metrics.json",
         {
             "train_walltime_s": train_walltime_s,
+            "peak_gpu_memory_bytes": peak_memory,
             "adaptive_solver_work": solver_work(best_model, config)
             if config.adaptive
             else None,

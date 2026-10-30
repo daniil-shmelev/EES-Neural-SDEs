@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
+import sys
 import time
 from dataclasses import dataclass
 from datetime import datetime
@@ -17,6 +19,7 @@ import numpy as np
 import optax
 from tqdm.auto import tqdm
 
+from experiments.metrics import peak_gpu_memory_bytes
 from experiments.sphere_latent_nsde.config import (
     DEFAULT_CONFIG,
     ActivityConfig,
@@ -372,6 +375,11 @@ def _run_single_config(config: ActivityConfig, output_base: Path | None = None) 
     start = time.perf_counter()
     train_result = fit(model, config)
     train_time_s = time.perf_counter() - start
+    peak_memory = peak_gpu_memory_bytes()
+    memory_label = (
+        f"{peak_memory / 2**20:.1f} MiB" if peak_memory is not None else "unavailable"
+    )
+    print(f"train_time={train_time_s:.1f}s peak_gpu_memory={memory_label}", flush=True)
 
     metrics = _metrics_payload(
         config=config,
@@ -382,6 +390,7 @@ def _run_single_config(config: ActivityConfig, output_base: Path | None = None) 
         train_result=train_result,
         train_time_s=train_time_s,
     )
+    metrics["peak_gpu_memory_bytes"] = peak_memory
     _save_artifacts(
         output_dir=output_dir,
         config=config,
@@ -428,10 +437,19 @@ def main() -> int:
         print(f"running sweep with {total} configurations", flush=True)
         for index in range(total):
             print(f"sweep_run={index + 1}/{total} sweep_index={index}", flush=True)
-            status = _run_single_config(
-                _configure_runtime(sweep_config_at(args.config, index)),
-                args.output_base,
-            )
+            # Allocator peaks and compiled programs must not carry between runs.
+            command = [
+                sys.executable,
+                "-u",
+                "-m",
+                "experiments.sphere_latent_nsde.train_activity",
+                str(args.config),
+                "--index",
+                str(index),
+            ]
+            if args.output_base is not None:
+                command += ["--output-base", str(args.output_base)]
+            status = subprocess.run(command, check=False).returncode
             if status != 0:
                 return status
         return 0

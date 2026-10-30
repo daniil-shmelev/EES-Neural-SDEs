@@ -93,6 +93,7 @@ def _run_cell(
                         "final_test_theta_mae_mean",
                         "final_test_omega_mae_mean",
                         "train_walltime_s",
+                        "peak_gpu_memory_bytes",
                     )
                 }
             )
