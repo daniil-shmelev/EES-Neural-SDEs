@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-import itertools
 import math
 import tomllib
 from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any, Literal
 
+from experiments.config import expand_integrators, method_label
 from experiments.sphere_latent_nsde.dataset import NUM_TIMEPOINTS
+
+DEFAULT_CONFIG = Path(__file__).resolve().parent / "config.toml"
 
 METHODS = {
     "geometric_euler_heun_direct": ("geometric_euler_heun", "direct"),
@@ -76,6 +78,7 @@ class ActivityConfig:
     n_deg: int = 4
     num_timepoints: int = NUM_TIMEPOINTS
     nfe_budget: int | None = None
+    n_steps: int | None = None
     solver: Literal[
         "geometric_euler_heun",
         "cg2",
@@ -112,6 +115,16 @@ class ActivityConfig:
     max_eval_batches: int | None = None
 
     def __post_init__(self):
+        if self.n_steps is not None:
+            if type(self.n_steps) is not int or self.n_steps <= 0:
+                raise ValueError("n_steps must be a positive integer.")
+            if (
+                self.nfe_budget is not None
+                and self.nfe_budget != self.n_steps * self.nfe_per_step
+            ):
+                raise ValueError(
+                    "n_steps and nfe_budget specify different step counts."
+                )
         if self.adaptive:
             validate_adaptive_settings(
                 self.solver,
@@ -123,8 +136,7 @@ class ActivityConfig:
 
     @property
     def method(self) -> str:
-        adaptive = "adaptive_" if self.adaptive else ""
-        return f"{self.solver}_{adaptive}{self.adjoint}"
+        return method_label(self.solver, self.adjoint, self.adaptive)
 
     @property
     def nfe_per_step(self) -> int:
@@ -136,6 +148,8 @@ class ActivityConfig:
 
     @property
     def effective_nfe_budget(self) -> int:
+        if self.n_steps is not None:
+            return self.n_steps * self.nfe_per_step
         if self.nfe_budget is not None:
             return int(self.nfe_budget)
         output_intervals = int(self.num_timepoints) - 1
@@ -171,27 +185,24 @@ def load_config(path: Path) -> ActivityConfig:
 def is_sweep_config(path: Path) -> bool:
     with path.open("rb") as f:
         data = tomllib.load(f)
-    return "base" in data and "sweep" in data
+    return "integrators" in data or "sweep" in data
 
 
-def load_sweep(path: Path) -> tuple[dict[str, Any], dict[str, list[Any]]]:
+def load_runs(path: Path) -> list[ActivityConfig]:
     with path.open("rb") as f:
         data = tomllib.load(f)
-    return data["base"], data["sweep"]
+    return [_build_config(settings) for settings in expand_integrators(data)]
 
 
 def sweep_len(path: Path) -> int:
-    _, sweep_axes = load_sweep(path)
-    return sum(1 for _ in itertools.product(*sweep_axes.values()))
+    return len(load_runs(path))
 
 
 def sweep_config_at(path: Path, index: int) -> ActivityConfig:
-    base, sweep_axes = load_sweep(path)
-    keys = list(sweep_axes.keys())
-    combos = list(itertools.product(*sweep_axes.values()))
-    if index < 0 or index >= len(combos):
-        raise IndexError(f"sweep index {index} out of range [0, {len(combos)})")
-    return _build_config({**base, **dict(zip(keys, combos[index]))})
+    runs = load_runs(path)
+    if index < 0 or index >= len(runs):
+        raise IndexError(f"sweep index {index} out of range [0, {len(runs)})")
+    return runs[index]
 
 
 def to_toml(config: ActivityConfig) -> str:
@@ -213,6 +224,7 @@ def to_toml(config: ActivityConfig) -> str:
         "n_deg",
         "num_timepoints",
         "nfe_budget",
+        "n_steps",
         "solver",
         "adjoint",
         "adaptive",
@@ -249,8 +261,7 @@ def _build_config(data: dict[str, Any]) -> ActivityConfig:
         if method not in METHODS:
             raise ValueError(f"Unknown activity method: {method!r}")
         data["solver"], data["adjoint"] = METHODS[method]
-        if method == "cfees25_adaptive_reversible":
-            data["adaptive"] = True
+        data["adaptive"] = method == "cfees25_adaptive_reversible"
     if "data_dir" in data:
         data["data_dir"] = Path(data["data_dir"])
 

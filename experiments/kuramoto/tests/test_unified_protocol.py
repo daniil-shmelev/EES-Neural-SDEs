@@ -1,15 +1,9 @@
-"""Check shared training/benchmark semantics and prevent legacy data mixing."""
+"""Check training method support and prevent legacy result mixing."""
 
-import dataclasses
 import json
 
-import equinox as eqx
-import jax
-import jax.numpy as jnp
-import numpy as np
 import pytest
 
-from experiments.kuramoto.experiment.benchmark import prepare_benchmark
 from experiments.kuramoto.experiment.config import (
     COMPARISON_METHODS,
     DEFAULT_CONFIG,
@@ -18,49 +12,7 @@ from experiments.kuramoto.experiment.config import (
     load_config,
     serialize_config,
 )
-from experiments.kuramoto.experiment.factories import make_model
-from experiments.kuramoto.experiment.losses import make_multi_horizon_energy_score
 from experiments.kuramoto.scripts.plot_memory_sweep import read_cells
-
-
-def test_shared_model_and_loss(tmp_path):
-    # Small real-format cached dataset, so this test exercises the complete
-    # benchmark preparation without running a training experiment.
-    config = dataclasses.replace(
-        load_config(DEFAULT_CONFIG),
-        N=3,
-        batch_size=2,
-        hidden_dim=8,
-        n_steps=4,
-        data_dir=str(tmp_path),
-    )
-    theta = np.linspace(-0.2, 0.3, 2 * 6 * 3, dtype=np.float32).reshape(2, 6, 3)
-    omega = theta / 2
-    path = tmp_path / "kuramoto_N3_seed0.npz"
-    np.savez(
-        path,
-        theta_train=theta,
-        omega_train=omega,
-        t_grid=np.linspace(0, 0.4, 6, dtype=np.float32),
-    )
-    path.with_suffix(".json").write_text(json.dumps({"N": 3, "T": 0.4, "n_obs": 6}))
-    model, batch, measured_loss, metadata = prepare_benchmark(config)
-    training_model = make_model(config, metadata, jax.random.key(config.seed))
-    for a, b in zip(
-        jax.tree.leaves(eqx.filter(model, eqx.is_array)),
-        jax.tree.leaves(eqx.filter(training_model, eqx.is_array)),
-        strict=True,
-    ):
-        np.testing.assert_array_equal(a, b)
-    training_loss = make_multi_horizon_energy_score(
-        horizons=config.loss_horizons, n_samples=config.loss_n_samples
-    )
-    key = jax.random.key(3)
-    np.testing.assert_array_equal(
-        measured_loss(model, batch, jnp.ones(2), key),
-        training_loss(training_model, batch, jnp.ones(2), key),
-    )
-    assert metadata["n_obs"] == 6
 
 
 def test_plot_rejects_legacy_and_mixed_experiments(tmp_path):
@@ -83,9 +35,9 @@ def test_plot_rejects_legacy_and_mixed_experiments(tmp_path):
         read_cells(path)
 
 
-@pytest.mark.parametrize("label,solver,adjoint,steps", COMPARISON_METHODS)
-def test_supported_training_methods(label, solver, adjoint, steps):
-    config = ExperimentConfig(solver=solver, adjoint=adjoint, n_steps=steps)
+@pytest.mark.parametrize("label,solver,adjoint", COMPARISON_METHODS)
+def test_supported_training_methods(label, solver, adjoint):
+    config = ExperimentConfig(solver=solver, adjoint=adjoint)
     assert config.solver == solver and config.adjoint == adjoint
 
 

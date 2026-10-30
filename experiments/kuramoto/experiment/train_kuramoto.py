@@ -25,7 +25,6 @@ Trains the canonical indexed mean-field Kuramoto model.
 from __future__ import annotations
 
 import argparse
-import dataclasses
 import json
 import time
 from pathlib import Path
@@ -40,8 +39,7 @@ import optax
 from experiments.kuramoto.experiment.config import (
     DEFAULT_CONFIG,
     ExperimentConfig,
-    Solvers,
-    load_config,
+    load_runs,
     serialize_config,
     validate_method,
 )
@@ -483,35 +481,6 @@ def solver_work(model, config):
     return summary
 
 
-def _override_from_args(
-    config: ExperimentConfig, args: argparse.Namespace
-) -> ExperimentConfig:
-    overrides: dict[str, Any] = {}
-    if args.solver is not None:
-        overrides["solver"] = Solvers(args.solver)
-    if args.adjoint is not None:
-        overrides["adjoint"] = str(args.adjoint)
-    if args.n_steps is not None:
-        overrides["n_steps"] = int(args.n_steps)
-    if args.batch_size is not None:
-        overrides["batch_size"] = int(args.batch_size)
-    if args.epochs is not None:
-        overrides["epochs"] = int(args.epochs)
-    if args.seed is not None:
-        overrides["seed"] = int(args.seed)
-    if args.N is not None:
-        overrides["N"] = int(args.N)
-    if args.lr is not None:
-        overrides["learning_rate"] = float(args.lr)
-    for name in ("adaptive", "adaptive_atol", "adaptive_dtmin", "adaptive_max_steps"):
-        value = getattr(args, name, None)
-        if value is not None:
-            overrides[name] = value
-    if not overrides:
-        return config
-    return dataclasses.replace(config, **overrides)
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -522,30 +491,9 @@ def main() -> int:
         help="Path to experiment config TOML",
     )
     parser.add_argument("--output-dir", type=Path, default=None)
-    parser.add_argument("--solver", type=str, choices=tuple(Solvers), default=None)
     parser.add_argument(
-        "--adjoint",
-        type=str,
-        default=None,
-        choices=("reversible", "checkpoint_recursive", "checkpoint_full"),
+        "--index", type=int, default=0, help="Entry from the TOML sweep."
     )
-    parser.add_argument(
-        "--n-steps",
-        type=int,
-        default=None,
-        help="Fixed step count, or T/dtmax for adaptive solves.",
-    )
-    parser.add_argument(
-        "--adaptive", action=argparse.BooleanOptionalAction, default=None
-    )
-    parser.add_argument("--adaptive-atol", type=float, default=None)
-    parser.add_argument("--adaptive-dtmin", type=float, default=None)
-    parser.add_argument("--adaptive-max-steps", type=int, default=None)
-    parser.add_argument("--batch-size", type=int, default=None)
-    parser.add_argument("--epochs", type=int, default=None)
-    parser.add_argument("--seed", type=int, default=None)
-    parser.add_argument("--N", type=int, default=None)
-    parser.add_argument("--lr", type=float, default=None)
     parser.add_argument(
         "--resume-from",
         type=Path,
@@ -555,8 +503,10 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    config = load_config(args.config)
-    config = _override_from_args(config, args)
+    configs = load_runs(args.config)
+    if not 0 <= args.index < len(configs):
+        parser.error(f"Sweep index must be between 0 and {len(configs) - 1}.")
+    config = configs[args.index]
     if args.resume_from is not None:
         source_config = json.loads((args.resume_from / "config.json").read_text())
         validate_method(

@@ -58,11 +58,11 @@ class LauncherTests(unittest.TestCase):
     def test_default_runs_get_distinct_directories(self):
         paths = []
         for _ in range(2):
-            status, calls, _ = self.invoke(["kuramoto", "--seeds", "0"])
+            status, calls, _ = self.invoke(["kuramoto", "--index", "0"])
             self.assertEqual(status, 0)
             cmd = calls[0].args[0]
             self.assertIn("jax-base", cmd)
-            self.assertEqual(cmd[-2:], ["--seeds", "0"])
+            self.assertEqual(cmd[-2:], ["--index", "0"])
             path = Path(cmd[cmd.index("--output-base") + 1])
             self.assertTrue(path.is_dir())
             paths.append(path)
@@ -118,39 +118,41 @@ class LauncherTests(unittest.TestCase):
                         )
                     )
 
-    def test_memory_plot_reads_this_run(self):
-        status, calls, _ = self.invoke(["kuramoto", "--memory"])
-        self.assertEqual(status, 0)
-        self.assertEqual(len(calls), 2)
-        measure, plot = [call.args[0] for call in calls]
-        self.assertEqual(
-            measure[measure.index("--output") + 1], plot[plot.index("--input") + 1]
-        )
-
-    def test_adaptive_preset_and_explicit_overrides(self):
+    def test_adaptive_selection_comes_from_toml(self):
+        config = self.root / "experiments/kuramoto/config.toml"
+        config.write_text("""
+[base]
+epochs = 3
+[sweep]
+seed = [7]
+[integrators.cg2]
+adjoints = ["full"]
+n_steps = 12
+[integrators.cfees25]
+adjoints = ["reversible"]
+stepping = ["adaptive"]
+n_steps = 25
+[integrators.cfees25.adaptive]
+dtmin = 2e-4
+""")
         with patch.object(Path, "is_dir", return_value=True):
-            _, calls, _ = self.invoke(["kuramoto", "--adaptive"])
+            _, calls, _ = self.invoke(["kuramoto"])
             command = calls[0].args[0]
-            self.assertEqual(command[command.index("--adjoint") + 1], "reversible")
-            self.assertEqual(command[command.index("--n-steps") + 1], "10")
-            self.assertEqual(command[command.index("--adaptive-dtmin") + 1], "1e-4")
-            _, calls, _ = self.invoke(
-                [
-                    "kuramoto",
-                    "--adaptive",
-                    "--adjoint",
-                    "checkpoint_recursive",
-                    "--n-steps",
-                    "25",
-                ]
-            )
-            self.assertEqual(
-                calls[0].args[0][-4:],
-                ["--adjoint", "checkpoint_recursive", "--n-steps", "25"],
-            )
+            self.assertIn("adaptive-reversible", calls[0].kwargs["env"]["PYTHONPATH"])
+            for flag in ("--seed", "--adjoint", "--n-steps", "--adaptive-dtmin"):
+                self.assertNotIn(flag, command)
+        with patch.dict(launcher.os.environ, {}, clear=True):
+            _, calls, _ = self.invoke(["kuramoto", "--index", "0"])
+            self.assertNotIn("PYTHONPATH", calls[0].kwargs["env"])
+
+    def test_run_parameters_cannot_override_toml(self):
+        for args in (["kuramoto", "--seeds", "0"], ["sphere", "--epochs", "1"]):
+            with self.subTest(args=args), self.assertRaises(SystemExit) as raised:
+                self.invoke(args)
+            self.assertEqual(raised.exception.code, 2)
 
     def test_failure_stops_before_plot_and_propagates(self):
-        status, calls, output = self.invoke(["kuramoto", "--memory"], status=7)
+        status, calls, output = self.invoke(["ou"], status=7)
         self.assertEqual(status, 7)
         self.assertEqual(len(calls), 1)
         self.assertIn("Experiment failed (exit 7)", output)
@@ -165,7 +167,7 @@ class LauncherTests(unittest.TestCase):
 
     def test_help_creates_no_run_and_only_calls_help(self):
         before = set(self.root.rglob("*"))
-        status, calls, _ = self.invoke(["kuramoto", "--memory", "--help"])
+        status, calls, _ = self.invoke(["kuramoto", "--help"])
         self.assertEqual(status, 0)
         self.assertEqual(len(calls), 1)
         self.assertIn("--help", calls[0].args[0])
@@ -185,8 +187,10 @@ class LauncherTests(unittest.TestCase):
             self.assertEqual(
                 calls[0].kwargs["env"]["XLA_PYTHON_CLIENT_PREALLOCATE"], "false"
             )
-            _, calls, _ = self.invoke(["kuramoto", "--memory"])
-            self.assertNotIn("XLA_PYTHON_CLIENT_PREALLOCATE", calls[0].kwargs["env"])
+            _, calls, _ = self.invoke(["sphere"])
+            self.assertEqual(
+                calls[0].kwargs["env"]["XLA_PYTHON_CLIENT_PREALLOCATE"], "false"
+            )
         with patch.dict(launcher.os.environ, {"XLA_PYTHON_CLIENT_PREALLOCATE": "true"}):
             _, calls, _ = self.invoke(["kuramoto"])
             self.assertEqual(
@@ -199,13 +203,17 @@ class LauncherTests(unittest.TestCase):
         comparison = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(comparison)
         _run_cell = comparison._run_cell
-        args = SimpleNamespace(
-            config=self.root / "config.toml", N=3, batch_size=2, epochs=1, lr=0.001
+        from experiments.kuramoto.experiment.config import ExperimentConfig, Solvers
+
+        config = ExperimentConfig(
+            N=3, batch_size=2, epochs=1, solver=Solvers.CG2, adjoint="checkpoint_full"
         )
         output_dir = self.root / "cg2_full_seed0"
         real_popen = subprocess.Popen
 
         def child(cmd, **kwargs):
+            self.assertEqual(cmd[cmd.index("--index") + 1], "2")
+            self.assertNotIn("--n-steps", cmd)
             self.assertFalse(
                 any(output_dir.iterdir()),
                 "Child must receive an empty output directory",
@@ -225,9 +233,7 @@ class LauncherTests(unittest.TestCase):
             contextlib.redirect_stdout(terminal),
             patch("subprocess.Popen", side_effect=child),
         ):
-            result = _run_cell(
-                args, "cg2_full", "cg2", "checkpoint_full", 75, 0, output_dir
-            )
+            result = _run_cell(self.root / "config.toml", 2, config, output_dir)
         self.assertEqual(result["exit_code"], 7)
         self.assertIn("visible failure", terminal.getvalue())
         self.assertIn("visible failure", (output_dir / "train.log").read_text())

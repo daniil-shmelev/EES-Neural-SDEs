@@ -1,4 +1,4 @@
-"""TOML configuration for the Kuramoto training and memory benchmarks."""
+"""TOML configuration for the Kuramoto training benchmark."""
 
 from __future__ import annotations
 
@@ -7,6 +7,8 @@ import tomllib
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from pathlib import Path
+
+from experiments.config import expand_integrators, method_label
 
 
 class Devices(StrEnum):
@@ -18,6 +20,7 @@ class Solvers(StrEnum):
     CFEES25 = "cfees25"
     CG2 = "cg2"
     GEOMETRIC_EULER_HEUN = "geometric_euler_heun"
+    SRKMK_GENERAL_SHARK = "srkmk_general_shark"
 
 
 class ModelKind(StrEnum):
@@ -25,15 +28,20 @@ class ModelKind(StrEnum):
 
 
 COMPARISON_METHODS = (
-    ("cg2_full", Solvers.CG2, "checkpoint_full", 75),
-    ("cg2_recursive", Solvers.CG2, "checkpoint_recursive", 75),
-    ("cfees25_reversible", Solvers.CFEES25, "reversible", 50),
-    ("geometric_euler_heun_full", Solvers.GEOMETRIC_EULER_HEUN, "checkpoint_full", 150),
+    ("cg2_full", Solvers.CG2, "checkpoint_full"),
+    ("cg2_recursive", Solvers.CG2, "checkpoint_recursive"),
+    ("srkmk_general_shark_full", Solvers.SRKMK_GENERAL_SHARK, "checkpoint_full"),
+    (
+        "srkmk_general_shark_recursive",
+        Solvers.SRKMK_GENERAL_SHARK,
+        "checkpoint_recursive",
+    ),
+    ("cfees25_reversible", Solvers.CFEES25, "reversible"),
+    ("geometric_euler_heun_full", Solvers.GEOMETRIC_EULER_HEUN, "checkpoint_full"),
     (
         "geometric_euler_heun_recursive",
         Solvers.GEOMETRIC_EULER_HEUN,
         "checkpoint_recursive",
-        150,
     ),
 )
 
@@ -42,9 +50,9 @@ def validate_method(solver, adjoint, *, adaptive=False):
     """Keep fixed-step comparisons restricted; allow checkpointed adaptive training."""
     if adaptive and solver == Solvers.CFEES25 and adjoint == "checkpoint_recursive":
         return
-    if (solver, adjoint) not in {(s, a) for _, s, a, _ in COMPARISON_METHODS}:
+    if (solver, adjoint) not in {(s, a) for _, s, a in COMPARISON_METHODS}:
         raise ValueError(
-            "Kuramoto supports only CG2 or Geometric Euler–Heun with checkpoint_full "
+            "Kuramoto supports only CG2, Geometric Euler–Heun or SRKMK–GeneralShARK with checkpoint_full "
             "or checkpoint_recursive, "
             "and CF-EES(2,5) with reversible."
         )
@@ -94,6 +102,8 @@ class ExperimentConfig:
     skip_plots: bool = False
 
     def __post_init__(self):
+        if type(self.n_steps) is not int or self.n_steps <= 0:
+            raise ValueError("n_steps must be a positive integer.")
         if self.adaptive:
             if self.solver != Solvers.CFEES25:
                 raise ValueError("Adaptive stepping requires a CF-EES embedded pair.")
@@ -110,8 +120,12 @@ class ExperimentConfig:
         ):
             raise ValueError("Use a supported mean-field Kuramoto drift.")
 
+    @property
+    def method(self):
+        return method_label(self.solver, self.adjoint, self.adaptive)
 
-DEFAULT_CONFIG = Path(__file__).resolve().parents[1] / "configs" / "kuramoto.toml"
+
+DEFAULT_CONFIG = Path(__file__).resolve().parents[1] / "config.toml"
 PROTOCOL = "kuramoto_second_order_mean_field_georaxbf5c355_v4"
 
 
@@ -120,8 +134,31 @@ def make_config(**overrides) -> ExperimentConfig:
 
 
 def load_config(path: Path) -> ExperimentConfig:
+    """Read shared settings for diagnostics."""
     with Path(path).open("rb") as f:
         data = tomllib.load(f)
+    return _build_config(data.get("base", data))
+
+
+def load_runs(path: Path) -> list[ExperimentConfig]:
+    """Expand the integrators and adjoints selected in TOML."""
+    with Path(path).open("rb") as f:
+        data = tomllib.load(f)
+    return [_build_config(settings) for settings in expand_integrators(data)]
+
+
+def _build_config(data) -> ExperimentConfig:
+    data = dict(data)
+    method = data.pop("method", None)
+    if method is not None:
+        methods = {
+            label: (solver, adjoint) for label, solver, adjoint in COMPARISON_METHODS
+        }
+        methods["cfees25_adaptive_reversible"] = (Solvers.CFEES25, "reversible")
+        if method not in methods:
+            raise ValueError(f"Unknown Kuramoto method: {method!r}")
+        data["solver"], data["adjoint"] = methods[method]
+        data["adaptive"] = method == "cfees25_adaptive_reversible"
     if "device" in data:
         data["device"] = Devices(data["device"])
     if "solver" in data:

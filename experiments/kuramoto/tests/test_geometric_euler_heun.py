@@ -6,6 +6,7 @@ import equinox as eqx
 import jax
 import jax.numpy as jnp
 import numpy as np
+import pytest
 from diffrax import VirtualBrownianTree
 from georax import GeometricEulerHeun
 
@@ -53,8 +54,12 @@ def test_geometric_euler_heun_matches_wrapped_euler_heun_step():
     assert theta[-1, 0] < 0 and theta[-1, 1] > 0
 
 
-def test_geometric_euler_heun_energy_score_checkpoint_gradients_agree():
-    config = _config(adjoint="checkpoint_full", n_steps=150)
+@pytest.mark.parametrize(
+    "solver,n_steps",
+    [(Solvers.GEOMETRIC_EULER_HEUN, 150), (Solvers.SRKMK_GENERAL_SHARK, 75)],
+)
+def test_energy_score_checkpoint_gradients_agree(solver, n_steps):
+    config = replace(_config(adjoint="checkpoint_full", n_steps=n_steps), solver=solver)
     metadata = {"N": 3, "n_obs": 5, "T": 0.4}
     full = make_model(config, metadata, jax.random.key(2))
     recursive = make_model(

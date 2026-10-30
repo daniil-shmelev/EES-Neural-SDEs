@@ -59,7 +59,7 @@ def test_euler_heun_sweep_uses_drift_budget_and_new_solver_name():
 
     from georax import GeometricEulerHeun
 
-    config_path = Path(__file__).parent / "configs" / "activity" / "sweep.toml"
+    config_path = Path(__file__).parent / "config.toml"
     for index in (0, 1):
         config = sweep_config_at(config_path, index)
         assert config.solver == "geometric_euler_heun"

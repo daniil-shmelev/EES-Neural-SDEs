@@ -1,0 +1,57 @@
+# All settings for ./run sphere.
+
+[base]
+experiment = "activity"
+data_dir = "/home/luke/EES-LatentSDEonHS/data_dir"
+epochs = 200
+batch_size = 256
+learning_rate = 1e-3
+lr_schedule = "cosine"
+lr_restart = 30
+lr_min_ratio = 0.0
+device = "gpu"
+h_dim = 32
+z_dim = 16
+n_deg = 4
+num_timepoints = 128
+learnable_prior = false
+use_atanh = false
+kl0_weight = 1e-4
+klp_weight = 1e-4
+pxz_weight = 1.0
+aux_weight = 10.0
+aux_hidden_dim = 32
+mc_train_samples = 1
+mc_eval_samples = 1
+split_seed = 42
+split_strategy = "auto"
+data_source = "raw"
+drop_last_train = true
+
+[sweep]
+seed = [2]
+
+# Each integrator runs with every listed adjoint. Stepping defaults to "fixed".
+# These fixed step counts match 30 forward drift evaluations.
+[integrators.geometric_euler_heun]
+adjoints = ["direct", "full"]
+n_steps = 30
+
+[integrators.cg2]
+adjoints = ["direct"]
+n_steps = 15
+
+[integrators.srkmk_general_shark]
+adjoints = ["direct", "full"]
+n_steps = 15
+
+[integrators.cfees25]
+adjoints = ["reversible"]
+stepping = ["fixed", "adaptive"]
+n_steps = 10
+
+# Adaptive runs inherit n_steps as the reference grid and maximum-step setting.
+[integrators.cfees25.adaptive]
+atol = 1e-2
+dtmin = 1e-4
+max_steps = 4096

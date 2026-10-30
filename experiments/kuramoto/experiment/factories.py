@@ -12,10 +12,11 @@ from cyreal.transforms import BatchTransform
 from diffrax import (
     AbstractAdjoint,
     AbstractSolver,
+    GeneralShARK,
     RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
 )
-from georax import CFEES25, CG2, GeometricEulerHeun
+from georax import CFEES25, CG2, SRKMK, GeometricEulerHeun
 
 from experiments.kuramoto.datasets.kuramoto_dataset import (
     KuramotoDataset,
@@ -36,6 +37,8 @@ _GEORAX_SOLVERS: dict[Solvers, type[AbstractSolver]] = {
 
 
 def build_solver(name: Solvers) -> AbstractSolver:
+    if name == Solvers.SRKMK_GENERAL_SHARK:
+        return SRKMK(GeneralShARK())
     cls = _GEORAX_SOLVERS[name]
     return cls()
 

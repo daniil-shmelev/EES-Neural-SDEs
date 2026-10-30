@@ -18,6 +18,7 @@ import optax
 from tqdm.auto import tqdm
 
 from experiments.sphere_latent_nsde.config import (
+    DEFAULT_CONFIG,
     ActivityConfig,
     is_sweep_config,
     load_config,
@@ -155,9 +156,12 @@ def fit(model: eqx.Module, config: ActivityConfig) -> TrainResult:
             for metric_name, metric_value in metrics.items():
                 # Predictive metrics are per example; solver work is per solve.
                 weight = 1 if metric_name.startswith("solver_") else count
-                totals[metric_name] = totals.get(metric_name, 0.0) + weight * metric_value
+                totals[metric_name] = (
+                    totals.get(metric_name, 0.0) + weight * metric_value
+                )
         averaged = {
-            name: value / max(steps if name.startswith("solver_") else total_examples, 1)
+            name: value
+            / max(steps if name.startswith("solver_") else total_examples, 1)
             for name, value in totals.items()
         }
         return averaged, state, key
@@ -396,7 +400,13 @@ def _run_single_config(config: ActivityConfig, output_base: Path | None = None) 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("config", type=Path, help="Path to TOML config or sweep")
+    parser.add_argument(
+        "config",
+        type=Path,
+        nargs="?",
+        default=DEFAULT_CONFIG,
+        help="Path to TOML config or sweep",
+    )
     parser.add_argument("--index", type=int, default=None, help="Sweep index to run")
     parser.add_argument(
         "--output-base",

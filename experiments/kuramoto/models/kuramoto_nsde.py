@@ -15,6 +15,7 @@ from diffrax import (
     AbstractAdjoint,
     AbstractReversibleSolver,
     AbstractSolver,
+    BrownianIncrement,
     ClipStepSizeController,
     ConstantStepSize,
     ControlTerm,
@@ -23,11 +24,12 @@ from diffrax import (
     RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
     SaveAt,
+    SpaceTimeLevyArea,
     StepTo,
     VirtualBrownianTree,
     diffeqsolve,
 )
-from georax import CFEES25, GeometricTerm, TangentTorus
+from georax import CFEES25, SRKMK, GeometricTerm, TangentTorus
 
 from ees_core.torus import wrap_to_pi
 
@@ -371,6 +373,9 @@ class KuramotoNSDE(eqx.Module):
             tol=self.adaptive_dtmin / 10.0 if self.adaptive else self.dt / 4.0,
             shape=(N,),
             key=key,
+            levy_area=SpaceTimeLevyArea
+            if isinstance(self.solver, SRKMK)
+            else BrownianIncrement,
         )
         term = MultiTerm(
             GeometricTerm(self.drift_field, self.drift_field.geometry),

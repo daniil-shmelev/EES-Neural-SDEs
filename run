@@ -13,8 +13,8 @@ import sys
 ROOT = Path(__file__).resolve().parent
 # module, uv extra, experiment directory, default configuration, output option
 EXPERIMENTS = {
-    'kuramoto': ('experiments.kuramoto.scripts.run_comparison', 'jax-base', 'experiments/kuramoto', 'configs/kuramoto.toml', '--output-base'),
-    'sphere': ('experiments.sphere_latent_nsde.train_activity', 'sphere', 'experiments/sphere_latent_nsde', 'configs/activity/sweep.toml', '--output-base'),
+    'kuramoto': ('experiments.kuramoto.scripts.run_comparison', 'jax-base', 'experiments/kuramoto', 'config.toml', '--output-base'),
+    'sphere': ('experiments.sphere_latent_nsde.train_activity', 'sphere', 'experiments/sphere_latent_nsde', 'config.toml', '--output-base'),
     'rough-vol': ('neurips.stochastic_volatility.experiment.train', 'stochastic-volatility', 'neurips/stochastic_volatility', 'configs/stoch_vol/sweep.toml', '--output-base'),
     'convergence-ode': ('experiments.convergence_ode.convergence', 'jax-base', 'experiments/convergence_ode', None, '--output-dir'),
     'convergence-fbm': ('neurips.convergence_fbm.convergence', 'algebra', 'neurips/convergence_fbm', None, '--output-dir'),
@@ -37,11 +37,9 @@ def main(argv=None):
             sub.add_argument("--output-dir", type=Path, help="New run directory; defaults to a timestamped directory under this experiment's results/.")
         if config:
             sub.add_argument("--config", type=Path, default=ROOT / folder / config)
-        if name == "kuramoto":
-            mode = sub.add_mutually_exclusive_group()
-            mode.add_argument("--memory", action="store_true", help="Measure and plot memory for the three methods.")
-            mode.add_argument("--adaptive", action="store_true", help="Train adaptive CF-EES with reversible reconstruction gradients.")
-        elif name == "convergence-fbm":
+        if name in ("kuramoto", "sphere"):
+            sub.add_argument("--index", type=int, help="Run one entry from the TOML sweep.")
+        if name == "convergence-fbm":
             sub.add_argument("--so3", action="store_true", help="Run and plot the SO(3) recovery experiment.")
         elif name == "rough-vol":
             sub.add_argument("--table", action="store_true", help="Print the table from saved manuscript predictions.")
@@ -49,13 +47,11 @@ def main(argv=None):
     name = args.experiment
     module, extra, folder, config, output_option = EXPERIMENTS[name]
     help_requested = any(flag in forwarded for flag in ("-h", "--help"))
+    if name in ("kuramoto", "sphere") and any(flag not in ("-h", "--help") for flag in forwarded):
+        parser.error(f"Set experiment parameters in {args.config}; only --config, --index, --output-dir and --dry-run select how to launch.")
     if any(arg.split("=", 1)[0] in ("--output", "--output-base", "--output_json") for arg in forwarded):
         parser.error("Use --output-dir to choose this run's output directory.")
-    if getattr(args, "memory", False):
-        module, output_option = "experiments.kuramoto.scripts.run_memory_sweep", "--output"
-    elif getattr(args, "adaptive", False):
-        module, output_option = "experiments.kuramoto.experiment.train_kuramoto", "--output-dir"
-    elif getattr(args, "so3", False):
+    if getattr(args, "so3", False):
         module, extra, output_option = "experiments.convergence_fbm.scripts.so3_reversibility_verify", "convergence-fbm", "--output_json"
         folder = "experiments/convergence_fbm"
     elif getattr(args, "table", False):
@@ -74,7 +70,7 @@ def main(argv=None):
     if config:
         if not help_requested and not args.config.is_file():
             parser.error(f"Configuration does not exist: {args.config}")
-        native += (["--config"] if module.endswith(("run_comparison", "run_memory_sweep")) else []) + [str(args.config)]
+        native += (["--config"] if module.endswith("run_comparison") else []) + [str(args.config)]
     if output_option:
         base = ROOT / folder / "results"
         if name == "kuramoto":
@@ -82,15 +78,12 @@ def main(argv=None):
         output = getattr(args, "output_dir", None) or base / "runs" / datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         output = output.resolve()
         print(f"Outputs: {base / 'runs' / '<timestamp>' if help_requested else output}", flush=True)
-        filename = "memory.json" if getattr(args, "memory", False) else "benchmark.json"
+        filename = "benchmark.json"
         if output_option == "--output_json":
             filename = "so3_reversibility_results.json"
         native += [output_option, str(output / filename if output_option in ("--output", "--output_json") else output)]
-    if getattr(args, "adaptive", False):
-        # Adaptive EES retains checkpoint-free reconstruction.
-        # Explicit forwarded flags can override this preset.
-        native += ["--adaptive", "--adjoint", "reversible",
-                   "--n-steps", "10", "--adaptive-dtmin", "1e-4"]
+    if getattr(args, "index", None) is not None:
+        native += ["--index", str(args.index)]
 
     commands = [(module, native + forwarded)]
     if not help_requested:
@@ -100,21 +93,28 @@ def main(argv=None):
                 commands = [(module, native + ["--method", method] + forwarded) for method in methods]
             plot = "neurips.ou.plot_OU" if name == "ou" else "neurips.stiff_gbm.plot_GBM"
             commands.append((plot, ["--input-dir", str(output)]))
-        elif getattr(args, "memory", False):
-            commands.append(("experiments.kuramoto.scripts.plot_memory_sweep", ["--input", str(output / "memory.json"), "--output", str(output / "memory.pdf")]))
         elif getattr(args, "so3", False):
             commands.append(("experiments.convergence_fbm.scripts.so3_reversibility_plot", [str(output / "so3_reversibility_results.json"), "--output", str(output / "so3_reversibility_convergence.pdf")]))
 
     env = os.environ.copy()
     env.setdefault("MPLBACKEND", "Agg")
-    if name == "kuramoto" and not getattr(args, "memory", False):
-        # Allocate training memory on demand; memory sweeps keep their own policy.
+    if name in ("kuramoto", "sphere"):
+        # Use the same on-demand allocation policy for both training benchmarks.
         env.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
-    if getattr(args, "adaptive", False):
+    adaptive = False
+    if name == "kuramoto" and not help_requested:
+        from experiments.kuramoto.experiment.config import load_runs
+        configs = load_runs(args.config)
+        if args.index is not None:
+            if not 0 <= args.index < len(configs):
+                parser.error(f"Sweep index must be between 0 and {len(configs) - 1}.")
+            configs = [configs[args.index]]
+        adaptive = any(config.adaptive for config in configs)
+    if adaptive:
         # This existing Diffrax worktree fixes batched adaptive reverse replay.
         diffrax = ROOT.parent / "diffrax" / ".worktrees" / "adaptive-reversible"
         if not diffrax.is_dir() and not help_requested:
-            parser.error(f"Adaptive reconstruction needs the tested Diffrax fix at {diffrax}; see experiments/kuramoto/README.md.")
+            parser.error(f"The TOML selects adaptive reconstruction, which needs the tested Diffrax fix at {diffrax}; see experiments/kuramoto/README.md.")
         env["PYTHONPATH"] = os.pathsep.join([str(diffrax), str(ROOT), env.get("PYTHONPATH", "")])
         print(f"Diffrax: {diffrax}", flush=True)
 

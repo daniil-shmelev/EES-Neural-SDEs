@@ -40,7 +40,7 @@ def test_invalid_adaptive_settings(override, match):
 
 
 def test_sweep_and_serialisation_keep_adaptive_distinct(tmp_path):
-    path = Path(__file__).parent / "configs" / "activity" / "sweep.toml"
+    path = Path(__file__).parent / "config.toml"
     configs = [sweep_config_at(path, i) for i in range(sweep_len(path))]
     adaptive = [c for c in configs if c.adaptive]
     assert len(adaptive) == 1

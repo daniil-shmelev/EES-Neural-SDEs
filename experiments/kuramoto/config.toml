@@ -1,0 +1,58 @@
+# All settings for ./run kuramoto.
+
+[base]
+epochs = 15
+# Shared by all methods; SRKMK–GeneralShARK exceeds this GPU's memory at 32.
+batch_size = 16
+learning_rate = 1e-3
+device = "gpu"
+dtype = "float32"
+
+model = "kuramoto_nsde"
+hidden_dim = 128
+drift_depth = 3
+diffusion_depth = 2
+activation = "silu"
+diffusion_scale = 0.1
+couple_theta_omega = false
+drift_kind = "second_order_mean_field"
+
+N = 1000
+data_seed = 0
+data_dir = "experiments/kuramoto/data/"
+
+loss_horizons = [0.125, 0.25, 0.5, 1.0]
+loss_n_samples = 4
+grad_clip_norm = 1.0
+
+save_every_epoch = true
+skip_plots = false
+
+[sweep]
+seed = [0, 1, 2]
+
+# Each integrator runs with every listed adjoint. Stepping defaults to "fixed".
+# These fixed step counts match 150 forward drift evaluations.
+[integrators.geometric_euler_heun]
+adjoints = ["full", "recursive"]
+n_steps = 150
+
+[integrators.cg2]
+adjoints = ["full", "recursive"]
+n_steps = 75
+
+[integrators.srkmk_general_shark]
+adjoints = ["full", "recursive"]
+n_steps = 75
+
+[integrators.cfees25]
+adjoints = ["reversible"]
+stepping = ["fixed", "adaptive"]
+n_steps = 50
+
+# Adaptive n_steps sets the initial/maximum step to T/n_steps.
+[integrators.cfees25.adaptive]
+n_steps = 10
+atol = 3e-2
+dtmin = 1e-4
+max_steps = 4096
