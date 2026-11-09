@@ -102,22 +102,6 @@ def main(argv=None):
     if name in ("kuramoto", "sphere"):
         # Use the same on-demand allocation policy for both training benchmarks.
         env.setdefault("XLA_PYTHON_CLIENT_PREALLOCATE", "false")
-    adaptive = False
-    if name == "kuramoto" and not help_requested:
-        from experiments.kuramoto.experiment.config import load_runs
-        configs = load_runs(args.config)
-        if args.index is not None:
-            if not 0 <= args.index < len(configs):
-                parser.error(f"Sweep index must be between 0 and {len(configs) - 1}.")
-            configs = [configs[args.index]]
-        adaptive = any(config.adaptive for config in configs)
-    if adaptive:
-        # This existing Diffrax worktree fixes batched adaptive reverse replay.
-        diffrax = ROOT.parent / "diffrax" / ".worktrees" / "adaptive-reversible"
-        if not diffrax.is_dir() and not help_requested:
-            parser.error(f"The TOML selects adaptive reconstruction, which needs the tested Diffrax fix at {diffrax}; see experiments/kuramoto/README.md.")
-        env["PYTHONPATH"] = os.pathsep.join([str(diffrax), str(ROOT), env.get("PYTHONPATH", "")])
-        print(f"Diffrax: {diffrax}", flush=True)
 
     prefix = ["uv", "run", "--locked"] + (["--extra", extra] if extra else []) + ["python", "-u", "-m"]
     if args.dry_run:

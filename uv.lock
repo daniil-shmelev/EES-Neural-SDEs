@@ -12,6 +12,9 @@ resolution-markers = [
     "python_full_version < '3.14' and sys_platform != 'emscripten' and sys_platform != 'linux' and sys_platform != 'win32'",
 ]
 
+[manifest]
+overrides = [{ name = "diffrax", git = "https://github.com/luke-a-thompson/diffrax.git?rev=40da72de540f27b1d04b2de6b6cd2e6fb373c985" }]
+
 [[package]]
 name = "absl-py"
 version = "2.5.0"
@@ -203,7 +206,7 @@ dependencies = [
 [[package]]
 name = "diffrax"
 version = "0.7.1"
-source = { git = "https://github.com/sammccallum/diffrax?rev=aeb1335b5a6278e85a270231e0f97b8db4453ae6#aeb1335b5a6278e85a270231e0f97b8db4453ae6" }
+source = { git = "https://github.com/luke-a-thompson/diffrax.git?rev=40da72de540f27b1d04b2de6b6cd2e6fb373c985#40da72de540f27b1d04b2de6b6cd2e6fb373c985" }
 dependencies = [
     { name = "equinox" },
     { name = "jax" },
@@ -360,7 +363,7 @@ torus-memory = [
 [package.metadata]
 requires-dist = [
     { name = "cyreal", marker = "extra == 'jax-base'", git = "https://github.com/luke-a-thompson/cyreal_dynamics.git?rev=88f02657989fc4f9c85df0afb1452085fc3f2f8b" },
-    { name = "diffrax", marker = "extra == 'jax-base'", git = "https://github.com/sammccallum/diffrax.git?rev=aeb1335b5a6278e85a270231e0f97b8db4453ae6" },
+    { name = "diffrax", marker = "extra == 'jax-base'", git = "https://github.com/luke-a-thompson/diffrax.git?rev=40da72de540f27b1d04b2de6b6cd2e6fb373c985" },
     { name = "diffrax-lowstorage", marker = "extra == 'stochastic-volatility'", git = "https://github.com/luke-a-thompson/diffrax-lowstorage.git?rev=a5659e83322f9c76bd72fb84387c2a30162d798d" },
     { name = "ees-neural-sdes", extras = ["algebra"], marker = "extra == 'order-verification'" },
     { name = "ees-neural-sdes", extras = ["algebra"], marker = "extra == 'stability-ode'" },

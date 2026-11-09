@@ -55,7 +55,7 @@ The default sweep includes `cf_cosine_ees_p5_adaptive_reversible`, with the Lieâ
 
 The `[integrators.cf_cosine_ees.adaptive]` table sets `n_steps = 10`, `dtmin = 1e-4`, `atol = 3e-2` and `max_steps = 4096`. These override the parent integrator's settings only for adaptive runs. The tolerance controls the estimated RMS difference between the two endpoints, using wrapped phase differences and ordinary velocity differences. Diffrax's standard `PIDController`, configured as a PI controller with `force_dtmin=True`, adjusts the step size, capped at `T/n_steps` (0.5 for this configuration). At `dtmin`, steps are accepted even if the estimated error exceeds tolerance. The Brownian-tree tolerance is ten times smaller than `dtmin`. `max_steps` limits attempted steps per trajectory. All of these options are read from the TOML.
 
-Batched adaptive reconstruction currently needs a Diffrax fix: the pinned fork reads a padded time after one batch member finishes its reverse loop. The tested fix is in `/home/luke/diffrax/.worktrees/adaptive-reversible`, on branch `codex/adaptive-reversible-vmap`; the launcher selects that worktree automatically whenever the selected TOML runs include adaptive cosine EES. The original pin remains unchanged. The verified SIAM result directory retains the exact patch and dependency provenance.
+Batched adaptive reconstruction needs a Diffrax fix: without it, `sammccallum/diffrax@aeb1335` reads a padded time after one batch member finishes its reverse loop. The project therefore pins [`luke-a-thompson/diffrax@40da72d`](https://github.com/luke-a-thompson/diffrax/commit/40da72de540f27b1d04b2de6b6cd2e6fb373c985), which adds that fix and its test to `aeb1335`. The SIAM adaptive runs used the same change from a local worktree; their result directories retain the exact patch and dependency provenance.
 
 The Brownian tree is retained through rejection. The learned diffusion depends on the full state and need not commute, so the standard `ClipStepSizeController` wrapper stores rejected endpoints and forces subsequent steps to revisit them. cosine EES uses the ordinary `ReversibleAdjoint` and reconstructs states on the accepted mesh without trajectory checkpoints. The accepted-time buffer is separate from the reconstructed state. No inverse-correction loop or checkpointed gradient is substituted. The previous unconstrained drift remains available as `drift_kind = "indexed_mean_field"` for reading historical checkpoints and reproducing the failure; new runs use `second_order_mean_field`. The earlier checkpointed speed comparison does not establish reversible-training performance. A single-run diagnostic TOML can explicitly set `adjoint = "checkpoint_recursive"` and `adaptive = true`. Adaptive runs have variable evaluation counts; they are additional experiments to the fixed 150-forward-drift-evaluation comparison. `metrics.json` records accepted/rejected steps and forward generator evaluations on eight fixed validation trajectories using the best validation checkpoint.
 
@@ -66,7 +66,7 @@ Tests compare reversible gradients with reference gradients, check adaptive mesh
 For short iterations, keep the production network and reduce the batch, number of forecast samples and data subset:
 
 ```bash
-PYTHONPATH=/home/luke/diffrax/.worktrees/adaptive-reversible:$PWD \
+PYTHONPATH=$PWD \
   .venv/bin/python -m experiments.kuramoto.scripts.check_reversible_training \
   --output-dir /tmp/kuramoto-reversible-check --steps 600
 ```

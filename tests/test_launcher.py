@@ -135,12 +135,10 @@ n_steps = 25
 [integrators.cf_cosine_ees.adaptive]
 dtmin = 2e-4
 """)
-        with patch.object(Path, "is_dir", return_value=True):
-            _, calls, _ = self.invoke(["kuramoto"])
-            command = calls[0].args[0]
-            self.assertIn("adaptive-reversible", calls[0].kwargs["env"]["PYTHONPATH"])
-            for flag in ("--seed", "--adjoint", "--n-steps", "--adaptive-dtmin"):
-                self.assertNotIn(flag, command)
+        _, calls, _ = self.invoke(["kuramoto"])
+        command = calls[0].args[0]
+        for flag in ("--seed", "--adjoint", "--n-steps", "--adaptive-dtmin"):
+            self.assertNotIn(flag, command)
         with patch.dict(launcher.os.environ, {}, clear=True):
             _, calls, _ = self.invoke(["kuramoto", "--index", "0"])
             self.assertNotIn("PYTHONPATH", calls[0].kwargs["env"])

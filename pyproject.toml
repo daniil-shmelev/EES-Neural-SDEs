@@ -30,8 +30,8 @@ jax-base = [
     "equinox>=0.13.6",
     "optax>=0.2.0",
     "jaxtyping>=0.2.36",
-    # diffrax fork by sammccallum (the version pinned by every modern experiment in this paper)
-    "diffrax @ git+https://github.com/sammccallum/diffrax.git@aeb1335b5a6278e85a270231e0f97b8db4453ae6",
+    # sammccallum/diffrax@aeb1335 plus the batched adaptive ReversibleAdjoint fix
+    "diffrax @ git+https://github.com/luke-a-thompson/diffrax.git@40da72de540f27b1d04b2de6b6cd2e6fb373c985",
     "georax @ git+https://github.com/luke-a-thompson/georax.git@20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
     "cyreal @ git+https://github.com/luke-a-thompson/cyreal_dynamics.git@88f02657989fc4f9c85df0afb1452085fc3f2f8b",
     "seali>=0.2.0",
@@ -111,3 +111,10 @@ packages = ["ees_core", "experiments", "neurips"]
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.uv]
+# diffrax-lowstorage and georax pin sammccallum/diffrax@aeb1335; use the fork
+# that adds the batched adaptive ReversibleAdjoint fix everywhere.
+override-dependencies = [
+    "diffrax @ git+https://github.com/luke-a-thompson/diffrax.git@40da72de540f27b1d04b2de6b6cd2e6fb373c985",
+]
