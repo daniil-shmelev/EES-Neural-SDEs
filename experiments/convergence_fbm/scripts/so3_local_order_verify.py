@@ -1,20 +1,6 @@
-"""Deterministic local-order verification for CF-EES(2,5;1/10) on SO(3).
+"""Measure cosine EES local recovery on a nonlinear SO(3) ODE.
 
-Tests the ONE-STEP local reversibility error
-    E(h) = || Phi_{-h}(Phi_{+h}(Y_0)) - Y_0 ||_F
-for a deterministic ODE on SO(3) with a nonlinear vector field xi:
-R^{3x3} -> so(3).
-
-If the scheme has ambient BCK antisymmetric order 5, then E(h) = O(h^6),
-i.e. log-log slope = 6.
-
-If the intrinsic MKW post-Lie structure with non-zero torsion governed
-the rate (as it would on a non-abelian Lie group with a torsion-bearing
-connection), we would see slope 4 instead (MKW order 3 -> O(h^4)).
-
-This is a clean test because there is no fBm rough-path averaging --
-the one-step error is deterministic and should lie on a smooth power
-curve.
+For reversible order 5, compare the observed one-step recovery rate with h**6, excluding errors at the floating-point floor.
 """
 
 from __future__ import annotations
@@ -23,7 +9,7 @@ import numpy as np
 from scipy.linalg import expm
 
 from experiments.convergence_fbm.scripts.so3_reversibility_verify import (
-    cfees25_step as driver_step,
+    cosine_ees_step as driver_step,
 )
 
 
@@ -45,14 +31,14 @@ def make_xi(seed: int, scale: float = 0.4):
     return xi
 
 
-def cfees25_step(Y: np.ndarray, xi, h: float) -> np.ndarray:
+def cosine_ees_step(Y: np.ndarray, xi, h: float) -> np.ndarray:
     """One step (ODE case, increment h along the one 'driver')."""
     return driver_step(Y, [xi], np.asarray([h]))
 
 
 def main():
     print("=" * 76)
-    print("  Deterministic local-order verification: CF-EES(2,5;1/10) on SO(3)")
+    print("  Deterministic local-order verification: cosine EES (p=5) on SO(3)")
     print("=" * 76)
     print()
     print("  ODE: dY/dt = xi(Y) Y, xi : R^{3x3} -> so(3), poly-4 in Y.")
@@ -71,8 +57,8 @@ def main():
         hs = [2 ** (-k) for k in range(3, 12)]
         errs = []
         for h in hs:
-            Y1 = cfees25_step(Y0, xi, h)
-            Y_back = cfees25_step(Y1, xi, -h)
+            Y1 = cosine_ees_step(Y0, xi, h)
+            Y_back = cosine_ees_step(Y1, xi, -h)
             errs.append(float(np.linalg.norm(Y_back - Y0, ord="fro")))
 
         print(f"--- seed={seed} ---")

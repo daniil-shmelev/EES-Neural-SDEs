@@ -1,0 +1,23 @@
+{
+  "config": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/config.toml",
+  "cells": [
+    {
+      "label": "cfees25_reversible",
+      "seed": 0,
+      "solver": "cfees25",
+      "adjoint": "reversible",
+      "n_steps": 50,
+      "exit_code": 0,
+      "wall_clock_s": 699.0121464129998,
+      "out_dir": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/20261029_033750_538648/006_cfees25_reversible_seed0",
+      "best_val_loss": 342.6146378580729,
+      "final_train_loss": 341.6253583354335,
+      "final_val_loss": 342.6985807291667,
+      "final_test_loss": 342.76721842447915,
+      "final_test_theta_mae_mean": 0.3304344415664673,
+      "final_test_omega_mae_mean": 0.17962737381458282,
+      "train_walltime_s": 688.375456019,
+      "peak_gpu_memory_bytes": 4119018496
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "experiment": "sphere",
+  "method": "cf_cosine_ees_p5_reversible",
+  "seed": 2,
+  "epochs": 200,
+  "previous_training_time_s": 493.28,
+  "new_training_time_s": 449.02,
+  "time_change_pct": -8.972591631527727,
+  "score_metric": "test_acc_at_best_val_pct",
+  "previous_score": 89.10677337646484,
+  "new_score": 89.07552083333333,
+  "old_metrics_file": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/training/00_cf_cosine_ees_p5_reversible_seed2/activity__cf_cosine_ees_p5_reversible__seed2__20261102_205116_606438/metrics.json",
+  "new_metrics_file": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/timing_repeat_20261103_155649_980786/training/activity__cf_cosine_ees_p5_reversible__seed2__20261103_155651_282142/metrics.json",
+  "gpu_telemetry": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/timing_repeat_20261103_155649_980786/gpu_telemetry.csv"
+}

@@ -20,6 +20,8 @@ Experiments for the NeurIPS 2026 manuscript and SIAM resubmission by Daniil Shme
 
 NeurIPS-only experiments and historical measurements are under [`neurips/`](neurips/README.md). SIAM experiments remain under `experiments/`.
 
+Active SIAM learning and numerical convergence experiments now use Georax's cosine EES family, pinned at `20b401c9ffc83dc449c0340f4bc7b1289761c2b1`. Learning configurations select `solver = "cf_cosine_ees"` and an odd `reversible_order` (default 5); adaptive runs enable the Lie–Euler companion. Saved method labels include the order and configs record the embedding setting. Earlier CF-EES measurements, NeurIPS-only implementations and symbolic checks of the original coefficient families retain their original identities.
+
 The [figure/table index](docs/figure_table_index.md) links manuscript results to scripts, saved records and external companion repositories.
 
 ## Run

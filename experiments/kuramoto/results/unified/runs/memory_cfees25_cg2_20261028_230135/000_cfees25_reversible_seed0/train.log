@@ -1,0 +1,146 @@
+dataset: N=1000 train=1500 T=5.00s n_obs=100
+model: kuramoto_nsde hidden=128 n_steps=50 solver=cfees25 adjoint=reversible dt=0.1000 adaptive=False atol=0.001 drift=second_order_mean_field
+output_dir: experiments/kuramoto/results/unified/runs/memory_cfees25_cg2_20261028_230135/000_cfees25_reversible_seed0
+device: cuda:0; batches per epoch: train=46 val=10 test=10. The first training and evaluation batches include JAX compilation.
+epoch=1/1 train batch=1/46 starting
+E1028 23:03:47.059901  232416 cuda_executor.cc:1365] [0] Failed to allocate device memory of 4.00GiB (4294967296 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: ===
+external/xla+/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla+/xla/stream_executor/cuda/cuda_device_allocator.cc:230
+external/xla+/xla/stream_executor/cuda/cuda_device_allocator.cc:487
+
+batch_loss=1157.7961 |g|=2.400 time=17.66s
+epoch=1/1 train batch=2/46 starting
+batch_loss=1153.8939 |g|=2.239 time=1.00s
+epoch=1/1 train batch=3/46 starting
+batch_loss=1146.9857 |g|=2.981 time=0.99s
+epoch=1/1 train batch=4/46 starting
+batch_loss=1155.6038 |g|=5.761 time=0.99s
+epoch=1/1 train batch=5/46 starting
+batch_loss=1156.4001 |g|=3.799 time=0.99s
+epoch=1/1 train batch=6/46 starting
+batch_loss=1157.0726 |g|=2.949 time=0.98s
+epoch=1/1 train batch=7/46 starting
+batch_loss=1149.8325 |g|=6.774 time=0.98s
+epoch=1/1 train batch=8/46 starting
+batch_loss=1153.5715 |g|=3.143 time=0.98s
+epoch=1/1 train batch=9/46 starting
+batch_loss=1157.6938 |g|=3.772 time=0.98s
+epoch=1/1 train batch=10/46 starting
+batch_loss=1157.4648 |g|=5.074 time=0.98s
+epoch=1/1 train batch=11/46 starting
+batch_loss=1150.0006 |g|=4.483 time=1.00s
+epoch=1/1 train batch=12/46 starting
+batch_loss=1154.9536 |g|=7.083 time=1.02s
+epoch=1/1 train batch=13/46 starting
+batch_loss=1153.0648 |g|=5.110 time=0.98s
+epoch=1/1 train batch=14/46 starting
+batch_loss=1156.1021 |g|=6.355 time=0.98s
+epoch=1/1 train batch=15/46 starting
+batch_loss=1154.1440 |g|=7.860 time=1.00s
+epoch=1/1 train batch=16/46 starting
+batch_loss=1152.9850 |g|=11.555 time=1.00s
+epoch=1/1 train batch=17/46 starting
+batch_loss=1155.7648 |g|=12.377 time=0.99s
+epoch=1/1 train batch=18/46 starting
+batch_loss=1151.7495 |g|=15.252 time=0.98s
+epoch=1/1 train batch=19/46 starting
+batch_loss=1153.2266 |g|=20.076 time=0.98s
+epoch=1/1 train batch=20/46 starting
+batch_loss=1155.1951 |g|=25.364 time=0.98s
+epoch=1/1 train batch=21/46 starting
+batch_loss=1145.8990 |g|=32.511 time=0.99s
+epoch=1/1 train batch=22/46 starting
+batch_loss=1150.2334 |g|=42.513 time=1.01s
+epoch=1/1 train batch=23/46 starting
+batch_loss=1147.3646 |g|=55.034 time=0.97s
+epoch=1/1 train batch=24/46 starting
+batch_loss=1141.6084 |g|=71.104 time=0.98s
+epoch=1/1 train batch=25/46 starting
+batch_loss=1141.0750 |g|=91.681 time=1.00s
+epoch=1/1 train batch=26/46 starting
+batch_loss=1139.8719 |g|=116.792 time=0.99s
+epoch=1/1 train batch=27/46 starting
+batch_loss=1129.7104 |g|=146.275 time=1.00s
+epoch=1/1 train batch=28/46 starting
+batch_loss=1129.0118 |g|=183.285 time=0.98s
+epoch=1/1 train batch=29/46 starting
+batch_loss=1119.8671 |g|=222.827 time=0.98s
+epoch=1/1 train batch=30/46 starting
+batch_loss=1106.3838 |g|=267.080 time=0.98s
+epoch=1/1 train batch=31/46 starting
+batch_loss=1093.8584 |g|=315.693 time=1.00s
+epoch=1/1 train batch=32/46 starting
+batch_loss=1083.4139 |g|=364.619 time=0.98s
+epoch=1/1 train batch=33/46 starting
+batch_loss=1064.4410 |g|=414.023 time=0.99s
+epoch=1/1 train batch=34/46 starting
+batch_loss=1048.2177 |g|=460.785 time=0.99s
+epoch=1/1 train batch=35/46 starting
+batch_loss=1033.4738 |g|=503.200 time=0.98s
+epoch=1/1 train batch=36/46 starting
+batch_loss=1022.0426 |g|=555.858 time=0.98s
+epoch=1/1 train batch=37/46 starting
+batch_loss=1000.3020 |g|=601.844 time=0.99s
+epoch=1/1 train batch=38/46 starting
+batch_loss=1000.3538 |g|=632.625 time=1.01s
+epoch=1/1 train batch=39/46 starting
+batch_loss=984.9753 |g|=654.646 time=1.03s
+epoch=1/1 train batch=40/46 starting
+batch_loss=973.4453 |g|=687.102 time=0.99s
+epoch=1/1 train batch=41/46 starting
+batch_loss=964.0190 |g|=706.411 time=1.00s
+epoch=1/1 train batch=42/46 starting
+batch_loss=959.0127 |g|=704.061 time=0.98s
+epoch=1/1 train batch=43/46 starting
+batch_loss=953.4128 |g|=712.215 time=0.99s
+epoch=1/1 train batch=44/46 starting
+batch_loss=947.3524 |g|=735.380 time=0.99s
+epoch=1/1 train batch=45/46 starting
+batch_loss=946.8977 |g|=729.515 time=0.99s
+epoch=1/1 train batch=46/46 starting
+batch_loss=945.2906 |g|=731.042 time=0.98s
+epoch=1/1 val batch=1/10 starting
+epoch=1/1 val batch=1/10 loss=943.0563 time=4.87s
+epoch=1/1 val batch=2/10 starting
+epoch=1/1 val batch=2/10 loss=945.0049 time=0.17s
+epoch=1/1 val batch=3/10 starting
+epoch=1/1 val batch=3/10 loss=944.3502 time=0.17s
+epoch=1/1 val batch=4/10 starting
+epoch=1/1 val batch=4/10 loss=946.4870 time=0.17s
+epoch=1/1 val batch=5/10 starting
+epoch=1/1 val batch=5/10 loss=944.2234 time=0.18s
+epoch=1/1 val batch=6/10 starting
+epoch=1/1 val batch=6/10 loss=950.4978 time=0.17s
+epoch=1/1 val batch=7/10 starting
+epoch=1/1 val batch=7/10 loss=950.5715 time=0.17s
+epoch=1/1 val batch=8/10 starting
+epoch=1/1 val batch=8/10 loss=949.3924 time=0.17s
+epoch=1/1 val batch=9/10 starting
+epoch=1/1 val batch=9/10 loss=949.0522 time=0.17s
+epoch=1/1 val batch=10/10 starting
+epoch=1/1 val batch=10/10 loss=941.2266 time=0.17s
+epoch=1/1 test batch=1/10 starting
+epoch=1/1 test batch=1/10 loss=948.3738 time=2.96s
+epoch=1/1 test batch=2/10 starting
+epoch=1/1 test batch=2/10 loss=942.7303 time=0.18s
+epoch=1/1 test batch=3/10 starting
+epoch=1/1 test batch=3/10 loss=945.4709 time=0.19s
+epoch=1/1 test batch=4/10 starting
+epoch=1/1 test batch=4/10 loss=954.8690 time=0.18s
+epoch=1/1 test batch=5/10 starting
+epoch=1/1 test batch=5/10 loss=952.3300 time=0.17s
+epoch=1/1 test batch=6/10 starting
+epoch=1/1 test batch=6/10 loss=947.6882 time=0.17s
+epoch=1/1 test batch=7/10 starting
+epoch=1/1 test batch=7/10 loss=946.7817 time=0.17s
+epoch=1/1 test batch=8/10 starting
+epoch=1/1 test batch=8/10 loss=950.5775 time=0.17s
+epoch=1/1 test batch=9/10 starting
+epoch=1/1 test batch=9/10 loss=945.5497 time=0.17s
+epoch=1/1 test batch=10/10 starting
+epoch=1/1 test batch=10/10 loss=937.8013 time=0.17s
+epoch=1/1 train=1096.8486±76.165 val=946.7302 test=947.8450 |g|=236.794 theta_mae=0.6254 omega_mae=0.3231 peak=4487MiB time=86.2s
+train_time=89.1s peak_gpu_memory=4487.1 MiB
+Saving demonstration forecasts...
+saved artifacts to experiments/kuramoto/results/unified/runs/memory_cfees25_cg2_20261028_230135/000_cfees25_reversible_seed0

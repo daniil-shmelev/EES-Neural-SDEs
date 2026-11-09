@@ -19,13 +19,17 @@ import jax.numpy as jnp
 import numpy as np
 import optax
 from diffrax import RecursiveCheckpointAdjoint
-from georax import CFEES25
 
 from experiments.kuramoto.datasets.kuramoto_dataset import (
     KuramotoDataset,
     default_npz_path,
 )
-from experiments.kuramoto.experiment.config import DEFAULT_CONFIG, Solvers, load_config
+from experiments.kuramoto.experiment.config import (
+    DEFAULT_CONFIG,
+    Solvers,
+    load_config,
+    serialize_config,
+)
 from experiments.kuramoto.experiment.factories import make_model
 from experiments.kuramoto.experiment.losses import make_multi_horizon_energy_score
 
@@ -41,7 +45,7 @@ def main():
     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument(
-        "--modes", nargs="+", choices=["cg2", "ees"], default=["cg2", "ees"]
+        "--modes", nargs="+", choices=["cg2", "cosine"], default=["cg2", "cosine"]
     )
     parser.add_argument("--steps", type=int, default=600)
     parser.add_argument("--seed", type=int, default=0)
@@ -92,7 +96,7 @@ def main():
         reversible = mode != "cg2"
         config = dataclasses.replace(
             base,
-            solver=Solvers.CFEES25 if reversible else Solvers.CG2,
+            solver=Solvers.CF_COSINE_EES if reversible else Solvers.CG2,
             adjoint="reversible" if reversible else "checkpoint_full",
             n_steps=args.n_steps if reversible else 75,
             adaptive=reversible,
@@ -104,8 +108,6 @@ def main():
             seed=args.seed,
         )
         model = make_model(config, data.metadata(), jax.random.key(args.seed))
-        if reversible:
-            object.__setattr__(model, "solver", CFEES25())
         if args.initial_checkpoint is not None:
             model = eqx.tree_deserialise_leaves(args.initial_checkpoint, model)
         schedule = optax.warmup_cosine_decay_schedule(
@@ -196,7 +198,7 @@ def main():
         results["runs"].append(
             dict(
                 mode=mode,
-                config=dataclasses.asdict(config),
+                config=json.loads(serialize_config(config)),
                 history=history,
                 derivative=derivative,
             )

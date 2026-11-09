@@ -128,11 +128,11 @@ seed = [7]
 [integrators.cg2]
 adjoints = ["full"]
 n_steps = 12
-[integrators.cfees25]
+[integrators.cf_cosine_ees]
 adjoints = ["reversible"]
 stepping = ["adaptive"]
 n_steps = 25
-[integrators.cfees25.adaptive]
+[integrators.cf_cosine_ees.adaptive]
 dtmin = 2e-4
 """)
         with patch.object(Path, "is_dir", return_value=True):

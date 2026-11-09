@@ -1,0 +1,1715 @@
+diff --git a/README.md b/README.md
+index 916ea9e..2c8d04f 100644
+--- a/README.md
++++ b/README.md
+@@ -20,6 +20,8 @@ Experiments for the NeurIPS 2026 manuscript and SIAM resubmission by Daniil Shme
+ 
+ NeurIPS-only experiments and historical measurements are under [`neurips/`](neurips/README.md). SIAM experiments remain under `experiments/`.
+ 
++Active SIAM learning and numerical convergence experiments now use Georax's cosine EES family, pinned at `20b401c9ffc83dc449c0340f4bc7b1289761c2b1`. Learning configurations select `solver = "cf_cosine_ees"` and an odd `reversible_order` (default 5); adaptive runs enable the Lie–Euler companion. Saved method labels include the order and configs record the embedding setting. Earlier CF-EES measurements, NeurIPS-only implementations and symbolic checks of the original coefficient families retain their original identities.
++
+ The [figure/table index](docs/figure_table_index.md) links manuscript results to scripts, saved records and external companion repositories.
+ 
+ ## Run
+diff --git a/experiments/config.py b/experiments/config.py
+index dca94d3..859f225 100644
+--- a/experiments/config.py
++++ b/experiments/config.py
+@@ -10,7 +10,19 @@ ADJOINTS = {
+ }
+ 
+ 
+-def method_label(solver, adjoint, adaptive=False):
++def cosine_stage_count(reversible_order):
++    if (
++        type(reversible_order) is not int
++        or reversible_order < 3
++        or reversible_order % 2 != 1
++    ):
++        raise ValueError("reversible_order must be an odd integer >= 3.")
++    return (reversible_order + 1) // 2
++
++
++def method_label(solver, adjoint, adaptive=False, *, reversible_order=5):
++    if solver == "cf_cosine_ees":
++        solver = f"{solver}_p{reversible_order}"
+     names = {value: key for key, value in ADJOINTS.items()}
+     names["recursive_checkpoint"] = "recursive"
+     return f"{solver}_{'adaptive_' if adaptive else ''}{names.get(adjoint, adjoint)}"
+diff --git a/experiments/convergence_fbm/README.md b/experiments/convergence_fbm/README.md
+index e31cdfc..61469bb 100644
+--- a/experiments/convergence_fbm/README.md
++++ b/experiments/convergence_fbm/README.md
+@@ -4,6 +4,8 @@ The geometric convergence code and saved figures used by SIAM and NeurIPS remain
+ 
+ `results/so3_reversibility_results.json` is a separate CF-EES(2,5) recovery diagnostic, not the raw data behind the manuscript's 12-panel figure. The current `scripts/so3_reversibility_verify.py` tests a nonlinear matrix-polynomial problem with three driver components; it must not be presented as reproducing the manuscript's two-component rotation experiment.
+ 
++New recovery and local-order runs use `CFCosineEES(reversible_order=5, embedded=False)` from Georax `20b401c9ffc83dc449c0340f4bc7b1289761c2b1`. Their JSON identifies the cosine solver and embedding policy. Historical arrays and symbolic CF-EES checks keep their original provenance; the recovery plotter selects its default solver label from the input records.
++
+ Run `./run convergence-fbm --so3` from the repository root for the recovery diagnostic. It selects the required dependencies and creates a fresh directory under `results/runs/`. The local-order verifier and page compositor remain in `scripts/`.
+ 
+ Euclidean convergence code and saved pages are now in [`../../neurips/convergence_fbm/`](../../neurips/convergence_fbm/README.md); `./run convergence-fbm` selects that NeurIPS experiment. The compositor reads its two source directories separately, with `--results-dir` for SO(3) and `--euclidean-results-dir` for Euclidean panels and combined output.
+diff --git a/experiments/convergence_fbm/scripts/so3_local_order_verify.py b/experiments/convergence_fbm/scripts/so3_local_order_verify.py
+index 9bbdfdb..f11be28 100644
+--- a/experiments/convergence_fbm/scripts/so3_local_order_verify.py
++++ b/experiments/convergence_fbm/scripts/so3_local_order_verify.py
+@@ -1,20 +1,6 @@
+-"""Deterministic local-order verification for CF-EES(2,5;1/10) on SO(3).
++"""Measure cosine EES local recovery on a nonlinear SO(3) ODE.
+ 
+-Tests the ONE-STEP local reversibility error
+-    E(h) = || Phi_{-h}(Phi_{+h}(Y_0)) - Y_0 ||_F
+-for a deterministic ODE on SO(3) with a nonlinear vector field xi:
+-R^{3x3} -> so(3).
+-
+-If the scheme has ambient BCK antisymmetric order 5, then E(h) = O(h^6),
+-i.e. log-log slope = 6.
+-
+-If the intrinsic MKW post-Lie structure with non-zero torsion governed
+-the rate (as it would on a non-abelian Lie group with a torsion-bearing
+-connection), we would see slope 4 instead (MKW order 3 -> O(h^4)).
+-
+-This is a clean test because there is no fBm rough-path averaging --
+-the one-step error is deterministic and should lie on a smooth power
+-curve.
++For reversible order 5, compare the observed one-step recovery rate with h**6, excluding errors at the floating-point floor.
+ """
+ 
+ from __future__ import annotations
+@@ -23,7 +9,7 @@ import numpy as np
+ from scipy.linalg import expm
+ 
+ from experiments.convergence_fbm.scripts.so3_reversibility_verify import (
+-    cfees25_step as driver_step,
++    cosine_ees_step as driver_step,
+ )
+ 
+ 
+@@ -45,14 +31,14 @@ def make_xi(seed: int, scale: float = 0.4):
+     return xi
+ 
+ 
+-def cfees25_step(Y: np.ndarray, xi, h: float) -> np.ndarray:
++def cosine_ees_step(Y: np.ndarray, xi, h: float) -> np.ndarray:
+     """One step (ODE case, increment h along the one 'driver')."""
+     return driver_step(Y, [xi], np.asarray([h]))
+ 
+ 
+ def main():
+     print("=" * 76)
+-    print("  Deterministic local-order verification: CF-EES(2,5;1/10) on SO(3)")
++    print("  Deterministic local-order verification: cosine EES (p=5) on SO(3)")
+     print("=" * 76)
+     print()
+     print("  ODE: dY/dt = xi(Y) Y, xi : R^{3x3} -> so(3), poly-4 in Y.")
+@@ -71,8 +57,8 @@ def main():
+         hs = [2 ** (-k) for k in range(3, 12)]
+         errs = []
+         for h in hs:
+-            Y1 = cfees25_step(Y0, xi, h)
+-            Y_back = cfees25_step(Y1, xi, -h)
++            Y1 = cosine_ees_step(Y0, xi, h)
++            Y_back = cosine_ees_step(Y1, xi, -h)
+             errs.append(float(np.linalg.norm(Y_back - Y0, ord="fro")))
+ 
+         print(f"--- seed={seed} ---")
+diff --git a/experiments/convergence_fbm/scripts/so3_reversibility_plot.py b/experiments/convergence_fbm/scripts/so3_reversibility_plot.py
+index d5d8162..7fb0dd0 100644
+--- a/experiments/convergence_fbm/scripts/so3_reversibility_plot.py
++++ b/experiments/convergence_fbm/scripts/so3_reversibility_plot.py
+@@ -27,11 +27,15 @@ def main():
+     ap = argparse.ArgumentParser(description=__doc__)
+     ap.add_argument("json_in")
+     ap.add_argument("--output", default="so3_reversibility_convergence.pdf")
+-    ap.add_argument("--title", default="CF-EES(2,5;1/10) reversibility on SO(3)")
++    ap.add_argument("--title")
+     args = ap.parse_args()
+ 
+     with open(args.json_in) as f:
+         records = json.load(f)
++    solvers = {record.get("solver", "cfees25") for record in records}
++    if len(solvers) != 1:
++        ap.error("Do not mix cosine EES and historical CF-EES measurements.")
++    title = "Cosine EES (p=5)" if solvers == {"cf_cosine_ees"} else "CF-EES(2,5;1/10)"
+ 
+     fig, ax = plt.subplots(figsize=(6.5, 5.2))
+ 
+@@ -70,27 +74,28 @@ def main():
+             linewidth=1.0,
+         )
+ 
+-        # MKW order-3 line: slope 4H - 1 (drawn with a longer dash)
+-        c_mkw = err_anchor / h_anchor ** (4 * H - 1)
+-        ax.loglog(
+-            h_ref,
+-            c_mkw * h_ref ** (4 * H - 1),
+-            color=color,
+-            linestyle=":",
+-            alpha=0.55,
+-            linewidth=1.0,
+-        )
++        # Preserve the additional historical comparison only for old records.
++        if solvers != {"cf_cosine_ees"}:
++            c_mkw = err_anchor / h_anchor ** (4 * H - 1)
++            ax.loglog(
++                h_ref,
++                c_mkw * h_ref ** (4 * H - 1),
++                color=color,
++                linestyle=":",
++                alpha=0.55,
++                linewidth=1.0,
++            )
+ 
+     ax.set_xlabel("step size  $h$")
+     ax.set_ylabel(r"$\|\Phi_{-h}\!\circ\!\Phi_{+h}(Y_0) - Y_0\|_F$ (mean over trials)")
+-    ax.set_title(args.title)
++    ax.set_title(args.title or f"{title} reversibility on SO(3)")
+     ax.grid(True, which="both", alpha=0.3)
+ 
+     # Build a single custom legend: the empirical curves + two reference
+     # entries (dashed = BCK 6H-1, dotted = MKW 4H-1).
+     from matplotlib.lines import Line2D
+ 
+-    empirical_handles, empirical_labels = ax.get_legend_handles_labels()
++    empirical_handles, _ = ax.get_legend_handles_labels()
+     ref_handles = [
+         Line2D(
+             [0],
+@@ -98,7 +103,7 @@ def main():
+             color="black",
+             linestyle="--",
+             alpha=0.65,
+-            label="reference slope $6H-1$ (BCK order 5)",
++            label="reference slope $6H-1$",
+         ),
+         Line2D(
+             [0],
+@@ -109,6 +114,8 @@ def main():
+             label="reference slope $4H-1$ (MKW order 3)",
+         ),
+     ]
++    if solvers == {"cf_cosine_ees"}:
++        ref_handles = ref_handles[:1]
+     ax.legend(
+         handles=empirical_handles + ref_handles,
+         loc="lower right",
+diff --git a/experiments/convergence_fbm/scripts/so3_reversibility_verify.py b/experiments/convergence_fbm/scripts/so3_reversibility_verify.py
+index 8c02857..032840c 100644
+--- a/experiments/convergence_fbm/scripts/so3_reversibility_verify.py
++++ b/experiments/convergence_fbm/scripts/so3_reversibility_verify.py
+@@ -1,52 +1,6 @@
+-"""Convergence verification for CF-EES(2,5;1/10) on SO(3) driven by fBm.
+-
+-Purpose
+--------
+-SO(3) is a non-abelian linear Lie group. Its natural flat Cartan
+-connection has *non-zero* torsion T(f,g) = -[f,g]_so(3). So the
+-intrinsic MKW Lie--Butcher series of CF-EES(2,5;1/10) does NOT have
+-planar-permutation-symmetric elementary differentials, and the MKW
+-antisymmetric order of the scheme on SO(3) is only 3 (verified
+-tree-by-tree in scheme_a_tree_algebraic_verify.py, with
+-D([o,[o]]) = +1/8 and D([[o],o]) = -1/8 at weight 4).
+-
+-If the scheme's reversibility rate on SO(3) were governed by the
+-intrinsic MKW order, we would see fitted slope 4H - 1:
+-  H = 0.4  ->  slope 0.6
+-  H = 0.5  ->  slope 1.0
+-  H = 0.6  ->  slope 1.4
+-
+-If instead it is governed by the AMBIENT BCK order (via the embedding
+-SO(3) subset GL(3,R) subset R^{3x3} and the ambient flat torsion-free
+-connection, per scheme_a_order_preservation.tex Lemma 2.3), the rate
+-is 6H - 1:
+-  H = 0.4  ->  slope 1.4
+-  H = 0.5  ->  slope 2.0
+-  H = 0.6  ->  slope 2.6
+-
+-These predictions are well-separated. We fit the empirical slope.
+-
+-Experiment design
+------------------
+-- d = 3 independent fBm drivers of Hurst H (Davies-Harte sampler).
+-- Three vector fields xi_m : SO(3) -> so(3), constructed as degree-4
+-  matrix polynomials in Y projected to so(3) via antisym(M)=(M-M^T)/2.
+-  The polynomial degree ensures that the elementary differentials
+-  through weight 5 are non-trivial (a linear xi would make trees with
+-  >= 3 children at the root trivially vanish).
+-- CF-EES(2,5;1/10) with beta_1 = (1/3,0,0), beta_2 = (-7/16,15/16,0),
+-  beta_3 = (49/240,-7/16,2/5), using the pinned Georax solver and SO(3) chart.
+-- Step sizes h = T/2^k for k = 6, 7, 8, 9, 10, 11 (six grids).
+-- n_trials independent fBm realisations per Hurst; the coarser grids
+-  sub-sample the finest grid so all step sizes see the SAME sample
+-  path (Wong--Zakai-consistent -- isolates discretisation error from
+-  path variation).
+-- Global reversibility error E(h) = || Y_back - Y_0 ||_F, averaged
+-  over trials, slope fitted in log-log.
+-
+-Usage
+------
+-  uv run --extra convergence-fbm python -m experiments.convergence_fbm.scripts.so3_reversibility_verify
++"""Cosine EES recovery on SO(3) driven by fractional Brownian motion.
++
++Use Georax's three-stage cosine method (reversible order 5) with three nonlinear matrix-polynomial vector fields. Coarser grids subsample one shared fine driver path per trial; forward and reverse integration use the same increments in opposite order. Saved measurements identify the cosine solver separately from historical CF-EES results.
+ """
+ 
+ from __future__ import annotations
+@@ -59,7 +13,7 @@ from pathlib import Path
+ 
+ import jax
+ import jax.numpy as jnp
+-from georax import CFEES25, SO, GeometricTerm
++from georax import SO, CFCosineEES, GeometricTerm
+ 
+ jax.config.update("jax_enable_x64", True)
+ 
+@@ -144,7 +98,7 @@ def _stepper(vfs: tuple):
+         return omega[jnp.triu_indices(3, k=1)]
+ 
+     term = GeometricTerm(coeffs, SO(3))
+-    solver = CFEES25()
++    solver = CFCosineEES(reversible_order=5)
+ 
+     @jax.jit
+     def step(rotation, increment):
+@@ -157,8 +111,8 @@ def _stepper(vfs: tuple):
+     return step
+ 
+ 
+-def cfees25_step(Y: np.ndarray, vfs: list[callable], dX: np.ndarray) -> np.ndarray:
+-    """Apply the library CF-EES(2,5;1/10) step to a driver increment."""
++def cosine_ees_step(Y: np.ndarray, vfs: list[callable], dX: np.ndarray) -> np.ndarray:
++    """Apply the library cosine EES (p=5) step to a driver increment."""
+     return np.asarray(_stepper(tuple(vfs))(jnp.asarray(Y), jnp.asarray(dX)))
+ 
+ 
+@@ -253,11 +207,14 @@ def run(
+         [math.exp(x) for x in log_err],
+     )
+     return {
++        "solver": "cf_cosine_ees",
++        "reversible_order": 5,
++        "embedded": False,
++        "georax_revision": "20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
+         "H": H,
+         "fitted_slope": slope,
+         "intercept": intercept,
+-        "predict_bck5": 6 * H - 1,
+-        "predict_mkw3": 4 * H - 1,
++        "reference_slope": 6 * H - 1,
+         "per_grid": per_grid_errs,
+     }
+ 
+@@ -273,7 +230,7 @@ def main():
+     ap.add_argument("--t_final", type=float, default=1.0)
+     ap.add_argument("--vf_seed", type=int, default=42)
+     ap.add_argument("--base_seed", type=int, default=2026)
+-    ap.add_argument("--output_json", default="so3_reversibility_results.json")
++    ap.add_argument("--output_json", default="cosine_so3_reversibility_results.json")
+     args = ap.parse_args()
+ 
+     # Y_0 = a generic rotation near but not equal to the identity.
+@@ -282,7 +239,7 @@ def main():
+     Y0 = expm(V0)
+ 
+     print("=" * 78)
+-    print("  CF-EES(2,5; 1/10) reversibility convergence on SO(3) (non-abelian)")
++    print("  Cosine EES (p=5) reversibility convergence on SO(3)")
+     print("  Group: SO(3) (matrix embedding in R^{3x3}, non-zero intrinsic torsion)")
+     print(f"  Driver: {args.d} independent fBm paths (Davies-Harte)")
+     print(f"  Step sizes: h = T / 2^k, k in {args.step_exponents}, T = {args.t_final}")
+@@ -290,17 +247,6 @@ def main():
+     print("  Vector fields: degree-4 matrix polynomials projected to so(3)")
+     print("=" * 78)
+     print()
+-    print("  Prediction table:")
+-    print("  +--------+-----------------------+----------------------+")
+-    print("  |   H    |  BCK order-5 (6H-1)   |  MKW order-3 (4H-1)  |")
+-    print("  +--------+-----------------------+----------------------+")
+-    for H in args.hursts:
+-        print(
+-            f"  |  {H:.2f}  |        {6 * H - 1:>5.2f}          |        {4 * H - 1:>5.2f}         |"
+-        )
+-    print("  +--------+-----------------------+----------------------+")
+-    print()
+-
+     results = []
+     for H in args.hursts:
+         print(f"[Hurst H = {H:.2f}]")
+@@ -317,34 +263,12 @@ def main():
+         results.append(res)
+         print(
+             f"  ==> fitted slope = {res['fitted_slope']:.3f}  "
+-            f"(predict BCK 6H-1 = {res['predict_bck5']:.2f}, "
+-            f"MKW 4H-1 = {res['predict_mkw3']:.2f})"
++            f"(reference 6H-1 = {res['reference_slope']:.2f})"
+         )
+         print()
+ 
+-    print("=" * 78)
+-    print("  SUMMARY")
+-    print("=" * 78)
+-    print(
+-        f"  {'H':>6}  {'fitted slope':>13}  {'6H-1 (BCK q=5)':>16}  {'4H-1 (MKW q=3)':>16}  {'verdict':>24}"
+-    )
+-    for res in results:
+-        fit = res["fitted_slope"]
+-        p5 = res["predict_bck5"]
+-        p3 = res["predict_mkw3"]
+-        d5 = abs(fit - p5)
+-        d3 = abs(fit - p3)
+-        if d5 < d3 and d5 < 0.35:
+-            verdict = "matches BCK order 5"
+-        elif d3 < d5 and d3 < 0.35:
+-            verdict = "matches MKW order 3"
+-        else:
+-            verdict = "inconclusive"
+-        print(
+-            f"  {res['H']:>6.2f}  {fit:>13.3f}  {p5:>16.2f}  {p3:>16.2f}  {verdict:>24}"
+-        )
+-
+     outp = Path(args.output_json)
++    outp.parent.mkdir(parents=True, exist_ok=True)
+     outp.write_text(json.dumps(results, indent=2))
+     print(f"\nWrote: {outp.resolve()}")
+ 
+diff --git a/experiments/convergence_fbm/scripts/test_georax_migration.py b/experiments/convergence_fbm/scripts/test_georax_migration.py
+index 4523898..bbf86a7 100644
+--- a/experiments/convergence_fbm/scripts/test_georax_migration.py
++++ b/experiments/convergence_fbm/scripts/test_georax_migration.py
+@@ -4,24 +4,24 @@ import numpy as np
+ from scipy.linalg import expm
+ 
+ from experiments.convergence_fbm.scripts.so3_reversibility_verify import (
+-    cfees25_step,
++    cosine_ees_step,
+     integrate,
+     make_so3_vfs,
+ )
+ 
+ 
+-def test_library_step_matches_original_left_action():
++def test_cosine_step_matches_independent_left_action():
+     fields = make_so3_vfs(3, seed=42)
+     start = expm(np.array([[0.0, -0.2, 0.1], [0.2, 0.0, -0.3], [-0.1, 0.3, 0.0]]))
+     increment = np.array([0.02, -0.01, 0.03])
+-    # Published stage combinations, evaluated independently with exact exponentials.
+-    weights = ((1 / 3,), (-7 / 16, 15 / 16), (49 / 240, -7 / 16, 2 / 5))
++    # Three-stage cosine combinations, evaluated independently with exact exponentials.
++    weights = ((0.5,), (-0.5, 1.0), (0.25, -0.5, 0.25))
+     reference = start.copy()
+     generators = []
+     for row in weights:
+         generators.append(sum(vf(reference) * dx for vf, dx in zip(fields, increment)))
+         reference = expm(sum(w * g for w, g in zip(row, generators))) @ reference
+-    actual = cfees25_step(start, fields, increment)
++    actual = cosine_ees_step(start, fields, increment)
+     np.testing.assert_allclose(actual, reference, atol=2e-14, rtol=0)
+     np.testing.assert_allclose(actual.T @ actual, np.eye(3), atol=2e-14, rtol=0)
+ 
+@@ -33,5 +33,5 @@ def test_forward_reverse_scan_uses_same_driver_increments():
+     reverse = integrate(forward, fields, path, reverse=True)
+     expected = forward
+     for increment in -np.diff(path, axis=0)[::-1]:
+-        expected = cfees25_step(expected, fields, increment)
++        expected = cosine_ees_step(expected, fields, increment)
+     np.testing.assert_allclose(reverse, expected, atol=2e-14, rtol=0)
+diff --git a/experiments/convergence_ode/README.md b/experiments/convergence_ode/README.md
+index f312a13..4de8388 100644
+--- a/experiments/convergence_ode/README.md
++++ b/experiments/convergence_ode/README.md
+@@ -6,12 +6,14 @@ Run from the repository root; the launcher selects the uv dependencies and a fre
+ ./run convergence-ode
+ ```
+ 
+-The experiment solves `R' = AR + RB`, `R(0) = I`, to time one, where `A = hat((0.4, -0.2, 0.7))` and `B = hat((-0.3, 0.8, 0.1))`. The exact solution is `exp(tA) exp(tB)`. A `GeometricTerm` supplies the right-action generator `R.T @ A @ R + B`; its only increment is the time step. Forward and reverse trajectories use `diffrax.diffeqsolve` with `georax.CFEES25` and `georax.CFEES27`, uniform steps, and float64 arithmetic. The selected SO(3) action uses a degree-eight Taylor exponential followed by QR.
++The experiment solves `R' = AR + RB`, `R(0) = I`, to time one, where `A = hat((0.4, -0.2, 0.7))` and `B = hat((-0.3, 0.8, 0.1))`. The exact solution is `exp(tA) exp(tB)`. A `GeometricTerm` supplies the right-action generator `R.T @ A @ R + B`; its only increment is the time step. Forward and reverse trajectories use `diffrax.diffeqsolve` with `georax.CFCosineEES(reversible_order=5)` and `georax.CFCosineEES(reversible_order=7)`, uniform steps, and float64 arithmetic. The selected SO(3) action uses a degree-eight Taylor exponential followed by QR.
+ 
+-The two-by-two figure uses `ees_core.convergence_plotting.plot_error_curve` and the existing STIX plotting settings, shared with `convergence_fbm`. Rows correspond to CF-EES(2,5) and CF-EES(2,7); columns show forward and recovery errors. Crimson crosses are measurements; blue lines have prescribed slopes. All measurements remain plotted, including those near roundoff.
++The two-by-two figure uses `ees_core.convergence_plotting.plot_error_curve` and the existing STIX plotting settings, shared with `convergence_fbm`. Rows correspond to cosine EES with reversible orders 5 and 7; columns show forward and recovery errors. Crimson crosses are measurements; blue lines have prescribed slopes. All measurements remain plotted, including those near roundoff.
+ 
+-Outputs in the printed run directory are `cfees_ode_convergence.pdf`, `ode_convergence.csv`, and `ode_validation.json`. The forward error is the maximum Frobenius error at mesh points. Recovery is the distance from the initial point after integrating backward from the numerical endpoint. The CSV also records a single forward–reverse defect, the embedded discrepancy, and the maximum orthogonality defect. The embedded discrepancy now comes directly from Georax's final-increment companion; no separate tableau implementation is used.
++Outputs in the printed run directory are `cf_cosine_ees_ode_convergence.pdf`, `ode_convergence.csv`, and `ode_validation.json`. The forward error is the maximum Frobenius error at mesh points. Recovery is the distance from the initial point after integrating backward from the numerical endpoint. The CSV also records a single forward–reverse defect, the embedded discrepancy, and the maximum orthogonality defect. The embedded discrepancy now comes directly from Georax's Lie–Euler companion, enabled with `embedded=True` only in the single-step diagnostic; no separate tableau implementation is used.
+ 
+ Reported slopes fit the finest three measurements above `100 * eps(float64)`; the JSON records each fitting grid. The defaults are 2 through 128 steps. Options are `--min-power`, `--max-power`, `--terminal-time`, and `--output-dir`. Use `./run convergence-ode --plot-only --output-dir PATH` to redraw a saved run.
+ 
+-The recorded run used georax `3e3b84ce3598627b2c2098cc1d3d8d8e2d030c13`, diffrax-lowstorage `5adac497d51ef424588ddb9252bbc52f8ce870c9`, and the sammccallum/Diffrax fork at `aeb1335b5a6278e85a270231e0f97b8db4453ae6`. The fork supplies `ReversibleAdjoint`. The local georax checkout had existing export changes in its two `__init__.py` files; its solver and SO(3) implementation files were unchanged. Package versions are recorded in the results JSON.
++New runs use Georax `20b401c9ffc83dc449c0340f4bc7b1289761c2b1`; their JSON records the cosine family, reversible orders and embedding policy. The plot-only command requires cosine provenance and refuses to relabel older measurements.
++
++The historical recorded run used georax `3e3b84ce3598627b2c2098cc1d3d8d8e2d030c13`, diffrax-lowstorage `5adac497d51ef424588ddb9252bbc52f8ce870c9`, and the sammccallum/Diffrax fork at `aeb1335b5a6278e85a270231e0f97b8db4453ae6`. The fork supplies `ReversibleAdjoint`. The local georax checkout had existing export changes in its two `__init__.py` files; its solver and SO(3) implementation files were unchanged. Package versions are recorded in the results JSON.
+diff --git a/experiments/convergence_ode/convergence.py b/experiments/convergence_ode/convergence.py
+index 34b84a2..cda7d24 100644
+--- a/experiments/convergence_ode/convergence.py
++++ b/experiments/convergence_ode/convergence.py
+@@ -1,4 +1,4 @@
+-"""CF-EES ODE convergence on SO(3), using Diffrax/georax and shared plots.
++"""Cosine EES ODE convergence on SO(3), using Diffrax/georax and shared plots.
+ 
+ Run from the repository root:
+     python -m experiments.convergence_ode.convergence
+@@ -11,6 +11,7 @@ import csv
+ import json
+ import os
+ import platform
++from datetime import datetime
+ from pathlib import Path
+ 
+ os.environ.setdefault("JAX_PLATFORMS", "cpu")
+@@ -26,7 +27,7 @@ import matplotlib
+ matplotlib.use("Agg")
+ import matplotlib.pyplot as plt
+ import numpy as np
+-from georax import CFEES25, CFEES27, SO, GeometricTerm
++from georax import SO, CFCosineEES, GeometricTerm
+ from scipy.linalg import expm
+ 
+ from ees_core.convergence_plotting import plot_error_curve
+@@ -91,6 +92,8 @@ def make_runner(solver, steps, terminal_time):
+ 
+ 
+ def single_step_diagnostics(solver, h, y0):
++    # Only this diagnostic needs the companion; fixed-step solves omit it.
++    solver = CFCosineEES(reversible_order=solver.reversible_order, embedded=True)
+     term = GeometricTerm(frame_coeffs, geometry=SO(3))
+     state = solver.init(term, 0.0, h, y0, None)
+     y1, discrepancy, _, state, result = solver.step(
+@@ -135,11 +138,9 @@ def plot_results(rows, output_dir):
+                 reference_mask=errors > 100 * np.finfo(float).eps,
+             )
+             symbol = r"\overleftarrow{\mathcal{E}}(h)" if col else r"\mathcal{E}(h)"
+-            axes[index, col].set_title(
+-                rf"${symbol}$ for $\mathrm{{CF\text{{-}}EES}}(2,{order})$"
+-            )
++            axes[index, col].set_title(rf"${symbol}$ for cosine EES, $p={order}$")
+     fig.tight_layout()
+-    fig.savefig(output_dir / "cfees_ode_convergence.pdf")
++    fig.savefig(output_dir / "cf_cosine_ees_ode_convergence.pdf")
+     plt.close(fig)
+ 
+ 
+@@ -152,13 +153,23 @@ def main():
+         "--plot-only", action="store_true", help="Redraw the saved CSV without solving."
+     )
+     parser.add_argument(
+-        "--output-dir", type=Path, default=Path(__file__).parent / "results"
++        "--output-dir",
++        type=Path,
++        default=Path(__file__).parent
++        / "results"
++        / "runs"
++        / datetime.now().astimezone().strftime("cosine_%Y%m%d_%H%M%S_%f"),
+     )
+     args = parser.parse_args()
+     if args.min_power < 0 or args.max_power < args.min_power or args.terminal_time <= 0:
+         parser.error("Use 0 <= min-power <= max-power and a positive terminal time.")
+     args.output_dir.mkdir(parents=True, exist_ok=True)
+     if args.plot_only:
++        metadata = json.loads((args.output_dir / "ode_validation.json").read_text())
++        if metadata.get("solver") != "cf_cosine_ees":
++            parser.error(
++                "This plotter requires cosine EES measurements; historical CF-EES data retain their original labels."
++            )
+         with (args.output_dir / "ode_convergence.csv").open(newline="") as stream:
+             rows = [
+                 {
+@@ -180,7 +191,7 @@ def main():
+         atol=2e-15,
+     )
+     rows, methods = [], {}
+-    for solver in [CFEES25(), CFEES27()]:
++    for solver in [CFCosineEES(reversible_order=5), CFCosineEES(reversible_order=7)]:
+         order = solver.antisymmetric_order(None)
+         method_rows = []
+         for power in range(args.min_power, args.max_power + 1):
+@@ -215,12 +226,17 @@ def main():
+             for key in ["forward", "recovery", "local_recovery", "embedded"]
+         }
+         methods[str(order)] = fits
+-        print(f"CF-EES(2,{order}): {json.dumps(fits)}", flush=True)
++        print(f"Cosine EES p={order}: {json.dumps(fits)}", flush=True)
+     with (args.output_dir / "ode_convergence.csv").open("w", newline="") as stream:
+         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+         writer.writeheader()
+         writer.writerows(rows)
+     summary = {
++        "solver": "cf_cosine_ees",
++        "reversible_orders": [5, 7],
++        "embedded": False,
++        "embedded_diagnostic": "Lie-Euler companion enabled only for single-step diagnostics",
++        "georax_revision": "20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
+         "terminal_time": args.terminal_time,
+         "powers": [args.min_power, args.max_power],
+         "arithmetic": "float64",
+diff --git a/experiments/kuramoto/README.md b/experiments/kuramoto/README.md
+index 442e51d..231b113 100644
+--- a/experiments/kuramoto/README.md
++++ b/experiments/kuramoto/README.md
+@@ -1,6 +1,6 @@
+ # Kuramoto learning experiment
+ 
+-The active experiment trains one geometric neural SDE on the tangent torus with 1000 oscillators. Its drift enforces `dtheta/dt = omega` and learns a phase-dependent mean-field force plus scalar damping `2*sigmoid(damping_logit)` in `(0, 2)`, initialized at 1. This includes the cached dataset's true unit damping. The force uses a shared per-oscillator network with trigonometric moments and learned oscillator embeddings; it has no velocity inputs. The diffusion remains a learned neural field. The same architecture is used for CG2, CF-EES, Geometric Euler–Heun and SRKMK–GeneralShARK. This changes the model assumption from the earlier unconstrained drift, whose backward reconstruction amplified numerical errors. The cached dataset has 1500/300/300 training/validation/test trajectories, 100 observations and horizon 5. Training uses the multi-horizon energy score with four stochastic predictions per example.
++The active experiment trains one geometric neural SDE on the tangent torus with 1000 oscillators. Its drift enforces `dtheta/dt = omega` and learns a phase-dependent mean-field force plus scalar damping `2*sigmoid(damping_logit)` in `(0, 2)`, initialized at 1. This includes the cached dataset's true unit damping. The force uses a shared per-oscillator network with trigonometric moments and learned oscillator embeddings; it has no velocity inputs. The diffusion remains a learned neural field. The same architecture is used for CG2, cosine EES, Geometric Euler–Heun and SRKMK–GeneralShARK. This changes the model assumption from the earlier unconstrained drift, whose backward reconstruction amplified numerical errors. The cached dataset has 1500/300/300 training/validation/test trajectories, 100 observations and horizon 5. Training uses the multi-horizon energy score with four stochastic predictions per example.
+ 
+ ## One configuration
+ 
+@@ -10,13 +10,13 @@ The active experiment trains one geometric neural SDE on the tangent torus with
+ | --- | --- | ---: | ---: | ---: |
+ | CG2 | Full | 75 | 150 | 150 |
+ | CG2 | Recursive | 75 | 150 | 150 |
+-| CF-EES(2,5) | Reconstruction without checkpoints | 50 | 150 | 150 |
++| Cosine EES (p=5) | Reconstruction without checkpoints | 50 | 150 | 150 |
+ | Geometric Euler–Heun | Full | 150 | 150 | 300 |
+ | Geometric Euler–Heun | Recursive | 150 | 150 | 300 |
+ | SRKMK–GeneralShARK | Full | 75 | 150 | 225 |
+ | SRKMK–GeneralShARK | Recursive | 75 | 150 | 225 |
+ 
+-Geometric Euler–Heun uses Georax's `GeometricEulerHeun()` directly on `TangentTorus`, with one drift and two diffusion evaluations per step. It uses the same Stratonovich convention as CG2 and CF-EES, so no drift conversion is needed. Each method is trained independently from the same initialization, architecture and loss. Euler–Heun supports fixed steps and full or recursive checkpointing; it has no embedded error estimate or reversible adjoint. The defaults match drift evaluations, not total field evaluations or runtime. For accuracy–time comparisons, vary each method's step count and use measured wall-clock time.
++Geometric Euler–Heun uses Georax's `GeometricEulerHeun()` directly on `TangentTorus`, with one drift and two diffusion evaluations per step. It uses the same Stratonovich convention as CG2 and cosine EES, so no drift conversion is needed. Each method is trained independently from the same initialization, architecture and loss. Euler–Heun supports fixed steps and full or recursive checkpointing; it has no embedded error estimate or reversible adjoint. The defaults match drift evaluations, not total field evaluations or runtime. For accuracy–time comparisons, vary each method's step count and use measured wall-clock time.
+ 
+ SRKMK wraps Diffrax’s `GeneralShARK()` in Georax’s tangent-torus charts. Its Brownian tree supplies the required space-time integrals. It uses two drift and three diffusion evaluations per step, with the same full and recursive checkpoint options as the other fixed-step baselines.
+ 
+@@ -37,25 +37,27 @@ adjoints = ["full", "recursive"]
+ n_steps = 150
+ ```
+ 
+-Set solver step counts under their integrator table. `stepping` defaults to `["fixed"]`; CF-EES selects `["fixed", "adaptive"]`. Output method labels are generated automatically. Model dimensions, training epochs and batch size belong in `[base]`.
++Cosine EES uses `reversible_order = 5` by default (three stages); any odd order at least three is supported, with `(reversible_order + 1) // 2` stages. Fixed steps disable the companion and adaptive steps enable it. New configurations record `reversible_order` and `embedded`, and method labels include the order. Adaptive work counts include the extra source-level companion evaluation per attempt; JIT may reuse the first-stage evaluation.
++
++Set solver step counts under their integrator table. `stepping` defaults to `["fixed"]`; cosine EES selects `["fixed", "adaptive"]`. Output method labels are generated automatically. Model dimensions, training epochs and batch size belong in `[base]`.
+ 
+ Each invocation gets a fresh directory under `results/unified/runs/`. Training prints progress and saves a log per method. `--config PATH` selects another TOML, and `--index N` selects one training sweep entry, in seed-then-method order. Every run records `peak_gpu_memory_bytes` alongside `train_walltime_s` in `metrics.json`; the comparison summary includes both. Memory is the peak JAX GPU allocation from process startup through training and evaluation, including resident data, model, optimiser and temporary buffers. It is captured before demonstration forecasts and solver-work diagnostics. Each configuration runs in a fresh process, and CPU runs or unsupported allocator statistics produce `null`.
+ 
+ Training, validation and test batches print progress and elapsed time; the first training and evaluation batches include JAX compilation. Evaluation computes loss and MAEs from the same forecast ensemble and counts each held-out trajectory once, masking the padded final batch and weighting batch averages by their valid example counts. Diffusion applies its diagonal entries directly instead of materialising a dense matrix, and loss calculations save only their four requested observation times. With `save_every_epoch = true`, epoch weights and the latest optimiser state are saved before evaluation, so an interruption during evaluation preserves that epoch's training weights. `--resume-from` accepts final checkpoints or the last fully evaluated epoch with its matching latest optimiser state. If evaluation was interrupted after a newer optimiser was saved, resume refuses to pair that optimiser with the older evaluated model.
+ 
+-## Adaptive CF-EES
++## Adaptive cosine EES
+ 
+-The default sweep includes `cfees25_adaptive_reversible`, with the final-increment embedded estimator, dynamic step sizes and checkpoint-free reversible reconstruction gradients. To select just its seed-0 entry in the supplied TOML:
++The default sweep includes `cf_cosine_ees_p5_adaptive_reversible`, with the Lie–Euler embedded estimator (`embedded=True`), dynamic step sizes and checkpoint-free reversible reconstruction gradients. To select just its seed-0 entry in the supplied TOML:
+ 
+ ```bash
+ ./run kuramoto --index 7
+ ```
+ 
+-The `[integrators.cfees25.adaptive]` table sets `n_steps = 10`, `dtmin = 1e-4`, `atol = 3e-2` and `max_steps = 4096`. These override the parent integrator's settings only for adaptive runs. The tolerance controls the estimated RMS difference between the two endpoints, using wrapped phase differences and ordinary velocity differences. Diffrax's standard `PIDController`, configured as a PI controller with `force_dtmin=True`, adjusts the step size, capped at `T/n_steps` (0.5 for this configuration). At `dtmin`, steps are accepted even if the estimated error exceeds tolerance. The Brownian-tree tolerance is ten times smaller than `dtmin`. `max_steps` limits attempted steps per trajectory. All of these options are read from the TOML.
++The `[integrators.cf_cosine_ees.adaptive]` table sets `n_steps = 10`, `dtmin = 1e-4`, `atol = 3e-2` and `max_steps = 4096`. These override the parent integrator's settings only for adaptive runs. The tolerance controls the estimated RMS difference between the two endpoints, using wrapped phase differences and ordinary velocity differences. Diffrax's standard `PIDController`, configured as a PI controller with `force_dtmin=True`, adjusts the step size, capped at `T/n_steps` (0.5 for this configuration). At `dtmin`, steps are accepted even if the estimated error exceeds tolerance. The Brownian-tree tolerance is ten times smaller than `dtmin`. `max_steps` limits attempted steps per trajectory. All of these options are read from the TOML.
+ 
+-Batched adaptive reconstruction currently needs a Diffrax fix: the pinned fork reads a padded time after one batch member finishes its reverse loop. The tested fix is in `/home/luke/diffrax/.worktrees/adaptive-reversible`, on branch `codex/adaptive-reversible-vmap`; the launcher selects that worktree automatically whenever the selected TOML runs include adaptive CF-EES. The original pin remains unchanged. The verified SIAM result directory retains the exact patch and dependency provenance.
++Batched adaptive reconstruction currently needs a Diffrax fix: the pinned fork reads a padded time after one batch member finishes its reverse loop. The tested fix is in `/home/luke/diffrax/.worktrees/adaptive-reversible`, on branch `codex/adaptive-reversible-vmap`; the launcher selects that worktree automatically whenever the selected TOML runs include adaptive cosine EES. The original pin remains unchanged. The verified SIAM result directory retains the exact patch and dependency provenance.
+ 
+-The Brownian tree is retained through rejection. The learned diffusion depends on the full state and need not commute, so the standard `ClipStepSizeController` wrapper stores rejected endpoints and forces subsequent steps to revisit them. CF-EES uses the ordinary `ReversibleAdjoint` and reconstructs states on the accepted mesh without trajectory checkpoints. The accepted-time buffer is separate from the reconstructed state. No inverse-correction loop or checkpointed gradient is substituted. The previous unconstrained drift remains available as `drift_kind = "indexed_mean_field"` for reading historical checkpoints and reproducing the failure; new runs use `second_order_mean_field`. The earlier checkpointed speed comparison does not establish reversible-training performance. A single-run diagnostic TOML can explicitly set `adjoint = "checkpoint_recursive"` and `adaptive = true`. Adaptive runs have variable evaluation counts; they are additional experiments to the fixed 150-forward-drift-evaluation comparison. `metrics.json` records accepted/rejected steps and forward generator evaluations on eight fixed validation trajectories using the best validation checkpoint.
++The Brownian tree is retained through rejection. The learned diffusion depends on the full state and need not commute, so the standard `ClipStepSizeController` wrapper stores rejected endpoints and forces subsequent steps to revisit them. cosine EES uses the ordinary `ReversibleAdjoint` and reconstructs states on the accepted mesh without trajectory checkpoints. The accepted-time buffer is separate from the reconstructed state. No inverse-correction loop or checkpointed gradient is substituted. The previous unconstrained drift remains available as `drift_kind = "indexed_mean_field"` for reading historical checkpoints and reproducing the failure; new runs use `second_order_mean_field`. The earlier checkpointed speed comparison does not establish reversible-training performance. A single-run diagnostic TOML can explicitly set `adjoint = "checkpoint_recursive"` and `adaptive = true`. Adaptive runs have variable evaluation counts; they are additional experiments to the fixed 150-forward-drift-evaluation comparison. `metrics.json` records accepted/rejected steps and forward generator evaluations on eight fixed validation trajectories using the best validation checkpoint.
+ 
+ ## Verification
+ 
+@@ -69,7 +71,7 @@ PYTHONPATH=/home/luke/diffrax/.worktrees/adaptive-reversible:$PWD \
+   --output-dir /tmp/kuramoto-reversible-check --steps 600
+ ```
+ 
+-This compares CG2 with checkpoints and CF-EES with ordinary reversible reconstruction from the same initialization, using two examples and two forecasts per update. `--modes ees` runs just the candidate. `--initial-checkpoint PATH` instead starts both methods at the same saved weights with fresh, identical optimisers; the checkpoint must match the configured architecture. The script records matched validation losses, timings and a final same-weights gradient comparison; reference gradients are used only in that diagnostic. Its default two-sample losses must not be compared numerically with the full four-sample results.
++This compares CG2 with checkpoints and cosine EES with ordinary reversible reconstruction from the same initialization, using two examples and two forecasts per update. `--modes cosine` runs just the candidate. `--initial-checkpoint PATH` instead starts both methods at the same saved weights with fresh, identical optimisers; the checkpoint must match the configured architecture. The script records matched validation losses, timings and a final same-weights gradient comparison; reference gradients are used only in that diagnostic. Its default two-sample losses must not be compared numerically with the full four-sample results.
+ 
+ The existing simulator checks and same-noise Lyapunov diagnostic remain available. scripts/run_m1.py defaults match the cached production dataset; --smoke uses a small dataset for testing.
+ 
+@@ -77,4 +79,4 @@ The existing simulator checks and same-noise Lyapunov diagnostic remain availabl
+ 
+ Historical models, presets, pilot scripts and documentation are in `/home/luke/nsde_archive/experiments/kuramoto/legacy/`. The current SIAM learning comparison, manuscript datasets, historical memory sweep and simulator diagnostics remain here. NeurIPS fixed-step runtime records are now in `../../neurips/kuramoto/results/`; superseded trial runs were deleted as recorded in `../../docs/cleanup_20261027.json`. The archived memory curve used a global MLP with 1,204,792 parameters; the second-order mean-field training model has 582,251. These isolated-gradient measurements have a different scope from the new per-run training memory metric.
+ 
+-New runs use Georax `bf5c3554bfa8199427d4a3200fa58b69b657aa98`, its public `TangentTorus` geometry, CF-EES(2,5;1/10) and Geometric Euler–Heun. Historical learning and memory records used the earlier implementation with parameter 1/4. The protocol marker is now `kuramoto_second_order_mean_field_georaxbf5c355_v4`, so the plotting script rejects records from earlier revisions, including the former Itô Euler baseline. Historical results retain their original solver and dependency provenance and cannot be relabelled as Euler–Heun measurements. The completed full-data training comparison is documented in [the verified results](results/unified/reversible_second_order_verified_20260925/README.md): reversible CF-EES reached test loss 361.03 in 6.68 minutes, and matched-model CG2 reached 361.19 in 11.51 minutes (15 epochs, seed 0).
++New runs use Georax `20b401c9ffc83dc449c0340f4bc7b1289761c2b1`, its public `TangentTorus` geometry, cosine EES and Geometric Euler–Heun. The previous active sweep used CF-EES(2,5;1/10). Historical learning and memory records used the earlier implementation with parameter 1/4. The protocol marker is now `kuramoto_second_order_mean_field_cosine_georax20b401c_v5`, so the plotting script rejects records from earlier revisions, including the former Itô Euler baseline. Historical results retain their original solver and dependency provenance and cannot be relabelled as Euler–Heun measurements. The completed full-data training comparison is documented in [the verified results](results/unified/reversible_second_order_verified_20260925/README.md): reversible CF-EES reached test loss 361.03 in 6.68 minutes, and matched-model CG2 reached 361.19 in 11.51 minutes (15 epochs, seed 0).
+diff --git a/experiments/kuramoto/config.toml b/experiments/kuramoto/config.toml
+index 1fc3f0a..0d002a8 100644
+--- a/experiments/kuramoto/config.toml
++++ b/experiments/kuramoto/config.toml
+@@ -45,13 +45,14 @@ n_steps = 75
+ adjoints = ["full", "recursive"]
+ n_steps = 75
+ 
+-[integrators.cfees25]
++[integrators.cf_cosine_ees]
++reversible_order = 5
+ adjoints = ["reversible"]
+ stepping = ["fixed", "adaptive"]
+ n_steps = 50
+ 
+ # Adaptive n_steps sets the initial/maximum step to T/n_steps.
+-[integrators.cfees25.adaptive]
++[integrators.cf_cosine_ees.adaptive]
+ n_steps = 10
+ atol = 3e-2
+ dtmin = 1e-4
+diff --git a/experiments/kuramoto/experiment/config.py b/experiments/kuramoto/experiment/config.py
+index 56585e1..d257603 100644
+--- a/experiments/kuramoto/experiment/config.py
++++ b/experiments/kuramoto/experiment/config.py
+@@ -8,7 +8,7 @@ from dataclasses import asdict, dataclass
+ from enum import StrEnum
+ from pathlib import Path
+ 
+-from experiments.config import expand_integrators, method_label
++from experiments.config import cosine_stage_count, expand_integrators, method_label
+ 
+ 
+ class Devices(StrEnum):
+@@ -17,7 +17,7 @@ class Devices(StrEnum):
+ 
+ 
+ class Solvers(StrEnum):
+-    CFEES25 = "cfees25"
++    CF_COSINE_EES = "cf_cosine_ees"
+     CG2 = "cg2"
+     GEOMETRIC_EULER_HEUN = "geometric_euler_heun"
+     SRKMK_GENERAL_SHARK = "srkmk_general_shark"
+@@ -36,7 +36,7 @@ COMPARISON_METHODS = (
+         Solvers.SRKMK_GENERAL_SHARK,
+         "checkpoint_recursive",
+     ),
+-    ("cfees25_reversible", Solvers.CFEES25, "reversible"),
++    ("cf_cosine_ees_p5_reversible", Solvers.CF_COSINE_EES, "reversible"),
+     ("geometric_euler_heun_full", Solvers.GEOMETRIC_EULER_HEUN, "checkpoint_full"),
+     (
+         "geometric_euler_heun_recursive",
+@@ -48,13 +48,17 @@ COMPARISON_METHODS = (
+ 
+ def validate_method(solver, adjoint, *, adaptive=False):
+     """Keep fixed-step comparisons restricted; allow checkpointed adaptive training."""
+-    if adaptive and solver == Solvers.CFEES25 and adjoint == "checkpoint_recursive":
++    if (
++        adaptive
++        and solver == Solvers.CF_COSINE_EES
++        and adjoint == "checkpoint_recursive"
++    ):
+         return
+     if (solver, adjoint) not in {(s, a) for _, s, a in COMPARISON_METHODS}:
+         raise ValueError(
+             "Kuramoto supports only CG2, Geometric Euler–Heun or SRKMK–GeneralShARK with checkpoint_full "
+             "or checkpoint_recursive, "
+-            "and CF-EES(2,5) with reversible."
++            "and cosine EES with reversible."
+         )
+ 
+ 
+@@ -79,7 +83,8 @@ class ExperimentConfig:
+     drift_kind: str = "second_order_mean_field"
+ 
+     # SDE integrator
+-    solver: Solvers = Solvers.CFEES25
++    solver: Solvers = Solvers.CF_COSINE_EES
++    reversible_order: int = 5
+     n_steps: int = 50
+     adjoint: str = "reversible"
+     adaptive: bool = False
+@@ -102,11 +107,14 @@ class ExperimentConfig:
+     skip_plots: bool = False
+ 
+     def __post_init__(self):
++        cosine_stage_count(self.reversible_order)
+         if type(self.n_steps) is not int or self.n_steps <= 0:
+             raise ValueError("n_steps must be a positive integer.")
+         if self.adaptive:
+-            if self.solver != Solvers.CFEES25:
+-                raise ValueError("Adaptive stepping requires a CF-EES embedded pair.")
++            if self.solver != Solvers.CF_COSINE_EES:
++                raise ValueError(
++                    "Adaptive stepping requires a cosine EES embedded pair."
++                )
+             if self.adaptive_atol <= 0 or self.adaptive_dtmin <= 0:
+                 raise ValueError(
+                     "Adaptive tolerance and minimum step must be positive."
+@@ -122,11 +130,20 @@ class ExperimentConfig:
+ 
+     @property
+     def method(self):
+-        return method_label(self.solver, self.adjoint, self.adaptive)
++        return method_label(
++            self.solver,
++            self.adjoint,
++            self.adaptive,
++            reversible_order=self.reversible_order,
++        )
++
++    @property
++    def embedded(self):
++        return self.solver == Solvers.CF_COSINE_EES and self.adaptive
+ 
+ 
+ DEFAULT_CONFIG = Path(__file__).resolve().parents[1] / "config.toml"
+-PROTOCOL = "kuramoto_second_order_mean_field_georaxbf5c355_v4"
++PROTOCOL = "kuramoto_second_order_mean_field_cosine_georax20b401c_v5"
+ 
+ 
+ def make_config(**overrides) -> ExperimentConfig:
+@@ -149,16 +166,20 @@ def load_runs(path: Path) -> list[ExperimentConfig]:
+ 
+ def _build_config(data) -> ExperimentConfig:
+     data = dict(data)
++    embedded = data.pop("embedded", None)
+     method = data.pop("method", None)
+     if method is not None:
+         methods = {
+             label: (solver, adjoint) for label, solver, adjoint in COMPARISON_METHODS
+         }
+-        methods["cfees25_adaptive_reversible"] = (Solvers.CFEES25, "reversible")
++        methods["cf_cosine_ees_p5_adaptive_reversible"] = (
++            Solvers.CF_COSINE_EES,
++            "reversible",
++        )
+         if method not in methods:
+             raise ValueError(f"Unknown Kuramoto method: {method!r}")
+         data["solver"], data["adjoint"] = methods[method]
+-        data["adaptive"] = method == "cfees25_adaptive_reversible"
++        data["adaptive"] = method == "cf_cosine_ees_p5_adaptive_reversible"
+     if "device" in data:
+         data["device"] = Devices(data["device"])
+     if "solver" in data:
+@@ -167,12 +188,20 @@ def _build_config(data) -> ExperimentConfig:
+         data["model"] = ModelKind(data["model"])
+     if "loss_horizons" in data:
+         data["loss_horizons"] = tuple(float(x) for x in data["loss_horizons"])
+-    return ExperimentConfig(**data)
++    config = ExperimentConfig(**data)
++    if embedded is not None and (
++        type(embedded) is not bool or embedded != config.embedded
++    ):
++        raise ValueError(
++            "embedded must match whether cosine EES uses adaptive stepping."
++        )
++    return config
+ 
+ 
+ def serialize_config(config: ExperimentConfig) -> str:
+     """JSON-serialise the config (StrEnums become strings, tuples become lists)."""
+     payload = asdict(config)
++    payload["embedded"] = config.embedded
+     for k, v in payload.items():
+         if isinstance(v, StrEnum):
+             payload[k] = v.value
+diff --git a/experiments/kuramoto/experiment/factories.py b/experiments/kuramoto/experiment/factories.py
+index 89463cb..4a93bb6 100644
+--- a/experiments/kuramoto/experiment/factories.py
++++ b/experiments/kuramoto/experiment/factories.py
+@@ -16,7 +16,7 @@ from diffrax import (
+     RecursiveCheckpointAdjoint,
+     ReversibleAdjoint,
+ )
+-from georax import CFEES25, CG2, SRKMK, GeometricEulerHeun
++from georax import CG2, SRKMK, CFCosineEES, GeometricEulerHeun
+ 
+ from experiments.kuramoto.datasets.kuramoto_dataset import (
+     KuramotoDataset,
+@@ -30,13 +30,16 @@ from experiments.kuramoto.experiment.config import (
+ )
+ 
+ _GEORAX_SOLVERS: dict[Solvers, type[AbstractSolver]] = {
+-    Solvers.CFEES25: CFEES25,
+     Solvers.CG2: CG2,
+     Solvers.GEOMETRIC_EULER_HEUN: GeometricEulerHeun,
+ }
+ 
+ 
+-def build_solver(name: Solvers) -> AbstractSolver:
++def build_solver(
++    name: Solvers, *, reversible_order=5, adaptive=False
++) -> AbstractSolver:
++    if name == Solvers.CF_COSINE_EES:
++        return CFCosineEES(reversible_order=reversible_order, embedded=adaptive)
+     if name == Solvers.SRKMK_GENERAL_SHARK:
+         return SRKMK(GeneralShARK())
+     cls = _GEORAX_SOLVERS[name]
+@@ -100,7 +103,11 @@ def make_model(
+             n_steps=config.n_steps,
+             dt=dt,
+             n_obs=n_obs,
+-            solver=build_solver(config.solver),
++            solver=build_solver(
++                config.solver,
++                reversible_order=config.reversible_order,
++                adaptive=config.adaptive,
++            ),
+             diffusion_scale=config.diffusion_scale,
+             adjoint=adjoint,
+             activation=config.activation,
+diff --git a/experiments/kuramoto/experiment/train_kuramoto.py b/experiments/kuramoto/experiment/train_kuramoto.py
+index dee8f30..b508de6 100644
+--- a/experiments/kuramoto/experiment/train_kuramoto.py
++++ b/experiments/kuramoto/experiment/train_kuramoto.py
+@@ -477,8 +477,15 @@ def solver_work(model, config):
+         split="val", model_checkpoint="model_best.eqx", brownian_seed=config.seed + 731
+     )
+     summary["forward_generator_evaluations"] = (
+-        np.asarray(stats["num_steps"]) * model.solver.recurrence.num_stages
++        np.asarray(stats["num_steps"])
++        * (model.solver.recurrence.num_stages + int(model.solver.embedded))
+     ).tolist()
++    summary["embedded_generator_evaluations"] = (
++        np.asarray(stats["num_steps"]) * int(model.solver.embedded)
++    ).tolist()
++    summary["counting_convention"] = (
++        "source-level field calls; JIT may share the embedded companion's initial-stage evaluation"
++    )
+     return summary
+ 
+ 
+@@ -531,9 +538,7 @@ def main() -> int:
+         n_samples=config.loss_n_samples,
+     )
+ 
+-    tag = f"N{config.N}_{config.model.value}_{config.solver.value}_{config.adjoint}_seed{config.seed}"
+-    if config.adaptive:
+-        tag += "_adaptive"
++    tag = f"N{config.N}_{config.model.value}_{config.method}_seed{config.seed}"
+     output_dir = args.output_dir or make_output_dir(tag)
+     if output_dir.exists() and any(output_dir.iterdir()):
+         raise FileExistsError(f"Use a fresh output directory: {output_dir}")
+@@ -590,6 +595,7 @@ def main() -> int:
+         output_dir / "metrics.json",
+         {
+             "train_walltime_s": train_walltime_s,
++            "georax_revision": "20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
+             "peak_gpu_memory_bytes": peak_memory,
+             "adaptive_solver_work": solver_work(best_model, config)
+             if config.adaptive
+diff --git a/experiments/kuramoto/models/kuramoto_nsde.py b/experiments/kuramoto/models/kuramoto_nsde.py
+index 4b22718..26fd7c0 100644
+--- a/experiments/kuramoto/models/kuramoto_nsde.py
++++ b/experiments/kuramoto/models/kuramoto_nsde.py
+@@ -29,7 +29,7 @@ from diffrax import (
+     VirtualBrownianTree,
+     diffeqsolve,
+ )
+-from georax import CFEES25, SRKMK, GeometricTerm, TangentTorus
++from georax import SRKMK, CFCosineEES, GeometricTerm, TangentTorus
+ 
+ from ees_core.torus import wrap_to_pi
+ 
+@@ -294,7 +294,7 @@ class KuramotoNSDE(eqx.Module):
+         geometry = TangentTorus(N)
+         act_fn = resolve_activation(activation)
+         if solver is None:
+-            solver = CFEES25()
++            solver = CFCosineEES(reversible_order=5, embedded=adaptive)
+ 
+         self.name = "kuramoto_nsde"
+         self.N = N
+@@ -304,8 +304,10 @@ class KuramotoNSDE(eqx.Module):
+         self.solver = solver
+         self.adjoint = adjoint
+         if adaptive:
+-            if not isinstance(solver, CFEES25):
+-                raise ValueError("Adaptive stepping requires a CF-EES embedded pair.")
++            if not (isinstance(solver, CFCosineEES) and solver.embedded):
++                raise ValueError(
++                    "Adaptive stepping requires a cosine EES embedded pair (embedded=True)."
++                )
+             if adaptive_atol <= 0 or not 0 < adaptive_dtmin <= dt:
+                 raise ValueError("Require atol > 0 and 0 < adaptive_dtmin <= dt.")
+             if adaptive_max_steps < n_steps:
+diff --git a/experiments/kuramoto/scripts/check_reversible_training.py b/experiments/kuramoto/scripts/check_reversible_training.py
+index 5aa575f..aae257f 100644
+--- a/experiments/kuramoto/scripts/check_reversible_training.py
++++ b/experiments/kuramoto/scripts/check_reversible_training.py
+@@ -19,13 +19,17 @@ import jax.numpy as jnp
+ import numpy as np
+ import optax
+ from diffrax import RecursiveCheckpointAdjoint
+-from georax import CFEES25
+ 
+ from experiments.kuramoto.datasets.kuramoto_dataset import (
+     KuramotoDataset,
+     default_npz_path,
+ )
+-from experiments.kuramoto.experiment.config import DEFAULT_CONFIG, Solvers, load_config
++from experiments.kuramoto.experiment.config import (
++    DEFAULT_CONFIG,
++    Solvers,
++    load_config,
++    serialize_config,
++)
+ from experiments.kuramoto.experiment.factories import make_model
+ from experiments.kuramoto.experiment.losses import make_multi_horizon_energy_score
+ 
+@@ -41,7 +45,7 @@ def main():
+     parser.add_argument("--config", type=Path, default=DEFAULT_CONFIG)
+     parser.add_argument("--output-dir", type=Path, required=True)
+     parser.add_argument(
+-        "--modes", nargs="+", choices=["cg2", "ees"], default=["cg2", "ees"]
++        "--modes", nargs="+", choices=["cg2", "cosine"], default=["cg2", "cosine"]
+     )
+     parser.add_argument("--steps", type=int, default=600)
+     parser.add_argument("--seed", type=int, default=0)
+@@ -92,7 +96,7 @@ def main():
+         reversible = mode != "cg2"
+         config = dataclasses.replace(
+             base,
+-            solver=Solvers.CFEES25 if reversible else Solvers.CG2,
++            solver=Solvers.CF_COSINE_EES if reversible else Solvers.CG2,
+             adjoint="reversible" if reversible else "checkpoint_full",
+             n_steps=args.n_steps if reversible else 75,
+             adaptive=reversible,
+@@ -104,8 +108,6 @@ def main():
+             seed=args.seed,
+         )
+         model = make_model(config, data.metadata(), jax.random.key(args.seed))
+-        if reversible:
+-            object.__setattr__(model, "solver", CFEES25())
+         if args.initial_checkpoint is not None:
+             model = eqx.tree_deserialise_leaves(args.initial_checkpoint, model)
+         schedule = optax.warmup_cosine_decay_schedule(
+@@ -196,7 +198,7 @@ def main():
+         results["runs"].append(
+             dict(
+                 mode=mode,
+-                config=dataclasses.asdict(config),
++                config=json.loads(serialize_config(config)),
+                 history=history,
+                 derivative=derivative,
+             )
+diff --git a/experiments/kuramoto/scripts/plot_memory_sweep.py b/experiments/kuramoto/scripts/plot_memory_sweep.py
+index e69ad3e..1d34693 100644
+--- a/experiments/kuramoto/scripts/plot_memory_sweep.py
++++ b/experiments/kuramoto/scripts/plot_memory_sweep.py
+@@ -16,7 +16,7 @@ from experiments.kuramoto.experiment.config import PROTOCOL, validate_method
+ LABELS = {
+     "cg2:checkpoint_full": "CG2 (Full)",
+     "cg2:checkpoint_recursive": "CG2 (Recursive)",
+-    "cfees25:reversible": "CF-EES(2,5) (Reconstruction)",
++    "cf_cosine_ees:reversible": "Cosine EES (Reconstruction)",
+     "geometric_euler_heun:checkpoint_full": "Geometric Euler–Heun (Full)",
+     "geometric_euler_heun:checkpoint_recursive": "Geometric Euler–Heun (Recursive)",
+ }
+@@ -81,11 +81,14 @@ def main():
+             key=lambda c: c["n_steps"],
+         )
+         if selected:
++            label = LABELS.get(mode, mode)
++            if mode.startswith("cf_cosine_ees:"):
++                label += f", p={selected[0]['config']['reversible_order']}"
+             ax.plot(
+                 [c["n_steps"] for c in selected],
+                 [c["peak_bytes"] / 2**20 for c in selected],
+                 marker="o",
+-                label=LABELS.get(mode, mode),
++                label=label,
+             )
+             plotted += 1
+     if not plotted:
+diff --git a/experiments/kuramoto/scripts/run_comparison.py b/experiments/kuramoto/scripts/run_comparison.py
+index ef3924d..34abdfe 100644
+--- a/experiments/kuramoto/scripts/run_comparison.py
++++ b/experiments/kuramoto/scripts/run_comparison.py
+@@ -72,6 +72,10 @@ def _run_cell(
+         "label": label,
+         "seed": seed,
+         "solver": solver,
++        "reversible_order": config.reversible_order
++        if solver == "cf_cosine_ees"
++        else None,
++        "embedded": config.embedded,
+         "adjoint": adjoint,
+         "n_steps": n_steps,
+         "exit_code": proc.returncode,
+diff --git a/experiments/kuramoto/tests/test_second_order_drift.py b/experiments/kuramoto/tests/test_second_order_drift.py
+index 9b4f682..512d503 100644
+--- a/experiments/kuramoto/tests/test_second_order_drift.py
++++ b/experiments/kuramoto/tests/test_second_order_drift.py
+@@ -7,7 +7,7 @@ import jax
+ import jax.numpy as jnp
+ import numpy as np
+ from diffrax import RecursiveCheckpointAdjoint, ReversibleAdjoint
+-from georax import CFEES25
++from georax import CFCosineEES
+ 
+ from experiments.kuramoto.experiment.config import ExperimentConfig
+ from experiments.kuramoto.experiment.factories import make_model
+@@ -97,6 +97,6 @@ def test_structured_adaptive_reconstruction_gradient():
+ def test_active_model_keeps_ordinary_reversible_adjoint():
+     config = ExperimentConfig(adaptive=True, N=3, hidden_dim=8)
+     model = make_model(config, {"N": 3, "n_obs": 100, "T": 5.0}, jax.random.key(0))
+-    assert type(model.solver) is CFEES25
++    assert type(model.solver) is CFCosineEES
+     assert type(model.adjoint) is ReversibleAdjoint
+     assert hasattr(model.drift_field, "damping_logit")
+diff --git a/experiments/kuramoto/tests/test_unified_protocol.py b/experiments/kuramoto/tests/test_unified_protocol.py
+index b62639b..120f1c5 100644
+--- a/experiments/kuramoto/tests/test_unified_protocol.py
++++ b/experiments/kuramoto/tests/test_unified_protocol.py
+@@ -24,7 +24,7 @@ def test_plot_rejects_legacy_and_mixed_experiments(tmp_path):
+     cell = dict(
+         protocol=PROTOCOL,
+         config=config,
+-        solver="cfees25",
++        solver="cf_cosine_ees",
+         adjoint="reversible",
+         n_steps=50,
+         peak_bytes=100,
+@@ -44,11 +44,11 @@ def test_supported_training_methods(label, solver, adjoint):
+ @pytest.mark.parametrize(
+     "solver,adjoint",
+     [
+-        ("cfees25", "checkpoint_full"),
+-        ("cfees25", "checkpoint_recursive"),
+-        ("cfees25", "reversible_checkpointed"),
+-        ("cfees25", "direct"),
+-        ("cfees25", "auto"),
++        ("cf_cosine_ees", "checkpoint_full"),
++        ("cf_cosine_ees", "checkpoint_recursive"),
++        ("cf_cosine_ees", "reversible_checkpointed"),
++        ("cf_cosine_ees", "direct"),
++        ("cf_cosine_ees", "auto"),
+         ("cg2", "reversible"),
+         ("geometric_euler_heun", "reversible"),
+         ("geometric_euler", "checkpoint_full"),
+@@ -67,7 +67,7 @@ def test_plot_rejects_excluded_method(tmp_path):
+     cell = dict(
+         protocol=PROTOCOL,
+         config=config,
+-        solver="cfees25",
++        solver="cf_cosine_ees",
+         adjoint="checkpoint_full",
+         n_steps=50,
+         peak_bytes=100,
+diff --git a/experiments/sphere_latent_nsde/README.md b/experiments/sphere_latent_nsde/README.md
+index 9e7cc6c..7f1be0b 100644
+--- a/experiments/sphere_latent_nsde/README.md
++++ b/experiments/sphere_latent_nsde/README.md
+@@ -4,7 +4,7 @@ JAX/Equinox reimplementation of the HumanActivity experiment from `/home/luke/EE
+ 
+ The latent state lives on `S^{z_dim-1}` and uses Georax's public batched `Sphere`. Its generator coordinates match the original PyTorch lower-triangular `so(n)` convention. All four methods now use `diffeqsolve`, the library's charts and the selected Diffrax adjoint. The former custom CF-EES adjoint, Euler stepping loop and SRKMK wrapper have been removed. The parity script checks the action using the library's high-order chart.
+ 
+-Existing results retain their original implementation and Brownian-driver provenance. New runs use Georax `bf5c3554bfa8199427d4a3200fa58b69b657aa98`, including CF-EES(2,5;1/10), and must be measured again before replacing manuscript results. The default sweep replaces Itô Geometric Euler with Stratonovich `GeometricEulerHeun()` on `Sphere`, using direct and full adjoints. Old Euler results are not Euler–Heun measurements.
++Existing results retain their original implementation and Brownian-driver provenance. New runs use Georax `20b401c9ffc83dc449c0340f4bc7b1289761c2b1` and cosine EES, and must be measured again before replacing manuscript results. The default sweep replaces Itô Geometric Euler with Stratonovich `GeometricEulerHeun()` on `Sphere`, using direct and full adjoints. Old Euler results are not Euler–Heun measurements.
+ 
+ ## Data
+ 
+@@ -37,7 +37,7 @@ Run the solver sweep from the repository root:
+ ./run sphere --index 0
+ ```
+ 
+-The first command runs all entries in [config.toml](config.toml); the second selects one. As in Kuramoto, `[base]` holds shared settings, `[sweep]` selects seeds, and `[integrators.<name>]` lists each integrator's adjoints and step settings. Adjoint names are `direct`, `full`, `recursive` and `reversible`; reversible reconstruction requires CF-EES. Change run parameters in that TOML; there are no CLI overrides for them. Use `--config PATH` to select another configuration and `--help` for options. The launcher installs the required uv dependencies. For example:
++The first command runs all entries in [config.toml](config.toml); the second selects one. As in Kuramoto, `[base]` holds shared settings, `[sweep]` selects seeds, and `[integrators.<name>]` lists each integrator's adjoints and step settings. Adjoint names are `direct`, `full`, `recursive` and `reversible`; reversible reconstruction requires cosine EES. Change run parameters in that TOML; there are no CLI overrides for them. Use `--config PATH` to select another configuration and `--help` for options. The launcher installs the required uv dependencies. For example:
+ 
+ ```toml
+ [integrators.geometric_euler_heun]
+@@ -49,19 +49,21 @@ Each listed adjoint runs with the same integrator settings. Stepping defaults to
+ 
+ The exact original output grid has 228 points. For faster JAX development runs, set `num_timepoints = 64` or `num_timepoints = 32` in a TOML config; the dataloader remaps reconstruction/classification time IDs onto that grid.
+ 
+-Set `n_steps` under each integrator. The supplied fixed-step counts match 30 forward drift evaluations: 30 Euler–Heun steps, 15 CG2 or SRKMK-GeneralShARK steps, and 10 CF-EES steps. Euler–Heun also evaluates diffusion twice per step; matching drift evaluations does not match total field evaluations or runtime. The metrics derive the drift budget from `n_steps` and separately record forward drift and diffusion evaluation counts. The latent path is interpolated back to the configured output grid for reconstruction and classification losses.
++Set `n_steps` under each integrator. The supplied fixed-step counts match 30 forward drift evaluations: 30 Euler–Heun steps, 15 CG2 or SRKMK-GeneralShARK steps, and 10 cosine EES steps. Euler–Heun also evaluates diffusion twice per step; matching drift evaluations does not match total field evaluations or runtime. The metrics derive the drift budget from `n_steps` and separately record forward drift and diffusion evaluation counts. The latent path is interpolated back to the configured output grid for reconstruction and classification losses.
+ 
+-## Adaptive CF-EES
++The cosine integrator table sets `reversible_order = 5`, giving three stages per step. Any odd order at least three is supported; its stage count is `(reversible_order + 1) // 2`. Fixed steps use `embedded=False`; adaptive steps set it to `True`. Saved configurations and metrics record both settings, and method labels include the order (for example `cf_cosine_ees_p5_reversible`). Stage budgets exclude the companion, while adaptive work statistics include its additional source-level drift and diffusion calls per attempted step. JIT may share these calls with the first stage.
+ 
+-The default sweep includes `cfees25_adaptive_reversible` as well as the fixed-step methods. To run only this entry with the supplied sweep:
++## Adaptive cosine EES
++
++The default sweep includes `cf_cosine_ees_p5_adaptive_reversible` as well as the fixed-step methods. To run only this entry with the supplied sweep:
+ 
+ ```bash
+ ./run sphere --index 6
+ ```
+ 
+-The `[integrators.cfees25]` table selects `adjoints = ["reversible"]` and `stepping = ["fixed", "adaptive"]`. Its nested `[integrators.cfees25.adaptive]` table sets `atol = 1e-2`, `dtmin = 1e-4` and `max_steps = 4096`. Adaptive runs inherit `n_steps = 10` from the parent table; adding `n_steps` to the nested table overrides it only for adaptive runs. Euler–Heun remains fixed-step. Tolerances can be varied in separate configurations for an accuracy–time comparison.
++The `[integrators.cf_cosine_ees]` table selects `adjoints = ["reversible"]` and `stepping = ["fixed", "adaptive"]`. Its nested `[integrators.cf_cosine_ees.adaptive]` table sets `atol = 1e-2`, `dtmin = 1e-4` and `max_steps = 4096`. Adaptive runs inherit `n_steps = 10` from the parent table; adding `n_steps` to the nested table overrides it only for adaptive runs. Euler–Heun remains fixed-step. Tolerances can be varied in separate configurations for an accuracy–time comparison.
+ 
+-The controller uses CF-EES's final-increment embedded estimate. Its error measure is the largest chordal endpoint difference over all examples and Monte Carlo samples; it is invariant under rotations and does not dilute one difficult trajectory into a batch average. One PI controller governs the shared batch mesh, so batch size is part of the adaptive protocol. Its initial and maximum step are `0.99 / n_steps`. The loss quadrature grid and output interpolation use the same reference step count as fixed-step CF-EES; accepted integration times are free to vary between them. For adaptive runs, `n_steps` therefore sets the reference grid and maximum step size; actual work is measured during the solve.
++The controller uses cosine EES's optional Lie–Euler embedded estimate (`embedded=True`). Its error measure is the largest chordal endpoint difference over all examples and Monte Carlo samples; it is invariant under rotations and does not dilute one difficult trajectory into a batch average. One PI controller governs the shared batch mesh, so batch size is part of the adaptive protocol. Its initial and maximum step are `0.99 / n_steps`. The loss quadrature grid and output interpolation use the same reference step count as fixed-step cosine EES; accepted integration times are free to vary between them. For adaptive runs, `n_steps` therefore sets the reference grid and maximum step size; actual work is measured during the solve.
+ 
+ The Brownian tree has tolerance `adaptive_dtmin / 10` and is retained through rejected attempts. Sphere rotation fields need not commute, so `ClipStepSizeController` stores rejected endpoints and forces later steps to visit them, following [Diffrax's adaptive SDE guidance](https://docs.kidger.site/diffrax/api/stepsize_controller/). Reversible gradients use the ordinary `ReversibleAdjoint` and reconstruct on the accepted mesh. The minimum-step policy matches Kuramoto: `force_dtmin=True` permits accepting a step at the minimum size even if the estimated error exceeds tolerance. The maximum-attempt limit still fails the solve when exceeded.
+ 
+@@ -78,3 +80,19 @@ Every configuration runs in a fresh process and records `peak_gpu_memory_bytes`
+ Each run writes a timestamped directory under `experiments/sphere_latent_nsde/results/runs/<timestamp>/activity__<method>__seed<N>__<timestamp>/` containing `config.toml`, `nsde.eqx`, `history.json`, and `metrics.json`.
+ 
+ Training selects the best checkpoint by validation accuracy, then evaluates the test split once at the end. Validation and test metrics are weighted by valid example counts, including a partial final batch; solver-work counts remain averages per batched solve. That final test accuracy is recorded as `test_acc_at_best_val_pct` in `metrics.json`.
++
++## Visualising the task
++
++Plot one sequence using a saved run's `config.toml` and `nsde.eqx`:
++
++```bash
++uv run --extra sphere python -m experiments.sphere_latent_nsde.visualize \
++  /path/to/cosine-run \
++  --output-dir experiments/sphere_latent_nsde/results/visualizations
++```
++
++The figure shows all four tags' observed x/y/z positions and reconstructed means, true and predicted activity bands, class probabilities, and sampled latent paths in a shared 3D PCA projection. Missing observations are masked. Predictions use the same output-time indices and averaging of logits as the evaluation code. Inference conditions on the complete observed sequence; this is activity classification within that sequence.
++
++The default selects the first test window containing an activity transition, independently of model predictions, and draws eight posterior samples on CPU. Use `--sample-index N`, `--split train|val|test`, `--mc-samples N`, `--seed N`, or `--device gpu` to change these choices. The saved split strategy is reused; for `auto`, match the training environment's Torch availability to reproduce its split. Adaptive inference uses a single-example batch, so its shared adaptive mesh can differ from evaluation with larger batches.
++
++Outputs are `activity_example.png`, `activity_example.pdf`, the plotted arrays in `activity_example.npz`, and selection/solver metadata in `activity_example.json`. Without `--output-dir`, these go into the run's `visualizations/` directory. The displayed accuracy describes only the selected sequence. For the default `z_dim = 16`, the latent paths lie on `S^{15}`; the 3D PCA view reports its explained variance and does not preserve spherical geometry.
+diff --git a/experiments/sphere_latent_nsde/config.py b/experiments/sphere_latent_nsde/config.py
+index aeee694..9c0bd86 100644
+--- a/experiments/sphere_latent_nsde/config.py
++++ b/experiments/sphere_latent_nsde/config.py
+@@ -8,7 +8,7 @@ from dataclasses import asdict, dataclass, fields
+ from pathlib import Path
+ from typing import Any, Literal
+ 
+-from experiments.config import expand_integrators, method_label
++from experiments.config import cosine_stage_count, expand_integrators, method_label
+ from experiments.sphere_latent_nsde.dataset import NUM_TIMEPOINTS
+ 
+ DEFAULT_CONFIG = Path(__file__).resolve().parent / "config.toml"
+@@ -27,8 +27,8 @@ METHODS = {
+         "geometric_euler_heun",
+         "recursive_checkpoint",
+     ),
+-    "cfees25_reversible": ("cfees25", "reversible"),
+-    "cfees25_adaptive_reversible": ("cfees25", "reversible"),
++    "cf_cosine_ees_p5_reversible": ("cf_cosine_ees", "reversible"),
++    "cf_cosine_ees_p5_adaptive_reversible": ("cf_cosine_ees", "reversible"),
+     "cg2_direct": ("cg2", "direct"),
+     "srkmk_general_shark_direct": ("srkmk_general_shark", "direct"),
+     "srkmk_general_shark_full": ("srkmk_general_shark", "checkpoint_full"),
+@@ -38,21 +38,25 @@ METHODS = {
+ SOLVER_NFE_PER_STEP = {
+     "geometric_euler_heun": 1,
+     "cg2": 2,
+-    "cfees25": 3,
+     "srkmk_general_shark": 2,
+ }
+ SOLVER_DIFFUSION_NFE_PER_STEP = {
+     "geometric_euler_heun": 2,
+     "cg2": 2,
+-    "cfees25": 3,
+     "srkmk_general_shark": 3,
+ }
+-COMMON_NFE_GRANULARITY = math.lcm(*SOLVER_NFE_PER_STEP.values())
++
++
++def solver_nfe_per_step(solver, reversible_order=5, *, diffusion=False):
++    if solver == "cf_cosine_ees":
++        return cosine_stage_count(reversible_order)
++    counts = SOLVER_DIFFUSION_NFE_PER_STEP if diffusion else SOLVER_NFE_PER_STEP
++    return counts[solver]
+ 
+ 
+ def validate_adaptive_settings(solver, n_steps, atol, dtmin, max_steps):
+-    if solver != "cfees25":
+-        raise ValueError("Adaptive sphere solves require the CF-EES embedded pair.")
++    if solver != "cf_cosine_ees":
++        raise ValueError("Adaptive sphere solves require the cosine EES embedded pair.")
+     if not math.isfinite(atol) or atol <= 0:
+         raise ValueError("adaptive_atol must be finite and positive.")
+     if not math.isfinite(dtmin) or not 0 < dtmin <= 0.99 / n_steps:
+@@ -82,9 +86,10 @@ class ActivityConfig:
+     solver: Literal[
+         "geometric_euler_heun",
+         "cg2",
+-        "cfees25",
++        "cf_cosine_ees",
+         "srkmk_general_shark",
+     ] = "geometric_euler_heun"
++    reversible_order: int = 5
+     adjoint: Literal[
+         "auto",
+         "direct",
+@@ -115,6 +120,11 @@ class ActivityConfig:
+     max_eval_batches: int | None = None
+ 
+     def __post_init__(self):
++        if self.solver not in (*SOLVER_NFE_PER_STEP, "cf_cosine_ees"):
++            raise ValueError(
++                f"Unsupported solver {self.solver!r}; use cf_cosine_ees for new EES runs."
++            )
++        cosine_stage_count(self.reversible_order)
+         if self.n_steps is not None:
+             if type(self.n_steps) is not int or self.n_steps <= 0:
+                 raise ValueError("n_steps must be a positive integer.")
+@@ -136,15 +146,24 @@ class ActivityConfig:
+ 
+     @property
+     def method(self) -> str:
+-        return method_label(self.solver, self.adjoint, self.adaptive)
++        return method_label(
++            self.solver,
++            self.adjoint,
++            self.adaptive,
++            reversible_order=self.reversible_order,
++        )
++
++    @property
++    def embedded(self) -> bool:
++        return self.solver == "cf_cosine_ees" and self.adaptive
+ 
+     @property
+     def nfe_per_step(self) -> int:
+-        return SOLVER_NFE_PER_STEP[self.solver]
++        return solver_nfe_per_step(self.solver, self.reversible_order)
+ 
+     @property
+     def diffusion_nfe_per_step(self) -> int:
+-        return SOLVER_DIFFUSION_NFE_PER_STEP[self.solver]
++        return solver_nfe_per_step(self.solver, self.reversible_order, diffusion=True)
+ 
+     @property
+     def effective_nfe_budget(self) -> int:
+@@ -153,7 +172,10 @@ class ActivityConfig:
+         if self.nfe_budget is not None:
+             return int(self.nfe_budget)
+         output_intervals = int(self.num_timepoints) - 1
+-        budget = output_intervals - (output_intervals % COMMON_NFE_GRANULARITY)
++        granularity = math.lcm(
++            *SOLVER_NFE_PER_STEP.values(), cosine_stage_count(self.reversible_order)
++        )
++        budget = output_intervals - (output_intervals % granularity)
+         if budget <= 0:
+             raise ValueError(
+                 "num_timepoints must provide at least one common NFE interval; "
+@@ -226,6 +248,7 @@ def to_toml(config: ActivityConfig) -> str:
+         "nfe_budget",
+         "n_steps",
+         "solver",
++        "reversible_order",
+         "adjoint",
+         "adaptive",
+         "adaptive_atol",
+@@ -251,17 +274,19 @@ def to_toml(config: ActivityConfig) -> str:
+         if value is None:
+             continue
+         lines.append(f"{name} = {_toml_value(value)}")
++    lines.append(f"embedded = {_toml_value(config.embedded)}")
+     return "\n".join(lines) + "\n"
+ 
+ 
+ def _build_config(data: dict[str, Any]) -> ActivityConfig:
+     data = dict(data)
++    embedded = data.pop("embedded", None)
+     method = data.pop("method", None)
+     if method is not None:
+         if method not in METHODS:
+             raise ValueError(f"Unknown activity method: {method!r}")
+         data["solver"], data["adjoint"] = METHODS[method]
+-        data["adaptive"] = method == "cfees25_adaptive_reversible"
++        data["adaptive"] = method == "cf_cosine_ees_p5_adaptive_reversible"
+     if "data_dir" in data:
+         data["data_dir"] = Path(data["data_dir"])
+ 
+@@ -269,7 +294,14 @@ def _build_config(data: dict[str, Any]) -> ActivityConfig:
+     unknown = sorted(set(data) - valid)
+     if unknown:
+         raise KeyError(f"Unknown activity config keys: {unknown}")
+-    return ActivityConfig(**data)
++    config = ActivityConfig(**data)
++    if embedded is not None and (
++        type(embedded) is not bool or embedded != config.embedded
++    ):
++        raise ValueError(
++            "embedded must match whether cosine EES uses adaptive stepping."
++        )
++    return config
+ 
+ 
+ def _toml_value(value: Any) -> str:
+diff --git a/experiments/sphere_latent_nsde/config.toml b/experiments/sphere_latent_nsde/config.toml
+index 5db0abe..7540ab9 100644
+--- a/experiments/sphere_latent_nsde/config.toml
++++ b/experiments/sphere_latent_nsde/config.toml
+@@ -45,13 +45,14 @@ n_steps = 15
+ adjoints = ["direct", "full"]
+ n_steps = 15
+ 
+-[integrators.cfees25]
++[integrators.cf_cosine_ees]
++reversible_order = 5
+ adjoints = ["reversible"]
+ stepping = ["fixed", "adaptive"]
+ n_steps = 10
+ 
+ # Adaptive runs inherit n_steps as the reference grid and maximum-step setting.
+-[integrators.cfees25.adaptive]
++[integrators.cf_cosine_ees.adaptive]
+ atol = 1e-2
+ dtmin = 1e-4
+ max_steps = 4096
+diff --git a/experiments/sphere_latent_nsde/factories.py b/experiments/sphere_latent_nsde/factories.py
+index 78ca340..52610c5 100644
+--- a/experiments/sphere_latent_nsde/factories.py
++++ b/experiments/sphere_latent_nsde/factories.py
+@@ -51,6 +51,7 @@ def make_model(config: ActivityConfig, key: jax.Array) -> ActivityLatentSDE:
+         num_timepoints=config.num_timepoints,
+         nfe_budget=config.effective_nfe_budget,
+         solver_name=config.solver,
++        reversible_order=config.reversible_order,
+         adjoint_name=config.adjoint,
+         adaptive=config.adaptive,
+         adaptive_atol=config.adaptive_atol,
+diff --git a/experiments/sphere_latent_nsde/models.py b/experiments/sphere_latent_nsde/models.py
+index e801de6..fb27d19 100644
+--- a/experiments/sphere_latent_nsde/models.py
++++ b/experiments/sphere_latent_nsde/models.py
+@@ -29,12 +29,11 @@ from diffrax import (
+     VirtualBrownianTree,
+     diffeqsolve,
+ )
+-from georax import CFEES25, CG2, SRKMK, GeometricEulerHeun, GeometricTerm, Sphere
++from georax import CG2, SRKMK, CFCosineEES, GeometricEulerHeun, GeometricTerm, Sphere
+ from jaxtyping import Array
+ 
+ from experiments.sphere_latent_nsde.config import (
+-    SOLVER_DIFFUSION_NFE_PER_STEP,
+-    SOLVER_NFE_PER_STEP,
++    solver_nfe_per_step,
+     validate_adaptive_settings,
+ )
+ from experiments.sphere_latent_nsde.dataset import (
+@@ -59,14 +58,19 @@ def sphere_error_norm(error: Array) -> Array:
+ 
+ 
+ def build_solver(
+-    name: Literal["geometric_euler_heun", "cg2", "cfees25", "srkmk_general_shark"],
++    name: Literal[
++        "geometric_euler_heun", "cg2", "cf_cosine_ees", "srkmk_general_shark"
++    ],
++    *,
++    reversible_order: int = 5,
++    adaptive: bool = False,
+ ) -> AbstractSolver:
+     if name == "geometric_euler_heun":
+         return GeometricEulerHeun()
+     if name == "cg2":
+         return CG2()
+-    if name == "cfees25":
+-        return CFEES25()
++    if name == "cf_cosine_ees":
++        return CFCosineEES(reversible_order=reversible_order, embedded=adaptive)
+     if name == "srkmk_general_shark":
+         return SRKMK(GeneralShARK())
+     raise ValueError(f"unknown solver {name!r}")
+@@ -505,8 +509,10 @@ class PathEncoder(eqx.Module):
+         dt = times[1] - times[0]
+         t0 = times[0]
+         t1 = times[-1]
+-        if adaptive and not isinstance(solver, CFEES25):
+-            raise ValueError("Adaptive sphere solves require the CF-EES embedded pair.")
++        if adaptive and not (isinstance(solver, CFCosineEES) and solver.embedded):
++            raise ValueError(
++                "Adaptive sphere solves require the cosine EES embedded pair (embedded=True)."
++            )
+         max_steps = adaptive_max_steps if adaptive else int(times.shape[0]) + 8
+         brownian_tol = adaptive_dtmin / 10.0 if adaptive else dt / 4.0
+         driver_dim = self.geometry.coordinate_shape[0]
+@@ -614,6 +620,7 @@ class ActivityLatentSDE(eqx.Module):
+     nfe_budget: int = eqx.field(static=True)
+     nfe_per_step: int = eqx.field(static=True)
+     diffusion_nfe_per_step: int = eqx.field(static=True)
++    embedded_nfe_per_step: int = eqx.field(static=True)
+     solve_n_steps: int = eqx.field(static=True)
+     solve_num_timepoints: int = eqx.field(static=True)
+     time_end: float = eqx.field(static=True)
+@@ -636,9 +643,10 @@ class ActivityLatentSDE(eqx.Module):
+         solver_name: Literal[
+             "geometric_euler_heun",
+             "cg2",
+-            "cfees25",
++            "cf_cosine_ees",
+             "srkmk_general_shark",
+         ] = "geometric_euler_heun",
++        reversible_order: int = 5,
+         adjoint_name: Literal[
+             "auto",
+             "direct",
+@@ -657,10 +665,12 @@ class ActivityLatentSDE(eqx.Module):
+         key: Array,
+     ) -> None:
+         k1, k2, k3, k4 = jax.random.split(key, 4)
+-        solver = build_solver(solver_name)
++        solver = build_solver(
++            solver_name, reversible_order=reversible_order, adaptive=adaptive
++        )
+         if nfe_budget is None:
+             nfe_budget = int(num_timepoints) - 1
+-        nfe_per_step = SOLVER_NFE_PER_STEP[solver_name]
++        nfe_per_step = solver_nfe_per_step(solver_name, reversible_order)
+         if nfe_budget <= 0:
+             raise ValueError("nfe_budget must be positive.")
+         if nfe_budget % nfe_per_step != 0:
+@@ -701,7 +711,12 @@ class ActivityLatentSDE(eqx.Module):
+         self.num_timepoints = int(num_timepoints)
+         self.nfe_budget = int(nfe_budget)
+         self.nfe_per_step = int(nfe_per_step)
+-        self.diffusion_nfe_per_step = SOLVER_DIFFUSION_NFE_PER_STEP[solver_name]
++        self.diffusion_nfe_per_step = solver_nfe_per_step(
++            solver_name, reversible_order, diffusion=True
++        )
++        self.embedded_nfe_per_step = int(
++            isinstance(solver, CFCosineEES) and solver.embedded
++        )
+         self.solve_n_steps = solve_n_steps
+         self.solve_num_timepoints = self.solve_n_steps + 1
+         self.time_end = 0.99
+@@ -768,8 +783,11 @@ class ActivityLatentSDE(eqx.Module):
+                         "num_rejected_steps",
+                     )
+                 },
+-                "forward_drift_evaluations": sol.stats["num_steps"] * self.nfe_per_step,
++                "forward_drift_evaluations": sol.stats["num_steps"]
++                * (self.nfe_per_step + self.embedded_nfe_per_step),
+                 "forward_diffusion_evaluations": sol.stats["num_steps"]
+-                * self.diffusion_nfe_per_step,
++                * (self.diffusion_nfe_per_step + self.embedded_nfe_per_step),
++                "embedded_generator_evaluations": sol.stats["num_steps"]
++                * self.embedded_nfe_per_step,
+             },
+         )
+diff --git a/experiments/sphere_latent_nsde/test_adaptive.py b/experiments/sphere_latent_nsde/test_adaptive.py
+index dce4654..a13f2ae 100644
+--- a/experiments/sphere_latent_nsde/test_adaptive.py
++++ b/experiments/sphere_latent_nsde/test_adaptive.py
+@@ -7,8 +7,14 @@ import jax
+ import jax.numpy as jnp
+ import numpy as np
+ import pytest
+-from diffrax import RecursiveCheckpointAdjoint, ReversibleAdjoint, SaveAt, StepTo
+-from georax import CFEES25
++from diffrax import (
++    RecursiveCheckpointAdjoint,
++    ReversibleAdjoint,
++    SaveAt,
++    StepTo,
++    SubSaveAt,
++)
++from georax import CFCosineEES
+ 
+ from experiments.sphere_latent_nsde.config import (
+     ActivityConfig,
+@@ -34,7 +40,12 @@ from experiments.sphere_latent_nsde.models import PathEncoder, sphere_error_norm
+     ],
+ )
+ def test_invalid_adaptive_settings(override, match):
+-    settings = {"solver": "cfees25", "adaptive": True, "nfe_budget": 12, **override}
++    settings = {
++        "solver": "cf_cosine_ees",
++        "adaptive": True,
++        "nfe_budget": 12,
++        **override,
++    }
+     with pytest.raises(ValueError, match=match):
+         ActivityConfig(**settings)
+ 
+@@ -45,8 +56,10 @@ def test_sweep_and_serialisation_keep_adaptive_distinct(tmp_path):
+     adaptive = [c for c in configs if c.adaptive]
+     assert len(adaptive) == 1
+     config = adaptive[0]
+-    assert config.method == "cfees25_adaptive_reversible"
+-    assert any(c.method == "cfees25_reversible" and not c.adaptive for c in configs)
++    assert config.method == "cf_cosine_ees_p5_adaptive_reversible"
++    assert any(
++        c.method == "cf_cosine_ees_p5_reversible" and not c.adaptive for c in configs
++    )
+     output = tmp_path / "config.toml"
+     output.write_text(to_toml(config))
+     assert load_config(output) == config
+@@ -76,7 +89,7 @@ def test_adaptive_rejections_replay_and_reversible_gradients():
+             z0,
+             key,
+             times=times,
+-            solver=CFEES25(),
++            solver=CFCosineEES(reversible_order=5, embedded=True),
+             adjoint=adjoint,
+             adaptive=True,
+             adaptive_atol=1e-5,
+@@ -87,21 +100,32 @@ def test_adaptive_rejections_replay_and_reversible_gradients():
+ 
+     reference_adjoint = RecursiveCheckpointAdjoint()
+     mesh = eqx.filter_jit(
+-        lambda m: solve(m, reference_adjoint, saveat=SaveAt(t0=True, steps=True))
++        lambda m: solve(
++            m,
++            reference_adjoint,
++            saveat=SaveAt(
++                subs={
++                    "mesh": SubSaveAt(t0=True, steps=True),
++                    "grid": SubSaveAt(ts=times),
++                }
++            ),
++        )
+     )(model)
+     assert int(mesh.stats["num_rejected_steps"]) > 0
+-    accepted = mesh.ts[np.isfinite(np.asarray(mesh.ts))]
++    accepted = mesh.ts["mesh"][np.isfinite(np.asarray(mesh.ts["mesh"]))]
+     assert np.ptp(np.diff(accepted)) > 1e-4
+     np.testing.assert_allclose(accepted[-1], times[-1])
+     assert np.min(np.abs(np.asarray(accepted) - float(times[1]))) < 1e-7
+ 
+-    reference = eqx.filter_jit(lambda m: solve(m, reference_adjoint))(model)
++    # Compare against values saved by the same adaptive solve as this mesh.
++    # A separately compiled SaveAt can change float32 roundoff and its mesh.
++    reference = mesh.ys["grid"]
+     replay = eqx.filter_jit(
+         lambda m: solve(m, reference_adjoint, stepsize_controller=StepTo(ts=accepted))
+     )(model)
+-    np.testing.assert_allclose(replay.ys, reference.ys, atol=2e-6, rtol=0)
++    np.testing.assert_allclose(replay.ys, reference, atol=2e-6, rtol=0)
+     # Hundreds of float32 chart actions accumulate small radial roundoff.
+-    np.testing.assert_allclose(jnp.linalg.norm(reference.ys, axis=-1), 1.0, atol=2e-5)
++    np.testing.assert_allclose(jnp.linalg.norm(reference, axis=-1), 1.0, atol=2e-5)
+ 
+     @eqx.filter_jit
+     def value_grad(m, adjoint):
+diff --git a/experiments/sphere_latent_nsde/test_georax_migration.py b/experiments/sphere_latent_nsde/test_georax_migration.py
+index 1e99807..21644c0 100644
+--- a/experiments/sphere_latent_nsde/test_georax_migration.py
++++ b/experiments/sphere_latent_nsde/test_georax_migration.py
+@@ -21,7 +21,7 @@ from experiments.sphere_latent_nsde.models import (
+         ("geometric_euler_heun", "checkpoint_full"),
+         ("geometric_euler_heun", "recursive_checkpoint"),
+         ("cg2", "checkpoint_full"),
+-        ("cfees25", "reversible"),
++        ("cf_cosine_ees", "reversible"),
+         ("srkmk_general_shark", "checkpoint_full"),
+     ],
+ )
+diff --git a/experiments/sphere_latent_nsde/train_activity.py b/experiments/sphere_latent_nsde/train_activity.py
+index 0049a26..9a37f81 100644
+--- a/experiments/sphere_latent_nsde/train_activity.py
++++ b/experiments/sphere_latent_nsde/train_activity.py
+@@ -324,6 +324,13 @@ def _metrics_payload(
+         },
+         "solver_work_unit": "mean per batched solve; includes rejected attempts",
+         "solver": config.solver,
++        "reversible_order": config.reversible_order
++        if config.solver == "cf_cosine_ees"
++        else None,
++        "embedded": config.embedded,
++        "embedded_nfe_per_step": int(config.embedded),
++        "nfe_counting_convention": "source-level field calls, including the embedded companion; JIT may share the initial-stage evaluation",
++        "georax_revision": "20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
+         "adjoint": config.adjoint,
+     }
+ 
+diff --git a/pyproject.toml b/pyproject.toml
+index bb39fe3..b246a60 100644
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -32,7 +32,7 @@ jax-base = [
+     "jaxtyping>=0.2.36",
+     # diffrax fork by sammccallum (the version pinned by every modern experiment in this paper)
+     "diffrax @ git+https://github.com/sammccallum/diffrax.git@aeb1335b5a6278e85a270231e0f97b8db4453ae6",
+-    "georax @ git+https://github.com/luke-a-thompson/georax.git@bf5c3554bfa8199427d4a3200fa58b69b657aa98",
++    "georax @ git+https://github.com/luke-a-thompson/georax.git@20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
+     "cyreal @ git+https://github.com/luke-a-thompson/cyreal_dynamics.git@88f02657989fc4f9c85df0afb1452085fc3f2f8b",
+     "seali>=0.2.0",
+ ]
+@@ -40,7 +40,7 @@ jax-base = [
+ # Stochastic-volatility experiment using Georax's compatible low-storage dependency.
+ stochastic-volatility = [
+     "ees-neural-sdes[jax-base]",
+-    "diffrax-lowstorage @ git+https://github.com/luke-a-thompson/diffrax-lowstorage.git@3f72fe75660ed325bfc35086239950c73c3e98c8",
++    "diffrax-lowstorage @ git+https://github.com/luke-a-thompson/diffrax-lowstorage.git@a5659e83322f9c76bd72fb84387c2a30162d798d",
+ ]
+ 
+ # Numerical fBm convergence (Euclidean is core-only; SO(3) RDE scripts need JAX + georax)
+diff --git a/run b/run
+index ff33a22..477f42f 100755
+--- a/run
++++ b/run
+@@ -13,6 +13,7 @@ import sys
+ ROOT = Path(__file__).resolve().parent
+ # module, uv extra, experiment directory, default configuration, output option
+ EXPERIMENTS = {
++    'rigid-body-pendulum': ('experiments.rigid_body_pendulum.scripts.run_comparison', 'jax-base', 'experiments/rigid_body_pendulum', 'config.toml', '--output-base'),
+     'kuramoto': ('experiments.kuramoto.scripts.run_comparison', 'jax-base', 'experiments/kuramoto', 'config.toml', '--output-base'),
+     'sphere': ('experiments.sphere_latent_nsde.train_activity', 'sphere', 'experiments/sphere_latent_nsde', 'config.toml', '--output-base'),
+     'rough-vol': ('neurips.stochastic_volatility.experiment.train', 'stochastic-volatility', 'neurips/stochastic_volatility', 'configs/stoch_vol/sweep.toml', '--output-base'),
+diff --git a/tests/test_benchmark_config.py b/tests/test_benchmark_config.py
+index b061b5d..0d7410c 100644
+--- a/tests/test_benchmark_config.py
++++ b/tests/test_benchmark_config.py
+@@ -29,7 +29,7 @@ def test_default_configs_keep_method_settings_explicit():
+             if run.adaptive
+             else {
+                 "cg2": 75,
+-                "cfees25": 50,
++                "cf_cosine_ees": 50,
+                 "geometric_euler_heun": 150,
+                 "srkmk_general_shark": 75,
+             }[run.solver]
+@@ -53,11 +53,11 @@ batch_size = 3
+ N = 4
+ [sweep]
+ seed = [7, 11]
+-[integrators.cfees25]
++[integrators.cf_cosine_ees]
+ adjoints = ["reversible"]
+ stepping = ["adaptive"]
+ n_steps = 9
+-[integrators.cfees25.adaptive]
++[integrators.cf_cosine_ees.adaptive]
+ atol = 0.02
+ dtmin = 0.0002
+ """)
+@@ -109,11 +109,11 @@ seed = [7]
+ [integrators.geometric_euler_heun]
+ adjoints = ["direct"]
+ n_steps = 12
+-[integrators.cfees25]
++[integrators.cf_cosine_ees]
+ adjoints = ["reversible"]
+ stepping = ["fixed", "adaptive"]
+ n_steps = 6
+-[integrators.cfees25.adaptive]
++[integrators.cf_cosine_ees.adaptive]
+ n_steps = 4
+ atol = 0.0003
+ dtmin = 0.0002
+diff --git a/tests/test_launcher.py b/tests/test_launcher.py
+index 0a3cd15..f683e1c 100644
+--- a/tests/test_launcher.py
++++ b/tests/test_launcher.py
+@@ -128,11 +128,11 @@ seed = [7]
+ [integrators.cg2]
+ adjoints = ["full"]
+ n_steps = 12
+-[integrators.cfees25]
++[integrators.cf_cosine_ees]
+ adjoints = ["reversible"]
+ stepping = ["adaptive"]
+ n_steps = 25
+-[integrators.cfees25.adaptive]
++[integrators.cf_cosine_ees.adaptive]
+ dtmin = 2e-4
+ """)
+         with patch.object(Path, "is_dir", return_value=True):
+diff --git a/uv.lock b/uv.lock
+index a5d0a8c..04fae63 100644
+--- a/uv.lock
++++ b/uv.lock
+@@ -217,9 +217,10 @@ dependencies = [
+ [[package]]
+ name = "diffrax-lowstorage"
+ version = "0.1.0"
+-source = { git = "https://github.com/luke-a-thompson/diffrax-lowstorage.git?rev=3f72fe75660ed325bfc35086239950c73c3e98c8#3f72fe75660ed325bfc35086239950c73c3e98c8" }
++source = { git = "https://github.com/luke-a-thompson/diffrax-lowstorage.git?rev=a5659e83322f9c76bd72fb84387c2a30162d798d#a5659e83322f9c76bd72fb84387c2a30162d798d" }
+ dependencies = [
+     { name = "diffrax" },
++    { name = "equinox" },
+     { name = "jax" },
+     { name = "typing-extensions" },
+ ]
+@@ -360,7 +361,7 @@ torus-memory = [
+ requires-dist = [
+     { name = "cyreal", marker = "extra == 'jax-base'", git = "https://github.com/luke-a-thompson/cyreal_dynamics.git?rev=88f02657989fc4f9c85df0afb1452085fc3f2f8b" },
+     { name = "diffrax", marker = "extra == 'jax-base'", git = "https://github.com/sammccallum/diffrax.git?rev=aeb1335b5a6278e85a270231e0f97b8db4453ae6" },
+-    { name = "diffrax-lowstorage", marker = "extra == 'stochastic-volatility'", git = "https://github.com/luke-a-thompson/diffrax-lowstorage.git?rev=3f72fe75660ed325bfc35086239950c73c3e98c8" },
++    { name = "diffrax-lowstorage", marker = "extra == 'stochastic-volatility'", git = "https://github.com/luke-a-thompson/diffrax-lowstorage.git?rev=a5659e83322f9c76bd72fb84387c2a30162d798d" },
+     { name = "ees-neural-sdes", extras = ["algebra"], marker = "extra == 'order-verification'" },
+     { name = "ees-neural-sdes", extras = ["algebra"], marker = "extra == 'stability-ode'" },
+     { name = "ees-neural-sdes", extras = ["convergence-fbm", "order-verification", "stability-ode", "torus-memory", "sphere", "stochastic-volatility", "stiff-gbm", "ou"], marker = "extra == 'all'" },
+@@ -372,7 +373,7 @@ requires-dist = [
+     { name = "ees-neural-sdes", extras = ["torchsde"], marker = "extra == 'stiff-gbm'" },
+     { name = "equinox", marker = "extra == 'jax-base'", specifier = ">=0.13.6" },
+     { name = "fbm", specifier = ">=0.3.0" },
+-    { name = "georax", marker = "extra == 'jax-base'", git = "https://github.com/luke-a-thompson/georax.git?rev=bf5c3554bfa8199427d4a3200fa58b69b657aa98" },
++    { name = "georax", marker = "extra == 'jax-base'", git = "https://github.com/luke-a-thompson/georax.git?rev=20b401c9ffc83dc449c0340f4bc7b1289761c2b1" },
+     { name = "jax", marker = "sys_platform != 'linux' and extra == 'jax-base'", specifier = ">=0.10.0" },
+     { name = "jax", extras = ["cuda12"], marker = "sys_platform == 'linux' and extra == 'jax-base'", specifier = ">=0.10.0" },
+     { name = "jaxtyping", marker = "extra == 'jax-base'", specifier = ">=0.2.36" },
+@@ -498,7 +499,7 @@ wheels = [
+ [[package]]
+ name = "georax"
+ version = "0.1.0"
+-source = { git = "https://github.com/luke-a-thompson/georax.git?rev=bf5c3554bfa8199427d4a3200fa58b69b657aa98#bf5c3554bfa8199427d4a3200fa58b69b657aa98" }
++source = { git = "https://github.com/luke-a-thompson/georax.git?rev=20b401c9ffc83dc449c0340f4bc7b1289761c2b1#20b401c9ffc83dc449c0340f4bc7b1289761c2b1" }
+ dependencies = [
+     { name = "diffrax" },
+     { name = "diffrax-lowstorage" },

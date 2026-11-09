@@ -45,13 +45,14 @@ n_steps = 15
 adjoints = ["direct", "full"]
 n_steps = 15
 
-[integrators.cfees25]
+[integrators.cf_cosine_ees]
+reversible_order = 5
 adjoints = ["reversible"]
 stepping = ["fixed", "adaptive"]
 n_steps = 10
 
 # Adaptive runs inherit n_steps as the reference grid and maximum-step setting.
-[integrators.cfees25.adaptive]
+[integrators.cf_cosine_ees.adaptive]
 atol = 1e-2
 dtmin = 1e-4
 max_steps = 4096

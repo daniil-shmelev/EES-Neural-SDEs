@@ -21,7 +21,7 @@ from experiments.sphere_latent_nsde.models import (
         ("geometric_euler_heun", "checkpoint_full"),
         ("geometric_euler_heun", "recursive_checkpoint"),
         ("cg2", "checkpoint_full"),
-        ("cfees25", "reversible"),
+        ("cf_cosine_ees", "reversible"),
         ("srkmk_general_shark", "checkpoint_full"),
     ],
 )

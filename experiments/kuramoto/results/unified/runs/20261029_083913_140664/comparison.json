@@ -1,0 +1,23 @@
+{
+  "config": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/config.toml",
+  "cells": [
+    {
+      "label": "srkmk_general_shark_recursive",
+      "seed": 2,
+      "solver": "srkmk_general_shark",
+      "adjoint": "checkpoint_recursive",
+      "n_steps": 75,
+      "exit_code": 0,
+      "wall_clock_s": 3108.0464987880005,
+      "out_dir": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/20261029_083913_140664/021_srkmk_general_shark_recursive_seed2",
+      "best_val_loss": 342.39533040364586,
+      "final_train_loss": 341.4335678264659,
+      "final_val_loss": 342.4824532063802,
+      "final_test_loss": 342.40465250651044,
+      "final_test_theta_mae_mean": 0.3309464752674103,
+      "final_test_omega_mae_mean": 0.17951610684394836,
+      "train_walltime_s": 3096.6173412999997,
+      "peak_gpu_memory_bytes": 6326637568
+    }
+  ]
+}

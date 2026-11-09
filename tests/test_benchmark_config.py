@@ -29,7 +29,7 @@ def test_default_configs_keep_method_settings_explicit():
             if run.adaptive
             else {
                 "cg2": 75,
-                "cfees25": 50,
+                "cf_cosine_ees": 50,
                 "geometric_euler_heun": 150,
                 "srkmk_general_shark": 75,
             }[run.solver]
@@ -53,11 +53,11 @@ batch_size = 3
 N = 4
 [sweep]
 seed = [7, 11]
-[integrators.cfees25]
+[integrators.cf_cosine_ees]
 adjoints = ["reversible"]
 stepping = ["adaptive"]
 n_steps = 9
-[integrators.cfees25.adaptive]
+[integrators.cf_cosine_ees.adaptive]
 atol = 0.02
 dtmin = 0.0002
 """)
@@ -109,11 +109,11 @@ seed = [7]
 [integrators.geometric_euler_heun]
 adjoints = ["direct"]
 n_steps = 12
-[integrators.cfees25]
+[integrators.cf_cosine_ees]
 adjoints = ["reversible"]
 stepping = ["fixed", "adaptive"]
 n_steps = 6
-[integrators.cfees25.adaptive]
+[integrators.cf_cosine_ees.adaptive]
 n_steps = 4
 atol = 0.0003
 dtmin = 0.0002

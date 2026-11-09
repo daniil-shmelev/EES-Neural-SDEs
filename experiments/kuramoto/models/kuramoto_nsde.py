@@ -29,7 +29,7 @@ from diffrax import (
     VirtualBrownianTree,
     diffeqsolve,
 )
-from georax import CFEES25, SRKMK, GeometricTerm, TangentTorus
+from georax import SRKMK, CFCosineEES, GeometricTerm, TangentTorus
 
 from ees_core.torus import wrap_to_pi
 
@@ -294,7 +294,7 @@ class KuramotoNSDE(eqx.Module):
         geometry = TangentTorus(N)
         act_fn = resolve_activation(activation)
         if solver is None:
-            solver = CFEES25()
+            solver = CFCosineEES(reversible_order=5, embedded=adaptive)
 
         self.name = "kuramoto_nsde"
         self.N = N
@@ -304,8 +304,10 @@ class KuramotoNSDE(eqx.Module):
         self.solver = solver
         self.adjoint = adjoint
         if adaptive:
-            if not isinstance(solver, CFEES25):
-                raise ValueError("Adaptive stepping requires a CF-EES embedded pair.")
+            if not (isinstance(solver, CFCosineEES) and solver.embedded):
+                raise ValueError(
+                    "Adaptive stepping requires a cosine EES embedded pair (embedded=True)."
+                )
             if adaptive_atol <= 0 or not 0 < adaptive_dtmin <= dt:
                 raise ValueError("Require atol > 0 and 0 < adaptive_dtmin <= dt.")
             if adaptive_max_steps < n_steps:

@@ -27,11 +27,15 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("json_in")
     ap.add_argument("--output", default="so3_reversibility_convergence.pdf")
-    ap.add_argument("--title", default="CF-EES(2,5;1/10) reversibility on SO(3)")
+    ap.add_argument("--title")
     args = ap.parse_args()
 
     with open(args.json_in) as f:
         records = json.load(f)
+    solvers = {record.get("solver", "cfees25") for record in records}
+    if len(solvers) != 1:
+        ap.error("Do not mix cosine EES and historical CF-EES measurements.")
+    title = "Cosine EES (p=5)" if solvers == {"cf_cosine_ees"} else "CF-EES(2,5;1/10)"
 
     fig, ax = plt.subplots(figsize=(6.5, 5.2))
 
@@ -70,27 +74,28 @@ def main():
             linewidth=1.0,
         )
 
-        # MKW order-3 line: slope 4H - 1 (drawn with a longer dash)
-        c_mkw = err_anchor / h_anchor ** (4 * H - 1)
-        ax.loglog(
-            h_ref,
-            c_mkw * h_ref ** (4 * H - 1),
-            color=color,
-            linestyle=":",
-            alpha=0.55,
-            linewidth=1.0,
-        )
+        # Preserve the additional historical comparison only for old records.
+        if solvers != {"cf_cosine_ees"}:
+            c_mkw = err_anchor / h_anchor ** (4 * H - 1)
+            ax.loglog(
+                h_ref,
+                c_mkw * h_ref ** (4 * H - 1),
+                color=color,
+                linestyle=":",
+                alpha=0.55,
+                linewidth=1.0,
+            )
 
     ax.set_xlabel("step size  $h$")
     ax.set_ylabel(r"$\|\Phi_{-h}\!\circ\!\Phi_{+h}(Y_0) - Y_0\|_F$ (mean over trials)")
-    ax.set_title(args.title)
+    ax.set_title(args.title or f"{title} reversibility on SO(3)")
     ax.grid(True, which="both", alpha=0.3)
 
     # Build a single custom legend: the empirical curves + two reference
     # entries (dashed = BCK 6H-1, dotted = MKW 4H-1).
     from matplotlib.lines import Line2D
 
-    empirical_handles, empirical_labels = ax.get_legend_handles_labels()
+    empirical_handles, _ = ax.get_legend_handles_labels()
     ref_handles = [
         Line2D(
             [0],
@@ -98,7 +103,7 @@ def main():
             color="black",
             linestyle="--",
             alpha=0.65,
-            label="reference slope $6H-1$ (BCK order 5)",
+            label="reference slope $6H-1$",
         ),
         Line2D(
             [0],
@@ -109,6 +114,8 @@ def main():
             label="reference slope $4H-1$ (MKW order 3)",
         ),
     ]
+    if solvers == {"cf_cosine_ees"}:
+        ref_handles = ref_handles[:1]
     ax.legend(
         handles=empirical_handles + ref_handles,
         loc="lower right",

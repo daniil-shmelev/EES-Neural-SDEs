@@ -1,0 +1,3960 @@
+dataset: N=1000 train=1500 T=5.00s n_obs=100
+model: kuramoto_nsde hidden=128 n_steps=75 solver=cg2 adjoint=checkpoint_recursive dt=0.0667 adaptive=False atol=0.001 drift=second_order_mean_field
+output_dir: /home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/20261029_044942_995728/011_cg2_recursive_seed1
+device: cuda:0; batches per epoch: train=93 val=19 test=19. The first training and evaluation batches include JAX compilation.
+epoch=1/15 train batch=1/93 starting
+/home/luke/EES-Neural-SDEs/.venv/lib/python3.13/site-packages/equinox/_jit.py:55: UserWarning: `CG2` is not marked as converging to either the Itô or the Stratonovich solution.
+  out = fun(*args, **kwargs)
+E1029 04:50:08.694649   80664 cuda_executor.cc:1365] [0] Failed to allocate device memory of 4.00GiB (4294967296 bytes): RESOURCE_EXHAUSTED: : CUDA_ERROR_OUT_OF_MEMORY: out of memory
+=== Source Location Trace: === 
+external/xla+/xla/stream_executor/cuda/cuda_status.cc:45
+external/xla+/xla/stream_executor/cuda/cuda_device_allocator.cc:230
+external/xla+/xla/stream_executor/cuda/cuda_device_allocator.cc:487
+
+batch_loss=1153.7041 |g|=2.154 time=10.91s
+epoch=1/15 train batch=2/93 starting
+batch_loss=1164.0698 |g|=4.206 time=0.58s
+epoch=1/15 train batch=3/93 starting
+batch_loss=1156.1246 |g|=3.934 time=0.58s
+epoch=1/15 train batch=4/93 starting
+batch_loss=1160.8406 |g|=5.876 time=0.59s
+epoch=1/15 train batch=5/93 starting
+batch_loss=1151.3208 |g|=5.459 time=0.58s
+epoch=1/15 train batch=6/93 starting
+batch_loss=1153.4377 |g|=2.674 time=0.59s
+epoch=1/15 train batch=7/93 starting
+batch_loss=1155.0331 |g|=3.051 time=0.59s
+epoch=1/15 train batch=8/93 starting
+batch_loss=1146.0785 |g|=5.063 time=0.58s
+epoch=1/15 train batch=9/93 starting
+batch_loss=1150.8396 |g|=2.765 time=0.59s
+epoch=1/15 train batch=10/93 starting
+batch_loss=1154.1909 |g|=4.515 time=0.58s
+epoch=1/15 train batch=11/93 starting
+batch_loss=1148.7079 |g|=5.252 time=0.59s
+epoch=1/15 train batch=12/93 starting
+batch_loss=1154.2780 |g|=2.653 time=0.59s
+epoch=1/15 train batch=13/93 starting
+batch_loss=1149.4956 |g|=3.721 time=0.58s
+epoch=1/15 train batch=14/93 starting
+batch_loss=1157.3666 |g|=2.655 time=0.58s
+epoch=1/15 train batch=15/93 starting
+batch_loss=1158.3309 |g|=5.941 time=0.58s
+epoch=1/15 train batch=16/93 starting
+batch_loss=1147.3062 |g|=6.510 time=0.59s
+epoch=1/15 train batch=17/93 starting
+batch_loss=1149.4384 |g|=8.384 time=0.58s
+epoch=1/15 train batch=18/93 starting
+batch_loss=1160.0499 |g|=3.139 time=0.59s
+epoch=1/15 train batch=19/93 starting
+batch_loss=1153.2052 |g|=6.212 time=0.58s
+epoch=1/15 train batch=20/93 starting
+batch_loss=1154.0753 |g|=5.480 time=0.58s
+epoch=1/15 train batch=21/93 starting
+batch_loss=1151.9769 |g|=6.812 time=0.59s
+epoch=1/15 train batch=22/93 starting
+batch_loss=1147.7794 |g|=5.453 time=0.59s
+epoch=1/15 train batch=23/93 starting
+batch_loss=1162.3574 |g|=7.114 time=0.58s
+epoch=1/15 train batch=24/93 starting
+batch_loss=1140.7002 |g|=11.441 time=0.59s
+epoch=1/15 train batch=25/93 starting
+batch_loss=1152.3673 |g|=4.334 time=0.58s
+epoch=1/15 train batch=26/93 starting
+batch_loss=1161.3881 |g|=5.197 time=0.58s
+epoch=1/15 train batch=27/93 starting
+batch_loss=1157.6343 |g|=6.193 time=0.58s
+epoch=1/15 train batch=28/93 starting
+batch_loss=1146.3134 |g|=5.201 time=0.58s
+epoch=1/15 train batch=29/93 starting
+batch_loss=1143.7168 |g|=5.017 time=0.58s
+epoch=1/15 train batch=30/93 starting
+batch_loss=1155.1282 |g|=5.994 time=0.58s
+epoch=1/15 train batch=31/93 starting
+batch_loss=1149.6235 |g|=7.477 time=0.58s
+epoch=1/15 train batch=32/93 starting
+batch_loss=1150.9287 |g|=6.218 time=0.58s
+epoch=1/15 train batch=33/93 starting
+batch_loss=1148.2494 |g|=7.090 time=0.58s
+epoch=1/15 train batch=34/93 starting
+batch_loss=1152.5729 |g|=7.707 time=0.58s
+epoch=1/15 train batch=35/93 starting
+batch_loss=1157.2383 |g|=7.890 time=0.58s
+epoch=1/15 train batch=36/93 starting
+batch_loss=1156.0133 |g|=8.210 time=0.59s
+epoch=1/15 train batch=37/93 starting
+batch_loss=1158.8656 |g|=10.105 time=0.59s
+epoch=1/15 train batch=38/93 starting
+batch_loss=1148.4966 |g|=11.151 time=0.59s
+epoch=1/15 train batch=39/93 starting
+batch_loss=1158.5851 |g|=11.355 time=0.59s
+epoch=1/15 train batch=40/93 starting
+batch_loss=1150.5786 |g|=13.113 time=0.58s
+epoch=1/15 train batch=41/93 starting
+batch_loss=1148.2461 |g|=13.823 time=0.58s
+epoch=1/15 train batch=42/93 starting
+batch_loss=1149.2135 |g|=14.719 time=0.59s
+epoch=1/15 train batch=43/93 starting
+batch_loss=1155.6475 |g|=15.973 time=0.58s
+epoch=1/15 train batch=44/93 starting
+batch_loss=1153.9343 |g|=18.964 time=0.58s
+epoch=1/15 train batch=45/93 starting
+batch_loss=1151.8820 |g|=19.928 time=0.58s
+epoch=1/15 train batch=46/93 starting
+batch_loss=1152.1844 |g|=24.302 time=0.58s
+epoch=1/15 train batch=47/93 starting
+batch_loss=1152.3894 |g|=22.954 time=0.58s
+epoch=1/15 train batch=48/93 starting
+batch_loss=1151.7972 |g|=25.721 time=0.58s
+epoch=1/15 train batch=49/93 starting
+batch_loss=1154.4055 |g|=29.482 time=0.58s
+epoch=1/15 train batch=50/93 starting
+batch_loss=1144.4053 |g|=30.464 time=0.58s
+epoch=1/15 train batch=51/93 starting
+batch_loss=1142.6965 |g|=33.995 time=0.58s
+epoch=1/15 train batch=52/93 starting
+batch_loss=1151.0289 |g|=38.256 time=0.58s
+epoch=1/15 train batch=53/93 starting
+batch_loss=1156.7133 |g|=43.587 time=0.58s
+epoch=1/15 train batch=54/93 starting
+batch_loss=1142.4861 |g|=45.518 time=0.58s
+epoch=1/15 train batch=55/93 starting
+batch_loss=1152.5066 |g|=51.945 time=0.58s
+epoch=1/15 train batch=56/93 starting
+batch_loss=1146.7621 |g|=55.529 time=0.59s
+epoch=1/15 train batch=57/93 starting
+batch_loss=1145.3263 |g|=62.561 time=0.58s
+epoch=1/15 train batch=58/93 starting
+batch_loss=1145.4121 |g|=69.477 time=0.59s
+epoch=1/15 train batch=59/93 starting
+batch_loss=1145.2490 |g|=77.012 time=0.59s
+epoch=1/15 train batch=60/93 starting
+batch_loss=1145.9073 |g|=84.697 time=0.66s
+epoch=1/15 train batch=61/93 starting
+batch_loss=1144.8683 |g|=93.389 time=0.60s
+epoch=1/15 train batch=62/93 starting
+batch_loss=1150.7228 |g|=104.052 time=0.59s
+epoch=1/15 train batch=63/93 starting
+batch_loss=1143.5305 |g|=112.836 time=0.58s
+epoch=1/15 train batch=64/93 starting
+batch_loss=1138.7316 |g|=127.090 time=0.58s
+epoch=1/15 train batch=65/93 starting
+batch_loss=1139.7103 |g|=139.473 time=0.58s
+epoch=1/15 train batch=66/93 starting
+batch_loss=1126.6860 |g|=153.521 time=0.59s
+epoch=1/15 train batch=67/93 starting
+batch_loss=1131.5668 |g|=168.865 time=0.59s
+epoch=1/15 train batch=68/93 starting
+batch_loss=1132.1322 |g|=185.323 time=0.58s
+epoch=1/15 train batch=69/93 starting
+batch_loss=1128.8560 |g|=204.925 time=0.59s
+epoch=1/15 train batch=70/93 starting
+batch_loss=1124.5371 |g|=224.057 time=0.58s
+epoch=1/15 train batch=71/93 starting
+batch_loss=1112.8843 |g|=245.196 time=0.59s
+epoch=1/15 train batch=72/93 starting
+batch_loss=1113.4594 |g|=269.537 time=0.60s
+epoch=1/15 train batch=73/93 starting
+batch_loss=1108.3531 |g|=294.822 time=0.59s
+epoch=1/15 train batch=74/93 starting
+batch_loss=1101.6733 |g|=323.563 time=0.59s
+epoch=1/15 train batch=75/93 starting
+batch_loss=1096.6241 |g|=354.632 time=0.58s
+epoch=1/15 train batch=76/93 starting
+batch_loss=1084.4302 |g|=382.904 time=0.59s
+epoch=1/15 train batch=77/93 starting
+batch_loss=1077.4507 |g|=420.266 time=0.59s
+epoch=1/15 train batch=78/93 starting
+batch_loss=1068.4275 |g|=444.823 time=0.58s
+epoch=1/15 train batch=79/93 starting
+batch_loss=1062.0740 |g|=497.600 time=0.58s
+epoch=1/15 train batch=80/93 starting
+batch_loss=1051.2458 |g|=541.407 time=0.58s
+epoch=1/15 train batch=81/93 starting
+batch_loss=1030.0790 |g|=573.926 time=0.58s
+epoch=1/15 train batch=82/93 starting
+batch_loss=1016.8442 |g|=620.365 time=0.59s
+epoch=1/15 train batch=83/93 starting
+batch_loss=1005.7491 |g|=673.843 time=0.59s
+epoch=1/15 train batch=84/93 starting
+batch_loss=998.5502 |g|=727.135 time=0.59s
+epoch=1/15 train batch=85/93 starting
+batch_loss=968.2260 |g|=749.952 time=0.59s
+epoch=1/15 train batch=86/93 starting
+batch_loss=954.4544 |g|=809.464 time=0.58s
+epoch=1/15 train batch=87/93 starting
+batch_loss=932.3039 |g|=850.476 time=0.59s
+epoch=1/15 train batch=88/93 starting
+batch_loss=907.2156 |g|=884.987 time=0.58s
+epoch=1/15 train batch=89/93 starting
+batch_loss=893.6476 |g|=940.548 time=0.58s
+epoch=1/15 train batch=90/93 starting
+batch_loss=858.9554 |g|=955.806 time=0.59s
+epoch=1/15 train batch=91/93 starting
+batch_loss=837.4199 |g|=948.448 time=0.59s
+epoch=1/15 train batch=92/93 starting
+batch_loss=808.3734 |g|=952.884 time=0.58s
+epoch=1/15 train batch=93/93 starting
+batch_loss=778.6992 |g|=957.740 time=0.58s
+epoch=1/15 val batch=1/19 starting
+epoch=1/15 val batch=1/19 loss=757.1376 time=4.43s
+epoch=1/15 val batch=2/19 starting
+epoch=1/15 val batch=2/19 loss=756.9993 time=0.10s
+epoch=1/15 val batch=3/19 starting
+epoch=1/15 val batch=3/19 loss=753.9716 time=0.10s
+epoch=1/15 val batch=4/19 starting
+epoch=1/15 val batch=4/19 loss=750.7233 time=0.10s
+epoch=1/15 val batch=5/19 starting
+epoch=1/15 val batch=5/19 loss=748.7104 time=0.10s
+epoch=1/15 val batch=6/19 starting
+epoch=1/15 val batch=6/19 loss=757.5149 time=0.10s
+epoch=1/15 val batch=7/19 starting
+epoch=1/15 val batch=7/19 loss=754.1047 time=0.10s
+epoch=1/15 val batch=8/19 starting
+epoch=1/15 val batch=8/19 loss=757.7177 time=0.10s
+epoch=1/15 val batch=9/19 starting
+epoch=1/15 val batch=9/19 loss=755.8857 time=0.10s
+epoch=1/15 val batch=10/19 starting
+epoch=1/15 val batch=10/19 loss=757.9745 time=0.10s
+epoch=1/15 val batch=11/19 starting
+epoch=1/15 val batch=11/19 loss=754.0905 time=0.10s
+epoch=1/15 val batch=12/19 starting
+epoch=1/15 val batch=12/19 loss=757.2199 time=0.10s
+epoch=1/15 val batch=13/19 starting
+epoch=1/15 val batch=13/19 loss=752.5569 time=0.10s
+epoch=1/15 val batch=14/19 starting
+epoch=1/15 val batch=14/19 loss=759.1782 time=0.10s
+epoch=1/15 val batch=15/19 starting
+epoch=1/15 val batch=15/19 loss=754.2979 time=0.10s
+epoch=1/15 val batch=16/19 starting
+epoch=1/15 val batch=16/19 loss=753.9534 time=0.10s
+epoch=1/15 val batch=17/19 starting
+epoch=1/15 val batch=17/19 loss=751.6793 time=0.10s
+epoch=1/15 val batch=18/19 starting
+epoch=1/15 val batch=18/19 loss=755.0705 time=0.10s
+epoch=1/15 val batch=19/19 starting
+epoch=1/15 val batch=19/19 loss=759.9814 time=0.10s
+epoch=1/15 test batch=1/19 starting
+epoch=1/15 test batch=1/19 loss=758.2095 time=2.39s
+epoch=1/15 test batch=2/19 starting
+epoch=1/15 test batch=2/19 loss=752.3923 time=0.12s
+epoch=1/15 test batch=3/19 starting
+epoch=1/15 test batch=3/19 loss=756.0368 time=0.10s
+epoch=1/15 test batch=4/19 starting
+epoch=1/15 test batch=4/19 loss=757.8326 time=0.10s
+epoch=1/15 test batch=5/19 starting
+epoch=1/15 test batch=5/19 loss=750.4529 time=0.10s
+epoch=1/15 test batch=6/19 starting
+epoch=1/15 test batch=6/19 loss=753.9397 time=0.10s
+epoch=1/15 test batch=7/19 starting
+epoch=1/15 test batch=7/19 loss=756.4123 time=0.10s
+epoch=1/15 test batch=8/19 starting
+epoch=1/15 test batch=8/19 loss=758.4294 time=0.10s
+epoch=1/15 test batch=9/19 starting
+epoch=1/15 test batch=9/19 loss=755.4474 time=0.10s
+epoch=1/15 test batch=10/19 starting
+epoch=1/15 test batch=10/19 loss=759.0245 time=0.10s
+epoch=1/15 test batch=11/19 starting
+epoch=1/15 test batch=11/19 loss=755.9045 time=0.10s
+epoch=1/15 test batch=12/19 starting
+epoch=1/15 test batch=12/19 loss=750.8649 time=0.10s
+epoch=1/15 test batch=13/19 starting
+epoch=1/15 test batch=13/19 loss=756.3939 time=0.10s
+epoch=1/15 test batch=14/19 starting
+epoch=1/15 test batch=14/19 loss=756.2396 time=0.10s
+epoch=1/15 test batch=15/19 starting
+epoch=1/15 test batch=15/19 loss=757.5036 time=0.10s
+epoch=1/15 test batch=16/19 starting
+epoch=1/15 test batch=16/19 loss=758.2089 time=0.10s
+epoch=1/15 test batch=17/19 starting
+epoch=1/15 test batch=17/19 loss=756.4603 time=0.10s
+epoch=1/15 test batch=18/19 starting
+epoch=1/15 test batch=18/19 loss=750.5294 time=0.10s
+epoch=1/15 test batch=19/19 starting
+epoch=1/15 test batch=19/19 loss=751.9851 time=0.10s
+epoch=1/15 train=1111.2375±84.512 val=755.1345 test=755.4278 |g|=182.317 theta_mae=0.4877 omega_mae=0.2693 peak=3960MiB time=85.8s
+epoch=2/15 train batch=1/93 starting
+batch_loss=757.9604 |g|=839.215 time=0.59s
+epoch=2/15 train batch=2/93 starting
+batch_loss=729.6161 |g|=747.184 time=0.58s
+epoch=2/15 train batch=3/93 starting
+batch_loss=706.3295 |g|=592.134 time=0.59s
+epoch=2/15 train batch=4/93 starting
+batch_loss=685.3572 |g|=455.870 time=0.58s
+epoch=2/15 train batch=5/93 starting
+batch_loss=670.8312 |g|=220.553 time=0.58s
+epoch=2/15 train batch=6/93 starting
+batch_loss=667.2729 |g|=164.440 time=0.58s
+epoch=2/15 train batch=7/93 starting
+batch_loss=649.7835 |g|=361.102 time=0.58s
+epoch=2/15 train batch=8/93 starting
+batch_loss=645.7433 |g|=558.722 time=0.58s
+epoch=2/15 train batch=9/93 starting
+batch_loss=640.3821 |g|=709.494 time=0.58s
+epoch=2/15 train batch=10/93 starting
+batch_loss=641.4718 |g|=828.316 time=0.58s
+epoch=2/15 train batch=11/93 starting
+batch_loss=639.7509 |g|=943.241 time=0.58s
+epoch=2/15 train batch=12/93 starting
+batch_loss=615.2406 |g|=920.357 time=0.60s
+epoch=2/15 train batch=13/93 starting
+batch_loss=610.6420 |g|=879.776 time=0.59s
+epoch=2/15 train batch=14/93 starting
+batch_loss=608.6656 |g|=822.169 time=0.58s
+epoch=2/15 train batch=15/93 starting
+batch_loss=592.8709 |g|=712.592 time=0.59s
+epoch=2/15 train batch=16/93 starting
+batch_loss=579.0664 |g|=561.410 time=0.58s
+epoch=2/15 train batch=17/93 starting
+batch_loss=559.3819 |g|=360.793 time=0.59s
+epoch=2/15 train batch=18/93 starting
+batch_loss=553.1604 |g|=204.397 time=0.59s
+epoch=2/15 train batch=19/93 starting
+batch_loss=537.1335 |g|=152.487 time=0.58s
+epoch=2/15 train batch=20/93 starting
+batch_loss=538.6903 |g|=265.483 time=0.59s
+epoch=2/15 train batch=21/93 starting
+batch_loss=531.6194 |g|=364.989 time=0.58s
+epoch=2/15 train batch=22/93 starting
+batch_loss=520.2749 |g|=439.462 time=0.58s
+epoch=2/15 train batch=23/93 starting
+batch_loss=522.8530 |g|=461.763 time=0.58s
+epoch=2/15 train batch=24/93 starting
+batch_loss=505.5811 |g|=465.086 time=0.58s
+epoch=2/15 train batch=25/93 starting
+batch_loss=506.9413 |g|=442.607 time=0.58s
+epoch=2/15 train batch=26/93 starting
+batch_loss=498.7759 |g|=338.409 time=0.58s
+epoch=2/15 train batch=27/93 starting
+batch_loss=474.8536 |g|=259.748 time=0.58s
+epoch=2/15 train batch=28/93 starting
+batch_loss=472.0590 |g|=165.288 time=0.59s
+epoch=2/15 train batch=29/93 starting
+batch_loss=480.1512 |g|=170.697 time=0.58s
+epoch=2/15 train batch=30/93 starting
+batch_loss=455.7842 |g|=268.728 time=0.59s
+epoch=2/15 train batch=31/93 starting
+batch_loss=460.2936 |g|=449.405 time=0.58s
+epoch=2/15 train batch=32/93 starting
+batch_loss=448.9995 |g|=527.237 time=0.58s
+epoch=2/15 train batch=33/93 starting
+batch_loss=443.5146 |g|=551.618 time=0.59s
+epoch=2/15 train batch=34/93 starting
+batch_loss=438.5675 |g|=504.841 time=0.59s
+epoch=2/15 train batch=35/93 starting
+batch_loss=432.5989 |g|=379.185 time=0.59s
+epoch=2/15 train batch=36/93 starting
+batch_loss=411.2390 |g|=151.702 time=0.58s
+epoch=2/15 train batch=37/93 starting
+batch_loss=416.9194 |g|=267.062 time=0.58s
+epoch=2/15 train batch=38/93 starting
+batch_loss=414.4040 |g|=437.840 time=0.59s
+epoch=2/15 train batch=39/93 starting
+batch_loss=419.0263 |g|=517.406 time=0.58s
+epoch=2/15 train batch=40/93 starting
+batch_loss=411.0030 |g|=490.406 time=0.58s
+epoch=2/15 train batch=41/93 starting
+batch_loss=410.8136 |g|=441.603 time=0.58s
+epoch=2/15 train batch=42/93 starting
+batch_loss=399.2372 |g|=287.019 time=0.58s
+epoch=2/15 train batch=43/93 starting
+batch_loss=419.9035 |g|=241.103 time=0.59s
+epoch=2/15 train batch=44/93 starting
+batch_loss=428.3607 |g|=425.459 time=0.58s
+epoch=2/15 train batch=45/93 starting
+batch_loss=405.5580 |g|=378.892 time=0.58s
+epoch=2/15 train batch=46/93 starting
+batch_loss=408.9700 |g|=451.151 time=0.59s
+epoch=2/15 train batch=47/93 starting
+batch_loss=413.2377 |g|=376.927 time=0.58s
+epoch=2/15 train batch=48/93 starting
+batch_loss=401.6600 |g|=260.029 time=0.58s
+epoch=2/15 train batch=49/93 starting
+batch_loss=396.8676 |g|=113.084 time=0.58s
+epoch=2/15 train batch=50/93 starting
+batch_loss=397.8750 |g|=215.286 time=0.58s
+epoch=2/15 train batch=51/93 starting
+batch_loss=405.9052 |g|=363.873 time=0.58s
+epoch=2/15 train batch=52/93 starting
+batch_loss=384.9504 |g|=305.979 time=0.58s
+epoch=2/15 train batch=53/93 starting
+batch_loss=395.2323 |g|=213.713 time=0.58s
+epoch=2/15 train batch=54/93 starting
+batch_loss=389.9482 |g|=122.225 time=0.58s
+epoch=2/15 train batch=55/93 starting
+batch_loss=393.6765 |g|=107.031 time=0.58s
+epoch=2/15 train batch=56/93 starting
+batch_loss=382.3377 |g|=128.073 time=0.58s
+epoch=2/15 train batch=57/93 starting
+batch_loss=382.4942 |g|=205.168 time=0.58s
+epoch=2/15 train batch=58/93 starting
+batch_loss=396.9531 |g|=111.206 time=0.59s
+epoch=2/15 train batch=59/93 starting
+batch_loss=387.4813 |g|=124.792 time=0.58s
+epoch=2/15 train batch=60/93 starting
+batch_loss=382.7435 |g|=126.336 time=0.58s
+epoch=2/15 train batch=61/93 starting
+batch_loss=393.7513 |g|=171.396 time=0.58s
+epoch=2/15 train batch=62/93 starting
+batch_loss=378.1501 |g|=102.224 time=0.59s
+epoch=2/15 train batch=63/93 starting
+batch_loss=375.1541 |g|=145.042 time=0.58s
+epoch=2/15 train batch=64/93 starting
+batch_loss=386.5666 |g|=166.408 time=0.60s
+epoch=2/15 train batch=65/93 starting
+batch_loss=384.7031 |g|=192.260 time=0.58s
+epoch=2/15 train batch=66/93 starting
+batch_loss=381.4054 |g|=150.485 time=0.58s
+epoch=2/15 train batch=67/93 starting
+batch_loss=386.8890 |g|=85.954 time=0.58s
+epoch=2/15 train batch=68/93 starting
+batch_loss=392.9621 |g|=231.346 time=0.58s
+epoch=2/15 train batch=69/93 starting
+batch_loss=381.0743 |g|=191.086 time=0.58s
+epoch=2/15 train batch=70/93 starting
+batch_loss=375.1266 |g|=166.354 time=0.58s
+epoch=2/15 train batch=71/93 starting
+batch_loss=378.6787 |g|=121.485 time=0.58s
+epoch=2/15 train batch=72/93 starting
+batch_loss=373.5073 |g|=176.880 time=0.58s
+epoch=2/15 train batch=73/93 starting
+batch_loss=383.6200 |g|=191.169 time=0.58s
+epoch=2/15 train batch=74/93 starting
+batch_loss=387.8966 |g|=181.290 time=0.58s
+epoch=2/15 train batch=75/93 starting
+batch_loss=381.9492 |g|=189.387 time=0.58s
+epoch=2/15 train batch=76/93 starting
+batch_loss=381.6645 |g|=184.792 time=0.59s
+epoch=2/15 train batch=77/93 starting
+batch_loss=384.5106 |g|=178.877 time=0.59s
+epoch=2/15 train batch=78/93 starting
+batch_loss=373.0464 |g|=141.744 time=0.59s
+epoch=2/15 train batch=79/93 starting
+batch_loss=390.3912 |g|=143.063 time=0.58s
+epoch=2/15 train batch=80/93 starting
+batch_loss=393.3875 |g|=213.323 time=0.58s
+epoch=2/15 train batch=81/93 starting
+batch_loss=378.2538 |g|=175.249 time=0.58s
+epoch=2/15 train batch=82/93 starting
+batch_loss=383.7708 |g|=184.016 time=0.58s
+epoch=2/15 train batch=83/93 starting
+batch_loss=376.4982 |g|=155.977 time=0.59s
+epoch=2/15 train batch=84/93 starting
+batch_loss=384.2113 |g|=147.229 time=0.58s
+epoch=2/15 train batch=85/93 starting
+batch_loss=399.0165 |g|=284.508 time=0.58s
+epoch=2/15 train batch=86/93 starting
+batch_loss=365.5723 |g|=269.245 time=0.58s
+epoch=2/15 train batch=87/93 starting
+batch_loss=390.3818 |g|=253.990 time=0.58s
+epoch=2/15 train batch=88/93 starting
+batch_loss=374.6465 |g|=92.430 time=0.58s
+epoch=2/15 train batch=89/93 starting
+batch_loss=368.9863 |g|=160.334 time=0.58s
+epoch=2/15 train batch=90/93 starting
+batch_loss=385.0299 |g|=213.159 time=0.58s
+epoch=2/15 train batch=91/93 starting
+batch_loss=384.1588 |g|=232.425 time=0.59s
+epoch=2/15 train batch=92/93 starting
+batch_loss=379.4208 |g|=164.663 time=0.58s
+epoch=2/15 train batch=93/93 starting
+batch_loss=375.6500 |g|=98.707 time=0.58s
+epoch=2/15 val batch=1/19 starting
+epoch=2/15 val batch=1/19 loss=397.6991 time=0.11s
+epoch=2/15 val batch=2/19 starting
+epoch=2/15 val batch=2/19 loss=386.1536 time=0.10s
+epoch=2/15 val batch=3/19 starting
+epoch=2/15 val batch=3/19 loss=386.5065 time=0.10s
+epoch=2/15 val batch=4/19 starting
+epoch=2/15 val batch=4/19 loss=368.1911 time=0.10s
+epoch=2/15 val batch=5/19 starting
+epoch=2/15 val batch=5/19 loss=373.0064 time=0.10s
+epoch=2/15 val batch=6/19 starting
+epoch=2/15 val batch=6/19 loss=384.2534 time=0.10s
+epoch=2/15 val batch=7/19 starting
+epoch=2/15 val batch=7/19 loss=378.5692 time=0.10s
+epoch=2/15 val batch=8/19 starting
+epoch=2/15 val batch=8/19 loss=384.9474 time=0.10s
+epoch=2/15 val batch=9/19 starting
+epoch=2/15 val batch=9/19 loss=392.9409 time=0.10s
+epoch=2/15 val batch=10/19 starting
+epoch=2/15 val batch=10/19 loss=384.5228 time=0.10s
+epoch=2/15 val batch=11/19 starting
+epoch=2/15 val batch=11/19 loss=385.3816 time=0.10s
+epoch=2/15 val batch=12/19 starting
+epoch=2/15 val batch=12/19 loss=381.3075 time=0.10s
+epoch=2/15 val batch=13/19 starting
+epoch=2/15 val batch=13/19 loss=376.8446 time=0.10s
+epoch=2/15 val batch=14/19 starting
+epoch=2/15 val batch=14/19 loss=379.4404 time=0.10s
+epoch=2/15 val batch=15/19 starting
+epoch=2/15 val batch=15/19 loss=371.9738 time=0.10s
+epoch=2/15 val batch=16/19 starting
+epoch=2/15 val batch=16/19 loss=385.2412 time=0.10s
+epoch=2/15 val batch=17/19 starting
+epoch=2/15 val batch=17/19 loss=381.6725 time=0.10s
+epoch=2/15 val batch=18/19 starting
+epoch=2/15 val batch=18/19 loss=369.0594 time=0.10s
+epoch=2/15 val batch=19/19 starting
+epoch=2/15 val batch=19/19 loss=401.8343 time=0.10s
+epoch=2/15 test batch=1/19 starting
+epoch=2/15 test batch=1/19 loss=378.1352 time=0.10s
+epoch=2/15 test batch=2/19 starting
+epoch=2/15 test batch=2/19 loss=373.4493 time=0.10s
+epoch=2/15 test batch=3/19 starting
+epoch=2/15 test batch=3/19 loss=385.1827 time=0.10s
+epoch=2/15 test batch=4/19 starting
+epoch=2/15 test batch=4/19 loss=394.9279 time=0.10s
+epoch=2/15 test batch=5/19 starting
+epoch=2/15 test batch=5/19 loss=374.0358 time=0.10s
+epoch=2/15 test batch=6/19 starting
+epoch=2/15 test batch=6/19 loss=379.3449 time=0.10s
+epoch=2/15 test batch=7/19 starting
+epoch=2/15 test batch=7/19 loss=374.7953 time=0.10s
+epoch=2/15 test batch=8/19 starting
+epoch=2/15 test batch=8/19 loss=370.9437 time=0.10s
+epoch=2/15 test batch=9/19 starting
+epoch=2/15 test batch=9/19 loss=374.6923 time=0.10s
+epoch=2/15 test batch=10/19 starting
+epoch=2/15 test batch=10/19 loss=376.2808 time=0.10s
+epoch=2/15 test batch=11/19 starting
+epoch=2/15 test batch=11/19 loss=384.4291 time=0.10s
+epoch=2/15 test batch=12/19 starting
+epoch=2/15 test batch=12/19 loss=374.0740 time=0.10s
+epoch=2/15 test batch=13/19 starting
+epoch=2/15 test batch=13/19 loss=382.3355 time=0.10s
+epoch=2/15 test batch=14/19 starting
+epoch=2/15 test batch=14/19 loss=389.9868 time=0.10s
+epoch=2/15 test batch=15/19 starting
+epoch=2/15 test batch=15/19 loss=381.4421 time=0.10s
+epoch=2/15 test batch=16/19 starting
+epoch=2/15 test batch=16/19 loss=378.4592 time=0.10s
+epoch=2/15 test batch=17/19 starting
+epoch=2/15 test batch=17/19 loss=369.2870 time=0.10s
+epoch=2/15 test batch=18/19 starting
+epoch=2/15 test batch=18/19 loss=379.3167 time=0.10s
+epoch=2/15 test batch=19/19 starting
+epoch=2/15 test batch=19/19 loss=380.0214 time=0.10s
+epoch=2/15 train=456.8715±102.097 val=382.3513 test=378.9938 |g|=319.448 theta_mae=0.3479 omega_mae=0.1943 peak=3964MiB time=58.4s
+epoch=3/15 train batch=1/93 starting
+batch_loss=372.9438 |g|=105.654 time=0.59s
+epoch=3/15 train batch=2/93 starting
+batch_loss=369.5803 |g|=149.251 time=0.58s
+epoch=3/15 train batch=3/93 starting
+batch_loss=370.4610 |g|=113.992 time=0.59s
+epoch=3/15 train batch=4/93 starting
+batch_loss=384.3380 |g|=140.885 time=0.58s
+epoch=3/15 train batch=5/93 starting
+batch_loss=369.3442 |g|=131.481 time=0.58s
+epoch=3/15 train batch=6/93 starting
+batch_loss=373.4736 |g|=163.671 time=0.58s
+epoch=3/15 train batch=7/93 starting
+batch_loss=373.3533 |g|=146.898 time=0.59s
+epoch=3/15 train batch=8/93 starting
+batch_loss=379.9661 |g|=150.766 time=0.59s
+epoch=3/15 train batch=9/93 starting
+batch_loss=388.2940 |g|=173.973 time=0.58s
+epoch=3/15 train batch=10/93 starting
+batch_loss=386.6476 |g|=162.926 time=0.58s
+epoch=3/15 train batch=11/93 starting
+batch_loss=368.7383 |g|=146.984 time=0.58s
+epoch=3/15 train batch=12/93 starting
+batch_loss=365.3304 |g|=160.522 time=0.58s
+epoch=3/15 train batch=13/93 starting
+batch_loss=377.9078 |g|=179.360 time=0.58s
+epoch=3/15 train batch=14/93 starting
+batch_loss=376.2719 |g|=230.235 time=0.59s
+epoch=3/15 train batch=15/93 starting
+batch_loss=390.9675 |g|=241.446 time=0.58s
+epoch=3/15 train batch=16/93 starting
+batch_loss=372.4045 |g|=171.123 time=0.58s
+epoch=3/15 train batch=17/93 starting
+batch_loss=378.7713 |g|=142.170 time=0.58s
+epoch=3/15 train batch=18/93 starting
+batch_loss=383.4093 |g|=150.213 time=0.58s
+epoch=3/15 train batch=19/93 starting
+batch_loss=368.4758 |g|=250.970 time=0.59s
+epoch=3/15 train batch=20/93 starting
+batch_loss=373.7735 |g|=239.384 time=0.58s
+epoch=3/15 train batch=21/93 starting
+batch_loss=370.6867 |g|=164.375 time=0.58s
+epoch=3/15 train batch=22/93 starting
+batch_loss=377.6212 |g|=127.466 time=0.58s
+epoch=3/15 train batch=23/93 starting
+batch_loss=377.2455 |g|=97.258 time=0.58s
+epoch=3/15 train batch=24/93 starting
+batch_loss=367.3500 |g|=78.278 time=0.58s
+epoch=3/15 train batch=25/93 starting
+batch_loss=375.9438 |g|=62.868 time=0.58s
+epoch=3/15 train batch=26/93 starting
+batch_loss=374.9375 |g|=162.094 time=0.58s
+epoch=3/15 train batch=27/93 starting
+batch_loss=367.0220 |g|=185.880 time=0.58s
+epoch=3/15 train batch=28/93 starting
+batch_loss=384.7092 |g|=63.495 time=0.58s
+epoch=3/15 train batch=29/93 starting
+batch_loss=369.5290 |g|=144.215 time=0.58s
+epoch=3/15 train batch=30/93 starting
+batch_loss=370.2982 |g|=150.251 time=0.58s
+epoch=3/15 train batch=31/93 starting
+batch_loss=372.2867 |g|=130.811 time=0.58s
+epoch=3/15 train batch=32/93 starting
+batch_loss=373.9601 |g|=229.972 time=0.58s
+epoch=3/15 train batch=33/93 starting
+batch_loss=373.4286 |g|=261.536 time=0.59s
+epoch=3/15 train batch=34/93 starting
+batch_loss=380.0877 |g|=195.849 time=0.58s
+epoch=3/15 train batch=35/93 starting
+batch_loss=377.0268 |g|=212.815 time=0.58s
+epoch=3/15 train batch=36/93 starting
+batch_loss=380.8289 |g|=92.332 time=0.59s
+epoch=3/15 train batch=37/93 starting
+batch_loss=371.7970 |g|=156.549 time=0.58s
+epoch=3/15 train batch=38/93 starting
+batch_loss=371.5276 |g|=178.255 time=0.58s
+epoch=3/15 train batch=39/93 starting
+batch_loss=376.4141 |g|=176.960 time=0.58s
+epoch=3/15 train batch=40/93 starting
+batch_loss=369.6867 |g|=117.216 time=0.58s
+epoch=3/15 train batch=41/93 starting
+batch_loss=379.4299 |g|=168.901 time=0.58s
+epoch=3/15 train batch=42/93 starting
+batch_loss=367.4101 |g|=155.998 time=0.58s
+epoch=3/15 train batch=43/93 starting
+batch_loss=387.4779 |g|=171.637 time=0.58s
+epoch=3/15 train batch=44/93 starting
+batch_loss=370.1028 |g|=140.760 time=0.58s
+epoch=3/15 train batch=45/93 starting
+batch_loss=369.1312 |g|=147.740 time=0.57s
+epoch=3/15 train batch=46/93 starting
+batch_loss=371.4045 |g|=211.544 time=0.59s
+epoch=3/15 train batch=47/93 starting
+batch_loss=368.8695 |g|=138.888 time=0.58s
+epoch=3/15 train batch=48/93 starting
+batch_loss=366.8213 |g|=88.992 time=0.58s
+epoch=3/15 train batch=49/93 starting
+batch_loss=371.0772 |g|=81.272 time=0.58s
+epoch=3/15 train batch=50/93 starting
+batch_loss=379.9231 |g|=211.058 time=0.58s
+epoch=3/15 train batch=51/93 starting
+batch_loss=365.0000 |g|=145.707 time=0.58s
+epoch=3/15 train batch=52/93 starting
+batch_loss=372.6269 |g|=197.514 time=0.59s
+epoch=3/15 train batch=53/93 starting
+batch_loss=370.6171 |g|=99.865 time=0.59s
+epoch=3/15 train batch=54/93 starting
+batch_loss=385.0803 |g|=63.371 time=0.58s
+epoch=3/15 train batch=55/93 starting
+batch_loss=376.5681 |g|=133.053 time=0.59s
+epoch=3/15 train batch=56/93 starting
+batch_loss=361.8486 |g|=170.068 time=0.59s
+epoch=3/15 train batch=57/93 starting
+batch_loss=376.8232 |g|=174.946 time=0.66s
+epoch=3/15 train batch=58/93 starting
+batch_loss=372.3387 |g|=127.338 time=0.68s
+epoch=3/15 train batch=59/93 starting
+batch_loss=376.3454 |g|=184.214 time=0.59s
+epoch=3/15 train batch=60/93 starting
+batch_loss=363.0847 |g|=193.016 time=0.58s
+epoch=3/15 train batch=61/93 starting
+batch_loss=365.4619 |g|=160.222 time=0.58s
+epoch=3/15 train batch=62/93 starting
+batch_loss=375.0191 |g|=106.055 time=0.58s
+epoch=3/15 train batch=63/93 starting
+batch_loss=367.5846 |g|=203.737 time=0.58s
+epoch=3/15 train batch=64/93 starting
+batch_loss=371.1465 |g|=251.279 time=0.59s
+epoch=3/15 train batch=65/93 starting
+batch_loss=377.8480 |g|=211.992 time=0.58s
+epoch=3/15 train batch=66/93 starting
+batch_loss=379.0988 |g|=240.891 time=0.60s
+epoch=3/15 train batch=67/93 starting
+batch_loss=377.9436 |g|=131.504 time=0.58s
+epoch=3/15 train batch=68/93 starting
+batch_loss=367.8408 |g|=207.174 time=0.58s
+epoch=3/15 train batch=69/93 starting
+batch_loss=369.8184 |g|=160.769 time=0.58s
+epoch=3/15 train batch=70/93 starting
+batch_loss=372.6114 |g|=254.858 time=0.59s
+epoch=3/15 train batch=71/93 starting
+batch_loss=374.5698 |g|=226.275 time=0.59s
+epoch=3/15 train batch=72/93 starting
+batch_loss=382.8995 |g|=126.051 time=0.58s
+epoch=3/15 train batch=73/93 starting
+batch_loss=383.7372 |g|=143.016 time=0.58s
+epoch=3/15 train batch=74/93 starting
+batch_loss=368.5710 |g|=129.782 time=0.58s
+epoch=3/15 train batch=75/93 starting
+batch_loss=369.7107 |g|=65.295 time=0.59s
+epoch=3/15 train batch=76/93 starting
+batch_loss=373.4340 |g|=195.748 time=0.59s
+epoch=3/15 train batch=77/93 starting
+batch_loss=371.4082 |g|=167.217 time=0.59s
+epoch=3/15 train batch=78/93 starting
+batch_loss=374.6828 |g|=226.188 time=0.58s
+epoch=3/15 train batch=79/93 starting
+batch_loss=370.0532 |g|=158.520 time=0.58s
+epoch=3/15 train batch=80/93 starting
+batch_loss=371.7521 |g|=182.597 time=0.58s
+epoch=3/15 train batch=81/93 starting
+batch_loss=363.0070 |g|=111.360 time=0.58s
+epoch=3/15 train batch=82/93 starting
+batch_loss=380.9815 |g|=119.255 time=0.58s
+epoch=3/15 train batch=83/93 starting
+batch_loss=377.8776 |g|=138.581 time=0.58s
+epoch=3/15 train batch=84/93 starting
+batch_loss=372.2770 |g|=166.110 time=0.59s
+epoch=3/15 train batch=85/93 starting
+batch_loss=371.3766 |g|=111.094 time=0.58s
+epoch=3/15 train batch=86/93 starting
+batch_loss=370.4409 |g|=62.130 time=0.59s
+epoch=3/15 train batch=87/93 starting
+batch_loss=378.5499 |g|=143.288 time=0.59s
+epoch=3/15 train batch=88/93 starting
+batch_loss=359.6139 |g|=127.166 time=0.58s
+epoch=3/15 train batch=89/93 starting
+batch_loss=372.2192 |g|=116.099 time=0.59s
+epoch=3/15 train batch=90/93 starting
+batch_loss=371.3914 |g|=163.098 time=0.59s
+epoch=3/15 train batch=91/93 starting
+batch_loss=382.0349 |g|=102.085 time=0.58s
+epoch=3/15 train batch=92/93 starting
+batch_loss=366.0072 |g|=117.983 time=0.59s
+epoch=3/15 train batch=93/93 starting
+batch_loss=362.2289 |g|=159.653 time=0.58s
+epoch=3/15 val batch=1/19 starting
+epoch=3/15 val batch=1/19 loss=386.7596 time=0.10s
+epoch=3/15 val batch=2/19 starting
+epoch=3/15 val batch=2/19 loss=376.2498 time=0.10s
+epoch=3/15 val batch=3/19 starting
+epoch=3/15 val batch=3/19 loss=375.0241 time=0.10s
+epoch=3/15 val batch=4/19 starting
+epoch=3/15 val batch=4/19 loss=357.6156 time=0.10s
+epoch=3/15 val batch=5/19 starting
+epoch=3/15 val batch=5/19 loss=361.3469 time=0.10s
+epoch=3/15 val batch=6/19 starting
+epoch=3/15 val batch=6/19 loss=375.6153 time=0.10s
+epoch=3/15 val batch=7/19 starting
+epoch=3/15 val batch=7/19 loss=369.1718 time=0.10s
+epoch=3/15 val batch=8/19 starting
+epoch=3/15 val batch=8/19 loss=376.0459 time=0.10s
+epoch=3/15 val batch=9/19 starting
+epoch=3/15 val batch=9/19 loss=385.9013 time=0.10s
+epoch=3/15 val batch=10/19 starting
+epoch=3/15 val batch=10/19 loss=375.1792 time=0.10s
+epoch=3/15 val batch=11/19 starting
+epoch=3/15 val batch=11/19 loss=379.1187 time=0.10s
+epoch=3/15 val batch=12/19 starting
+epoch=3/15 val batch=12/19 loss=370.6075 time=0.10s
+epoch=3/15 val batch=13/19 starting
+epoch=3/15 val batch=13/19 loss=368.6538 time=0.10s
+epoch=3/15 val batch=14/19 starting
+epoch=3/15 val batch=14/19 loss=368.2026 time=0.10s
+epoch=3/15 val batch=15/19 starting
+epoch=3/15 val batch=15/19 loss=366.5726 time=0.10s
+epoch=3/15 val batch=16/19 starting
+epoch=3/15 val batch=16/19 loss=375.8606 time=0.10s
+epoch=3/15 val batch=17/19 starting
+epoch=3/15 val batch=17/19 loss=374.8575 time=0.10s
+epoch=3/15 val batch=18/19 starting
+epoch=3/15 val batch=18/19 loss=360.6037 time=0.10s
+epoch=3/15 val batch=19/19 starting
+epoch=3/15 val batch=19/19 loss=398.5238 time=0.10s
+epoch=3/15 test batch=1/19 starting
+epoch=3/15 test batch=1/19 loss=369.4746 time=0.10s
+epoch=3/15 test batch=2/19 starting
+epoch=3/15 test batch=2/19 loss=364.0316 time=0.10s
+epoch=3/15 test batch=3/19 starting
+epoch=3/15 test batch=3/19 loss=376.5272 time=0.10s
+epoch=3/15 test batch=4/19 starting
+epoch=3/15 test batch=4/19 loss=383.3334 time=0.10s
+epoch=3/15 test batch=5/19 starting
+epoch=3/15 test batch=5/19 loss=366.5523 time=0.10s
+epoch=3/15 test batch=6/19 starting
+epoch=3/15 test batch=6/19 loss=368.9179 time=0.10s
+epoch=3/15 test batch=7/19 starting
+epoch=3/15 test batch=7/19 loss=367.5845 time=0.10s
+epoch=3/15 test batch=8/19 starting
+epoch=3/15 test batch=8/19 loss=358.7922 time=0.10s
+epoch=3/15 test batch=9/19 starting
+epoch=3/15 test batch=9/19 loss=369.0980 time=0.10s
+epoch=3/15 test batch=10/19 starting
+epoch=3/15 test batch=10/19 loss=364.5979 time=0.10s
+epoch=3/15 test batch=11/19 starting
+epoch=3/15 test batch=11/19 loss=376.4565 time=0.10s
+epoch=3/15 test batch=12/19 starting
+epoch=3/15 test batch=12/19 loss=362.2946 time=0.10s
+epoch=3/15 test batch=13/19 starting
+epoch=3/15 test batch=13/19 loss=372.4215 time=0.10s
+epoch=3/15 test batch=14/19 starting
+epoch=3/15 test batch=14/19 loss=381.9910 time=0.10s
+epoch=3/15 test batch=15/19 starting
+epoch=3/15 test batch=15/19 loss=371.2266 time=0.10s
+epoch=3/15 test batch=16/19 starting
+epoch=3/15 test batch=16/19 loss=366.8917 time=0.10s
+epoch=3/15 test batch=17/19 starting
+epoch=3/15 test batch=17/19 loss=363.8205 time=0.10s
+epoch=3/15 test batch=18/19 starting
+epoch=3/15 test batch=18/19 loss=369.2215 time=0.10s
+epoch=3/15 test batch=19/19 starting
+epoch=3/15 test batch=19/19 loss=371.4179 time=0.10s
+epoch=3/15 train=373.6776±6.263 val=373.4549 test=369.6958 |g|=156.272 theta_mae=0.3538 omega_mae=0.1921 peak=3969MiB time=58.6s
+epoch=4/15 train batch=1/93 starting
+batch_loss=359.0624 |g|=69.253 time=0.58s
+epoch=4/15 train batch=2/93 starting
+batch_loss=371.7230 |g|=92.670 time=0.59s
+epoch=4/15 train batch=3/93 starting
+batch_loss=376.1490 |g|=161.790 time=0.58s
+epoch=4/15 train batch=4/93 starting
+batch_loss=363.8185 |g|=164.451 time=0.59s
+epoch=4/15 train batch=5/93 starting
+batch_loss=380.5679 |g|=97.396 time=0.59s
+epoch=4/15 train batch=6/93 starting
+batch_loss=367.0444 |g|=93.780 time=0.58s
+epoch=4/15 train batch=7/93 starting
+batch_loss=368.6170 |g|=167.964 time=0.59s
+epoch=4/15 train batch=8/93 starting
+batch_loss=371.9324 |g|=180.965 time=0.59s
+epoch=4/15 train batch=9/93 starting
+batch_loss=367.0886 |g|=84.101 time=0.58s
+epoch=4/15 train batch=10/93 starting
+batch_loss=359.3189 |g|=158.654 time=0.58s
+epoch=4/15 train batch=11/93 starting
+batch_loss=375.3554 |g|=179.555 time=0.58s
+epoch=4/15 train batch=12/93 starting
+batch_loss=366.1758 |g|=138.405 time=0.58s
+epoch=4/15 train batch=13/93 starting
+batch_loss=376.7221 |g|=191.875 time=0.59s
+epoch=4/15 train batch=14/93 starting
+batch_loss=368.8649 |g|=145.251 time=0.58s
+epoch=4/15 train batch=15/93 starting
+batch_loss=383.1519 |g|=199.019 time=0.58s
+epoch=4/15 train batch=16/93 starting
+batch_loss=370.0599 |g|=143.543 time=0.59s
+epoch=4/15 train batch=17/93 starting
+batch_loss=361.1649 |g|=154.891 time=0.59s
+epoch=4/15 train batch=18/93 starting
+batch_loss=362.8636 |g|=82.305 time=0.60s
+epoch=4/15 train batch=19/93 starting
+batch_loss=367.6928 |g|=160.412 time=0.59s
+epoch=4/15 train batch=20/93 starting
+batch_loss=362.5511 |g|=116.775 time=0.58s
+epoch=4/15 train batch=21/93 starting
+batch_loss=366.2467 |g|=119.104 time=0.58s
+epoch=4/15 train batch=22/93 starting
+batch_loss=364.1907 |g|=234.390 time=0.59s
+epoch=4/15 train batch=23/93 starting
+batch_loss=366.6763 |g|=154.408 time=0.58s
+epoch=4/15 train batch=24/93 starting
+batch_loss=381.8396 |g|=182.507 time=0.58s
+epoch=4/15 train batch=25/93 starting
+batch_loss=362.7482 |g|=69.302 time=0.59s
+epoch=4/15 train batch=26/93 starting
+batch_loss=369.3183 |g|=125.510 time=0.59s
+epoch=4/15 train batch=27/93 starting
+batch_loss=373.2217 |g|=173.355 time=0.59s
+epoch=4/15 train batch=28/93 starting
+batch_loss=369.3702 |g|=179.207 time=0.58s
+epoch=4/15 train batch=29/93 starting
+batch_loss=377.7391 |g|=110.002 time=0.58s
+epoch=4/15 train batch=30/93 starting
+batch_loss=369.2604 |g|=66.845 time=0.58s
+epoch=4/15 train batch=31/93 starting
+batch_loss=361.9907 |g|=73.838 time=0.58s
+epoch=4/15 train batch=32/93 starting
+batch_loss=362.3238 |g|=153.454 time=0.58s
+epoch=4/15 train batch=33/93 starting
+batch_loss=374.7779 |g|=217.083 time=0.58s
+epoch=4/15 train batch=34/93 starting
+batch_loss=371.3764 |g|=154.007 time=0.58s
+epoch=4/15 train batch=35/93 starting
+batch_loss=377.5787 |g|=164.039 time=0.59s
+epoch=4/15 train batch=36/93 starting
+batch_loss=365.3442 |g|=118.270 time=0.58s
+epoch=4/15 train batch=37/93 starting
+batch_loss=365.5904 |g|=173.126 time=0.58s
+epoch=4/15 train batch=38/93 starting
+batch_loss=364.2438 |g|=129.930 time=0.58s
+epoch=4/15 train batch=39/93 starting
+batch_loss=374.2465 |g|=158.136 time=0.58s
+epoch=4/15 train batch=40/93 starting
+batch_loss=368.3182 |g|=128.169 time=0.58s
+epoch=4/15 train batch=41/93 starting
+batch_loss=369.5688 |g|=119.134 time=0.58s
+epoch=4/15 train batch=42/93 starting
+batch_loss=366.3934 |g|=130.660 time=0.58s
+epoch=4/15 train batch=43/93 starting
+batch_loss=375.0185 |g|=148.309 time=0.58s
+epoch=4/15 train batch=44/93 starting
+batch_loss=365.4127 |g|=107.704 time=0.58s
+epoch=4/15 train batch=45/93 starting
+batch_loss=362.1554 |g|=82.343 time=0.58s
+epoch=4/15 train batch=46/93 starting
+batch_loss=373.6109 |g|=87.073 time=0.58s
+epoch=4/15 train batch=47/93 starting
+batch_loss=358.9854 |g|=97.642 time=0.59s
+epoch=4/15 train batch=48/93 starting
+batch_loss=388.5042 |g|=117.594 time=0.58s
+epoch=4/15 train batch=49/93 starting
+batch_loss=362.9038 |g|=132.403 time=0.58s
+epoch=4/15 train batch=50/93 starting
+batch_loss=357.5289 |g|=52.816 time=0.58s
+epoch=4/15 train batch=51/93 starting
+batch_loss=363.0761 |g|=106.460 time=0.59s
+epoch=4/15 train batch=52/93 starting
+batch_loss=370.5962 |g|=154.901 time=0.58s
+epoch=4/15 train batch=53/93 starting
+batch_loss=368.9536 |g|=87.687 time=0.58s
+epoch=4/15 train batch=54/93 starting
+batch_loss=368.7308 |g|=141.244 time=0.59s
+epoch=4/15 train batch=55/93 starting
+batch_loss=364.9494 |g|=105.135 time=0.58s
+epoch=4/15 train batch=56/93 starting
+batch_loss=364.5472 |g|=67.522 time=0.59s
+epoch=4/15 train batch=57/93 starting
+batch_loss=359.7526 |g|=117.873 time=0.58s
+epoch=4/15 train batch=58/93 starting
+batch_loss=374.9812 |g|=196.547 time=0.59s
+epoch=4/15 train batch=59/93 starting
+batch_loss=371.1130 |g|=223.995 time=0.58s
+epoch=4/15 train batch=60/93 starting
+batch_loss=384.1685 |g|=121.010 time=0.59s
+epoch=4/15 train batch=61/93 starting
+batch_loss=366.4930 |g|=144.752 time=0.58s
+epoch=4/15 train batch=62/93 starting
+batch_loss=374.3275 |g|=197.024 time=0.58s
+epoch=4/15 train batch=63/93 starting
+batch_loss=380.6123 |g|=238.212 time=0.58s
+epoch=4/15 train batch=64/93 starting
+batch_loss=376.6938 |g|=138.070 time=0.58s
+epoch=4/15 train batch=65/93 starting
+batch_loss=376.1141 |g|=141.482 time=0.59s
+epoch=4/15 train batch=66/93 starting
+batch_loss=369.6040 |g|=170.180 time=0.58s
+epoch=4/15 train batch=67/93 starting
+batch_loss=380.1460 |g|=150.124 time=0.59s
+epoch=4/15 train batch=68/93 starting
+batch_loss=357.8098 |g|=101.555 time=0.58s
+epoch=4/15 train batch=69/93 starting
+batch_loss=363.1072 |g|=211.502 time=0.59s
+epoch=4/15 train batch=70/93 starting
+batch_loss=370.8232 |g|=254.732 time=0.58s
+epoch=4/15 train batch=71/93 starting
+batch_loss=357.6461 |g|=143.629 time=0.58s
+epoch=4/15 train batch=72/93 starting
+batch_loss=356.0212 |g|=104.120 time=0.58s
+epoch=4/15 train batch=73/93 starting
+batch_loss=363.5386 |g|=67.544 time=0.59s
+epoch=4/15 train batch=74/93 starting
+batch_loss=360.7039 |g|=100.617 time=0.59s
+epoch=4/15 train batch=75/93 starting
+batch_loss=387.8796 |g|=203.061 time=0.58s
+epoch=4/15 train batch=76/93 starting
+batch_loss=361.6106 |g|=113.943 time=0.59s
+epoch=4/15 train batch=77/93 starting
+batch_loss=371.4140 |g|=175.108 time=0.58s
+epoch=4/15 train batch=78/93 starting
+batch_loss=382.5376 |g|=200.776 time=0.59s
+epoch=4/15 train batch=79/93 starting
+batch_loss=374.2552 |g|=189.988 time=0.59s
+epoch=4/15 train batch=80/93 starting
+batch_loss=377.4202 |g|=184.124 time=0.58s
+epoch=4/15 train batch=81/93 starting
+batch_loss=370.5306 |g|=162.642 time=0.58s
+epoch=4/15 train batch=82/93 starting
+batch_loss=371.1667 |g|=141.677 time=0.58s
+epoch=4/15 train batch=83/93 starting
+batch_loss=362.5000 |g|=124.621 time=0.58s
+epoch=4/15 train batch=84/93 starting
+batch_loss=368.5137 |g|=129.781 time=0.58s
+epoch=4/15 train batch=85/93 starting
+batch_loss=360.9841 |g|=59.656 time=0.58s
+epoch=4/15 train batch=86/93 starting
+batch_loss=377.4160 |g|=180.443 time=0.58s
+epoch=4/15 train batch=87/93 starting
+batch_loss=371.3000 |g|=239.147 time=0.58s
+epoch=4/15 train batch=88/93 starting
+batch_loss=379.5547 |g|=290.388 time=0.58s
+epoch=4/15 train batch=89/93 starting
+batch_loss=372.4360 |g|=163.960 time=0.58s
+epoch=4/15 train batch=90/93 starting
+batch_loss=360.7700 |g|=97.940 time=0.58s
+epoch=4/15 train batch=91/93 starting
+batch_loss=360.8859 |g|=97.349 time=0.58s
+epoch=4/15 train batch=92/93 starting
+batch_loss=364.2632 |g|=73.205 time=0.58s
+epoch=4/15 train batch=93/93 starting
+batch_loss=367.0317 |g|=133.103 time=0.59s
+epoch=4/15 val batch=1/19 starting
+epoch=4/15 val batch=1/19 loss=385.8185 time=0.10s
+epoch=4/15 val batch=2/19 starting
+epoch=4/15 val batch=2/19 loss=382.2379 time=0.10s
+epoch=4/15 val batch=3/19 starting
+epoch=4/15 val batch=3/19 loss=377.4200 time=0.10s
+epoch=4/15 val batch=4/19 starting
+epoch=4/15 val batch=4/19 loss=360.5042 time=0.10s
+epoch=4/15 val batch=5/19 starting
+epoch=4/15 val batch=5/19 loss=363.0098 time=0.10s
+epoch=4/15 val batch=6/19 starting
+epoch=4/15 val batch=6/19 loss=379.7333 time=0.10s
+epoch=4/15 val batch=7/19 starting
+epoch=4/15 val batch=7/19 loss=374.2787 time=0.10s
+epoch=4/15 val batch=8/19 starting
+epoch=4/15 val batch=8/19 loss=379.0243 time=0.10s
+epoch=4/15 val batch=9/19 starting
+epoch=4/15 val batch=9/19 loss=383.8153 time=0.10s
+epoch=4/15 val batch=10/19 starting
+epoch=4/15 val batch=10/19 loss=375.1512 time=0.10s
+epoch=4/15 val batch=11/19 starting
+epoch=4/15 val batch=11/19 loss=380.9606 time=0.10s
+epoch=4/15 val batch=12/19 starting
+epoch=4/15 val batch=12/19 loss=366.3530 time=0.10s
+epoch=4/15 val batch=13/19 starting
+epoch=4/15 val batch=13/19 loss=367.5416 time=0.10s
+epoch=4/15 val batch=14/19 starting
+epoch=4/15 val batch=14/19 loss=363.6888 time=0.10s
+epoch=4/15 val batch=15/19 starting
+epoch=4/15 val batch=15/19 loss=374.9067 time=0.10s
+epoch=4/15 val batch=16/19 starting
+epoch=4/15 val batch=16/19 loss=375.1044 time=0.10s
+epoch=4/15 val batch=17/19 starting
+epoch=4/15 val batch=17/19 loss=372.3685 time=0.10s
+epoch=4/15 val batch=18/19 starting
+epoch=4/15 val batch=18/19 loss=365.5233 time=0.10s
+epoch=4/15 val batch=19/19 starting
+epoch=4/15 val batch=19/19 loss=404.4743 time=0.10s
+epoch=4/15 test batch=1/19 starting
+epoch=4/15 test batch=1/19 loss=370.7725 time=0.10s
+epoch=4/15 test batch=2/19 starting
+epoch=4/15 test batch=2/19 loss=366.4784 time=0.10s
+epoch=4/15 test batch=3/19 starting
+epoch=4/15 test batch=3/19 loss=379.9007 time=0.10s
+epoch=4/15 test batch=4/19 starting
+epoch=4/15 test batch=4/19 loss=381.3790 time=0.10s
+epoch=4/15 test batch=5/19 starting
+epoch=4/15 test batch=5/19 loss=367.3242 time=0.10s
+epoch=4/15 test batch=6/19 starting
+epoch=4/15 test batch=6/19 loss=369.7186 time=0.10s
+epoch=4/15 test batch=7/19 starting
+epoch=4/15 test batch=7/19 loss=366.5518 time=0.10s
+epoch=4/15 test batch=8/19 starting
+epoch=4/15 test batch=8/19 loss=357.5005 time=0.10s
+epoch=4/15 test batch=9/19 starting
+epoch=4/15 test batch=9/19 loss=365.8594 time=0.10s
+epoch=4/15 test batch=10/19 starting
+epoch=4/15 test batch=10/19 loss=367.5507 time=0.10s
+epoch=4/15 test batch=11/19 starting
+epoch=4/15 test batch=11/19 loss=373.8928 time=0.10s
+epoch=4/15 test batch=12/19 starting
+epoch=4/15 test batch=12/19 loss=360.6435 time=0.10s
+epoch=4/15 test batch=13/19 starting
+epoch=4/15 test batch=13/19 loss=369.9977 time=0.10s
+epoch=4/15 test batch=14/19 starting
+epoch=4/15 test batch=14/19 loss=378.1743 time=0.10s
+epoch=4/15 test batch=15/19 starting
+epoch=4/15 test batch=15/19 loss=370.3274 time=0.10s
+epoch=4/15 test batch=16/19 starting
+epoch=4/15 test batch=16/19 loss=365.3442 time=0.10s
+epoch=4/15 test batch=17/19 starting
+epoch=4/15 test batch=17/19 loss=374.4823 time=0.10s
+epoch=4/15 test batch=18/19 starting
+epoch=4/15 test batch=18/19 loss=369.7407 time=0.10s
+epoch=4/15 test batch=19/19 starting
+epoch=4/15 test batch=19/19 loss=378.9137 time=0.10s
+epoch=4/15 train=369.1762±7.208 val=374.9758 test=370.1239 |g|=141.831 theta_mae=0.3582 omega_mae=0.1932 peak=3969MiB time=58.4s
+epoch=5/15 train batch=1/93 starting
+batch_loss=369.6070 |g|=102.390 time=0.59s
+epoch=5/15 train batch=2/93 starting
+batch_loss=379.8043 |g|=191.936 time=0.58s
+epoch=5/15 train batch=3/93 starting
+batch_loss=365.1056 |g|=83.095 time=0.58s
+epoch=5/15 train batch=4/93 starting
+batch_loss=366.5739 |g|=63.842 time=0.58s
+epoch=5/15 train batch=5/93 starting
+batch_loss=379.3623 |g|=145.945 time=0.58s
+epoch=5/15 train batch=6/93 starting
+batch_loss=363.9981 |g|=87.591 time=0.59s
+epoch=5/15 train batch=7/93 starting
+batch_loss=358.3315 |g|=73.345 time=0.59s
+epoch=5/15 train batch=8/93 starting
+batch_loss=379.8264 |g|=275.743 time=0.58s
+epoch=5/15 train batch=9/93 starting
+batch_loss=374.9031 |g|=229.175 time=0.58s
+epoch=5/15 train batch=10/93 starting
+batch_loss=364.8775 |g|=204.270 time=0.59s
+epoch=5/15 train batch=11/93 starting
+batch_loss=369.7898 |g|=248.978 time=0.59s
+epoch=5/15 train batch=12/93 starting
+batch_loss=372.7760 |g|=168.706 time=0.59s
+epoch=5/15 train batch=13/93 starting
+batch_loss=372.9220 |g|=123.432 time=0.58s
+epoch=5/15 train batch=14/93 starting
+batch_loss=361.5927 |g|=101.933 time=0.59s
+epoch=5/15 train batch=15/93 starting
+batch_loss=374.8050 |g|=156.462 time=0.59s
+epoch=5/15 train batch=16/93 starting
+batch_loss=368.1476 |g|=188.522 time=0.58s
+epoch=5/15 train batch=17/93 starting
+batch_loss=365.7613 |g|=165.852 time=0.59s
+epoch=5/15 train batch=18/93 starting
+batch_loss=366.0368 |g|=241.772 time=0.58s
+epoch=5/15 train batch=19/93 starting
+batch_loss=368.8683 |g|=119.183 time=0.58s
+epoch=5/15 train batch=20/93 starting
+batch_loss=369.6415 |g|=253.861 time=0.58s
+epoch=5/15 train batch=21/93 starting
+batch_loss=376.7196 |g|=87.139 time=0.58s
+epoch=5/15 train batch=22/93 starting
+batch_loss=366.4591 |g|=106.474 time=0.58s
+epoch=5/15 train batch=23/93 starting
+batch_loss=353.5056 |g|=97.278 time=0.58s
+epoch=5/15 train batch=24/93 starting
+batch_loss=375.1707 |g|=138.918 time=0.58s
+epoch=5/15 train batch=25/93 starting
+batch_loss=366.2796 |g|=188.767 time=0.58s
+epoch=5/15 train batch=26/93 starting
+batch_loss=375.2483 |g|=140.864 time=0.59s
+epoch=5/15 train batch=27/93 starting
+batch_loss=360.5585 |g|=147.463 time=0.59s
+epoch=5/15 train batch=28/93 starting
+batch_loss=362.5543 |g|=164.169 time=0.58s
+epoch=5/15 train batch=29/93 starting
+batch_loss=366.7319 |g|=147.311 time=0.58s
+epoch=5/15 train batch=30/93 starting
+batch_loss=363.8203 |g|=48.862 time=0.58s
+epoch=5/15 train batch=31/93 starting
+batch_loss=367.1160 |g|=140.923 time=0.59s
+epoch=5/15 train batch=32/93 starting
+batch_loss=363.3546 |g|=203.833 time=0.59s
+epoch=5/15 train batch=33/93 starting
+batch_loss=365.0442 |g|=207.149 time=0.59s
+epoch=5/15 train batch=34/93 starting
+batch_loss=370.3360 |g|=184.566 time=0.58s
+epoch=5/15 train batch=35/93 starting
+batch_loss=374.0652 |g|=230.343 time=0.58s
+epoch=5/15 train batch=36/93 starting
+batch_loss=363.7661 |g|=142.689 time=0.58s
+epoch=5/15 train batch=37/93 starting
+batch_loss=365.9963 |g|=147.980 time=0.59s
+epoch=5/15 train batch=38/93 starting
+batch_loss=366.4605 |g|=132.064 time=0.58s
+epoch=5/15 train batch=39/93 starting
+batch_loss=375.1779 |g|=148.244 time=0.58s
+epoch=5/15 train batch=40/93 starting
+batch_loss=363.1899 |g|=180.516 time=0.59s
+epoch=5/15 train batch=41/93 starting
+batch_loss=357.9269 |g|=178.460 time=0.59s
+epoch=5/15 train batch=42/93 starting
+batch_loss=364.4463 |g|=114.025 time=0.58s
+epoch=5/15 train batch=43/93 starting
+batch_loss=361.0430 |g|=108.728 time=0.58s
+epoch=5/15 train batch=44/93 starting
+batch_loss=366.6246 |g|=87.183 time=0.58s
+epoch=5/15 train batch=45/93 starting
+batch_loss=375.3108 |g|=151.483 time=0.58s
+epoch=5/15 train batch=46/93 starting
+batch_loss=371.8970 |g|=123.840 time=0.59s
+epoch=5/15 train batch=47/93 starting
+batch_loss=363.3353 |g|=119.150 time=0.58s
+epoch=5/15 train batch=48/93 starting
+batch_loss=377.5106 |g|=173.073 time=0.58s
+epoch=5/15 train batch=49/93 starting
+batch_loss=367.4616 |g|=140.234 time=0.59s
+epoch=5/15 train batch=50/93 starting
+batch_loss=393.2849 |g|=344.793 time=0.58s
+epoch=5/15 train batch=51/93 starting
+batch_loss=371.9715 |g|=246.648 time=0.58s
+epoch=5/15 train batch=52/93 starting
+batch_loss=361.2646 |g|=151.429 time=0.58s
+epoch=5/15 train batch=53/93 starting
+batch_loss=360.8979 |g|=121.074 time=0.59s
+epoch=5/15 train batch=54/93 starting
+batch_loss=373.7007 |g|=135.855 time=0.58s
+epoch=5/15 train batch=55/93 starting
+batch_loss=363.6156 |g|=103.219 time=0.58s
+epoch=5/15 train batch=56/93 starting
+batch_loss=366.2975 |g|=133.966 time=0.58s
+epoch=5/15 train batch=57/93 starting
+batch_loss=373.2613 |g|=263.892 time=0.58s
+epoch=5/15 train batch=58/93 starting
+batch_loss=369.6679 |g|=216.449 time=0.59s
+epoch=5/15 train batch=59/93 starting
+batch_loss=365.8326 |g|=177.652 time=0.59s
+epoch=5/15 train batch=60/93 starting
+batch_loss=370.3897 |g|=87.743 time=0.58s
+epoch=5/15 train batch=61/93 starting
+batch_loss=370.3751 |g|=234.922 time=0.58s
+epoch=5/15 train batch=62/93 starting
+batch_loss=367.7180 |g|=99.707 time=0.58s
+epoch=5/15 train batch=63/93 starting
+batch_loss=380.9869 |g|=163.371 time=0.60s
+epoch=5/15 train batch=64/93 starting
+batch_loss=359.0477 |g|=86.517 time=0.59s
+epoch=5/15 train batch=65/93 starting
+batch_loss=366.6211 |g|=127.169 time=0.59s
+epoch=5/15 train batch=66/93 starting
+batch_loss=362.6716 |g|=129.306 time=0.75s
+epoch=5/15 train batch=67/93 starting
+batch_loss=366.5659 |g|=128.085 time=0.59s
+epoch=5/15 train batch=68/93 starting
+batch_loss=363.9841 |g|=83.575 time=0.58s
+epoch=5/15 train batch=69/93 starting
+batch_loss=357.7737 |g|=149.462 time=0.58s
+epoch=5/15 train batch=70/93 starting
+batch_loss=378.0634 |g|=176.447 time=0.58s
+epoch=5/15 train batch=71/93 starting
+batch_loss=361.9454 |g|=99.114 time=0.60s
+epoch=5/15 train batch=72/93 starting
+batch_loss=360.8085 |g|=60.161 time=0.59s
+epoch=5/15 train batch=73/93 starting
+batch_loss=372.3312 |g|=290.565 time=0.58s
+epoch=5/15 train batch=74/93 starting
+batch_loss=365.5624 |g|=161.636 time=0.58s
+epoch=5/15 train batch=75/93 starting
+batch_loss=360.6693 |g|=116.298 time=0.58s
+epoch=5/15 train batch=76/93 starting
+batch_loss=360.2498 |g|=40.257 time=0.58s
+epoch=5/15 train batch=77/93 starting
+batch_loss=359.3204 |g|=159.174 time=0.59s
+epoch=5/15 train batch=78/93 starting
+batch_loss=375.8947 |g|=146.932 time=0.58s
+epoch=5/15 train batch=79/93 starting
+batch_loss=367.2613 |g|=146.759 time=0.58s
+epoch=5/15 train batch=80/93 starting
+batch_loss=359.5104 |g|=105.148 time=0.58s
+epoch=5/15 train batch=81/93 starting
+batch_loss=363.2438 |g|=122.018 time=0.59s
+epoch=5/15 train batch=82/93 starting
+batch_loss=388.6680 |g|=231.317 time=0.58s
+epoch=5/15 train batch=83/93 starting
+batch_loss=359.2231 |g|=146.277 time=0.58s
+epoch=5/15 train batch=84/93 starting
+batch_loss=361.8520 |g|=84.782 time=0.58s
+epoch=5/15 train batch=85/93 starting
+batch_loss=365.2567 |g|=146.413 time=0.58s
+epoch=5/15 train batch=86/93 starting
+batch_loss=368.9471 |g|=70.738 time=0.58s
+epoch=5/15 train batch=87/93 starting
+batch_loss=370.3830 |g|=167.608 time=0.59s
+epoch=5/15 train batch=88/93 starting
+batch_loss=363.7164 |g|=132.570 time=0.59s
+epoch=5/15 train batch=89/93 starting
+batch_loss=358.5454 |g|=90.462 time=0.58s
+epoch=5/15 train batch=90/93 starting
+batch_loss=363.8759 |g|=38.749 time=0.58s
+epoch=5/15 train batch=91/93 starting
+batch_loss=369.6553 |g|=105.427 time=0.59s
+epoch=5/15 train batch=92/93 starting
+batch_loss=368.1772 |g|=122.563 time=0.58s
+epoch=5/15 train batch=93/93 starting
+batch_loss=368.2064 |g|=219.834 time=0.58s
+epoch=5/15 val batch=1/19 starting
+epoch=5/15 val batch=1/19 loss=386.1161 time=0.10s
+epoch=5/15 val batch=2/19 starting
+epoch=5/15 val batch=2/19 loss=372.4009 time=0.10s
+epoch=5/15 val batch=3/19 starting
+epoch=5/15 val batch=3/19 loss=371.5057 time=0.10s
+epoch=5/15 val batch=4/19 starting
+epoch=5/15 val batch=4/19 loss=357.6068 time=0.10s
+epoch=5/15 val batch=5/19 starting
+epoch=5/15 val batch=5/19 loss=361.9184 time=0.10s
+epoch=5/15 val batch=6/19 starting
+epoch=5/15 val batch=6/19 loss=372.5547 time=0.10s
+epoch=5/15 val batch=7/19 starting
+epoch=5/15 val batch=7/19 loss=368.5089 time=0.10s
+epoch=5/15 val batch=8/19 starting
+epoch=5/15 val batch=8/19 loss=372.1994 time=0.10s
+epoch=5/15 val batch=9/19 starting
+epoch=5/15 val batch=9/19 loss=379.6859 time=0.10s
+epoch=5/15 val batch=10/19 starting
+epoch=5/15 val batch=10/19 loss=373.9488 time=0.10s
+epoch=5/15 val batch=11/19 starting
+epoch=5/15 val batch=11/19 loss=372.2244 time=0.10s
+epoch=5/15 val batch=12/19 starting
+epoch=5/15 val batch=12/19 loss=367.8356 time=0.10s
+epoch=5/15 val batch=13/19 starting
+epoch=5/15 val batch=13/19 loss=363.5912 time=0.10s
+epoch=5/15 val batch=14/19 starting
+epoch=5/15 val batch=14/19 loss=367.5933 time=0.10s
+epoch=5/15 val batch=15/19 starting
+epoch=5/15 val batch=15/19 loss=359.6140 time=0.10s
+epoch=5/15 val batch=16/19 starting
+epoch=5/15 val batch=16/19 loss=372.2628 time=0.10s
+epoch=5/15 val batch=17/19 starting
+epoch=5/15 val batch=17/19 loss=369.1607 time=0.10s
+epoch=5/15 val batch=18/19 starting
+epoch=5/15 val batch=18/19 loss=356.5926 time=0.10s
+epoch=5/15 val batch=19/19 starting
+epoch=5/15 val batch=19/19 loss=388.9130 time=0.10s
+epoch=5/15 test batch=1/19 starting
+epoch=5/15 test batch=1/19 loss=366.8799 time=0.10s
+epoch=5/15 test batch=2/19 starting
+epoch=5/15 test batch=2/19 loss=361.2334 time=0.10s
+epoch=5/15 test batch=3/19 starting
+epoch=5/15 test batch=3/19 loss=371.6371 time=0.10s
+epoch=5/15 test batch=4/19 starting
+epoch=5/15 test batch=4/19 loss=384.5992 time=0.10s
+epoch=5/15 test batch=5/19 starting
+epoch=5/15 test batch=5/19 loss=363.3831 time=0.10s
+epoch=5/15 test batch=6/19 starting
+epoch=5/15 test batch=6/19 loss=367.4152 time=0.10s
+epoch=5/15 test batch=7/19 starting
+epoch=5/15 test batch=7/19 loss=362.3194 time=0.10s
+epoch=5/15 test batch=8/19 starting
+epoch=5/15 test batch=8/19 loss=360.6111 time=0.10s
+epoch=5/15 test batch=9/19 starting
+epoch=5/15 test batch=9/19 loss=362.8237 time=0.10s
+epoch=5/15 test batch=10/19 starting
+epoch=5/15 test batch=10/19 loss=366.0177 time=0.10s
+epoch=5/15 test batch=11/19 starting
+epoch=5/15 test batch=11/19 loss=372.1552 time=0.10s
+epoch=5/15 test batch=12/19 starting
+epoch=5/15 test batch=12/19 loss=363.3456 time=0.10s
+epoch=5/15 test batch=13/19 starting
+epoch=5/15 test batch=13/19 loss=370.3352 time=0.10s
+epoch=5/15 test batch=14/19 starting
+epoch=5/15 test batch=14/19 loss=376.9193 time=0.10s
+epoch=5/15 test batch=15/19 starting
+epoch=5/15 test batch=15/19 loss=371.1941 time=0.10s
+epoch=5/15 test batch=16/19 starting
+epoch=5/15 test batch=16/19 loss=367.2429 time=0.10s
+epoch=5/15 test batch=17/19 starting
+epoch=5/15 test batch=17/19 loss=360.1790 time=0.10s
+epoch=5/15 test batch=18/19 starting
+epoch=5/15 test batch=18/19 loss=369.3360 time=0.10s
+epoch=5/15 test batch=19/19 starting
+epoch=5/15 test batch=19/19 loss=371.0697 time=0.10s
+epoch=5/15 train=367.7111±6.757 val=369.9736 test=367.7829 |g|=148.106 theta_mae=0.3460 omega_mae=0.1896 peak=3969MiB time=58.6s
+epoch=6/15 train batch=1/93 starting
+batch_loss=360.4009 |g|=97.995 time=0.59s
+epoch=6/15 train batch=2/93 starting
+batch_loss=360.6410 |g|=83.432 time=0.58s
+epoch=6/15 train batch=3/93 starting
+batch_loss=360.9903 |g|=145.861 time=0.58s
+epoch=6/15 train batch=4/93 starting
+batch_loss=371.3082 |g|=90.736 time=0.58s
+epoch=6/15 train batch=5/93 starting
+batch_loss=363.9248 |g|=87.584 time=0.57s
+epoch=6/15 train batch=6/93 starting
+batch_loss=373.8601 |g|=304.434 time=0.58s
+epoch=6/15 train batch=7/93 starting
+batch_loss=366.8951 |g|=209.186 time=0.59s
+epoch=6/15 train batch=8/93 starting
+batch_loss=364.3807 |g|=184.037 time=0.58s
+epoch=6/15 train batch=9/93 starting
+batch_loss=368.0792 |g|=125.345 time=0.58s
+epoch=6/15 train batch=10/93 starting
+batch_loss=354.6628 |g|=123.778 time=0.58s
+epoch=6/15 train batch=11/93 starting
+batch_loss=363.9439 |g|=125.798 time=0.58s
+epoch=6/15 train batch=12/93 starting
+batch_loss=365.7373 |g|=213.642 time=0.58s
+epoch=6/15 train batch=13/93 starting
+batch_loss=362.1055 |g|=168.750 time=0.58s
+epoch=6/15 train batch=14/93 starting
+batch_loss=372.5995 |g|=177.904 time=0.59s
+epoch=6/15 train batch=15/93 starting
+batch_loss=356.6068 |g|=205.266 time=0.57s
+epoch=6/15 train batch=16/93 starting
+batch_loss=365.8752 |g|=127.629 time=0.58s
+epoch=6/15 train batch=17/93 starting
+batch_loss=363.2553 |g|=175.758 time=0.58s
+epoch=6/15 train batch=18/93 starting
+batch_loss=369.4083 |g|=307.301 time=0.58s
+epoch=6/15 train batch=19/93 starting
+batch_loss=366.6673 |g|=122.044 time=0.58s
+epoch=6/15 train batch=20/93 starting
+batch_loss=361.1047 |g|=76.615 time=0.58s
+epoch=6/15 train batch=21/93 starting
+batch_loss=363.0375 |g|=77.441 time=0.58s
+epoch=6/15 train batch=22/93 starting
+batch_loss=371.4812 |g|=75.139 time=0.58s
+epoch=6/15 train batch=23/93 starting
+batch_loss=362.3456 |g|=120.179 time=0.59s
+epoch=6/15 train batch=24/93 starting
+batch_loss=362.1693 |g|=148.892 time=0.58s
+epoch=6/15 train batch=25/93 starting
+batch_loss=367.9048 |g|=89.594 time=0.58s
+epoch=6/15 train batch=26/93 starting
+batch_loss=375.9258 |g|=182.813 time=0.59s
+epoch=6/15 train batch=27/93 starting
+batch_loss=353.2425 |g|=92.996 time=0.58s
+epoch=6/15 train batch=28/93 starting
+batch_loss=366.6367 |g|=133.202 time=0.58s
+epoch=6/15 train batch=29/93 starting
+batch_loss=376.6249 |g|=288.538 time=0.58s
+epoch=6/15 train batch=30/93 starting
+batch_loss=358.8930 |g|=92.170 time=0.59s
+epoch=6/15 train batch=31/93 starting
+batch_loss=366.2035 |g|=248.821 time=0.59s
+epoch=6/15 train batch=32/93 starting
+batch_loss=354.2766 |g|=123.147 time=0.58s
+epoch=6/15 train batch=33/93 starting
+batch_loss=362.2047 |g|=166.754 time=0.58s
+epoch=6/15 train batch=34/93 starting
+batch_loss=365.7911 |g|=136.159 time=0.59s
+epoch=6/15 train batch=35/93 starting
+batch_loss=367.3437 |g|=112.580 time=0.58s
+epoch=6/15 train batch=36/93 starting
+batch_loss=360.3925 |g|=148.019 time=0.58s
+epoch=6/15 train batch=37/93 starting
+batch_loss=370.0164 |g|=137.409 time=0.58s
+epoch=6/15 train batch=38/93 starting
+batch_loss=356.7375 |g|=130.553 time=0.58s
+epoch=6/15 train batch=39/93 starting
+batch_loss=362.7776 |g|=87.027 time=0.58s
+epoch=6/15 train batch=40/93 starting
+batch_loss=368.6325 |g|=118.393 time=0.58s
+epoch=6/15 train batch=41/93 starting
+batch_loss=358.4932 |g|=161.054 time=0.58s
+epoch=6/15 train batch=42/93 starting
+batch_loss=367.9534 |g|=180.913 time=0.58s
+epoch=6/15 train batch=43/93 starting
+batch_loss=360.0702 |g|=133.532 time=0.58s
+epoch=6/15 train batch=44/93 starting
+batch_loss=369.8621 |g|=130.726 time=0.58s
+epoch=6/15 train batch=45/93 starting
+batch_loss=360.5203 |g|=135.415 time=0.59s
+epoch=6/15 train batch=46/93 starting
+batch_loss=365.1337 |g|=207.703 time=0.59s
+epoch=6/15 train batch=47/93 starting
+batch_loss=360.6368 |g|=203.132 time=0.58s
+epoch=6/15 train batch=48/93 starting
+batch_loss=371.4750 |g|=126.409 time=0.58s
+epoch=6/15 train batch=49/93 starting
+batch_loss=365.8659 |g|=157.609 time=0.58s
+epoch=6/15 train batch=50/93 starting
+batch_loss=376.4890 |g|=301.528 time=0.57s
+epoch=6/15 train batch=51/93 starting
+batch_loss=362.8139 |g|=93.816 time=0.59s
+epoch=6/15 train batch=52/93 starting
+batch_loss=364.8517 |g|=135.994 time=0.58s
+epoch=6/15 train batch=53/93 starting
+batch_loss=362.3034 |g|=243.071 time=0.59s
+epoch=6/15 train batch=54/93 starting
+batch_loss=373.5067 |g|=196.270 time=0.59s
+epoch=6/15 train batch=55/93 starting
+batch_loss=360.5147 |g|=219.467 time=0.59s
+epoch=6/15 train batch=56/93 starting
+batch_loss=364.9897 |g|=136.117 time=0.59s
+epoch=6/15 train batch=57/93 starting
+batch_loss=366.0369 |g|=294.751 time=0.57s
+epoch=6/15 train batch=58/93 starting
+batch_loss=364.8906 |g|=205.359 time=0.59s
+epoch=6/15 train batch=59/93 starting
+batch_loss=378.6396 |g|=178.641 time=0.58s
+epoch=6/15 train batch=60/93 starting
+batch_loss=360.8080 |g|=199.639 time=0.58s
+epoch=6/15 train batch=61/93 starting
+batch_loss=365.0832 |g|=209.669 time=0.58s
+epoch=6/15 train batch=62/93 starting
+batch_loss=365.9157 |g|=204.290 time=0.58s
+epoch=6/15 train batch=63/93 starting
+batch_loss=364.2574 |g|=160.242 time=0.59s
+epoch=6/15 train batch=64/93 starting
+batch_loss=362.8200 |g|=170.787 time=0.58s
+epoch=6/15 train batch=65/93 starting
+batch_loss=359.4119 |g|=213.778 time=0.59s
+epoch=6/15 train batch=66/93 starting
+batch_loss=370.0466 |g|=163.134 time=0.59s
+epoch=6/15 train batch=67/93 starting
+batch_loss=362.4637 |g|=155.802 time=0.58s
+epoch=6/15 train batch=68/93 starting
+batch_loss=356.7398 |g|=116.285 time=0.59s
+epoch=6/15 train batch=69/93 starting
+batch_loss=377.4935 |g|=177.137 time=0.59s
+epoch=6/15 train batch=70/93 starting
+batch_loss=373.0338 |g|=167.741 time=0.58s
+epoch=6/15 train batch=71/93 starting
+batch_loss=366.7658 |g|=166.899 time=0.58s
+epoch=6/15 train batch=72/93 starting
+batch_loss=360.4038 |g|=129.464 time=0.59s
+epoch=6/15 train batch=73/93 starting
+batch_loss=361.8694 |g|=231.956 time=0.58s
+epoch=6/15 train batch=74/93 starting
+batch_loss=357.6106 |g|=115.035 time=0.59s
+epoch=6/15 train batch=75/93 starting
+batch_loss=369.7649 |g|=154.698 time=0.59s
+epoch=6/15 train batch=76/93 starting
+batch_loss=363.4582 |g|=124.168 time=0.58s
+epoch=6/15 train batch=77/93 starting
+batch_loss=361.5275 |g|=71.445 time=0.58s
+epoch=6/15 train batch=78/93 starting
+batch_loss=367.6002 |g|=207.137 time=0.58s
+epoch=6/15 train batch=79/93 starting
+batch_loss=364.7701 |g|=217.713 time=0.58s
+epoch=6/15 train batch=80/93 starting
+batch_loss=366.0208 |g|=134.316 time=0.58s
+epoch=6/15 train batch=81/93 starting
+batch_loss=372.4770 |g|=112.244 time=0.59s
+epoch=6/15 train batch=82/93 starting
+batch_loss=354.5522 |g|=187.698 time=0.58s
+epoch=6/15 train batch=83/93 starting
+batch_loss=360.1834 |g|=148.968 time=0.59s
+epoch=6/15 train batch=84/93 starting
+batch_loss=363.3333 |g|=86.850 time=0.58s
+epoch=6/15 train batch=85/93 starting
+batch_loss=365.0579 |g|=171.172 time=0.58s
+epoch=6/15 train batch=86/93 starting
+batch_loss=357.9965 |g|=175.766 time=0.58s
+epoch=6/15 train batch=87/93 starting
+batch_loss=357.4788 |g|=159.061 time=0.59s
+epoch=6/15 train batch=88/93 starting
+batch_loss=362.3379 |g|=196.389 time=0.58s
+epoch=6/15 train batch=89/93 starting
+batch_loss=359.3832 |g|=144.137 time=0.58s
+epoch=6/15 train batch=90/93 starting
+batch_loss=381.1326 |g|=332.048 time=0.57s
+epoch=6/15 train batch=91/93 starting
+batch_loss=367.7634 |g|=223.062 time=0.58s
+epoch=6/15 train batch=92/93 starting
+batch_loss=363.7430 |g|=352.254 time=0.57s
+epoch=6/15 train batch=93/93 starting
+batch_loss=360.1125 |g|=119.478 time=0.58s
+epoch=6/15 val batch=1/19 starting
+epoch=6/15 val batch=1/19 loss=376.5038 time=0.10s
+epoch=6/15 val batch=2/19 starting
+epoch=6/15 val batch=2/19 loss=368.8469 time=0.10s
+epoch=6/15 val batch=3/19 starting
+epoch=6/15 val batch=3/19 loss=367.7288 time=0.10s
+epoch=6/15 val batch=4/19 starting
+epoch=6/15 val batch=4/19 loss=354.9669 time=0.10s
+epoch=6/15 val batch=5/19 starting
+epoch=6/15 val batch=5/19 loss=357.1570 time=0.10s
+epoch=6/15 val batch=6/19 starting
+epoch=6/15 val batch=6/19 loss=368.6111 time=0.10s
+epoch=6/15 val batch=7/19 starting
+epoch=6/15 val batch=7/19 loss=363.8704 time=0.10s
+epoch=6/15 val batch=8/19 starting
+epoch=6/15 val batch=8/19 loss=366.9427 time=0.10s
+epoch=6/15 val batch=9/19 starting
+epoch=6/15 val batch=9/19 loss=373.7287 time=0.10s
+epoch=6/15 val batch=10/19 starting
+epoch=6/15 val batch=10/19 loss=368.7008 time=0.10s
+epoch=6/15 val batch=11/19 starting
+epoch=6/15 val batch=11/19 loss=369.1374 time=0.10s
+epoch=6/15 val batch=12/19 starting
+epoch=6/15 val batch=12/19 loss=360.6093 time=0.10s
+epoch=6/15 val batch=13/19 starting
+epoch=6/15 val batch=13/19 loss=359.7998 time=0.10s
+epoch=6/15 val batch=14/19 starting
+epoch=6/15 val batch=14/19 loss=360.0098 time=0.10s
+epoch=6/15 val batch=15/19 starting
+epoch=6/15 val batch=15/19 loss=360.5875 time=0.10s
+epoch=6/15 val batch=16/19 starting
+epoch=6/15 val batch=16/19 loss=365.3558 time=0.10s
+epoch=6/15 val batch=17/19 starting
+epoch=6/15 val batch=17/19 loss=364.7570 time=0.10s
+epoch=6/15 val batch=18/19 starting
+epoch=6/15 val batch=18/19 loss=356.7680 time=0.10s
+epoch=6/15 val batch=19/19 starting
+epoch=6/15 val batch=19/19 loss=384.9444 time=0.10s
+epoch=6/15 test batch=1/19 starting
+epoch=6/15 test batch=1/19 loss=359.8774 time=0.10s
+epoch=6/15 test batch=2/19 starting
+epoch=6/15 test batch=2/19 loss=359.3813 time=0.10s
+epoch=6/15 test batch=3/19 starting
+epoch=6/15 test batch=3/19 loss=366.7229 time=0.10s
+epoch=6/15 test batch=4/19 starting
+epoch=6/15 test batch=4/19 loss=373.3892 time=0.10s
+epoch=6/15 test batch=5/19 starting
+epoch=6/15 test batch=5/19 loss=359.2856 time=0.10s
+epoch=6/15 test batch=6/19 starting
+epoch=6/15 test batch=6/19 loss=361.3210 time=0.10s
+epoch=6/15 test batch=7/19 starting
+epoch=6/15 test batch=7/19 loss=357.5133 time=0.10s
+epoch=6/15 test batch=8/19 starting
+epoch=6/15 test batch=8/19 loss=352.7805 time=0.10s
+epoch=6/15 test batch=9/19 starting
+epoch=6/15 test batch=9/19 loss=357.7405 time=0.10s
+epoch=6/15 test batch=10/19 starting
+epoch=6/15 test batch=10/19 loss=359.5293 time=0.10s
+epoch=6/15 test batch=11/19 starting
+epoch=6/15 test batch=11/19 loss=365.8237 time=0.10s
+epoch=6/15 test batch=12/19 starting
+epoch=6/15 test batch=12/19 loss=356.7012 time=0.10s
+epoch=6/15 test batch=13/19 starting
+epoch=6/15 test batch=13/19 loss=362.1842 time=0.10s
+epoch=6/15 test batch=14/19 starting
+epoch=6/15 test batch=14/19 loss=369.5064 time=0.10s
+epoch=6/15 test batch=15/19 starting
+epoch=6/15 test batch=15/19 loss=364.6202 time=0.10s
+epoch=6/15 test batch=16/19 starting
+epoch=6/15 test batch=16/19 loss=360.0100 time=0.10s
+epoch=6/15 test batch=17/19 starting
+epoch=6/15 test batch=17/19 loss=361.1260 time=0.10s
+epoch=6/15 test batch=18/19 starting
+epoch=6/15 test batch=18/19 loss=361.8319 time=0.10s
+epoch=6/15 test batch=19/19 starting
+epoch=6/15 test batch=19/19 loss=364.1560 time=0.10s
+epoch=6/15 train=364.7693±5.659 val=365.4821 test=361.7313 |g|=163.493 theta_mae=0.3509 omega_mae=0.1897 peak=3969MiB time=58.3s
+epoch=7/15 train batch=1/93 starting
+batch_loss=372.8512 |g|=75.435 time=0.58s
+epoch=7/15 train batch=2/93 starting
+batch_loss=355.9426 |g|=165.599 time=0.58s
+epoch=7/15 train batch=3/93 starting
+batch_loss=369.5243 |g|=121.182 time=0.58s
+epoch=7/15 train batch=4/93 starting
+batch_loss=367.0067 |g|=146.846 time=0.58s
+epoch=7/15 train batch=5/93 starting
+batch_loss=353.1715 |g|=140.839 time=0.58s
+epoch=7/15 train batch=6/93 starting
+batch_loss=363.1127 |g|=246.271 time=0.59s
+epoch=7/15 train batch=7/93 starting
+batch_loss=358.1258 |g|=144.594 time=0.58s
+epoch=7/15 train batch=8/93 starting
+batch_loss=361.1980 |g|=180.298 time=0.59s
+epoch=7/15 train batch=9/93 starting
+batch_loss=356.8490 |g|=193.831 time=0.58s
+epoch=7/15 train batch=10/93 starting
+batch_loss=367.3231 |g|=231.871 time=0.58s
+epoch=7/15 train batch=11/93 starting
+batch_loss=356.8958 |g|=232.585 time=0.58s
+epoch=7/15 train batch=12/93 starting
+batch_loss=361.5365 |g|=188.562 time=0.59s
+epoch=7/15 train batch=13/93 starting
+batch_loss=358.7686 |g|=113.490 time=0.58s
+epoch=7/15 train batch=14/93 starting
+batch_loss=354.9446 |g|=105.304 time=0.58s
+epoch=7/15 train batch=15/93 starting
+batch_loss=367.4680 |g|=210.017 time=0.58s
+epoch=7/15 train batch=16/93 starting
+batch_loss=362.4992 |g|=188.369 time=0.58s
+epoch=7/15 train batch=17/93 starting
+batch_loss=360.5352 |g|=128.256 time=0.59s
+epoch=7/15 train batch=18/93 starting
+batch_loss=358.1483 |g|=232.137 time=0.58s
+epoch=7/15 train batch=19/93 starting
+batch_loss=358.4607 |g|=136.887 time=0.59s
+epoch=7/15 train batch=20/93 starting
+batch_loss=364.3429 |g|=132.635 time=0.58s
+epoch=7/15 train batch=21/93 starting
+batch_loss=357.9900 |g|=124.013 time=0.58s
+epoch=7/15 train batch=22/93 starting
+batch_loss=353.2691 |g|=179.227 time=0.59s
+epoch=7/15 train batch=23/93 starting
+batch_loss=359.6414 |g|=226.617 time=0.59s
+epoch=7/15 train batch=24/93 starting
+batch_loss=362.7361 |g|=199.228 time=0.58s
+epoch=7/15 train batch=25/93 starting
+batch_loss=362.9716 |g|=206.925 time=0.58s
+epoch=7/15 train batch=26/93 starting
+batch_loss=353.2840 |g|=192.113 time=0.58s
+epoch=7/15 train batch=27/93 starting
+batch_loss=364.5160 |g|=112.730 time=0.58s
+epoch=7/15 train batch=28/93 starting
+batch_loss=363.7283 |g|=115.214 time=0.59s
+epoch=7/15 train batch=29/93 starting
+batch_loss=369.6845 |g|=251.044 time=0.58s
+epoch=7/15 train batch=30/93 starting
+batch_loss=359.2729 |g|=298.612 time=0.58s
+epoch=7/15 train batch=31/93 starting
+batch_loss=348.7168 |g|=224.631 time=0.58s
+epoch=7/15 train batch=32/93 starting
+batch_loss=354.2430 |g|=147.850 time=0.59s
+epoch=7/15 train batch=33/93 starting
+batch_loss=350.1515 |g|=121.843 time=0.58s
+epoch=7/15 train batch=34/93 starting
+batch_loss=359.0648 |g|=236.911 time=0.58s
+epoch=7/15 train batch=35/93 starting
+batch_loss=360.0622 |g|=348.720 time=0.58s
+epoch=7/15 train batch=36/93 starting
+batch_loss=363.5496 |g|=186.590 time=0.58s
+epoch=7/15 train batch=37/93 starting
+batch_loss=356.3485 |g|=164.213 time=0.59s
+epoch=7/15 train batch=38/93 starting
+batch_loss=356.7733 |g|=159.536 time=0.58s
+epoch=7/15 train batch=39/93 starting
+batch_loss=353.9401 |g|=165.177 time=0.58s
+epoch=7/15 train batch=40/93 starting
+batch_loss=354.8231 |g|=167.476 time=0.58s
+epoch=7/15 train batch=41/93 starting
+batch_loss=364.6197 |g|=144.118 time=0.59s
+epoch=7/15 train batch=42/93 starting
+batch_loss=363.6545 |g|=205.539 time=0.58s
+epoch=7/15 train batch=43/93 starting
+batch_loss=363.6065 |g|=304.760 time=0.58s
+epoch=7/15 train batch=44/93 starting
+batch_loss=359.0602 |g|=159.875 time=0.58s
+epoch=7/15 train batch=45/93 starting
+batch_loss=359.7638 |g|=146.573 time=0.59s
+epoch=7/15 train batch=46/93 starting
+batch_loss=357.5022 |g|=135.563 time=0.58s
+epoch=7/15 train batch=47/93 starting
+batch_loss=359.0523 |g|=197.866 time=0.58s
+epoch=7/15 train batch=48/93 starting
+batch_loss=357.2713 |g|=375.363 time=0.59s
+epoch=7/15 train batch=49/93 starting
+batch_loss=364.8267 |g|=384.925 time=0.59s
+epoch=7/15 train batch=50/93 starting
+batch_loss=362.2962 |g|=481.661 time=0.58s
+epoch=7/15 train batch=51/93 starting
+batch_loss=353.9368 |g|=162.576 time=0.58s
+epoch=7/15 train batch=52/93 starting
+batch_loss=356.0948 |g|=296.462 time=0.58s
+epoch=7/15 train batch=53/93 starting
+batch_loss=356.9441 |g|=334.094 time=0.58s
+epoch=7/15 train batch=54/93 starting
+batch_loss=357.3332 |g|=379.318 time=0.58s
+epoch=7/15 train batch=55/93 starting
+batch_loss=365.1848 |g|=314.446 time=0.58s
+epoch=7/15 train batch=56/93 starting
+batch_loss=361.7074 |g|=547.174 time=0.59s
+epoch=7/15 train batch=57/93 starting
+batch_loss=356.6602 |g|=518.121 time=0.59s
+epoch=7/15 train batch=58/93 starting
+batch_loss=353.8585 |g|=226.389 time=0.58s
+epoch=7/15 train batch=59/93 starting
+batch_loss=357.0431 |g|=179.967 time=0.59s
+epoch=7/15 train batch=60/93 starting
+batch_loss=351.1750 |g|=237.655 time=0.59s
+epoch=7/15 train batch=61/93 starting
+batch_loss=356.9902 |g|=136.118 time=0.58s
+epoch=7/15 train batch=62/93 starting
+batch_loss=356.7039 |g|=344.162 time=0.58s
+epoch=7/15 train batch=63/93 starting
+batch_loss=358.1011 |g|=173.534 time=0.58s
+epoch=7/15 train batch=64/93 starting
+batch_loss=352.2345 |g|=238.934 time=0.58s
+epoch=7/15 train batch=65/93 starting
+batch_loss=350.9790 |g|=150.889 time=0.58s
+epoch=7/15 train batch=66/93 starting
+batch_loss=356.7258 |g|=427.827 time=0.59s
+epoch=7/15 train batch=67/93 starting
+batch_loss=360.6129 |g|=493.027 time=0.58s
+epoch=7/15 train batch=68/93 starting
+batch_loss=358.1797 |g|=232.297 time=0.59s
+epoch=7/15 train batch=69/93 starting
+batch_loss=353.8629 |g|=339.075 time=0.59s
+epoch=7/15 train batch=70/93 starting
+batch_loss=352.5629 |g|=96.366 time=0.59s
+epoch=7/15 train batch=71/93 starting
+batch_loss=350.1396 |g|=280.904 time=0.59s
+epoch=7/15 train batch=72/93 starting
+batch_loss=356.4519 |g|=625.563 time=0.61s
+epoch=7/15 train batch=73/93 starting
+batch_loss=357.1045 |g|=722.100 time=0.59s
+epoch=7/15 train batch=74/93 starting
+batch_loss=355.1043 |g|=478.544 time=0.58s
+epoch=7/15 train batch=75/93 starting
+batch_loss=352.0396 |g|=281.943 time=0.75s
+epoch=7/15 train batch=76/93 starting
+batch_loss=350.2146 |g|=141.912 time=0.59s
+epoch=7/15 train batch=77/93 starting
+batch_loss=353.1675 |g|=294.263 time=0.58s
+epoch=7/15 train batch=78/93 starting
+batch_loss=356.6000 |g|=424.370 time=0.59s
+epoch=7/15 train batch=79/93 starting
+batch_loss=351.9389 |g|=191.849 time=0.59s
+epoch=7/15 train batch=80/93 starting
+batch_loss=351.5412 |g|=173.424 time=0.59s
+epoch=7/15 train batch=81/93 starting
+batch_loss=348.8629 |g|=307.961 time=0.59s
+epoch=7/15 train batch=82/93 starting
+batch_loss=354.0482 |g|=206.240 time=0.58s
+epoch=7/15 train batch=83/93 starting
+batch_loss=354.5212 |g|=395.537 time=0.58s
+epoch=7/15 train batch=84/93 starting
+batch_loss=355.4333 |g|=369.159 time=0.59s
+epoch=7/15 train batch=85/93 starting
+batch_loss=356.0344 |g|=315.446 time=0.58s
+epoch=7/15 train batch=86/93 starting
+batch_loss=352.6479 |g|=578.107 time=0.58s
+epoch=7/15 train batch=87/93 starting
+batch_loss=352.7989 |g|=482.586 time=0.58s
+epoch=7/15 train batch=88/93 starting
+batch_loss=350.1553 |g|=224.520 time=0.58s
+epoch=7/15 train batch=89/93 starting
+batch_loss=347.2656 |g|=258.382 time=0.58s
+epoch=7/15 train batch=90/93 starting
+batch_loss=345.8366 |g|=379.592 time=0.59s
+epoch=7/15 train batch=91/93 starting
+batch_loss=349.4014 |g|=484.872 time=0.59s
+epoch=7/15 train batch=92/93 starting
+batch_loss=352.3805 |g|=375.051 time=0.59s
+epoch=7/15 train batch=93/93 starting
+batch_loss=345.9790 |g|=260.488 time=0.59s
+epoch=7/15 val batch=1/19 starting
+epoch=7/15 val batch=1/19 loss=356.3128 time=0.10s
+epoch=7/15 val batch=2/19 starting
+epoch=7/15 val batch=2/19 loss=351.4159 time=0.10s
+epoch=7/15 val batch=3/19 starting
+epoch=7/15 val batch=3/19 loss=352.5374 time=0.10s
+epoch=7/15 val batch=4/19 starting
+epoch=7/15 val batch=4/19 loss=346.9798 time=0.10s
+epoch=7/15 val batch=5/19 starting
+epoch=7/15 val batch=5/19 loss=345.2652 time=0.10s
+epoch=7/15 val batch=6/19 starting
+epoch=7/15 val batch=6/19 loss=351.9846 time=0.10s
+epoch=7/15 val batch=7/19 starting
+epoch=7/15 val batch=7/19 loss=346.4571 time=0.10s
+epoch=7/15 val batch=8/19 starting
+epoch=7/15 val batch=8/19 loss=351.4972 time=0.10s
+epoch=7/15 val batch=9/19 starting
+epoch=7/15 val batch=9/19 loss=355.2269 time=0.10s
+epoch=7/15 val batch=10/19 starting
+epoch=7/15 val batch=10/19 loss=353.4988 time=0.10s
+epoch=7/15 val batch=11/19 starting
+epoch=7/15 val batch=11/19 loss=351.2708 time=0.10s
+epoch=7/15 val batch=12/19 starting
+epoch=7/15 val batch=12/19 loss=349.3641 time=0.10s
+epoch=7/15 val batch=13/19 starting
+epoch=7/15 val batch=13/19 loss=348.6382 time=0.10s
+epoch=7/15 val batch=14/19 starting
+epoch=7/15 val batch=14/19 loss=347.5838 time=0.10s
+epoch=7/15 val batch=15/19 starting
+epoch=7/15 val batch=15/19 loss=348.0795 time=0.10s
+epoch=7/15 val batch=16/19 starting
+epoch=7/15 val batch=16/19 loss=349.2758 time=0.10s
+epoch=7/15 val batch=17/19 starting
+epoch=7/15 val batch=17/19 loss=351.0254 time=0.10s
+epoch=7/15 val batch=18/19 starting
+epoch=7/15 val batch=18/19 loss=345.7362 time=0.10s
+epoch=7/15 val batch=19/19 starting
+epoch=7/15 val batch=19/19 loss=357.1111 time=0.10s
+epoch=7/15 test batch=1/19 starting
+epoch=7/15 test batch=1/19 loss=349.6373 time=0.10s
+epoch=7/15 test batch=2/19 starting
+epoch=7/15 test batch=2/19 loss=347.9437 time=0.10s
+epoch=7/15 test batch=3/19 starting
+epoch=7/15 test batch=3/19 loss=350.5070 time=0.10s
+epoch=7/15 test batch=4/19 starting
+epoch=7/15 test batch=4/19 loss=356.5674 time=0.10s
+epoch=7/15 test batch=5/19 starting
+epoch=7/15 test batch=5/19 loss=346.7718 time=0.10s
+epoch=7/15 test batch=6/19 starting
+epoch=7/15 test batch=6/19 loss=347.7528 time=0.10s
+epoch=7/15 test batch=7/19 starting
+epoch=7/15 test batch=7/19 loss=346.2805 time=0.10s
+epoch=7/15 test batch=8/19 starting
+epoch=7/15 test batch=8/19 loss=347.0433 time=0.10s
+epoch=7/15 test batch=9/19 starting
+epoch=7/15 test batch=9/19 loss=348.7907 time=0.10s
+epoch=7/15 test batch=10/19 starting
+epoch=7/15 test batch=10/19 loss=346.6761 time=0.10s
+epoch=7/15 test batch=11/19 starting
+epoch=7/15 test batch=11/19 loss=355.0962 time=0.10s
+epoch=7/15 test batch=12/19 starting
+epoch=7/15 test batch=12/19 loss=346.7785 time=0.10s
+epoch=7/15 test batch=13/19 starting
+epoch=7/15 test batch=13/19 loss=349.7919 time=0.10s
+epoch=7/15 test batch=14/19 starting
+epoch=7/15 test batch=14/19 loss=352.3934 time=0.10s
+epoch=7/15 test batch=15/19 starting
+epoch=7/15 test batch=15/19 loss=351.0468 time=0.10s
+epoch=7/15 test batch=16/19 starting
+epoch=7/15 test batch=16/19 loss=348.3596 time=0.10s
+epoch=7/15 test batch=17/19 starting
+epoch=7/15 test batch=17/19 loss=347.9016 time=0.10s
+epoch=7/15 test batch=18/19 starting
+epoch=7/15 test batch=18/19 loss=350.0535 time=0.10s
+epoch=7/15 test batch=19/19 starting
+epoch=7/15 test batch=19/19 loss=346.8340 time=0.10s
+epoch=7/15 train=357.3299±5.447 val=350.3991 test=349.3076 |g|=255.496 theta_mae=0.3395 omega_mae=0.1836 peak=3969MiB time=58.6s
+epoch=8/15 train batch=1/93 starting
+batch_loss=349.2016 |g|=186.729 time=0.58s
+epoch=8/15 train batch=2/93 starting
+batch_loss=348.4647 |g|=236.922 time=0.58s
+epoch=8/15 train batch=3/93 starting
+batch_loss=354.2419 |g|=380.945 time=0.59s
+epoch=8/15 train batch=4/93 starting
+batch_loss=350.6627 |g|=476.119 time=0.58s
+epoch=8/15 train batch=5/93 starting
+batch_loss=349.4088 |g|=268.061 time=0.59s
+epoch=8/15 train batch=6/93 starting
+batch_loss=349.2801 |g|=521.373 time=0.58s
+epoch=8/15 train batch=7/93 starting
+batch_loss=344.2129 |g|=215.164 time=0.58s
+epoch=8/15 train batch=8/93 starting
+batch_loss=349.7697 |g|=215.378 time=0.59s
+epoch=8/15 train batch=9/93 starting
+batch_loss=345.9954 |g|=238.809 time=0.59s
+epoch=8/15 train batch=10/93 starting
+batch_loss=345.8608 |g|=455.256 time=0.58s
+epoch=8/15 train batch=11/93 starting
+batch_loss=348.5920 |g|=377.345 time=0.58s
+epoch=8/15 train batch=12/93 starting
+batch_loss=346.7225 |g|=586.252 time=0.58s
+epoch=8/15 train batch=13/93 starting
+batch_loss=344.9372 |g|=745.023 time=0.58s
+epoch=8/15 train batch=14/93 starting
+batch_loss=343.2842 |g|=193.041 time=0.58s
+epoch=8/15 train batch=15/93 starting
+batch_loss=344.6207 |g|=155.658 time=0.58s
+epoch=8/15 train batch=16/93 starting
+batch_loss=346.4376 |g|=337.161 time=0.58s
+epoch=8/15 train batch=17/93 starting
+batch_loss=344.7786 |g|=553.255 time=0.58s
+epoch=8/15 train batch=18/93 starting
+batch_loss=345.0797 |g|=714.904 time=0.58s
+epoch=8/15 train batch=19/93 starting
+batch_loss=343.9304 |g|=299.712 time=0.59s
+epoch=8/15 train batch=20/93 starting
+batch_loss=341.4852 |g|=203.103 time=0.59s
+epoch=8/15 train batch=21/93 starting
+batch_loss=346.0357 |g|=579.123 time=0.59s
+epoch=8/15 train batch=22/93 starting
+batch_loss=345.1061 |g|=258.942 time=0.59s
+epoch=8/15 train batch=23/93 starting
+batch_loss=341.8937 |g|=486.398 time=0.58s
+epoch=8/15 train batch=24/93 starting
+batch_loss=344.8311 |g|=728.053 time=0.58s
+epoch=8/15 train batch=25/93 starting
+batch_loss=346.0040 |g|=584.821 time=0.58s
+epoch=8/15 train batch=26/93 starting
+batch_loss=344.1267 |g|=180.386 time=0.59s
+epoch=8/15 train batch=27/93 starting
+batch_loss=343.4122 |g|=348.438 time=0.57s
+epoch=8/15 train batch=28/93 starting
+batch_loss=345.2139 |g|=606.045 time=0.58s
+epoch=8/15 train batch=29/93 starting
+batch_loss=346.3134 |g|=544.630 time=0.58s
+epoch=8/15 train batch=30/93 starting
+batch_loss=346.5027 |g|=246.098 time=0.59s
+epoch=8/15 train batch=31/93 starting
+batch_loss=345.4226 |g|=775.107 time=0.58s
+epoch=8/15 train batch=32/93 starting
+batch_loss=346.6808 |g|=726.828 time=0.59s
+epoch=8/15 train batch=33/93 starting
+batch_loss=342.4254 |g|=415.072 time=0.59s
+epoch=8/15 train batch=34/93 starting
+batch_loss=344.7773 |g|=426.084 time=0.59s
+epoch=8/15 train batch=35/93 starting
+batch_loss=344.3900 |g|=700.666 time=0.58s
+epoch=8/15 train batch=36/93 starting
+batch_loss=342.9341 |g|=471.997 time=0.58s
+epoch=8/15 train batch=37/93 starting
+batch_loss=344.0350 |g|=376.810 time=0.59s
+epoch=8/15 train batch=38/93 starting
+batch_loss=342.9696 |g|=433.428 time=0.59s
+epoch=8/15 train batch=39/93 starting
+batch_loss=345.8748 |g|=593.149 time=0.58s
+epoch=8/15 train batch=40/93 starting
+batch_loss=343.6316 |g|=451.182 time=0.58s
+epoch=8/15 train batch=41/93 starting
+batch_loss=340.6999 |g|=275.832 time=0.58s
+epoch=8/15 train batch=42/93 starting
+batch_loss=341.0398 |g|=360.093 time=0.58s
+epoch=8/15 train batch=43/93 starting
+batch_loss=343.0269 |g|=477.017 time=0.59s
+epoch=8/15 train batch=44/93 starting
+batch_loss=343.6717 |g|=273.403 time=0.58s
+epoch=8/15 train batch=45/93 starting
+batch_loss=345.2973 |g|=506.624 time=0.58s
+epoch=8/15 train batch=46/93 starting
+batch_loss=345.3122 |g|=666.694 time=0.58s
+epoch=8/15 train batch=47/93 starting
+batch_loss=341.5608 |g|=281.719 time=0.58s
+epoch=8/15 train batch=48/93 starting
+batch_loss=345.8033 |g|=815.455 time=0.58s
+epoch=8/15 train batch=49/93 starting
+batch_loss=347.6840 |g|=1169.204 time=0.59s
+epoch=8/15 train batch=50/93 starting
+batch_loss=345.4889 |g|=885.459 time=0.59s
+epoch=8/15 train batch=51/93 starting
+batch_loss=342.2547 |g|=326.821 time=0.59s
+epoch=8/15 train batch=52/93 starting
+batch_loss=347.4445 |g|=867.551 time=0.58s
+epoch=8/15 train batch=53/93 starting
+batch_loss=346.0770 |g|=1038.343 time=0.59s
+epoch=8/15 train batch=54/93 starting
+batch_loss=344.6790 |g|=592.314 time=0.59s
+epoch=8/15 train batch=55/93 starting
+batch_loss=344.2048 |g|=445.402 time=0.58s
+epoch=8/15 train batch=56/93 starting
+batch_loss=342.5648 |g|=540.820 time=0.58s
+epoch=8/15 train batch=57/93 starting
+batch_loss=341.6387 |g|=296.512 time=0.58s
+epoch=8/15 train batch=58/93 starting
+batch_loss=343.8440 |g|=462.870 time=0.58s
+epoch=8/15 train batch=59/93 starting
+batch_loss=343.7662 |g|=803.515 time=0.58s
+epoch=8/15 train batch=60/93 starting
+batch_loss=343.1843 |g|=479.240 time=0.58s
+epoch=8/15 train batch=61/93 starting
+batch_loss=341.4427 |g|=251.021 time=0.59s
+epoch=8/15 train batch=62/93 starting
+batch_loss=344.9402 |g|=614.455 time=0.58s
+epoch=8/15 train batch=63/93 starting
+batch_loss=344.5587 |g|=326.526 time=0.59s
+epoch=8/15 train batch=64/93 starting
+batch_loss=343.8312 |g|=339.123 time=0.59s
+epoch=8/15 train batch=65/93 starting
+batch_loss=343.9552 |g|=335.167 time=0.58s
+epoch=8/15 train batch=66/93 starting
+batch_loss=344.3470 |g|=835.727 time=0.58s
+epoch=8/15 train batch=67/93 starting
+batch_loss=344.7225 |g|=491.906 time=0.58s
+epoch=8/15 train batch=68/93 starting
+batch_loss=340.8911 |g|=233.822 time=0.59s
+epoch=8/15 train batch=69/93 starting
+batch_loss=344.5887 |g|=975.303 time=0.58s
+epoch=8/15 train batch=70/93 starting
+batch_loss=351.1518 |g|=1488.287 time=0.58s
+epoch=8/15 train batch=71/93 starting
+batch_loss=343.8222 |g|=1253.793 time=0.59s
+epoch=8/15 train batch=72/93 starting
+batch_loss=341.9771 |g|=331.339 time=0.58s
+epoch=8/15 train batch=73/93 starting
+batch_loss=345.4290 |g|=709.179 time=0.59s
+epoch=8/15 train batch=74/93 starting
+batch_loss=344.1189 |g|=834.495 time=0.58s
+epoch=8/15 train batch=75/93 starting
+batch_loss=345.4716 |g|=1028.864 time=0.59s
+epoch=8/15 train batch=76/93 starting
+batch_loss=339.0400 |g|=391.953 time=0.58s
+epoch=8/15 train batch=77/93 starting
+batch_loss=343.6251 |g|=590.494 time=0.59s
+epoch=8/15 train batch=78/93 starting
+batch_loss=345.5151 |g|=1158.236 time=0.58s
+epoch=8/15 train batch=79/93 starting
+batch_loss=344.3882 |g|=930.440 time=0.59s
+epoch=8/15 train batch=80/93 starting
+batch_loss=342.7790 |g|=391.375 time=0.58s
+epoch=8/15 train batch=81/93 starting
+batch_loss=344.1655 |g|=168.600 time=0.58s
+epoch=8/15 train batch=82/93 starting
+batch_loss=343.4498 |g|=637.200 time=0.58s
+epoch=8/15 train batch=83/93 starting
+batch_loss=343.7285 |g|=543.968 time=0.58s
+epoch=8/15 train batch=84/93 starting
+batch_loss=343.4236 |g|=244.653 time=0.59s
+epoch=8/15 train batch=85/93 starting
+batch_loss=342.6689 |g|=604.617 time=0.59s
+epoch=8/15 train batch=86/93 starting
+batch_loss=345.3057 |g|=651.132 time=0.58s
+epoch=8/15 train batch=87/93 starting
+batch_loss=343.0212 |g|=392.892 time=0.58s
+epoch=8/15 train batch=88/93 starting
+batch_loss=348.2871 |g|=708.091 time=0.58s
+epoch=8/15 train batch=89/93 starting
+batch_loss=346.0247 |g|=581.611 time=0.58s
+epoch=8/15 train batch=90/93 starting
+batch_loss=341.3730 |g|=537.306 time=0.58s
+epoch=8/15 train batch=91/93 starting
+batch_loss=342.1606 |g|=633.295 time=0.59s
+epoch=8/15 train batch=92/93 starting
+batch_loss=343.2789 |g|=337.297 time=0.59s
+epoch=8/15 train batch=93/93 starting
+batch_loss=344.1255 |g|=625.946 time=0.58s
+epoch=8/15 val batch=1/19 starting
+epoch=8/15 val batch=1/19 loss=345.1505 time=0.10s
+epoch=8/15 val batch=2/19 starting
+epoch=8/15 val batch=2/19 loss=343.8457 time=0.10s
+epoch=8/15 val batch=3/19 starting
+epoch=8/15 val batch=3/19 loss=344.6808 time=0.10s
+epoch=8/15 val batch=4/19 starting
+epoch=8/15 val batch=4/19 loss=343.5176 time=0.10s
+epoch=8/15 val batch=5/19 starting
+epoch=8/15 val batch=5/19 loss=342.0415 time=0.10s
+epoch=8/15 val batch=6/19 starting
+epoch=8/15 val batch=6/19 loss=344.5093 time=0.10s
+epoch=8/15 val batch=7/19 starting
+epoch=8/15 val batch=7/19 loss=340.9590 time=0.10s
+epoch=8/15 val batch=8/19 starting
+epoch=8/15 val batch=8/19 loss=344.5168 time=0.10s
+epoch=8/15 val batch=9/19 starting
+epoch=8/15 val batch=9/19 loss=344.7903 time=0.10s
+epoch=8/15 val batch=10/19 starting
+epoch=8/15 val batch=10/19 loss=347.0476 time=0.10s
+epoch=8/15 val batch=11/19 starting
+epoch=8/15 val batch=11/19 loss=343.1238 time=0.10s
+epoch=8/15 val batch=12/19 starting
+epoch=8/15 val batch=12/19 loss=341.6457 time=0.10s
+epoch=8/15 val batch=13/19 starting
+epoch=8/15 val batch=13/19 loss=343.5982 time=0.10s
+epoch=8/15 val batch=14/19 starting
+epoch=8/15 val batch=14/19 loss=342.6643 time=0.10s
+epoch=8/15 val batch=15/19 starting
+epoch=8/15 val batch=15/19 loss=341.1151 time=0.10s
+epoch=8/15 val batch=16/19 starting
+epoch=8/15 val batch=16/19 loss=342.3962 time=0.10s
+epoch=8/15 val batch=17/19 starting
+epoch=8/15 val batch=17/19 loss=344.5308 time=0.10s
+epoch=8/15 val batch=18/19 starting
+epoch=8/15 val batch=18/19 loss=342.8100 time=0.10s
+epoch=8/15 val batch=19/19 starting
+epoch=8/15 val batch=19/19 loss=341.6180 time=0.10s
+epoch=8/15 test batch=1/19 starting
+epoch=8/15 test batch=1/19 loss=345.7271 time=0.10s
+epoch=8/15 test batch=2/19 starting
+epoch=8/15 test batch=2/19 loss=342.0813 time=0.10s
+epoch=8/15 test batch=3/19 starting
+epoch=8/15 test batch=3/19 loss=343.4488 time=0.10s
+epoch=8/15 test batch=4/19 starting
+epoch=8/15 test batch=4/19 loss=343.6175 time=0.10s
+epoch=8/15 test batch=5/19 starting
+epoch=8/15 test batch=5/19 loss=342.0762 time=0.10s
+epoch=8/15 test batch=6/19 starting
+epoch=8/15 test batch=6/19 loss=342.3083 time=0.10s
+epoch=8/15 test batch=7/19 starting
+epoch=8/15 test batch=7/19 loss=341.5664 time=0.10s
+epoch=8/15 test batch=8/19 starting
+epoch=8/15 test batch=8/19 loss=342.7665 time=0.10s
+epoch=8/15 test batch=9/19 starting
+epoch=8/15 test batch=9/19 loss=344.7723 time=0.10s
+epoch=8/15 test batch=10/19 starting
+epoch=8/15 test batch=10/19 loss=344.3154 time=0.10s
+epoch=8/15 test batch=11/19 starting
+epoch=8/15 test batch=11/19 loss=346.7843 time=0.10s
+epoch=8/15 test batch=12/19 starting
+epoch=8/15 test batch=12/19 loss=343.8909 time=0.10s
+epoch=8/15 test batch=13/19 starting
+epoch=8/15 test batch=13/19 loss=341.8132 time=0.10s
+epoch=8/15 test batch=14/19 starting
+epoch=8/15 test batch=14/19 loss=343.4283 time=0.10s
+epoch=8/15 test batch=15/19 starting
+epoch=8/15 test batch=15/19 loss=344.1002 time=0.10s
+epoch=8/15 test batch=16/19 starting
+epoch=8/15 test batch=16/19 loss=341.4126 time=0.10s
+epoch=8/15 test batch=17/19 starting
+epoch=8/15 test batch=17/19 loss=343.2330 time=0.10s
+epoch=8/15 test batch=18/19 starting
+epoch=8/15 test batch=18/19 loss=341.6008 time=0.10s
+epoch=8/15 test batch=19/19 starting
+epoch=8/15 test batch=19/19 loss=342.2654 time=0.10s
+epoch=8/15 train=344.7355±2.447 val=343.4217 test=343.2343 |g|=527.274 theta_mae=0.3327 omega_mae=0.1801 peak=3969MiB time=58.4s
+epoch=9/15 train batch=1/93 starting
+batch_loss=341.7155 |g|=287.955 time=0.59s
+epoch=9/15 train batch=2/93 starting
+batch_loss=345.1960 |g|=487.057 time=0.59s
+epoch=9/15 train batch=3/93 starting
+batch_loss=343.2554 |g|=375.959 time=0.59s
+epoch=9/15 train batch=4/93 starting
+batch_loss=340.6532 |g|=282.768 time=0.59s
+epoch=9/15 train batch=5/93 starting
+batch_loss=344.5749 |g|=464.817 time=0.58s
+epoch=9/15 train batch=6/93 starting
+batch_loss=344.7958 |g|=506.228 time=0.58s
+epoch=9/15 train batch=7/93 starting
+batch_loss=344.9459 |g|=645.967 time=0.58s
+epoch=9/15 train batch=8/93 starting
+batch_loss=342.1775 |g|=124.973 time=0.58s
+epoch=9/15 train batch=9/93 starting
+batch_loss=341.7031 |g|=254.654 time=0.58s
+epoch=9/15 train batch=10/93 starting
+batch_loss=340.5353 |g|=470.813 time=0.58s
+epoch=9/15 train batch=11/93 starting
+batch_loss=343.0247 |g|=226.546 time=0.59s
+epoch=9/15 train batch=12/93 starting
+batch_loss=340.1641 |g|=97.744 time=0.59s
+epoch=9/15 train batch=13/93 starting
+batch_loss=341.9269 |g|=581.513 time=0.59s
+epoch=9/15 train batch=14/93 starting
+batch_loss=341.1317 |g|=449.326 time=0.58s
+epoch=9/15 train batch=15/93 starting
+batch_loss=339.6104 |g|=217.144 time=0.59s
+epoch=9/15 train batch=16/93 starting
+batch_loss=341.3808 |g|=239.557 time=0.58s
+epoch=9/15 train batch=17/93 starting
+batch_loss=342.2209 |g|=462.250 time=0.60s
+epoch=9/15 train batch=18/93 starting
+batch_loss=341.5186 |g|=253.966 time=0.59s
+epoch=9/15 train batch=19/93 starting
+batch_loss=339.8326 |g|=256.678 time=0.59s
+epoch=9/15 train batch=20/93 starting
+batch_loss=346.1050 |g|=362.319 time=0.59s
+epoch=9/15 train batch=21/93 starting
+batch_loss=340.3590 |g|=110.825 time=0.58s
+epoch=9/15 train batch=22/93 starting
+batch_loss=345.2156 |g|=368.318 time=0.58s
+epoch=9/15 train batch=23/93 starting
+batch_loss=345.7556 |g|=704.931 time=0.58s
+epoch=9/15 train batch=24/93 starting
+batch_loss=342.2168 |g|=443.745 time=0.58s
+epoch=9/15 train batch=25/93 starting
+batch_loss=341.7450 |g|=462.246 time=0.58s
+epoch=9/15 train batch=26/93 starting
+batch_loss=345.5517 |g|=976.702 time=0.58s
+epoch=9/15 train batch=27/93 starting
+batch_loss=345.8139 |g|=475.376 time=0.59s
+epoch=9/15 train batch=28/93 starting
+batch_loss=342.3228 |g|=132.530 time=0.58s
+epoch=9/15 train batch=29/93 starting
+batch_loss=342.9946 |g|=612.756 time=0.58s
+epoch=9/15 train batch=30/93 starting
+batch_loss=343.5703 |g|=500.750 time=0.58s
+epoch=9/15 train batch=31/93 starting
+batch_loss=345.3180 |g|=355.487 time=0.58s
+epoch=9/15 train batch=32/93 starting
+batch_loss=342.2446 |g|=536.178 time=0.58s
+epoch=9/15 train batch=33/93 starting
+batch_loss=347.9572 |g|=864.974 time=0.59s
+epoch=9/15 train batch=34/93 starting
+batch_loss=341.8948 |g|=650.964 time=0.59s
+epoch=9/15 train batch=35/93 starting
+batch_loss=341.6885 |g|=171.941 time=0.58s
+epoch=9/15 train batch=36/93 starting
+batch_loss=346.2607 |g|=454.043 time=0.58s
+epoch=9/15 train batch=37/93 starting
+batch_loss=343.1475 |g|=447.515 time=0.59s
+epoch=9/15 train batch=38/93 starting
+batch_loss=341.7235 |g|=254.299 time=0.59s
+epoch=9/15 train batch=39/93 starting
+batch_loss=341.7571 |g|=312.438 time=0.58s
+epoch=9/15 train batch=40/93 starting
+batch_loss=342.9009 |g|=660.400 time=0.59s
+epoch=9/15 train batch=41/93 starting
+batch_loss=345.3718 |g|=781.126 time=0.59s
+epoch=9/15 train batch=42/93 starting
+batch_loss=343.6720 |g|=654.241 time=0.59s
+epoch=9/15 train batch=43/93 starting
+batch_loss=341.4627 |g|=196.464 time=0.58s
+epoch=9/15 train batch=44/93 starting
+batch_loss=343.3831 |g|=876.958 time=0.58s
+epoch=9/15 train batch=45/93 starting
+batch_loss=349.7384 |g|=1312.899 time=0.59s
+epoch=9/15 train batch=46/93 starting
+batch_loss=349.4798 |g|=1038.953 time=0.58s
+epoch=9/15 train batch=47/93 starting
+batch_loss=342.1866 |g|=441.181 time=0.58s
+epoch=9/15 train batch=48/93 starting
+batch_loss=345.0102 |g|=177.486 time=0.58s
+epoch=9/15 train batch=49/93 starting
+batch_loss=343.1020 |g|=610.771 time=0.59s
+epoch=9/15 train batch=50/93 starting
+batch_loss=344.7692 |g|=603.099 time=0.58s
+epoch=9/15 train batch=51/93 starting
+batch_loss=344.4877 |g|=475.361 time=0.58s
+epoch=9/15 train batch=52/93 starting
+batch_loss=345.8819 |g|=453.898 time=0.58s
+epoch=9/15 train batch=53/93 starting
+batch_loss=341.7091 |g|=143.232 time=0.58s
+epoch=9/15 train batch=54/93 starting
+batch_loss=344.2406 |g|=630.870 time=0.59s
+epoch=9/15 train batch=55/93 starting
+batch_loss=343.9345 |g|=400.390 time=0.59s
+epoch=9/15 train batch=56/93 starting
+batch_loss=342.6126 |g|=479.356 time=0.59s
+epoch=9/15 train batch=57/93 starting
+batch_loss=345.1959 |g|=358.319 time=0.59s
+epoch=9/15 train batch=58/93 starting
+batch_loss=343.2285 |g|=617.355 time=0.59s
+epoch=9/15 train batch=59/93 starting
+batch_loss=342.2135 |g|=345.901 time=0.58s
+epoch=9/15 train batch=60/93 starting
+batch_loss=342.6576 |g|=334.241 time=0.59s
+epoch=9/15 train batch=61/93 starting
+batch_loss=341.4695 |g|=304.792 time=0.58s
+epoch=9/15 train batch=62/93 starting
+batch_loss=342.3759 |g|=270.459 time=0.58s
+epoch=9/15 train batch=63/93 starting
+batch_loss=341.6255 |g|=145.089 time=0.58s
+epoch=9/15 train batch=64/93 starting
+batch_loss=342.0162 |g|=403.980 time=0.58s
+epoch=9/15 train batch=65/93 starting
+batch_loss=341.3942 |g|=326.307 time=0.58s
+epoch=9/15 train batch=66/93 starting
+batch_loss=345.0728 |g|=155.072 time=0.58s
+epoch=9/15 train batch=67/93 starting
+batch_loss=344.2251 |g|=612.219 time=0.58s
+epoch=9/15 train batch=68/93 starting
+batch_loss=345.0303 |g|=841.651 time=0.59s
+epoch=9/15 train batch=69/93 starting
+batch_loss=343.3553 |g|=663.477 time=0.59s
+epoch=9/15 train batch=70/93 starting
+batch_loss=341.0449 |g|=282.732 time=0.58s
+epoch=9/15 train batch=71/93 starting
+batch_loss=342.1910 |g|=688.883 time=0.59s
+epoch=9/15 train batch=72/93 starting
+batch_loss=346.3760 |g|=918.358 time=0.59s
+epoch=9/15 train batch=73/93 starting
+batch_loss=345.6514 |g|=772.623 time=0.58s
+epoch=9/15 train batch=74/93 starting
+batch_loss=342.8429 |g|=423.320 time=0.59s
+epoch=9/15 train batch=75/93 starting
+batch_loss=344.3060 |g|=432.640 time=0.59s
+epoch=9/15 train batch=76/93 starting
+batch_loss=342.4685 |g|=602.219 time=0.58s
+epoch=9/15 train batch=77/93 starting
+batch_loss=343.3036 |g|=772.490 time=0.58s
+epoch=9/15 train batch=78/93 starting
+batch_loss=344.5286 |g|=645.077 time=0.58s
+epoch=9/15 train batch=79/93 starting
+batch_loss=343.8163 |g|=430.460 time=0.58s
+epoch=9/15 train batch=80/93 starting
+batch_loss=344.6696 |g|=341.532 time=0.61s
+epoch=9/15 train batch=81/93 starting
+batch_loss=343.2767 |g|=531.888 time=0.59s
+epoch=9/15 train batch=82/93 starting
+batch_loss=345.8214 |g|=617.251 time=0.58s
+epoch=9/15 train batch=83/93 starting
+batch_loss=340.7779 |g|=263.241 time=0.73s
+epoch=9/15 train batch=84/93 starting
+batch_loss=343.2376 |g|=571.493 time=0.60s
+epoch=9/15 train batch=85/93 starting
+batch_loss=341.9420 |g|=474.630 time=0.58s
+epoch=9/15 train batch=86/93 starting
+batch_loss=344.8836 |g|=603.422 time=0.58s
+epoch=9/15 train batch=87/93 starting
+batch_loss=342.4853 |g|=482.114 time=0.59s
+epoch=9/15 train batch=88/93 starting
+batch_loss=342.9452 |g|=288.356 time=0.59s
+epoch=9/15 train batch=89/93 starting
+batch_loss=344.5338 |g|=604.809 time=0.59s
+epoch=9/15 train batch=90/93 starting
+batch_loss=341.8257 |g|=450.792 time=0.59s
+epoch=9/15 train batch=91/93 starting
+batch_loss=344.1354 |g|=566.482 time=0.59s
+epoch=9/15 train batch=92/93 starting
+batch_loss=339.5561 |g|=355.061 time=0.59s
+epoch=9/15 train batch=93/93 starting
+batch_loss=347.7177 |g|=348.503 time=0.58s
+epoch=9/15 val batch=1/19 starting
+epoch=9/15 val batch=1/19 loss=346.7427 time=0.10s
+epoch=9/15 val batch=2/19 starting
+epoch=9/15 val batch=2/19 loss=343.8001 time=0.10s
+epoch=9/15 val batch=3/19 starting
+epoch=9/15 val batch=3/19 loss=344.6685 time=0.10s
+epoch=9/15 val batch=4/19 starting
+epoch=9/15 val batch=4/19 loss=344.7216 time=0.10s
+epoch=9/15 val batch=5/19 starting
+epoch=9/15 val batch=5/19 loss=342.1174 time=0.10s
+epoch=9/15 val batch=6/19 starting
+epoch=9/15 val batch=6/19 loss=344.9809 time=0.10s
+epoch=9/15 val batch=7/19 starting
+epoch=9/15 val batch=7/19 loss=340.4310 time=0.10s
+epoch=9/15 val batch=8/19 starting
+epoch=9/15 val batch=8/19 loss=344.1906 time=0.10s
+epoch=9/15 val batch=9/19 starting
+epoch=9/15 val batch=9/19 loss=345.8263 time=0.10s
+epoch=9/15 val batch=10/19 starting
+epoch=9/15 val batch=10/19 loss=346.3451 time=0.10s
+epoch=9/15 val batch=11/19 starting
+epoch=9/15 val batch=11/19 loss=342.1896 time=0.10s
+epoch=9/15 val batch=12/19 starting
+epoch=9/15 val batch=12/19 loss=341.5692 time=0.10s
+epoch=9/15 val batch=13/19 starting
+epoch=9/15 val batch=13/19 loss=343.0326 time=0.10s
+epoch=9/15 val batch=14/19 starting
+epoch=9/15 val batch=14/19 loss=341.6778 time=0.10s
+epoch=9/15 val batch=15/19 starting
+epoch=9/15 val batch=15/19 loss=342.1758 time=0.10s
+epoch=9/15 val batch=16/19 starting
+epoch=9/15 val batch=16/19 loss=342.4534 time=0.10s
+epoch=9/15 val batch=17/19 starting
+epoch=9/15 val batch=17/19 loss=345.1259 time=0.10s
+epoch=9/15 val batch=18/19 starting
+epoch=9/15 val batch=18/19 loss=342.9495 time=0.10s
+epoch=9/15 val batch=19/19 starting
+epoch=9/15 val batch=19/19 loss=344.2861 time=0.10s
+epoch=9/15 test batch=1/19 starting
+epoch=9/15 test batch=1/19 loss=346.5495 time=0.10s
+epoch=9/15 test batch=2/19 starting
+epoch=9/15 test batch=2/19 loss=342.3174 time=0.10s
+epoch=9/15 test batch=3/19 starting
+epoch=9/15 test batch=3/19 loss=343.8702 time=0.10s
+epoch=9/15 test batch=4/19 starting
+epoch=9/15 test batch=4/19 loss=344.0365 time=0.10s
+epoch=9/15 test batch=5/19 starting
+epoch=9/15 test batch=5/19 loss=342.9659 time=0.10s
+epoch=9/15 test batch=6/19 starting
+epoch=9/15 test batch=6/19 loss=342.3212 time=0.10s
+epoch=9/15 test batch=7/19 starting
+epoch=9/15 test batch=7/19 loss=341.3450 time=0.10s
+epoch=9/15 test batch=8/19 starting
+epoch=9/15 test batch=8/19 loss=343.3101 time=0.10s
+epoch=9/15 test batch=9/19 starting
+epoch=9/15 test batch=9/19 loss=343.7052 time=0.10s
+epoch=9/15 test batch=10/19 starting
+epoch=9/15 test batch=10/19 loss=342.5679 time=0.10s
+epoch=9/15 test batch=11/19 starting
+epoch=9/15 test batch=11/19 loss=348.7403 time=0.10s
+epoch=9/15 test batch=12/19 starting
+epoch=9/15 test batch=12/19 loss=343.5861 time=0.10s
+epoch=9/15 test batch=13/19 starting
+epoch=9/15 test batch=13/19 loss=342.2123 time=0.10s
+epoch=9/15 test batch=14/19 starting
+epoch=9/15 test batch=14/19 loss=343.6480 time=0.10s
+epoch=9/15 test batch=15/19 starting
+epoch=9/15 test batch=15/19 loss=344.9663 time=0.10s
+epoch=9/15 test batch=16/19 starting
+epoch=9/15 test batch=16/19 loss=343.5812 time=0.10s
+epoch=9/15 test batch=17/19 starting
+epoch=9/15 test batch=17/19 loss=342.6953 time=0.10s
+epoch=9/15 test batch=18/19 starting
+epoch=9/15 test batch=18/19 loss=341.5307 time=0.10s
+epoch=9/15 test batch=19/19 starting
+epoch=9/15 test batch=19/19 loss=340.5362 time=0.10s
+epoch=9/15 train=343.3564±2.026 val=343.6380 test=343.4321 |g|=469.550 theta_mae=0.3320 omega_mae=0.1800 peak=3969MiB time=58.6s
+epoch=10/15 train batch=1/93 starting
+batch_loss=345.3376 |g|=698.273 time=0.58s
+epoch=10/15 train batch=2/93 starting
+batch_loss=344.9125 |g|=385.095 time=0.59s
+epoch=10/15 train batch=3/93 starting
+batch_loss=342.4980 |g|=196.637 time=0.59s
+epoch=10/15 train batch=4/93 starting
+batch_loss=342.0449 |g|=440.367 time=0.59s
+epoch=10/15 train batch=5/93 starting
+batch_loss=345.2806 |g|=792.580 time=0.59s
+epoch=10/15 train batch=6/93 starting
+batch_loss=343.4827 |g|=816.378 time=0.60s
+epoch=10/15 train batch=7/93 starting
+batch_loss=340.0170 |g|=236.599 time=0.58s
+epoch=10/15 train batch=8/93 starting
+batch_loss=343.1309 |g|=480.714 time=0.58s
+epoch=10/15 train batch=9/93 starting
+batch_loss=341.7950 |g|=639.566 time=0.58s
+epoch=10/15 train batch=10/93 starting
+batch_loss=344.9229 |g|=697.744 time=0.58s
+epoch=10/15 train batch=11/93 starting
+batch_loss=341.1430 |g|=431.916 time=0.58s
+epoch=10/15 train batch=12/93 starting
+batch_loss=342.9061 |g|=734.995 time=0.58s
+epoch=10/15 train batch=13/93 starting
+batch_loss=341.7534 |g|=600.395 time=0.58s
+epoch=10/15 train batch=14/93 starting
+batch_loss=341.0750 |g|=404.529 time=0.58s
+epoch=10/15 train batch=15/93 starting
+batch_loss=342.4728 |g|=485.609 time=0.58s
+epoch=10/15 train batch=16/93 starting
+batch_loss=340.5001 |g|=337.246 time=0.59s
+epoch=10/15 train batch=17/93 starting
+batch_loss=342.9517 |g|=559.624 time=0.58s
+epoch=10/15 train batch=18/93 starting
+batch_loss=342.1454 |g|=431.570 time=0.58s
+epoch=10/15 train batch=19/93 starting
+batch_loss=342.9967 |g|=628.110 time=0.58s
+epoch=10/15 train batch=20/93 starting
+batch_loss=340.1728 |g|=493.890 time=0.59s
+epoch=10/15 train batch=21/93 starting
+batch_loss=342.4299 |g|=184.824 time=0.58s
+epoch=10/15 train batch=22/93 starting
+batch_loss=343.5031 |g|=237.810 time=0.59s
+epoch=10/15 train batch=23/93 starting
+batch_loss=341.5503 |g|=219.606 time=0.59s
+epoch=10/15 train batch=24/93 starting
+batch_loss=342.9622 |g|=591.358 time=0.59s
+epoch=10/15 train batch=25/93 starting
+batch_loss=341.2057 |g|=647.854 time=0.58s
+epoch=10/15 train batch=26/93 starting
+batch_loss=344.4287 |g|=617.883 time=0.58s
+epoch=10/15 train batch=27/93 starting
+batch_loss=341.2990 |g|=255.662 time=0.58s
+epoch=10/15 train batch=28/93 starting
+batch_loss=341.1215 |g|=393.610 time=0.58s
+epoch=10/15 train batch=29/93 starting
+batch_loss=342.7754 |g|=529.311 time=0.58s
+epoch=10/15 train batch=30/93 starting
+batch_loss=342.0988 |g|=178.739 time=0.58s
+epoch=10/15 train batch=31/93 starting
+batch_loss=340.2342 |g|=233.359 time=0.58s
+epoch=10/15 train batch=32/93 starting
+batch_loss=341.1195 |g|=319.715 time=0.59s
+epoch=10/15 train batch=33/93 starting
+batch_loss=344.9708 |g|=314.897 time=0.59s
+epoch=10/15 train batch=34/93 starting
+batch_loss=343.9415 |g|=431.727 time=0.59s
+epoch=10/15 train batch=35/93 starting
+batch_loss=343.1871 |g|=137.318 time=0.58s
+epoch=10/15 train batch=36/93 starting
+batch_loss=342.6418 |g|=333.534 time=0.58s
+epoch=10/15 train batch=37/93 starting
+batch_loss=342.7501 |g|=559.896 time=0.58s
+epoch=10/15 train batch=38/93 starting
+batch_loss=341.8262 |g|=598.919 time=0.59s
+epoch=10/15 train batch=39/93 starting
+batch_loss=344.8094 |g|=338.253 time=0.58s
+epoch=10/15 train batch=40/93 starting
+batch_loss=341.6932 |g|=276.799 time=0.58s
+epoch=10/15 train batch=41/93 starting
+batch_loss=341.9454 |g|=205.706 time=0.58s
+epoch=10/15 train batch=42/93 starting
+batch_loss=343.2329 |g|=309.900 time=0.58s
+epoch=10/15 train batch=43/93 starting
+batch_loss=342.5227 |g|=573.023 time=0.58s
+epoch=10/15 train batch=44/93 starting
+batch_loss=343.2238 |g|=702.217 time=0.58s
+epoch=10/15 train batch=45/93 starting
+batch_loss=344.2967 |g|=177.235 time=0.58s
+epoch=10/15 train batch=46/93 starting
+batch_loss=340.9089 |g|=336.769 time=0.58s
+epoch=10/15 train batch=47/93 starting
+batch_loss=341.3786 |g|=570.952 time=0.59s
+epoch=10/15 train batch=48/93 starting
+batch_loss=344.2656 |g|=509.967 time=0.58s
+epoch=10/15 train batch=49/93 starting
+batch_loss=342.4258 |g|=590.542 time=0.58s
+epoch=10/15 train batch=50/93 starting
+batch_loss=343.7099 |g|=477.731 time=0.58s
+epoch=10/15 train batch=51/93 starting
+batch_loss=343.1157 |g|=412.915 time=0.59s
+epoch=10/15 train batch=52/93 starting
+batch_loss=343.6175 |g|=506.837 time=0.59s
+epoch=10/15 train batch=53/93 starting
+batch_loss=341.6749 |g|=536.170 time=0.59s
+epoch=10/15 train batch=54/93 starting
+batch_loss=342.5853 |g|=456.502 time=0.59s
+epoch=10/15 train batch=55/93 starting
+batch_loss=340.8548 |g|=346.620 time=0.58s
+epoch=10/15 train batch=56/93 starting
+batch_loss=341.9019 |g|=655.378 time=0.58s
+epoch=10/15 train batch=57/93 starting
+batch_loss=342.3401 |g|=627.176 time=0.58s
+epoch=10/15 train batch=58/93 starting
+batch_loss=342.0851 |g|=145.391 time=0.59s
+epoch=10/15 train batch=59/93 starting
+batch_loss=344.4487 |g|=612.075 time=0.58s
+epoch=10/15 train batch=60/93 starting
+batch_loss=347.0172 |g|=866.216 time=0.58s
+epoch=10/15 train batch=61/93 starting
+batch_loss=343.9100 |g|=553.525 time=0.58s
+epoch=10/15 train batch=62/93 starting
+batch_loss=342.4670 |g|=639.889 time=0.58s
+epoch=10/15 train batch=63/93 starting
+batch_loss=339.7551 |g|=189.068 time=0.59s
+epoch=10/15 train batch=64/93 starting
+batch_loss=344.3631 |g|=408.574 time=0.58s
+epoch=10/15 train batch=65/93 starting
+batch_loss=344.4748 |g|=763.802 time=0.58s
+epoch=10/15 train batch=66/93 starting
+batch_loss=343.7693 |g|=617.393 time=0.58s
+epoch=10/15 train batch=67/93 starting
+batch_loss=344.3796 |g|=577.337 time=0.58s
+epoch=10/15 train batch=68/93 starting
+batch_loss=342.4762 |g|=233.133 time=0.58s
+epoch=10/15 train batch=69/93 starting
+batch_loss=341.7525 |g|=351.622 time=0.58s
+epoch=10/15 train batch=70/93 starting
+batch_loss=341.4841 |g|=364.616 time=0.58s
+epoch=10/15 train batch=71/93 starting
+batch_loss=342.1112 |g|=366.007 time=0.58s
+epoch=10/15 train batch=72/93 starting
+batch_loss=342.2624 |g|=238.231 time=0.59s
+epoch=10/15 train batch=73/93 starting
+batch_loss=344.2953 |g|=264.158 time=0.59s
+epoch=10/15 train batch=74/93 starting
+batch_loss=344.6699 |g|=486.408 time=0.59s
+epoch=10/15 train batch=75/93 starting
+batch_loss=342.9903 |g|=287.479 time=0.58s
+epoch=10/15 train batch=76/93 starting
+batch_loss=341.0139 |g|=321.268 time=0.59s
+epoch=10/15 train batch=77/93 starting
+batch_loss=344.8537 |g|=503.130 time=0.58s
+epoch=10/15 train batch=78/93 starting
+batch_loss=340.8869 |g|=324.613 time=0.58s
+epoch=10/15 train batch=79/93 starting
+batch_loss=343.4161 |g|=584.209 time=0.58s
+epoch=10/15 train batch=80/93 starting
+batch_loss=341.6924 |g|=559.028 time=0.58s
+epoch=10/15 train batch=81/93 starting
+batch_loss=342.6460 |g|=125.353 time=0.58s
+epoch=10/15 train batch=82/93 starting
+batch_loss=339.3814 |g|=315.243 time=0.58s
+epoch=10/15 train batch=83/93 starting
+batch_loss=343.1347 |g|=154.142 time=0.59s
+epoch=10/15 train batch=84/93 starting
+batch_loss=343.3344 |g|=388.544 time=0.58s
+epoch=10/15 train batch=85/93 starting
+batch_loss=342.6196 |g|=416.948 time=0.59s
+epoch=10/15 train batch=86/93 starting
+batch_loss=343.0157 |g|=460.087 time=0.58s
+epoch=10/15 train batch=87/93 starting
+batch_loss=341.3470 |g|=403.246 time=0.59s
+epoch=10/15 train batch=88/93 starting
+batch_loss=340.6766 |g|=287.204 time=0.58s
+epoch=10/15 train batch=89/93 starting
+batch_loss=338.1560 |g|=149.010 time=0.58s
+epoch=10/15 train batch=90/93 starting
+batch_loss=344.4958 |g|=448.735 time=0.58s
+epoch=10/15 train batch=91/93 starting
+batch_loss=343.6794 |g|=276.300 time=0.58s
+epoch=10/15 train batch=92/93 starting
+batch_loss=342.3062 |g|=306.882 time=0.58s
+epoch=10/15 train batch=93/93 starting
+batch_loss=341.9819 |g|=159.461 time=0.58s
+epoch=10/15 val batch=1/19 starting
+epoch=10/15 val batch=1/19 loss=345.1655 time=0.10s
+epoch=10/15 val batch=2/19 starting
+epoch=10/15 val batch=2/19 loss=342.8015 time=0.10s
+epoch=10/15 val batch=3/19 starting
+epoch=10/15 val batch=3/19 loss=344.1819 time=0.10s
+epoch=10/15 val batch=4/19 starting
+epoch=10/15 val batch=4/19 loss=342.7732 time=0.10s
+epoch=10/15 val batch=5/19 starting
+epoch=10/15 val batch=5/19 loss=342.5920 time=0.10s
+epoch=10/15 val batch=6/19 starting
+epoch=10/15 val batch=6/19 loss=343.9486 time=0.10s
+epoch=10/15 val batch=7/19 starting
+epoch=10/15 val batch=7/19 loss=341.7296 time=0.10s
+epoch=10/15 val batch=8/19 starting
+epoch=10/15 val batch=8/19 loss=342.6743 time=0.10s
+epoch=10/15 val batch=9/19 starting
+epoch=10/15 val batch=9/19 loss=343.2277 time=0.10s
+epoch=10/15 val batch=10/19 starting
+epoch=10/15 val batch=10/19 loss=348.3846 time=0.10s
+epoch=10/15 val batch=11/19 starting
+epoch=10/15 val batch=11/19 loss=343.1821 time=0.10s
+epoch=10/15 val batch=12/19 starting
+epoch=10/15 val batch=12/19 loss=341.9959 time=0.10s
+epoch=10/15 val batch=13/19 starting
+epoch=10/15 val batch=13/19 loss=343.5378 time=0.10s
+epoch=10/15 val batch=14/19 starting
+epoch=10/15 val batch=14/19 loss=342.4055 time=0.10s
+epoch=10/15 val batch=15/19 starting
+epoch=10/15 val batch=15/19 loss=342.6479 time=0.10s
+epoch=10/15 val batch=16/19 starting
+epoch=10/15 val batch=16/19 loss=341.0624 time=0.10s
+epoch=10/15 val batch=17/19 starting
+epoch=10/15 val batch=17/19 loss=343.9388 time=0.10s
+epoch=10/15 val batch=18/19 starting
+epoch=10/15 val batch=18/19 loss=342.0784 time=0.10s
+epoch=10/15 val batch=19/19 starting
+epoch=10/15 val batch=19/19 loss=340.9599 time=0.10s
+epoch=10/15 test batch=1/19 starting
+epoch=10/15 test batch=1/19 loss=345.8992 time=0.10s
+epoch=10/15 test batch=2/19 starting
+epoch=10/15 test batch=2/19 loss=342.1442 time=0.10s
+epoch=10/15 test batch=3/19 starting
+epoch=10/15 test batch=3/19 loss=343.7012 time=0.10s
+epoch=10/15 test batch=4/19 starting
+epoch=10/15 test batch=4/19 loss=342.7993 time=0.10s
+epoch=10/15 test batch=5/19 starting
+epoch=10/15 test batch=5/19 loss=341.4355 time=0.10s
+epoch=10/15 test batch=6/19 starting
+epoch=10/15 test batch=6/19 loss=341.2480 time=0.10s
+epoch=10/15 test batch=7/19 starting
+epoch=10/15 test batch=7/19 loss=340.9743 time=0.10s
+epoch=10/15 test batch=8/19 starting
+epoch=10/15 test batch=8/19 loss=343.0871 time=0.10s
+epoch=10/15 test batch=9/19 starting
+epoch=10/15 test batch=9/19 loss=343.6076 time=0.10s
+epoch=10/15 test batch=10/19 starting
+epoch=10/15 test batch=10/19 loss=342.5100 time=0.10s
+epoch=10/15 test batch=11/19 starting
+epoch=10/15 test batch=11/19 loss=347.1400 time=0.10s
+epoch=10/15 test batch=12/19 starting
+epoch=10/15 test batch=12/19 loss=342.6104 time=0.10s
+epoch=10/15 test batch=13/19 starting
+epoch=10/15 test batch=13/19 loss=341.4963 time=0.10s
+epoch=10/15 test batch=14/19 starting
+epoch=10/15 test batch=14/19 loss=341.9974 time=0.10s
+epoch=10/15 test batch=15/19 starting
+epoch=10/15 test batch=15/19 loss=343.5415 time=0.10s
+epoch=10/15 test batch=16/19 starting
+epoch=10/15 test batch=16/19 loss=342.6941 time=0.10s
+epoch=10/15 test batch=17/19 starting
+epoch=10/15 test batch=17/19 loss=342.6378 time=0.10s
+epoch=10/15 test batch=18/19 starting
+epoch=10/15 test batch=18/19 loss=341.6654 time=0.10s
+epoch=10/15 test batch=19/19 starting
+epoch=10/15 test batch=19/19 loss=341.2036 time=0.10s
+epoch=10/15 train=342.6176±1.500 val=343.1492 test=342.7782 |g|=430.504 theta_mae=0.3309 omega_mae=0.1797 peak=3969MiB time=58.4s
+epoch=11/15 train batch=1/93 starting
+batch_loss=341.3354 |g|=244.939 time=0.58s
+epoch=11/15 train batch=2/93 starting
+batch_loss=342.6182 |g|=463.502 time=0.59s
+epoch=11/15 train batch=3/93 starting
+batch_loss=342.7064 |g|=366.703 time=0.58s
+epoch=11/15 train batch=4/93 starting
+batch_loss=341.4940 |g|=349.527 time=0.58s
+epoch=11/15 train batch=5/93 starting
+batch_loss=339.9847 |g|=419.845 time=0.58s
+epoch=11/15 train batch=6/93 starting
+batch_loss=340.7723 |g|=293.334 time=0.59s
+epoch=11/15 train batch=7/93 starting
+batch_loss=340.1187 |g|=258.670 time=0.57s
+epoch=11/15 train batch=8/93 starting
+batch_loss=342.2021 |g|=360.165 time=0.58s
+epoch=11/15 train batch=9/93 starting
+batch_loss=341.5397 |g|=395.316 time=0.58s
+epoch=11/15 train batch=10/93 starting
+batch_loss=343.2200 |g|=371.777 time=0.58s
+epoch=11/15 train batch=11/93 starting
+batch_loss=340.3340 |g|=275.763 time=0.58s
+epoch=11/15 train batch=12/93 starting
+batch_loss=340.5194 |g|=304.323 time=0.58s
+epoch=11/15 train batch=13/93 starting
+batch_loss=340.5047 |g|=280.230 time=0.59s
+epoch=11/15 train batch=14/93 starting
+batch_loss=345.1166 |g|=327.353 time=0.59s
+epoch=11/15 train batch=15/93 starting
+batch_loss=339.5556 |g|=108.567 time=0.58s
+epoch=11/15 train batch=16/93 starting
+batch_loss=341.3432 |g|=303.984 time=0.59s
+epoch=11/15 train batch=17/93 starting
+batch_loss=343.8069 |g|=457.168 time=0.58s
+epoch=11/15 train batch=18/93 starting
+batch_loss=344.4136 |g|=724.790 time=0.58s
+epoch=11/15 train batch=19/93 starting
+batch_loss=341.8351 |g|=426.140 time=0.59s
+epoch=11/15 train batch=20/93 starting
+batch_loss=340.8034 |g|=272.541 time=0.58s
+epoch=11/15 train batch=21/93 starting
+batch_loss=342.3016 |g|=483.719 time=0.58s
+epoch=11/15 train batch=22/93 starting
+batch_loss=347.0390 |g|=635.361 time=0.58s
+epoch=11/15 train batch=23/93 starting
+batch_loss=342.1169 |g|=498.824 time=0.58s
+epoch=11/15 train batch=24/93 starting
+batch_loss=343.3561 |g|=674.658 time=0.58s
+epoch=11/15 train batch=25/93 starting
+batch_loss=341.5913 |g|=430.890 time=0.59s
+epoch=11/15 train batch=26/93 starting
+batch_loss=341.8007 |g|=138.242 time=0.58s
+epoch=11/15 train batch=27/93 starting
+batch_loss=343.3128 |g|=545.984 time=0.58s
+epoch=11/15 train batch=28/93 starting
+batch_loss=345.0693 |g|=795.835 time=0.58s
+epoch=11/15 train batch=29/93 starting
+batch_loss=344.3615 |g|=444.317 time=0.58s
+epoch=11/15 train batch=30/93 starting
+batch_loss=341.7732 |g|=497.809 time=0.58s
+epoch=11/15 train batch=31/93 starting
+batch_loss=338.6055 |g|=424.979 time=0.59s
+epoch=11/15 train batch=32/93 starting
+batch_loss=343.1841 |g|=262.590 time=0.58s
+epoch=11/15 train batch=33/93 starting
+batch_loss=342.2028 |g|=498.245 time=0.59s
+epoch=11/15 train batch=34/93 starting
+batch_loss=343.1696 |g|=573.695 time=0.59s
+epoch=11/15 train batch=35/93 starting
+batch_loss=343.0564 |g|=512.206 time=0.60s
+epoch=11/15 train batch=36/93 starting
+batch_loss=342.7130 |g|=452.843 time=0.59s
+epoch=11/15 train batch=37/93 starting
+batch_loss=341.5954 |g|=254.911 time=0.58s
+epoch=11/15 train batch=38/93 starting
+batch_loss=342.3356 |g|=414.220 time=0.58s
+epoch=11/15 train batch=39/93 starting
+batch_loss=340.5809 |g|=379.305 time=0.58s
+epoch=11/15 train batch=40/93 starting
+batch_loss=342.0223 |g|=285.086 time=0.58s
+epoch=11/15 train batch=41/93 starting
+batch_loss=340.9504 |g|=221.222 time=0.58s
+epoch=11/15 train batch=42/93 starting
+batch_loss=344.0865 |g|=543.437 time=0.58s
+epoch=11/15 train batch=43/93 starting
+batch_loss=344.1090 |g|=339.956 time=0.58s
+epoch=11/15 train batch=44/93 starting
+batch_loss=341.2186 |g|=125.224 time=0.58s
+epoch=11/15 train batch=45/93 starting
+batch_loss=343.1125 |g|=738.101 time=0.59s
+epoch=11/15 train batch=46/93 starting
+batch_loss=345.7304 |g|=748.626 time=0.58s
+epoch=11/15 train batch=47/93 starting
+batch_loss=345.7012 |g|=787.441 time=0.58s
+epoch=11/15 train batch=48/93 starting
+batch_loss=345.8771 |g|=786.478 time=0.59s
+epoch=11/15 train batch=49/93 starting
+batch_loss=342.7796 |g|=352.943 time=0.58s
+epoch=11/15 train batch=50/93 starting
+batch_loss=344.0017 |g|=192.873 time=0.58s
+epoch=11/15 train batch=51/93 starting
+batch_loss=342.1807 |g|=247.287 time=0.59s
+epoch=11/15 train batch=52/93 starting
+batch_loss=341.0942 |g|=229.011 time=0.58s
+epoch=11/15 train batch=53/93 starting
+batch_loss=341.7248 |g|=359.674 time=0.59s
+epoch=11/15 train batch=54/93 starting
+batch_loss=342.8170 |g|=182.185 time=0.59s
+epoch=11/15 train batch=55/93 starting
+batch_loss=343.2463 |g|=234.624 time=0.58s
+epoch=11/15 train batch=56/93 starting
+batch_loss=341.7421 |g|=188.203 time=0.58s
+epoch=11/15 train batch=57/93 starting
+batch_loss=340.6512 |g|=137.351 time=0.58s
+epoch=11/15 train batch=58/93 starting
+batch_loss=342.0779 |g|=146.847 time=0.58s
+epoch=11/15 train batch=59/93 starting
+batch_loss=343.4722 |g|=282.593 time=0.58s
+epoch=11/15 train batch=60/93 starting
+batch_loss=343.8488 |g|=498.720 time=0.58s
+epoch=11/15 train batch=61/93 starting
+batch_loss=344.6170 |g|=581.885 time=0.59s
+epoch=11/15 train batch=62/93 starting
+batch_loss=343.9024 |g|=385.391 time=0.59s
+epoch=11/15 train batch=63/93 starting
+batch_loss=344.2814 |g|=355.694 time=0.59s
+epoch=11/15 train batch=64/93 starting
+batch_loss=341.4568 |g|=487.083 time=0.59s
+epoch=11/15 train batch=65/93 starting
+batch_loss=345.1913 |g|=444.437 time=0.59s
+epoch=11/15 train batch=66/93 starting
+batch_loss=343.3115 |g|=273.391 time=0.59s
+epoch=11/15 train batch=67/93 starting
+batch_loss=342.1981 |g|=379.600 time=0.58s
+epoch=11/15 train batch=68/93 starting
+batch_loss=342.8991 |g|=100.736 time=0.58s
+epoch=11/15 train batch=69/93 starting
+batch_loss=340.1506 |g|=147.826 time=0.58s
+epoch=11/15 train batch=70/93 starting
+batch_loss=342.6544 |g|=483.884 time=0.58s
+epoch=11/15 train batch=71/93 starting
+batch_loss=340.2809 |g|=301.363 time=0.59s
+epoch=11/15 train batch=72/93 starting
+batch_loss=339.1799 |g|=196.791 time=0.58s
+epoch=11/15 train batch=73/93 starting
+batch_loss=341.6610 |g|=148.159 time=0.58s
+epoch=11/15 train batch=74/93 starting
+batch_loss=343.0324 |g|=283.000 time=0.58s
+epoch=11/15 train batch=75/93 starting
+batch_loss=342.7953 |g|=434.754 time=0.58s
+epoch=11/15 train batch=76/93 starting
+batch_loss=345.0033 |g|=338.778 time=0.59s
+epoch=11/15 train batch=77/93 starting
+batch_loss=342.3782 |g|=245.438 time=0.59s
+epoch=11/15 train batch=78/93 starting
+batch_loss=343.2844 |g|=231.416 time=0.59s
+epoch=11/15 train batch=79/93 starting
+batch_loss=340.9374 |g|=472.960 time=0.58s
+epoch=11/15 train batch=80/93 starting
+batch_loss=342.0661 |g|=372.570 time=0.58s
+epoch=11/15 train batch=81/93 starting
+batch_loss=339.3260 |g|=268.411 time=0.58s
+epoch=11/15 train batch=82/93 starting
+batch_loss=341.3859 |g|=264.328 time=0.58s
+epoch=11/15 train batch=83/93 starting
+batch_loss=340.9949 |g|=257.648 time=0.58s
+epoch=11/15 train batch=84/93 starting
+batch_loss=344.5165 |g|=187.228 time=0.59s
+epoch=11/15 train batch=85/93 starting
+batch_loss=342.8937 |g|=378.908 time=0.59s
+epoch=11/15 train batch=86/93 starting
+batch_loss=342.0220 |g|=68.220 time=0.58s
+epoch=11/15 train batch=87/93 starting
+batch_loss=338.8735 |g|=199.029 time=0.59s
+epoch=11/15 train batch=88/93 starting
+batch_loss=342.1641 |g|=705.228 time=0.59s
+epoch=11/15 train batch=89/93 starting
+batch_loss=343.4255 |g|=390.537 time=0.60s
+epoch=11/15 train batch=90/93 starting
+batch_loss=344.1097 |g|=619.020 time=0.58s
+epoch=11/15 train batch=91/93 starting
+batch_loss=341.4965 |g|=275.984 time=0.71s
+epoch=11/15 train batch=92/93 starting
+batch_loss=341.0769 |g|=442.057 time=0.59s
+epoch=11/15 train batch=93/93 starting
+batch_loss=342.1474 |g|=226.083 time=0.59s
+epoch=11/15 val batch=1/19 starting
+epoch=11/15 val batch=1/19 loss=345.1670 time=0.10s
+epoch=11/15 val batch=2/19 starting
+epoch=11/15 val batch=2/19 loss=343.5630 time=0.10s
+epoch=11/15 val batch=3/19 starting
+epoch=11/15 val batch=3/19 loss=344.6162 time=0.10s
+epoch=11/15 val batch=4/19 starting
+epoch=11/15 val batch=4/19 loss=343.2017 time=0.10s
+epoch=11/15 val batch=5/19 starting
+epoch=11/15 val batch=5/19 loss=341.5869 time=0.10s
+epoch=11/15 val batch=6/19 starting
+epoch=11/15 val batch=6/19 loss=345.1117 time=0.10s
+epoch=11/15 val batch=7/19 starting
+epoch=11/15 val batch=7/19 loss=341.6305 time=0.10s
+epoch=11/15 val batch=8/19 starting
+epoch=11/15 val batch=8/19 loss=343.0647 time=0.10s
+epoch=11/15 val batch=9/19 starting
+epoch=11/15 val batch=9/19 loss=345.5499 time=0.10s
+epoch=11/15 val batch=10/19 starting
+epoch=11/15 val batch=10/19 loss=347.5328 time=0.10s
+epoch=11/15 val batch=11/19 starting
+epoch=11/15 val batch=11/19 loss=343.1409 time=0.10s
+epoch=11/15 val batch=12/19 starting
+epoch=11/15 val batch=12/19 loss=342.7818 time=0.10s
+epoch=11/15 val batch=13/19 starting
+epoch=11/15 val batch=13/19 loss=344.8142 time=0.10s
+epoch=11/15 val batch=14/19 starting
+epoch=11/15 val batch=14/19 loss=342.6653 time=0.10s
+epoch=11/15 val batch=15/19 starting
+epoch=11/15 val batch=15/19 loss=343.9063 time=0.10s
+epoch=11/15 val batch=16/19 starting
+epoch=11/15 val batch=16/19 loss=342.2516 time=0.10s
+epoch=11/15 val batch=17/19 starting
+epoch=11/15 val batch=17/19 loss=344.3775 time=0.10s
+epoch=11/15 val batch=18/19 starting
+epoch=11/15 val batch=18/19 loss=343.0113 time=0.10s
+epoch=11/15 val batch=19/19 starting
+epoch=11/15 val batch=19/19 loss=343.2765 time=0.10s
+epoch=11/15 test batch=1/19 starting
+epoch=11/15 test batch=1/19 loss=346.3467 time=0.10s
+epoch=11/15 test batch=2/19 starting
+epoch=11/15 test batch=2/19 loss=343.3438 time=0.10s
+epoch=11/15 test batch=3/19 starting
+epoch=11/15 test batch=3/19 loss=344.3126 time=0.10s
+epoch=11/15 test batch=4/19 starting
+epoch=11/15 test batch=4/19 loss=344.2470 time=0.10s
+epoch=11/15 test batch=5/19 starting
+epoch=11/15 test batch=5/19 loss=342.1094 time=0.10s
+epoch=11/15 test batch=6/19 starting
+epoch=11/15 test batch=6/19 loss=342.1185 time=0.10s
+epoch=11/15 test batch=7/19 starting
+epoch=11/15 test batch=7/19 loss=340.4581 time=0.10s
+epoch=11/15 test batch=8/19 starting
+epoch=11/15 test batch=8/19 loss=344.1384 time=0.10s
+epoch=11/15 test batch=9/19 starting
+epoch=11/15 test batch=9/19 loss=344.3988 time=0.10s
+epoch=11/15 test batch=10/19 starting
+epoch=11/15 test batch=10/19 loss=343.3994 time=0.10s
+epoch=11/15 test batch=11/19 starting
+epoch=11/15 test batch=11/19 loss=347.1185 time=0.10s
+epoch=11/15 test batch=12/19 starting
+epoch=11/15 test batch=12/19 loss=342.9583 time=0.10s
+epoch=11/15 test batch=13/19 starting
+epoch=11/15 test batch=13/19 loss=343.1940 time=0.10s
+epoch=11/15 test batch=14/19 starting
+epoch=11/15 test batch=14/19 loss=343.9185 time=0.10s
+epoch=11/15 test batch=15/19 starting
+epoch=11/15 test batch=15/19 loss=343.7556 time=0.10s
+epoch=11/15 test batch=16/19 starting
+epoch=11/15 test batch=16/19 loss=341.4072 time=0.10s
+epoch=11/15 test batch=17/19 starting
+epoch=11/15 test batch=17/19 loss=343.7641 time=0.10s
+epoch=11/15 test batch=18/19 starting
+epoch=11/15 test batch=18/19 loss=343.3845 time=0.10s
+epoch=11/15 test batch=19/19 starting
+epoch=11/15 test batch=19/19 loss=342.8229 time=0.10s
+epoch=11/15 train=342.3930±1.654 val=343.7563 test=343.5462 |g|=370.957 theta_mae=0.3335 omega_mae=0.1806 peak=3969MiB time=58.6s
+epoch=12/15 train batch=1/93 starting
+batch_loss=343.4377 |g|=663.020 time=0.58s
+epoch=12/15 train batch=2/93 starting
+batch_loss=342.3326 |g|=466.890 time=0.58s
+epoch=12/15 train batch=3/93 starting
+batch_loss=340.9869 |g|=276.328 time=0.59s
+epoch=12/15 train batch=4/93 starting
+batch_loss=341.0190 |g|=336.628 time=0.58s
+epoch=12/15 train batch=5/93 starting
+batch_loss=341.6877 |g|=159.067 time=0.58s
+epoch=12/15 train batch=6/93 starting
+batch_loss=342.9735 |g|=320.767 time=0.58s
+epoch=12/15 train batch=7/93 starting
+batch_loss=340.9773 |g|=271.104 time=0.59s
+epoch=12/15 train batch=8/93 starting
+batch_loss=344.0918 |g|=576.179 time=0.58s
+epoch=12/15 train batch=9/93 starting
+batch_loss=341.7598 |g|=361.014 time=0.58s
+epoch=12/15 train batch=10/93 starting
+batch_loss=341.2789 |g|=554.960 time=0.58s
+epoch=12/15 train batch=11/93 starting
+batch_loss=344.4521 |g|=438.157 time=0.58s
+epoch=12/15 train batch=12/93 starting
+batch_loss=340.3326 |g|=138.495 time=0.59s
+epoch=12/15 train batch=13/93 starting
+batch_loss=344.2372 |g|=349.769 time=0.58s
+epoch=12/15 train batch=14/93 starting
+batch_loss=341.1049 |g|=360.617 time=0.59s
+epoch=12/15 train batch=15/93 starting
+batch_loss=343.1847 |g|=590.106 time=0.59s
+epoch=12/15 train batch=16/93 starting
+batch_loss=342.2861 |g|=556.426 time=0.58s
+epoch=12/15 train batch=17/93 starting
+batch_loss=343.2562 |g|=513.654 time=0.58s
+epoch=12/15 train batch=18/93 starting
+batch_loss=341.7879 |g|=197.966 time=0.58s
+epoch=12/15 train batch=19/93 starting
+batch_loss=343.7593 |g|=400.354 time=0.58s
+epoch=12/15 train batch=20/93 starting
+batch_loss=343.8460 |g|=366.254 time=0.58s
+epoch=12/15 train batch=21/93 starting
+batch_loss=343.7834 |g|=453.898 time=0.58s
+epoch=12/15 train batch=22/93 starting
+batch_loss=342.5964 |g|=256.087 time=0.58s
+epoch=12/15 train batch=23/93 starting
+batch_loss=343.1125 |g|=158.380 time=0.58s
+epoch=12/15 train batch=24/93 starting
+batch_loss=341.9348 |g|=496.019 time=0.58s
+epoch=12/15 train batch=25/93 starting
+batch_loss=341.3447 |g|=655.843 time=0.58s
+epoch=12/15 train batch=26/93 starting
+batch_loss=343.1567 |g|=656.595 time=0.59s
+epoch=12/15 train batch=27/93 starting
+batch_loss=344.5929 |g|=605.878 time=0.60s
+epoch=12/15 train batch=28/93 starting
+batch_loss=341.8766 |g|=197.757 time=0.59s
+epoch=12/15 train batch=29/93 starting
+batch_loss=344.6844 |g|=393.199 time=0.58s
+epoch=12/15 train batch=30/93 starting
+batch_loss=342.1530 |g|=284.203 time=0.58s
+epoch=12/15 train batch=31/93 starting
+batch_loss=341.4485 |g|=465.900 time=0.58s
+epoch=12/15 train batch=32/93 starting
+batch_loss=342.1646 |g|=380.901 time=0.58s
+epoch=12/15 train batch=33/93 starting
+batch_loss=343.2117 |g|=452.735 time=0.59s
+epoch=12/15 train batch=34/93 starting
+batch_loss=345.0613 |g|=334.753 time=0.59s
+epoch=12/15 train batch=35/93 starting
+batch_loss=341.8552 |g|=310.367 time=0.58s
+epoch=12/15 train batch=36/93 starting
+batch_loss=340.8368 |g|=441.010 time=0.59s
+epoch=12/15 train batch=37/93 starting
+batch_loss=340.3106 |g|=295.427 time=0.59s
+epoch=12/15 train batch=38/93 starting
+batch_loss=342.3181 |g|=235.283 time=0.59s
+epoch=12/15 train batch=39/93 starting
+batch_loss=341.7133 |g|=224.752 time=0.59s
+epoch=12/15 train batch=40/93 starting
+batch_loss=341.7631 |g|=192.455 time=0.58s
+epoch=12/15 train batch=41/93 starting
+batch_loss=343.2103 |g|=546.885 time=0.58s
+epoch=12/15 train batch=42/93 starting
+batch_loss=344.8540 |g|=539.009 time=0.59s
+epoch=12/15 train batch=43/93 starting
+batch_loss=341.5359 |g|=426.024 time=0.59s
+epoch=12/15 train batch=44/93 starting
+batch_loss=340.3060 |g|=207.763 time=0.59s
+epoch=12/15 train batch=45/93 starting
+batch_loss=341.7679 |g|=84.194 time=0.59s
+epoch=12/15 train batch=46/93 starting
+batch_loss=341.0779 |g|=453.186 time=0.58s
+epoch=12/15 train batch=47/93 starting
+batch_loss=345.4744 |g|=517.732 time=0.58s
+epoch=12/15 train batch=48/93 starting
+batch_loss=342.5572 |g|=428.414 time=0.59s
+epoch=12/15 train batch=49/93 starting
+batch_loss=341.4088 |g|=613.575 time=0.58s
+epoch=12/15 train batch=50/93 starting
+batch_loss=343.0318 |g|=309.918 time=0.59s
+epoch=12/15 train batch=51/93 starting
+batch_loss=341.7670 |g|=204.861 time=0.58s
+epoch=12/15 train batch=52/93 starting
+batch_loss=341.1054 |g|=412.017 time=0.59s
+epoch=12/15 train batch=53/93 starting
+batch_loss=342.8933 |g|=611.618 time=0.58s
+epoch=12/15 train batch=54/93 starting
+batch_loss=342.4159 |g|=539.693 time=0.58s
+epoch=12/15 train batch=55/93 starting
+batch_loss=345.7932 |g|=543.121 time=0.59s
+epoch=12/15 train batch=56/93 starting
+batch_loss=342.7016 |g|=447.731 time=0.58s
+epoch=12/15 train batch=57/93 starting
+batch_loss=340.3625 |g|=201.191 time=0.58s
+epoch=12/15 train batch=58/93 starting
+batch_loss=340.0098 |g|=401.453 time=0.58s
+epoch=12/15 train batch=59/93 starting
+batch_loss=341.8409 |g|=437.798 time=0.58s
+epoch=12/15 train batch=60/93 starting
+batch_loss=343.3435 |g|=557.866 time=0.59s
+epoch=12/15 train batch=61/93 starting
+batch_loss=342.9794 |g|=436.101 time=0.58s
+epoch=12/15 train batch=62/93 starting
+batch_loss=341.5158 |g|=330.009 time=0.58s
+epoch=12/15 train batch=63/93 starting
+batch_loss=343.4766 |g|=247.371 time=0.59s
+epoch=12/15 train batch=64/93 starting
+batch_loss=341.3405 |g|=173.240 time=0.58s
+epoch=12/15 train batch=65/93 starting
+batch_loss=340.3915 |g|=508.277 time=0.58s
+epoch=12/15 train batch=66/93 starting
+batch_loss=342.5491 |g|=315.283 time=0.58s
+epoch=12/15 train batch=67/93 starting
+batch_loss=341.1298 |g|=215.841 time=0.58s
+epoch=12/15 train batch=68/93 starting
+batch_loss=341.1532 |g|=268.933 time=0.59s
+epoch=12/15 train batch=69/93 starting
+batch_loss=343.5166 |g|=106.442 time=0.58s
+epoch=12/15 train batch=70/93 starting
+batch_loss=340.9949 |g|=443.722 time=0.59s
+epoch=12/15 train batch=71/93 starting
+batch_loss=342.5777 |g|=233.120 time=0.58s
+epoch=12/15 train batch=72/93 starting
+batch_loss=339.9061 |g|=198.795 time=0.58s
+epoch=12/15 train batch=73/93 starting
+batch_loss=340.6849 |g|=185.771 time=0.58s
+epoch=12/15 train batch=74/93 starting
+batch_loss=340.1731 |g|=189.312 time=0.59s
+epoch=12/15 train batch=75/93 starting
+batch_loss=341.7302 |g|=469.418 time=0.58s
+epoch=12/15 train batch=76/93 starting
+batch_loss=341.7248 |g|=538.234 time=0.58s
+epoch=12/15 train batch=77/93 starting
+batch_loss=345.7784 |g|=549.043 time=0.59s
+epoch=12/15 train batch=78/93 starting
+batch_loss=343.7751 |g|=196.746 time=0.58s
+epoch=12/15 train batch=79/93 starting
+batch_loss=339.9463 |g|=424.009 time=0.58s
+epoch=12/15 train batch=80/93 starting
+batch_loss=340.1426 |g|=226.562 time=0.59s
+epoch=12/15 train batch=81/93 starting
+batch_loss=345.4001 |g|=413.257 time=0.59s
+epoch=12/15 train batch=82/93 starting
+batch_loss=344.2746 |g|=618.069 time=0.58s
+epoch=12/15 train batch=83/93 starting
+batch_loss=340.3240 |g|=579.905 time=0.58s
+epoch=12/15 train batch=84/93 starting
+batch_loss=343.2240 |g|=560.306 time=0.58s
+epoch=12/15 train batch=85/93 starting
+batch_loss=339.9460 |g|=342.324 time=0.58s
+epoch=12/15 train batch=86/93 starting
+batch_loss=340.6055 |g|=99.231 time=0.58s
+epoch=12/15 train batch=87/93 starting
+batch_loss=339.9728 |g|=289.370 time=0.58s
+epoch=12/15 train batch=88/93 starting
+batch_loss=343.0783 |g|=493.862 time=0.60s
+epoch=12/15 train batch=89/93 starting
+batch_loss=344.2493 |g|=476.405 time=0.58s
+epoch=12/15 train batch=90/93 starting
+batch_loss=342.8034 |g|=285.815 time=0.58s
+epoch=12/15 train batch=91/93 starting
+batch_loss=343.2640 |g|=266.643 time=0.58s
+epoch=12/15 train batch=92/93 starting
+batch_loss=343.6152 |g|=220.720 time=0.58s
+epoch=12/15 train batch=93/93 starting
+batch_loss=341.6961 |g|=197.194 time=0.58s
+epoch=12/15 val batch=1/19 starting
+epoch=12/15 val batch=1/19 loss=345.9882 time=0.10s
+epoch=12/15 val batch=2/19 starting
+epoch=12/15 val batch=2/19 loss=342.8671 time=0.10s
+epoch=12/15 val batch=3/19 starting
+epoch=12/15 val batch=3/19 loss=346.1371 time=0.10s
+epoch=12/15 val batch=4/19 starting
+epoch=12/15 val batch=4/19 loss=345.0690 time=0.10s
+epoch=12/15 val batch=5/19 starting
+epoch=12/15 val batch=5/19 loss=342.7562 time=0.10s
+epoch=12/15 val batch=6/19 starting
+epoch=12/15 val batch=6/19 loss=343.6062 time=0.10s
+epoch=12/15 val batch=7/19 starting
+epoch=12/15 val batch=7/19 loss=341.4598 time=0.10s
+epoch=12/15 val batch=8/19 starting
+epoch=12/15 val batch=8/19 loss=345.4485 time=0.10s
+epoch=12/15 val batch=9/19 starting
+epoch=12/15 val batch=9/19 loss=345.0723 time=0.10s
+epoch=12/15 val batch=10/19 starting
+epoch=12/15 val batch=10/19 loss=345.6599 time=0.10s
+epoch=12/15 val batch=11/19 starting
+epoch=12/15 val batch=11/19 loss=342.4682 time=0.10s
+epoch=12/15 val batch=12/19 starting
+epoch=12/15 val batch=12/19 loss=342.2758 time=0.10s
+epoch=12/15 val batch=13/19 starting
+epoch=12/15 val batch=13/19 loss=343.6780 time=0.10s
+epoch=12/15 val batch=14/19 starting
+epoch=12/15 val batch=14/19 loss=339.9551 time=0.10s
+epoch=12/15 val batch=15/19 starting
+epoch=12/15 val batch=15/19 loss=341.9620 time=0.10s
+epoch=12/15 val batch=16/19 starting
+epoch=12/15 val batch=16/19 loss=342.6961 time=0.10s
+epoch=12/15 val batch=17/19 starting
+epoch=12/15 val batch=17/19 loss=345.4299 time=0.10s
+epoch=12/15 val batch=18/19 starting
+epoch=12/15 val batch=18/19 loss=342.3479 time=0.10s
+epoch=12/15 val batch=19/19 starting
+epoch=12/15 val batch=19/19 loss=343.9579 time=0.10s
+epoch=12/15 test batch=1/19 starting
+epoch=12/15 test batch=1/19 loss=345.5779 time=0.10s
+epoch=12/15 test batch=2/19 starting
+epoch=12/15 test batch=2/19 loss=341.6283 time=0.10s
+epoch=12/15 test batch=3/19 starting
+epoch=12/15 test batch=3/19 loss=344.3244 time=0.10s
+epoch=12/15 test batch=4/19 starting
+epoch=12/15 test batch=4/19 loss=343.9250 time=0.10s
+epoch=12/15 test batch=5/19 starting
+epoch=12/15 test batch=5/19 loss=344.6200 time=0.10s
+epoch=12/15 test batch=6/19 starting
+epoch=12/15 test batch=6/19 loss=343.4311 time=0.10s
+epoch=12/15 test batch=7/19 starting
+epoch=12/15 test batch=7/19 loss=341.9424 time=0.10s
+epoch=12/15 test batch=8/19 starting
+epoch=12/15 test batch=8/19 loss=343.6778 time=0.10s
+epoch=12/15 test batch=9/19 starting
+epoch=12/15 test batch=9/19 loss=343.8718 time=0.10s
+epoch=12/15 test batch=10/19 starting
+epoch=12/15 test batch=10/19 loss=343.7728 time=0.10s
+epoch=12/15 test batch=11/19 starting
+epoch=12/15 test batch=11/19 loss=348.5101 time=0.10s
+epoch=12/15 test batch=12/19 starting
+epoch=12/15 test batch=12/19 loss=344.2223 time=0.10s
+epoch=12/15 test batch=13/19 starting
+epoch=12/15 test batch=13/19 loss=342.5424 time=0.10s
+epoch=12/15 test batch=14/19 starting
+epoch=12/15 test batch=14/19 loss=343.7765 time=0.10s
+epoch=12/15 test batch=15/19 starting
+epoch=12/15 test batch=15/19 loss=343.6778 time=0.10s
+epoch=12/15 test batch=16/19 starting
+epoch=12/15 test batch=16/19 loss=343.9021 time=0.10s
+epoch=12/15 test batch=17/19 starting
+epoch=12/15 test batch=17/19 loss=341.7522 time=0.10s
+epoch=12/15 test batch=18/19 starting
+epoch=12/15 test batch=18/19 loss=341.8893 time=0.10s
+epoch=12/15 test batch=19/19 starting
+epoch=12/15 test batch=19/19 loss=341.1546 time=0.10s
+epoch=12/15 train=342.3022±1.483 val=343.6184 test=343.6219 |g|=376.049 theta_mae=0.3327 omega_mae=0.1801 peak=3969MiB time=58.4s
+epoch=13/15 train batch=1/93 starting
+batch_loss=341.7759 |g|=755.475 time=0.59s
+epoch=13/15 train batch=2/93 starting
+batch_loss=344.0319 |g|=685.219 time=0.58s
+epoch=13/15 train batch=3/93 starting
+batch_loss=342.6093 |g|=470.406 time=0.59s
+epoch=13/15 train batch=4/93 starting
+batch_loss=341.1992 |g|=524.610 time=0.59s
+epoch=13/15 train batch=5/93 starting
+batch_loss=340.8822 |g|=167.923 time=0.58s
+epoch=13/15 train batch=6/93 starting
+batch_loss=342.3145 |g|=385.911 time=0.59s
+epoch=13/15 train batch=7/93 starting
+batch_loss=341.7846 |g|=106.351 time=0.58s
+epoch=13/15 train batch=8/93 starting
+batch_loss=340.4759 |g|=284.962 time=0.59s
+epoch=13/15 train batch=9/93 starting
+batch_loss=342.9902 |g|=380.425 time=0.58s
+epoch=13/15 train batch=10/93 starting
+batch_loss=343.1202 |g|=227.600 time=0.59s
+epoch=13/15 train batch=11/93 starting
+batch_loss=342.0245 |g|=281.831 time=0.58s
+epoch=13/15 train batch=12/93 starting
+batch_loss=342.6013 |g|=158.658 time=0.59s
+epoch=13/15 train batch=13/93 starting
+batch_loss=340.5416 |g|=307.559 time=0.59s
+epoch=13/15 train batch=14/93 starting
+batch_loss=340.9275 |g|=327.420 time=0.59s
+epoch=13/15 train batch=15/93 starting
+batch_loss=342.9937 |g|=518.609 time=0.58s
+epoch=13/15 train batch=16/93 starting
+batch_loss=340.9556 |g|=232.431 time=0.59s
+epoch=13/15 train batch=17/93 starting
+batch_loss=341.2844 |g|=356.643 time=0.57s
+epoch=13/15 train batch=18/93 starting
+batch_loss=340.7669 |g|=271.158 time=0.59s
+epoch=13/15 train batch=19/93 starting
+batch_loss=342.7306 |g|=588.821 time=0.58s
+epoch=13/15 train batch=20/93 starting
+batch_loss=341.8026 |g|=221.634 time=0.58s
+epoch=13/15 train batch=21/93 starting
+batch_loss=340.5203 |g|=207.873 time=0.58s
+epoch=13/15 train batch=22/93 starting
+batch_loss=340.3570 |g|=428.958 time=0.59s
+epoch=13/15 train batch=23/93 starting
+batch_loss=342.5779 |g|=240.748 time=0.58s
+epoch=13/15 train batch=24/93 starting
+batch_loss=342.7484 |g|=169.259 time=0.58s
+epoch=13/15 train batch=25/93 starting
+batch_loss=340.7933 |g|=197.538 time=0.58s
+epoch=13/15 train batch=26/93 starting
+batch_loss=341.9981 |g|=445.244 time=0.59s
+epoch=13/15 train batch=27/93 starting
+batch_loss=341.3185 |g|=268.770 time=0.58s
+epoch=13/15 train batch=28/93 starting
+batch_loss=342.0117 |g|=359.423 time=0.58s
+epoch=13/15 train batch=29/93 starting
+batch_loss=343.0422 |g|=164.331 time=0.58s
+epoch=13/15 train batch=30/93 starting
+batch_loss=337.9481 |g|=183.194 time=0.58s
+epoch=13/15 train batch=31/93 starting
+batch_loss=340.8322 |g|=107.790 time=0.59s
+epoch=13/15 train batch=32/93 starting
+batch_loss=341.7990 |g|=321.533 time=0.59s
+epoch=13/15 train batch=33/93 starting
+batch_loss=341.2793 |g|=319.235 time=0.58s
+epoch=13/15 train batch=34/93 starting
+batch_loss=341.5809 |g|=364.828 time=0.58s
+epoch=13/15 train batch=35/93 starting
+batch_loss=343.8851 |g|=308.012 time=0.58s
+epoch=13/15 train batch=36/93 starting
+batch_loss=340.0900 |g|=187.125 time=0.58s
+epoch=13/15 train batch=37/93 starting
+batch_loss=343.2264 |g|=140.231 time=0.58s
+epoch=13/15 train batch=38/93 starting
+batch_loss=342.6676 |g|=127.339 time=0.58s
+epoch=13/15 train batch=39/93 starting
+batch_loss=339.4648 |g|=169.459 time=0.59s
+epoch=13/15 train batch=40/93 starting
+batch_loss=342.1821 |g|=279.486 time=0.59s
+epoch=13/15 train batch=41/93 starting
+batch_loss=343.3299 |g|=296.214 time=0.58s
+epoch=13/15 train batch=42/93 starting
+batch_loss=338.9605 |g|=341.559 time=0.58s
+epoch=13/15 train batch=43/93 starting
+batch_loss=341.7918 |g|=365.403 time=0.59s
+epoch=13/15 train batch=44/93 starting
+batch_loss=344.6404 |g|=181.990 time=0.58s
+epoch=13/15 train batch=45/93 starting
+batch_loss=340.5539 |g|=116.472 time=0.58s
+epoch=13/15 train batch=46/93 starting
+batch_loss=343.0754 |g|=118.704 time=0.58s
+epoch=13/15 train batch=47/93 starting
+batch_loss=341.8179 |g|=104.807 time=0.58s
+epoch=13/15 train batch=48/93 starting
+batch_loss=341.6102 |g|=271.516 time=0.58s
+epoch=13/15 train batch=49/93 starting
+batch_loss=341.9575 |g|=412.110 time=0.58s
+epoch=13/15 train batch=50/93 starting
+batch_loss=341.6085 |g|=155.073 time=0.58s
+epoch=13/15 train batch=51/93 starting
+batch_loss=341.1389 |g|=117.626 time=0.59s
+epoch=13/15 train batch=52/93 starting
+batch_loss=342.4101 |g|=388.537 time=0.58s
+epoch=13/15 train batch=53/93 starting
+batch_loss=345.8831 |g|=436.413 time=0.58s
+epoch=13/15 train batch=54/93 starting
+batch_loss=343.1726 |g|=456.734 time=0.58s
+epoch=13/15 train batch=55/93 starting
+batch_loss=340.9716 |g|=498.953 time=0.59s
+epoch=13/15 train batch=56/93 starting
+batch_loss=342.2181 |g|=509.071 time=0.58s
+epoch=13/15 train batch=57/93 starting
+batch_loss=341.9634 |g|=213.637 time=0.58s
+epoch=13/15 train batch=58/93 starting
+batch_loss=340.4863 |g|=210.766 time=0.58s
+epoch=13/15 train batch=59/93 starting
+batch_loss=343.3505 |g|=223.890 time=0.59s
+epoch=13/15 train batch=60/93 starting
+batch_loss=342.1303 |g|=429.879 time=0.58s
+epoch=13/15 train batch=61/93 starting
+batch_loss=340.9741 |g|=249.432 time=0.59s
+epoch=13/15 train batch=62/93 starting
+batch_loss=344.5341 |g|=801.921 time=0.58s
+epoch=13/15 train batch=63/93 starting
+batch_loss=343.0683 |g|=545.126 time=0.58s
+epoch=13/15 train batch=64/93 starting
+batch_loss=342.1998 |g|=154.053 time=0.58s
+epoch=13/15 train batch=65/93 starting
+batch_loss=340.7245 |g|=249.783 time=0.58s
+epoch=13/15 train batch=66/93 starting
+batch_loss=340.6507 |g|=77.103 time=0.58s
+epoch=13/15 train batch=67/93 starting
+batch_loss=342.3569 |g|=307.250 time=0.58s
+epoch=13/15 train batch=68/93 starting
+batch_loss=341.8367 |g|=506.610 time=0.58s
+epoch=13/15 train batch=69/93 starting
+batch_loss=341.5023 |g|=438.122 time=0.58s
+epoch=13/15 train batch=70/93 starting
+batch_loss=343.5667 |g|=519.547 time=0.58s
+epoch=13/15 train batch=71/93 starting
+batch_loss=341.3009 |g|=181.380 time=0.58s
+epoch=13/15 train batch=72/93 starting
+batch_loss=344.8523 |g|=345.289 time=0.58s
+epoch=13/15 train batch=73/93 starting
+batch_loss=342.9855 |g|=194.690 time=0.58s
+epoch=13/15 train batch=74/93 starting
+batch_loss=341.5519 |g|=196.956 time=0.58s
+epoch=13/15 train batch=75/93 starting
+batch_loss=343.3353 |g|=216.856 time=0.58s
+epoch=13/15 train batch=76/93 starting
+batch_loss=341.1163 |g|=431.294 time=0.59s
+epoch=13/15 train batch=77/93 starting
+batch_loss=345.1960 |g|=540.990 time=0.58s
+epoch=13/15 train batch=78/93 starting
+batch_loss=344.3962 |g|=336.320 time=0.59s
+epoch=13/15 train batch=79/93 starting
+batch_loss=342.0537 |g|=260.387 time=0.59s
+epoch=13/15 train batch=80/93 starting
+batch_loss=341.4070 |g|=149.558 time=0.59s
+epoch=13/15 train batch=81/93 starting
+batch_loss=340.3273 |g|=327.178 time=0.58s
+epoch=13/15 train batch=82/93 starting
+batch_loss=340.6736 |g|=551.805 time=0.58s
+epoch=13/15 train batch=83/93 starting
+batch_loss=344.4088 |g|=486.956 time=0.58s
+epoch=13/15 train batch=84/93 starting
+batch_loss=343.2397 |g|=582.456 time=0.58s
+epoch=13/15 train batch=85/93 starting
+batch_loss=341.5620 |g|=380.138 time=0.60s
+epoch=13/15 train batch=86/93 starting
+batch_loss=340.6830 |g|=381.255 time=0.58s
+epoch=13/15 train batch=87/93 starting
+batch_loss=340.9076 |g|=361.266 time=0.59s
+epoch=13/15 train batch=88/93 starting
+batch_loss=342.5579 |g|=218.826 time=0.58s
+epoch=13/15 train batch=89/93 starting
+batch_loss=342.4158 |g|=347.959 time=0.58s
+epoch=13/15 train batch=90/93 starting
+batch_loss=343.4649 |g|=279.742 time=0.58s
+epoch=13/15 train batch=91/93 starting
+batch_loss=341.1765 |g|=236.747 time=0.59s
+epoch=13/15 train batch=92/93 starting
+batch_loss=344.4453 |g|=612.499 time=0.59s
+epoch=13/15 train batch=93/93 starting
+batch_loss=342.8741 |g|=469.643 time=0.58s
+epoch=13/15 val batch=1/19 starting
+epoch=13/15 val batch=1/19 loss=345.2885 time=0.10s
+epoch=13/15 val batch=2/19 starting
+epoch=13/15 val batch=2/19 loss=343.0045 time=0.10s
+epoch=13/15 val batch=3/19 starting
+epoch=13/15 val batch=3/19 loss=344.3305 time=0.10s
+epoch=13/15 val batch=4/19 starting
+epoch=13/15 val batch=4/19 loss=343.2258 time=0.10s
+epoch=13/15 val batch=5/19 starting
+epoch=13/15 val batch=5/19 loss=340.7411 time=0.10s
+epoch=13/15 val batch=6/19 starting
+epoch=13/15 val batch=6/19 loss=343.2176 time=0.10s
+epoch=13/15 val batch=7/19 starting
+epoch=13/15 val batch=7/19 loss=341.2764 time=0.10s
+epoch=13/15 val batch=8/19 starting
+epoch=13/15 val batch=8/19 loss=343.0199 time=0.10s
+epoch=13/15 val batch=9/19 starting
+epoch=13/15 val batch=9/19 loss=343.0028 time=0.10s
+epoch=13/15 val batch=10/19 starting
+epoch=13/15 val batch=10/19 loss=346.5546 time=0.10s
+epoch=13/15 val batch=11/19 starting
+epoch=13/15 val batch=11/19 loss=342.0732 time=0.10s
+epoch=13/15 val batch=12/19 starting
+epoch=13/15 val batch=12/19 loss=342.4352 time=0.10s
+epoch=13/15 val batch=13/19 starting
+epoch=13/15 val batch=13/19 loss=342.6573 time=0.10s
+epoch=13/15 val batch=14/19 starting
+epoch=13/15 val batch=14/19 loss=342.5349 time=0.10s
+epoch=13/15 val batch=15/19 starting
+epoch=13/15 val batch=15/19 loss=341.9424 time=0.10s
+epoch=13/15 val batch=16/19 starting
+epoch=13/15 val batch=16/19 loss=342.1101 time=0.10s
+epoch=13/15 val batch=17/19 starting
+epoch=13/15 val batch=17/19 loss=342.3948 time=0.10s
+epoch=13/15 val batch=18/19 starting
+epoch=13/15 val batch=18/19 loss=342.8335 time=0.10s
+epoch=13/15 val batch=19/19 starting
+epoch=13/15 val batch=19/19 loss=341.6900 time=0.10s
+epoch=13/15 test batch=1/19 starting
+epoch=13/15 test batch=1/19 loss=344.6931 time=0.13s
+epoch=13/15 test batch=2/19 starting
+epoch=13/15 test batch=2/19 loss=342.4456 time=0.10s
+epoch=13/15 test batch=3/19 starting
+epoch=13/15 test batch=3/19 loss=342.4480 time=0.10s
+epoch=13/15 test batch=4/19 starting
+epoch=13/15 test batch=4/19 loss=343.7400 time=0.10s
+epoch=13/15 test batch=5/19 starting
+epoch=13/15 test batch=5/19 loss=342.9843 time=0.10s
+epoch=13/15 test batch=6/19 starting
+epoch=13/15 test batch=6/19 loss=342.5650 time=0.10s
+epoch=13/15 test batch=7/19 starting
+epoch=13/15 test batch=7/19 loss=342.1395 time=0.10s
+epoch=13/15 test batch=8/19 starting
+epoch=13/15 test batch=8/19 loss=342.5111 time=0.10s
+epoch=13/15 test batch=9/19 starting
+epoch=13/15 test batch=9/19 loss=343.4089 time=0.10s
+epoch=13/15 test batch=10/19 starting
+epoch=13/15 test batch=10/19 loss=343.8161 time=0.10s
+epoch=13/15 test batch=11/19 starting
+epoch=13/15 test batch=11/19 loss=346.6656 time=0.10s
+epoch=13/15 test batch=12/19 starting
+epoch=13/15 test batch=12/19 loss=342.6856 time=0.10s
+epoch=13/15 test batch=13/19 starting
+epoch=13/15 test batch=13/19 loss=342.6562 time=0.10s
+epoch=13/15 test batch=14/19 starting
+epoch=13/15 test batch=14/19 loss=341.3913 time=0.10s
+epoch=13/15 test batch=15/19 starting
+epoch=13/15 test batch=15/19 loss=341.9081 time=0.25s
+epoch=13/15 test batch=16/19 starting
+epoch=13/15 test batch=16/19 loss=342.4769 time=0.10s
+epoch=13/15 test batch=17/19 starting
+epoch=13/15 test batch=17/19 loss=342.5204 time=0.13s
+epoch=13/15 test batch=18/19 starting
+epoch=13/15 test batch=18/19 loss=340.8610 time=0.10s
+epoch=13/15 test batch=19/19 starting
+epoch=13/15 test batch=19/19 loss=341.0500 time=0.10s
+epoch=13/15 train=342.0382±1.372 val=342.8752 test=342.8109 |g|=322.930 theta_mae=0.3313 omega_mae=0.1799 peak=3969MiB time=58.6s
+epoch=14/15 train batch=1/93 starting
+batch_loss=340.4852 |g|=273.045 time=0.59s
+epoch=14/15 train batch=2/93 starting
+batch_loss=343.6868 |g|=408.312 time=0.58s
+epoch=14/15 train batch=3/93 starting
+batch_loss=342.8460 |g|=278.899 time=0.58s
+epoch=14/15 train batch=4/93 starting
+batch_loss=340.6173 |g|=194.352 time=0.58s
+epoch=14/15 train batch=5/93 starting
+batch_loss=342.7587 |g|=301.108 time=0.58s
+epoch=14/15 train batch=6/93 starting
+batch_loss=342.0555 |g|=229.876 time=0.58s
+epoch=14/15 train batch=7/93 starting
+batch_loss=343.4324 |g|=416.963 time=0.59s
+epoch=14/15 train batch=8/93 starting
+batch_loss=341.5132 |g|=430.607 time=0.58s
+epoch=14/15 train batch=9/93 starting
+batch_loss=341.3714 |g|=309.083 time=0.58s
+epoch=14/15 train batch=10/93 starting
+batch_loss=345.1305 |g|=205.466 time=0.58s
+epoch=14/15 train batch=11/93 starting
+batch_loss=342.0508 |g|=302.463 time=0.58s
+epoch=14/15 train batch=12/93 starting
+batch_loss=343.7761 |g|=240.391 time=0.58s
+epoch=14/15 train batch=13/93 starting
+batch_loss=343.4330 |g|=371.962 time=0.58s
+epoch=14/15 train batch=14/93 starting
+batch_loss=338.6549 |g|=312.732 time=0.58s
+epoch=14/15 train batch=15/93 starting
+batch_loss=341.4553 |g|=227.328 time=0.58s
+epoch=14/15 train batch=16/93 starting
+batch_loss=341.9665 |g|=337.806 time=0.58s
+epoch=14/15 train batch=17/93 starting
+batch_loss=342.1898 |g|=161.142 time=0.58s
+epoch=14/15 train batch=18/93 starting
+batch_loss=340.5903 |g|=284.141 time=0.58s
+epoch=14/15 train batch=19/93 starting
+batch_loss=341.6335 |g|=83.575 time=0.58s
+epoch=14/15 train batch=20/93 starting
+batch_loss=344.7164 |g|=432.082 time=0.58s
+epoch=14/15 train batch=21/93 starting
+batch_loss=342.7590 |g|=406.799 time=0.58s
+epoch=14/15 train batch=22/93 starting
+batch_loss=341.8683 |g|=244.370 time=0.58s
+epoch=14/15 train batch=23/93 starting
+batch_loss=342.4853 |g|=153.933 time=0.59s
+epoch=14/15 train batch=24/93 starting
+batch_loss=342.2720 |g|=635.125 time=0.57s
+epoch=14/15 train batch=25/93 starting
+batch_loss=341.5521 |g|=147.330 time=0.58s
+epoch=14/15 train batch=26/93 starting
+batch_loss=343.5073 |g|=229.957 time=0.58s
+epoch=14/15 train batch=27/93 starting
+batch_loss=340.2000 |g|=123.635 time=0.58s
+epoch=14/15 train batch=28/93 starting
+batch_loss=339.4948 |g|=256.712 time=0.59s
+epoch=14/15 train batch=29/93 starting
+batch_loss=342.9673 |g|=268.217 time=0.59s
+epoch=14/15 train batch=30/93 starting
+batch_loss=340.6703 |g|=64.754 time=0.58s
+epoch=14/15 train batch=31/93 starting
+batch_loss=340.2502 |g|=206.441 time=0.59s
+epoch=14/15 train batch=32/93 starting
+batch_loss=341.0542 |g|=485.844 time=0.58s
+epoch=14/15 train batch=33/93 starting
+batch_loss=341.5821 |g|=189.641 time=0.59s
+epoch=14/15 train batch=34/93 starting
+batch_loss=340.7256 |g|=316.360 time=0.58s
+epoch=14/15 train batch=35/93 starting
+batch_loss=341.4610 |g|=338.877 time=0.58s
+epoch=14/15 train batch=36/93 starting
+batch_loss=342.7366 |g|=325.521 time=0.59s
+epoch=14/15 train batch=37/93 starting
+batch_loss=341.6717 |g|=293.041 time=0.58s
+epoch=14/15 train batch=38/93 starting
+batch_loss=340.4256 |g|=216.968 time=0.58s
+epoch=14/15 train batch=39/93 starting
+batch_loss=343.1884 |g|=379.316 time=0.58s
+epoch=14/15 train batch=40/93 starting
+batch_loss=342.3404 |g|=381.454 time=0.59s
+epoch=14/15 train batch=41/93 starting
+batch_loss=341.3806 |g|=101.843 time=0.58s
+epoch=14/15 train batch=42/93 starting
+batch_loss=340.8872 |g|=261.991 time=0.58s
+epoch=14/15 train batch=43/93 starting
+batch_loss=344.0576 |g|=272.352 time=0.58s
+epoch=14/15 train batch=44/93 starting
+batch_loss=343.5063 |g|=335.840 time=0.58s
+epoch=14/15 train batch=45/93 starting
+batch_loss=341.9899 |g|=224.086 time=0.58s
+epoch=14/15 train batch=46/93 starting
+batch_loss=342.6969 |g|=255.198 time=0.59s
+epoch=14/15 train batch=47/93 starting
+batch_loss=342.3233 |g|=119.643 time=0.57s
+epoch=14/15 train batch=48/93 starting
+batch_loss=342.5361 |g|=282.986 time=0.58s
+epoch=14/15 train batch=49/93 starting
+batch_loss=343.1434 |g|=500.547 time=0.58s
+epoch=14/15 train batch=50/93 starting
+batch_loss=338.9545 |g|=301.277 time=0.59s
+epoch=14/15 train batch=51/93 starting
+batch_loss=340.2142 |g|=113.239 time=0.59s
+epoch=14/15 train batch=52/93 starting
+batch_loss=342.2920 |g|=232.817 time=0.59s
+epoch=14/15 train batch=53/93 starting
+batch_loss=338.9095 |g|=248.149 time=0.58s
+epoch=14/15 train batch=54/93 starting
+batch_loss=341.5514 |g|=223.610 time=0.58s
+epoch=14/15 train batch=55/93 starting
+batch_loss=341.7417 |g|=335.699 time=0.58s
+epoch=14/15 train batch=56/93 starting
+batch_loss=340.1275 |g|=278.822 time=0.59s
+epoch=14/15 train batch=57/93 starting
+batch_loss=340.2169 |g|=331.695 time=0.58s
+epoch=14/15 train batch=58/93 starting
+batch_loss=343.0560 |g|=110.945 time=0.58s
+epoch=14/15 train batch=59/93 starting
+batch_loss=344.3483 |g|=149.456 time=0.59s
+epoch=14/15 train batch=60/93 starting
+batch_loss=340.2739 |g|=124.614 time=0.58s
+epoch=14/15 train batch=61/93 starting
+batch_loss=341.2469 |g|=241.269 time=0.58s
+epoch=14/15 train batch=62/93 starting
+batch_loss=342.1210 |g|=138.917 time=0.58s
+epoch=14/15 train batch=63/93 starting
+batch_loss=341.6745 |g|=166.916 time=0.59s
+epoch=14/15 train batch=64/93 starting
+batch_loss=341.5850 |g|=222.069 time=0.58s
+epoch=14/15 train batch=65/93 starting
+batch_loss=340.1110 |g|=272.132 time=0.59s
+epoch=14/15 train batch=66/93 starting
+batch_loss=341.4729 |g|=386.838 time=0.58s
+epoch=14/15 train batch=67/93 starting
+batch_loss=339.5538 |g|=169.557 time=0.58s
+epoch=14/15 train batch=68/93 starting
+batch_loss=340.8602 |g|=268.179 time=0.58s
+epoch=14/15 train batch=69/93 starting
+batch_loss=342.5788 |g|=316.701 time=0.58s
+epoch=14/15 train batch=70/93 starting
+batch_loss=340.2986 |g|=166.904 time=0.58s
+epoch=14/15 train batch=71/93 starting
+batch_loss=344.4178 |g|=315.782 time=0.58s
+epoch=14/15 train batch=72/93 starting
+batch_loss=344.9818 |g|=392.329 time=0.59s
+epoch=14/15 train batch=73/93 starting
+batch_loss=340.0127 |g|=243.146 time=0.59s
+epoch=14/15 train batch=74/93 starting
+batch_loss=340.5695 |g|=101.039 time=0.58s
+epoch=14/15 train batch=75/93 starting
+batch_loss=340.2613 |g|=156.474 time=0.58s
+epoch=14/15 train batch=76/93 starting
+batch_loss=341.4036 |g|=57.304 time=0.58s
+epoch=14/15 train batch=77/93 starting
+batch_loss=343.9024 |g|=170.968 time=0.58s
+epoch=14/15 train batch=78/93 starting
+batch_loss=340.8010 |g|=307.718 time=0.59s
+epoch=14/15 train batch=79/93 starting
+batch_loss=343.2202 |g|=298.467 time=0.59s
+epoch=14/15 train batch=80/93 starting
+batch_loss=342.7471 |g|=211.203 time=0.58s
+epoch=14/15 train batch=81/93 starting
+batch_loss=342.7643 |g|=444.096 time=0.58s
+epoch=14/15 train batch=82/93 starting
+batch_loss=341.7473 |g|=96.016 time=0.58s
+epoch=14/15 train batch=83/93 starting
+batch_loss=340.1743 |g|=246.142 time=0.58s
+epoch=14/15 train batch=84/93 starting
+batch_loss=339.3398 |g|=178.769 time=0.58s
+epoch=14/15 train batch=85/93 starting
+batch_loss=340.3802 |g|=145.357 time=0.59s
+epoch=14/15 train batch=86/93 starting
+batch_loss=341.9351 |g|=150.995 time=0.58s
+epoch=14/15 train batch=87/93 starting
+batch_loss=343.1153 |g|=78.458 time=0.59s
+epoch=14/15 train batch=88/93 starting
+batch_loss=339.6338 |g|=81.847 time=0.58s
+epoch=14/15 train batch=89/93 starting
+batch_loss=340.8104 |g|=308.047 time=0.58s
+epoch=14/15 train batch=90/93 starting
+batch_loss=339.3967 |g|=223.815 time=0.58s
+epoch=14/15 train batch=91/93 starting
+batch_loss=341.2490 |g|=168.332 time=0.58s
+epoch=14/15 train batch=92/93 starting
+batch_loss=343.4277 |g|=232.356 time=0.58s
+epoch=14/15 train batch=93/93 starting
+batch_loss=340.9615 |g|=167.042 time=0.58s
+epoch=14/15 val batch=1/19 starting
+epoch=14/15 val batch=1/19 loss=344.7011 time=0.10s
+epoch=14/15 val batch=2/19 starting
+epoch=14/15 val batch=2/19 loss=341.0130 time=0.10s
+epoch=14/15 val batch=3/19 starting
+epoch=14/15 val batch=3/19 loss=343.9649 time=0.10s
+epoch=14/15 val batch=4/19 starting
+epoch=14/15 val batch=4/19 loss=343.9984 time=0.10s
+epoch=14/15 val batch=5/19 starting
+epoch=14/15 val batch=5/19 loss=341.5630 time=0.10s
+epoch=14/15 val batch=6/19 starting
+epoch=14/15 val batch=6/19 loss=344.5144 time=0.10s
+epoch=14/15 val batch=7/19 starting
+epoch=14/15 val batch=7/19 loss=340.6985 time=0.10s
+epoch=14/15 val batch=8/19 starting
+epoch=14/15 val batch=8/19 loss=341.8307 time=0.10s
+epoch=14/15 val batch=9/19 starting
+epoch=14/15 val batch=9/19 loss=344.0381 time=0.10s
+epoch=14/15 val batch=10/19 starting
+epoch=14/15 val batch=10/19 loss=344.6626 time=0.10s
+epoch=14/15 val batch=11/19 starting
+epoch=14/15 val batch=11/19 loss=341.9614 time=0.10s
+epoch=14/15 val batch=12/19 starting
+epoch=14/15 val batch=12/19 loss=340.3057 time=0.10s
+epoch=14/15 val batch=13/19 starting
+epoch=14/15 val batch=13/19 loss=342.4896 time=0.10s
+epoch=14/15 val batch=14/19 starting
+epoch=14/15 val batch=14/19 loss=341.1171 time=0.10s
+epoch=14/15 val batch=15/19 starting
+epoch=14/15 val batch=15/19 loss=340.3499 time=0.10s
+epoch=14/15 val batch=16/19 starting
+epoch=14/15 val batch=16/19 loss=340.4973 time=0.10s
+epoch=14/15 val batch=17/19 starting
+epoch=14/15 val batch=17/19 loss=342.7780 time=0.10s
+epoch=14/15 val batch=18/19 starting
+epoch=14/15 val batch=18/19 loss=342.5743 time=0.10s
+epoch=14/15 val batch=19/19 starting
+epoch=14/15 val batch=19/19 loss=341.6972 time=0.10s
+epoch=14/15 test batch=1/19 starting
+epoch=14/15 test batch=1/19 loss=344.1486 time=0.10s
+epoch=14/15 test batch=2/19 starting
+epoch=14/15 test batch=2/19 loss=341.6357 time=0.10s
+epoch=14/15 test batch=3/19 starting
+epoch=14/15 test batch=3/19 loss=343.5155 time=0.10s
+epoch=14/15 test batch=4/19 starting
+epoch=14/15 test batch=4/19 loss=343.3743 time=0.10s
+epoch=14/15 test batch=5/19 starting
+epoch=14/15 test batch=5/19 loss=342.0177 time=0.10s
+epoch=14/15 test batch=6/19 starting
+epoch=14/15 test batch=6/19 loss=340.8491 time=0.10s
+epoch=14/15 test batch=7/19 starting
+epoch=14/15 test batch=7/19 loss=340.5600 time=0.10s
+epoch=14/15 test batch=8/19 starting
+epoch=14/15 test batch=8/19 loss=340.8657 time=0.10s
+epoch=14/15 test batch=9/19 starting
+epoch=14/15 test batch=9/19 loss=342.9527 time=0.10s
+epoch=14/15 test batch=10/19 starting
+epoch=14/15 test batch=10/19 loss=342.1702 time=0.10s
+epoch=14/15 test batch=11/19 starting
+epoch=14/15 test batch=11/19 loss=347.6902 time=0.10s
+epoch=14/15 test batch=12/19 starting
+epoch=14/15 test batch=12/19 loss=342.3843 time=0.10s
+epoch=14/15 test batch=13/19 starting
+epoch=14/15 test batch=13/19 loss=341.9476 time=0.10s
+epoch=14/15 test batch=14/19 starting
+epoch=14/15 test batch=14/19 loss=341.8965 time=0.10s
+epoch=14/15 test batch=15/19 starting
+epoch=14/15 test batch=15/19 loss=341.9926 time=0.10s
+epoch=14/15 test batch=16/19 starting
+epoch=14/15 test batch=16/19 loss=341.5818 time=0.10s
+epoch=14/15 test batch=17/19 starting
+epoch=14/15 test batch=17/19 loss=342.3091 time=0.10s
+epoch=14/15 test batch=18/19 starting
+epoch=14/15 test batch=18/19 loss=341.8774 time=0.10s
+epoch=14/15 test batch=19/19 starting
+epoch=14/15 test batch=19/19 loss=340.4980 time=0.10s
+epoch=14/15 train=341.7262±1.445 val=342.3643 test=342.3543 |g|=251.566 theta_mae=0.3310 omega_mae=0.1795 peak=3969MiB time=58.4s
+epoch=15/15 train batch=1/93 starting
+batch_loss=343.3806 |g|=214.880 time=0.59s
+epoch=15/15 train batch=2/93 starting
+batch_loss=337.9694 |g|=286.578 time=0.59s
+epoch=15/15 train batch=3/93 starting
+batch_loss=342.2742 |g|=158.770 time=0.59s
+epoch=15/15 train batch=4/93 starting
+batch_loss=343.8560 |g|=229.746 time=0.59s
+epoch=15/15 train batch=5/93 starting
+batch_loss=340.8726 |g|=43.089 time=0.59s
+epoch=15/15 train batch=6/93 starting
+batch_loss=341.6042 |g|=188.876 time=0.58s
+epoch=15/15 train batch=7/93 starting
+batch_loss=343.4036 |g|=198.340 time=0.59s
+epoch=15/15 train batch=8/93 starting
+batch_loss=343.9695 |g|=192.361 time=0.58s
+epoch=15/15 train batch=9/93 starting
+batch_loss=341.4472 |g|=427.790 time=0.58s
+epoch=15/15 train batch=10/93 starting
+batch_loss=340.5974 |g|=71.333 time=0.59s
+epoch=15/15 train batch=11/93 starting
+batch_loss=341.3314 |g|=191.032 time=0.58s
+epoch=15/15 train batch=12/93 starting
+batch_loss=340.7848 |g|=257.689 time=0.59s
+epoch=15/15 train batch=13/93 starting
+batch_loss=341.2733 |g|=215.290 time=0.59s
+epoch=15/15 train batch=14/93 starting
+batch_loss=339.9825 |g|=357.518 time=0.58s
+epoch=15/15 train batch=15/93 starting
+batch_loss=342.4666 |g|=160.942 time=0.59s
+epoch=15/15 train batch=16/93 starting
+batch_loss=340.7380 |g|=165.167 time=0.59s
+epoch=15/15 train batch=17/93 starting
+batch_loss=346.5919 |g|=103.695 time=0.59s
+epoch=15/15 train batch=18/93 starting
+batch_loss=342.6556 |g|=157.415 time=0.58s
+epoch=15/15 train batch=19/93 starting
+batch_loss=343.8287 |g|=238.299 time=0.59s
+epoch=15/15 train batch=20/93 starting
+batch_loss=341.2006 |g|=279.116 time=0.58s
+epoch=15/15 train batch=21/93 starting
+batch_loss=341.7045 |g|=178.061 time=0.58s
+epoch=15/15 train batch=22/93 starting
+batch_loss=339.7851 |g|=340.304 time=0.59s
+epoch=15/15 train batch=23/93 starting
+batch_loss=341.3033 |g|=80.602 time=0.58s
+epoch=15/15 train batch=24/93 starting
+batch_loss=342.6399 |g|=176.257 time=0.59s
+epoch=15/15 train batch=25/93 starting
+batch_loss=339.4253 |g|=95.089 time=0.60s
+epoch=15/15 train batch=26/93 starting
+batch_loss=341.3051 |g|=246.288 time=0.58s
+epoch=15/15 train batch=27/93 starting
+batch_loss=339.5005 |g|=279.064 time=0.58s
+epoch=15/15 train batch=28/93 starting
+batch_loss=342.6250 |g|=149.309 time=0.58s
+epoch=15/15 train batch=29/93 starting
+batch_loss=342.0607 |g|=148.580 time=0.58s
+epoch=15/15 train batch=30/93 starting
+batch_loss=339.3642 |g|=282.882 time=0.59s
+epoch=15/15 train batch=31/93 starting
+batch_loss=343.4795 |g|=243.938 time=0.58s
+epoch=15/15 train batch=32/93 starting
+batch_loss=342.6369 |g|=174.841 time=0.58s
+epoch=15/15 train batch=33/93 starting
+batch_loss=338.6025 |g|=237.339 time=0.58s
+epoch=15/15 train batch=34/93 starting
+batch_loss=342.7126 |g|=144.614 time=0.59s
+epoch=15/15 train batch=35/93 starting
+batch_loss=342.4760 |g|=228.908 time=0.59s
+epoch=15/15 train batch=36/93 starting
+batch_loss=343.0324 |g|=267.984 time=0.59s
+epoch=15/15 train batch=37/93 starting
+batch_loss=341.3087 |g|=159.636 time=0.58s
+epoch=15/15 train batch=38/93 starting
+batch_loss=340.5448 |g|=377.460 time=0.59s
+epoch=15/15 train batch=39/93 starting
+batch_loss=340.9530 |g|=470.339 time=0.59s
+epoch=15/15 train batch=40/93 starting
+batch_loss=342.5107 |g|=233.812 time=0.59s
+epoch=15/15 train batch=41/93 starting
+batch_loss=345.3455 |g|=320.975 time=0.59s
+epoch=15/15 train batch=42/93 starting
+batch_loss=340.6971 |g|=125.145 time=0.58s
+epoch=15/15 train batch=43/93 starting
+batch_loss=341.8712 |g|=185.713 time=0.59s
+epoch=15/15 train batch=44/93 starting
+batch_loss=342.2485 |g|=274.812 time=0.58s
+epoch=15/15 train batch=45/93 starting
+batch_loss=339.6952 |g|=227.812 time=0.58s
+epoch=15/15 train batch=46/93 starting
+batch_loss=341.9656 |g|=87.732 time=0.58s
+epoch=15/15 train batch=47/93 starting
+batch_loss=343.0443 |g|=393.518 time=0.59s
+epoch=15/15 train batch=48/93 starting
+batch_loss=339.8458 |g|=197.208 time=0.59s
+epoch=15/15 train batch=49/93 starting
+batch_loss=342.1999 |g|=122.679 time=0.59s
+epoch=15/15 train batch=50/93 starting
+batch_loss=344.0378 |g|=107.159 time=0.58s
+epoch=15/15 train batch=51/93 starting
+batch_loss=339.4419 |g|=175.807 time=0.58s
+epoch=15/15 train batch=52/93 starting
+batch_loss=342.1624 |g|=217.009 time=0.58s
+epoch=15/15 train batch=53/93 starting
+batch_loss=343.4860 |g|=272.746 time=0.58s
+epoch=15/15 train batch=54/93 starting
+batch_loss=344.1165 |g|=306.685 time=0.58s
+epoch=15/15 train batch=55/93 starting
+batch_loss=341.7517 |g|=299.735 time=0.58s
+epoch=15/15 train batch=56/93 starting
+batch_loss=343.0315 |g|=47.768 time=0.58s
+epoch=15/15 train batch=57/93 starting
+batch_loss=341.3928 |g|=113.627 time=0.58s
+epoch=15/15 train batch=58/93 starting
+batch_loss=343.7172 |g|=139.714 time=0.59s
+epoch=15/15 train batch=59/93 starting
+batch_loss=341.6915 |g|=112.811 time=0.58s
+epoch=15/15 train batch=60/93 starting
+batch_loss=340.9648 |g|=120.260 time=0.58s
+epoch=15/15 train batch=61/93 starting
+batch_loss=341.4647 |g|=273.959 time=0.58s
+epoch=15/15 train batch=62/93 starting
+batch_loss=343.4434 |g|=283.097 time=0.59s
+epoch=15/15 train batch=63/93 starting
+batch_loss=339.6980 |g|=65.750 time=0.58s
+epoch=15/15 train batch=64/93 starting
+batch_loss=340.1999 |g|=60.330 time=0.58s
+epoch=15/15 train batch=65/93 starting
+batch_loss=338.9631 |g|=209.856 time=0.59s
+epoch=15/15 train batch=66/93 starting
+batch_loss=341.5437 |g|=117.916 time=0.58s
+epoch=15/15 train batch=67/93 starting
+batch_loss=342.9376 |g|=52.741 time=0.59s
+epoch=15/15 train batch=68/93 starting
+batch_loss=341.9491 |g|=93.526 time=0.58s
+epoch=15/15 train batch=69/93 starting
+batch_loss=343.0355 |g|=405.037 time=0.58s
+epoch=15/15 train batch=70/93 starting
+batch_loss=341.6193 |g|=171.899 time=0.58s
+epoch=15/15 train batch=71/93 starting
+batch_loss=339.6050 |g|=272.398 time=0.58s
+epoch=15/15 train batch=72/93 starting
+batch_loss=340.7005 |g|=421.668 time=0.58s
+epoch=15/15 train batch=73/93 starting
+batch_loss=340.3896 |g|=145.064 time=0.59s
+epoch=15/15 train batch=74/93 starting
+batch_loss=340.4341 |g|=75.009 time=0.58s
+epoch=15/15 train batch=75/93 starting
+batch_loss=345.0263 |g|=103.918 time=0.59s
+epoch=15/15 train batch=76/93 starting
+batch_loss=343.4582 |g|=254.082 time=0.60s
+epoch=15/15 train batch=77/93 starting
+batch_loss=339.0083 |g|=100.558 time=0.59s
+epoch=15/15 train batch=78/93 starting
+batch_loss=342.7597 |g|=355.374 time=0.58s
+epoch=15/15 train batch=79/93 starting
+batch_loss=338.4868 |g|=248.920 time=0.58s
+epoch=15/15 train batch=80/93 starting
+batch_loss=342.7840 |g|=164.738 time=0.58s
+epoch=15/15 train batch=81/93 starting
+batch_loss=340.1444 |g|=175.824 time=0.58s
+epoch=15/15 train batch=82/93 starting
+batch_loss=341.3603 |g|=127.816 time=0.58s
+epoch=15/15 train batch=83/93 starting
+batch_loss=340.7784 |g|=336.135 time=0.58s
+epoch=15/15 train batch=84/93 starting
+batch_loss=342.9330 |g|=129.015 time=0.59s
+epoch=15/15 train batch=85/93 starting
+batch_loss=341.6719 |g|=295.776 time=0.58s
+epoch=15/15 train batch=86/93 starting
+batch_loss=342.7719 |g|=156.965 time=0.59s
+epoch=15/15 train batch=87/93 starting
+batch_loss=340.8351 |g|=119.373 time=0.58s
+epoch=15/15 train batch=88/93 starting
+batch_loss=341.4689 |g|=114.040 time=0.58s
+epoch=15/15 train batch=89/93 starting
+batch_loss=341.3864 |g|=153.812 time=0.59s
+epoch=15/15 train batch=90/93 starting
+batch_loss=338.1529 |g|=131.722 time=0.58s
+epoch=15/15 train batch=91/93 starting
+batch_loss=342.8177 |g|=108.236 time=0.59s
+epoch=15/15 train batch=92/93 starting
+batch_loss=343.8941 |g|=203.315 time=0.58s
+epoch=15/15 train batch=93/93 starting
+batch_loss=340.8694 |g|=51.657 time=0.59s
+epoch=15/15 val batch=1/19 starting
+epoch=15/15 val batch=1/19 loss=344.0277 time=0.10s
+epoch=15/15 val batch=2/19 starting
+epoch=15/15 val batch=2/19 loss=341.7027 time=0.10s
+epoch=15/15 val batch=3/19 starting
+epoch=15/15 val batch=3/19 loss=344.1261 time=0.10s
+epoch=15/15 val batch=4/19 starting
+epoch=15/15 val batch=4/19 loss=343.4982 time=0.10s
+epoch=15/15 val batch=5/19 starting
+epoch=15/15 val batch=5/19 loss=340.7268 time=0.10s
+epoch=15/15 val batch=6/19 starting
+epoch=15/15 val batch=6/19 loss=342.8780 time=0.10s
+epoch=15/15 val batch=7/19 starting
+epoch=15/15 val batch=7/19 loss=339.9003 time=0.10s
+epoch=15/15 val batch=8/19 starting
+epoch=15/15 val batch=8/19 loss=343.3065 time=0.10s
+epoch=15/15 val batch=9/19 starting
+epoch=15/15 val batch=9/19 loss=343.1832 time=0.10s
+epoch=15/15 val batch=10/19 starting
+epoch=15/15 val batch=10/19 loss=345.3174 time=0.10s
+epoch=15/15 val batch=11/19 starting
+epoch=15/15 val batch=11/19 loss=342.7506 time=0.10s
+epoch=15/15 val batch=12/19 starting
+epoch=15/15 val batch=12/19 loss=340.2619 time=0.10s
+epoch=15/15 val batch=13/19 starting
+epoch=15/15 val batch=13/19 loss=343.4092 time=0.10s
+epoch=15/15 val batch=14/19 starting
+epoch=15/15 val batch=14/19 loss=341.5798 time=0.10s
+epoch=15/15 val batch=15/19 starting
+epoch=15/15 val batch=15/19 loss=341.5053 time=0.10s
+epoch=15/15 val batch=16/19 starting
+epoch=15/15 val batch=16/19 loss=340.9739 time=0.10s
+epoch=15/15 val batch=17/19 starting
+epoch=15/15 val batch=17/19 loss=343.4667 time=0.10s
+epoch=15/15 val batch=18/19 starting
+epoch=15/15 val batch=18/19 loss=341.3670 time=0.10s
+epoch=15/15 val batch=19/19 starting
+epoch=15/15 val batch=19/19 loss=341.7785 time=0.10s
+epoch=15/15 test batch=1/19 starting
+epoch=15/15 test batch=1/19 loss=344.7399 time=0.10s
+epoch=15/15 test batch=2/19 starting
+epoch=15/15 test batch=2/19 loss=340.4791 time=0.10s
+epoch=15/15 test batch=3/19 starting
+epoch=15/15 test batch=3/19 loss=342.8066 time=0.10s
+epoch=15/15 test batch=4/19 starting
+epoch=15/15 test batch=4/19 loss=343.1598 time=0.10s
+epoch=15/15 test batch=5/19 starting
+epoch=15/15 test batch=5/19 loss=341.8094 time=0.10s
+epoch=15/15 test batch=6/19 starting
+epoch=15/15 test batch=6/19 loss=340.7364 time=0.10s
+epoch=15/15 test batch=7/19 starting
+epoch=15/15 test batch=7/19 loss=341.9155 time=0.10s
+epoch=15/15 test batch=8/19 starting
+epoch=15/15 test batch=8/19 loss=342.2785 time=0.10s
+epoch=15/15 test batch=9/19 starting
+epoch=15/15 test batch=9/19 loss=342.5032 time=0.10s
+epoch=15/15 test batch=10/19 starting
+epoch=15/15 test batch=10/19 loss=341.1942 time=0.10s
+epoch=15/15 test batch=11/19 starting
+epoch=15/15 test batch=11/19 loss=348.1595 time=0.10s
+epoch=15/15 test batch=12/19 starting
+epoch=15/15 test batch=12/19 loss=343.3253 time=0.10s
+epoch=15/15 test batch=13/19 starting
+epoch=15/15 test batch=13/19 loss=341.1640 time=0.10s
+epoch=15/15 test batch=14/19 starting
+epoch=15/15 test batch=14/19 loss=341.1064 time=0.10s
+epoch=15/15 test batch=15/19 starting
+epoch=15/15 test batch=15/19 loss=343.7133 time=0.10s
+epoch=15/15 test batch=16/19 starting
+epoch=15/15 test batch=16/19 loss=341.0632 time=0.10s
+epoch=15/15 test batch=17/19 starting
+epoch=15/15 test batch=17/19 loss=341.3217 time=0.10s
+epoch=15/15 test batch=18/19 starting
+epoch=15/15 test batch=18/19 loss=340.7082 time=0.10s
+epoch=15/15 test batch=19/19 starting
+epoch=15/15 test batch=19/19 loss=340.3929 time=0.10s
+epoch=15/15 train=341.6935±1.632 val=342.4168 test=342.2655 |g|=198.728 theta_mae=0.3309 omega_mae=0.1796 peak=3969MiB time=58.4s
+train_time=906.4s peak_gpu_memory=3968.6 MiB
+Saving demonstration forecasts...
+saved artifacts to /home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/20261029_044942_995728/011_cg2_recursive_seed1

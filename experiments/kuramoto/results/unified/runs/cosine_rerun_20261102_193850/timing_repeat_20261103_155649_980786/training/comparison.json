@@ -1,0 +1,25 @@
+{
+  "config": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/timing_repeat_20261103_155649_980786/config.toml",
+  "cells": [
+    {
+      "label": "cf_cosine_ees_p5_adaptive_reversible",
+      "seed": 1,
+      "solver": "cf_cosine_ees",
+      "reversible_order": 5,
+      "embedded": true,
+      "adjoint": "reversible",
+      "n_steps": 10,
+      "exit_code": 0,
+      "wall_clock_s": 545.768737284001,
+      "out_dir": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/timing_repeat_20261103_155649_980786/training/003_cf_cosine_ees_p5_adaptive_reversible_seed1",
+      "best_val_loss": 342.3981437174479,
+      "final_train_loss": 341.7530445386005,
+      "final_val_loss": 342.47199178059896,
+      "final_test_loss": 342.3256486002604,
+      "final_test_theta_mae_mean": 0.33174318075180054,
+      "final_test_omega_mae_mean": 0.17921853065490723,
+      "train_walltime_s": 527.9414667609963,
+      "peak_gpu_memory_bytes": 3575836416
+    }
+  ]
+}

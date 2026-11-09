@@ -1,0 +1,13 @@
+{
+  "started_at": "2026-11-03T02:54:01.725697+11:00",
+  "config": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/config.toml",
+  "config_sha256": "1ab52e655c9ef7b1866d1cbb8d9f361c5a1ac1cdc8c32f6bc2bb4718802846db",
+  "source_diff_unchanged": true,
+  "georax_revision": "20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
+  "seed": 2,
+  "reversible_order": 5,
+  "embedded": true,
+  "previous_attempt": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/training/01_cf_cosine_ees_p5_adaptive_reversible_seed2",
+  "new_output": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/training/01_cf_cosine_ees_p5_adaptive_reversible_seed2_restart_20261103_025401_724662",
+  "restart_from_epoch": 1
+}

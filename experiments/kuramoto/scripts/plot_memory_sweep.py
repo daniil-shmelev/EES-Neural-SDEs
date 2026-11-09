@@ -16,7 +16,7 @@ from experiments.kuramoto.experiment.config import PROTOCOL, validate_method
 LABELS = {
     "cg2:checkpoint_full": "CG2 (Full)",
     "cg2:checkpoint_recursive": "CG2 (Recursive)",
-    "cfees25:reversible": "CF-EES(2,5) (Reconstruction)",
+    "cf_cosine_ees:reversible": "Cosine EES (Reconstruction)",
     "geometric_euler_heun:checkpoint_full": "Geometric Euler–Heun (Full)",
     "geometric_euler_heun:checkpoint_recursive": "Geometric Euler–Heun (Recursive)",
 }
@@ -81,11 +81,14 @@ def main():
             key=lambda c: c["n_steps"],
         )
         if selected:
+            label = LABELS.get(mode, mode)
+            if mode.startswith("cf_cosine_ees:"):
+                label += f", p={selected[0]['config']['reversible_order']}"
             ax.plot(
                 [c["n_steps"] for c in selected],
                 [c["peak_bytes"] / 2**20 for c in selected],
                 marker="o",
-                label=LABELS.get(mode, mode),
+                label=label,
             )
             plotted += 1
     if not plotted:

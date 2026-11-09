@@ -13,6 +13,7 @@ import sys
 ROOT = Path(__file__).resolve().parent
 # module, uv extra, experiment directory, default configuration, output option
 EXPERIMENTS = {
+    'rigid-body-pendulum': ('experiments.rigid_body_pendulum.scripts.run_comparison', 'jax-base', 'experiments/rigid_body_pendulum', 'config.toml', '--output-base'),
     'kuramoto': ('experiments.kuramoto.scripts.run_comparison', 'jax-base', 'experiments/kuramoto', 'config.toml', '--output-base'),
     'sphere': ('experiments.sphere_latent_nsde.train_activity', 'sphere', 'experiments/sphere_latent_nsde', 'config.toml', '--output-base'),
     'rough-vol': ('neurips.stochastic_volatility.experiment.train', 'stochastic-volatility', 'neurips/stochastic_volatility', 'configs/stoch_vol/sweep.toml', '--output-base'),

@@ -1,0 +1,91 @@
+{
+  "train_walltime_s": 512.8001999620001,
+  "peak_gpu_memory_bytes": 4116658688,
+  "adaptive_solver_work": {
+    "num_steps": [
+      28,
+      22,
+      25,
+      19,
+      24,
+      26,
+      25,
+      27
+    ],
+    "num_accepted_steps": [
+      25,
+      20,
+      22,
+      17,
+      22,
+      22,
+      22,
+      24
+    ],
+    "num_rejected_steps": [
+      3,
+      2,
+      3,
+      2,
+      2,
+      4,
+      3,
+      3
+    ],
+    "split": "val",
+    "model_checkpoint": "model_best.eqx",
+    "brownian_seed": 731,
+    "forward_generator_evaluations": [
+      84,
+      66,
+      75,
+      57,
+      72,
+      78,
+      75,
+      81
+    ]
+  },
+  "best_val_loss": 342.60325520833334,
+  "final_train_loss": 341.6238606770833,
+  "final_val_loss": 342.681494140625,
+  "final_test_loss": 342.7009606933594,
+  "final_test_theta_mae_mean": 0.3316449224948883,
+  "final_test_omega_mae_mean": 0.17943303287029266,
+  "config": {
+    "N": 1000,
+    "activation": "silu",
+    "adaptive": true,
+    "adaptive_atol": 0.03,
+    "adaptive_dtmin": 0.0001,
+    "adaptive_max_steps": 4096,
+    "adjoint": "reversible",
+    "batch_size": 16,
+    "couple_theta_omega": false,
+    "data_dir": "experiments/kuramoto/data/",
+    "data_seed": 0,
+    "device": "gpu",
+    "diffusion_depth": 2,
+    "diffusion_scale": 0.1,
+    "drift_depth": 3,
+    "drift_kind": "second_order_mean_field",
+    "dtype": "float32",
+    "epochs": 15,
+    "grad_clip_norm": 1.0,
+    "hidden_dim": 128,
+    "learning_rate": 0.001,
+    "loss_horizons": [
+      0.125,
+      0.25,
+      0.5,
+      1.0
+    ],
+    "loss_n_samples": 4,
+    "model": "kuramoto_nsde",
+    "n_steps": 10,
+    "save_every_epoch": true,
+    "seed": 0,
+    "skip_plots": false,
+    "solver": "cfees25"
+  }
+}

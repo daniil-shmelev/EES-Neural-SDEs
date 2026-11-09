@@ -1,0 +1,40 @@
+# All settings for ./run kuramoto.
+
+[base]
+epochs = 1
+batch_size = 32
+learning_rate = 1e-3
+device = "gpu"
+dtype = "float32"
+
+model = "kuramoto_nsde"
+hidden_dim = 128
+drift_depth = 3
+diffusion_depth = 2
+activation = "silu"
+diffusion_scale = 0.1
+couple_theta_omega = false
+drift_kind = "second_order_mean_field"
+
+N = 1000
+data_seed = 0
+data_dir = "experiments/kuramoto/data/"
+
+loss_horizons = [0.125, 0.25, 0.5, 1.0]
+loss_n_samples = 4
+grad_clip_norm = 1.0
+
+save_every_epoch = true
+skip_plots = true
+
+[sweep]
+seed = [0]
+
+# Both methods use 150 forward drift and 150 diffusion evaluations.
+[integrators.cfees25]
+adjoints = ["reversible"]
+n_steps = 50
+
+[integrators.cg2]
+adjoints = ["full"]
+n_steps = 75

@@ -51,6 +51,7 @@ def make_model(config: ActivityConfig, key: jax.Array) -> ActivityLatentSDE:
         num_timepoints=config.num_timepoints,
         nfe_budget=config.effective_nfe_budget,
         solver_name=config.solver,
+        reversible_order=config.reversible_order,
         adjoint_name=config.adjoint,
         adaptive=config.adaptive,
         adaptive_atol=config.adaptive_atol,

@@ -24,7 +24,7 @@ def test_plot_rejects_legacy_and_mixed_experiments(tmp_path):
     cell = dict(
         protocol=PROTOCOL,
         config=config,
-        solver="cfees25",
+        solver="cf_cosine_ees",
         adjoint="reversible",
         n_steps=50,
         peak_bytes=100,
@@ -44,11 +44,11 @@ def test_supported_training_methods(label, solver, adjoint):
 @pytest.mark.parametrize(
     "solver,adjoint",
     [
-        ("cfees25", "checkpoint_full"),
-        ("cfees25", "checkpoint_recursive"),
-        ("cfees25", "reversible_checkpointed"),
-        ("cfees25", "direct"),
-        ("cfees25", "auto"),
+        ("cf_cosine_ees", "checkpoint_full"),
+        ("cf_cosine_ees", "checkpoint_recursive"),
+        ("cf_cosine_ees", "reversible_checkpointed"),
+        ("cf_cosine_ees", "direct"),
+        ("cf_cosine_ees", "auto"),
         ("cg2", "reversible"),
         ("geometric_euler_heun", "reversible"),
         ("geometric_euler", "checkpoint_full"),
@@ -67,7 +67,7 @@ def test_plot_rejects_excluded_method(tmp_path):
     cell = dict(
         protocol=PROTOCOL,
         config=config,
-        solver="cfees25",
+        solver="cf_cosine_ees",
         adjoint="checkpoint_full",
         n_steps=50,
         peak_bytes=100,

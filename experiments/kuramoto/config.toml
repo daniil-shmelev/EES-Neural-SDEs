@@ -45,13 +45,14 @@ n_steps = 75
 adjoints = ["full", "recursive"]
 n_steps = 75
 
-[integrators.cfees25]
+[integrators.cf_cosine_ees]
+reversible_order = 5
 adjoints = ["reversible"]
 stepping = ["fixed", "adaptive"]
 n_steps = 50
 
 # Adaptive n_steps sets the initial/maximum step to T/n_steps.
-[integrators.cfees25.adaptive]
+[integrators.cf_cosine_ees.adaptive]
 n_steps = 10
 atol = 3e-2
 dtmin = 1e-4

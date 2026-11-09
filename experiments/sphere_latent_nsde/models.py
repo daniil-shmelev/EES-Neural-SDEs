@@ -29,12 +29,11 @@ from diffrax import (
     VirtualBrownianTree,
     diffeqsolve,
 )
-from georax import CFEES25, CG2, SRKMK, GeometricEulerHeun, GeometricTerm, Sphere
+from georax import CG2, SRKMK, CFCosineEES, GeometricEulerHeun, GeometricTerm, Sphere
 from jaxtyping import Array
 
 from experiments.sphere_latent_nsde.config import (
-    SOLVER_DIFFUSION_NFE_PER_STEP,
-    SOLVER_NFE_PER_STEP,
+    solver_nfe_per_step,
     validate_adaptive_settings,
 )
 from experiments.sphere_latent_nsde.dataset import (
@@ -59,14 +58,19 @@ def sphere_error_norm(error: Array) -> Array:
 
 
 def build_solver(
-    name: Literal["geometric_euler_heun", "cg2", "cfees25", "srkmk_general_shark"],
+    name: Literal[
+        "geometric_euler_heun", "cg2", "cf_cosine_ees", "srkmk_general_shark"
+    ],
+    *,
+    reversible_order: int = 5,
+    adaptive: bool = False,
 ) -> AbstractSolver:
     if name == "geometric_euler_heun":
         return GeometricEulerHeun()
     if name == "cg2":
         return CG2()
-    if name == "cfees25":
-        return CFEES25()
+    if name == "cf_cosine_ees":
+        return CFCosineEES(reversible_order=reversible_order, embedded=adaptive)
     if name == "srkmk_general_shark":
         return SRKMK(GeneralShARK())
     raise ValueError(f"unknown solver {name!r}")
@@ -505,8 +509,10 @@ class PathEncoder(eqx.Module):
         dt = times[1] - times[0]
         t0 = times[0]
         t1 = times[-1]
-        if adaptive and not isinstance(solver, CFEES25):
-            raise ValueError("Adaptive sphere solves require the CF-EES embedded pair.")
+        if adaptive and not (isinstance(solver, CFCosineEES) and solver.embedded):
+            raise ValueError(
+                "Adaptive sphere solves require the cosine EES embedded pair (embedded=True)."
+            )
         max_steps = adaptive_max_steps if adaptive else int(times.shape[0]) + 8
         brownian_tol = adaptive_dtmin / 10.0 if adaptive else dt / 4.0
         driver_dim = self.geometry.coordinate_shape[0]
@@ -614,6 +620,7 @@ class ActivityLatentSDE(eqx.Module):
     nfe_budget: int = eqx.field(static=True)
     nfe_per_step: int = eqx.field(static=True)
     diffusion_nfe_per_step: int = eqx.field(static=True)
+    embedded_nfe_per_step: int = eqx.field(static=True)
     solve_n_steps: int = eqx.field(static=True)
     solve_num_timepoints: int = eqx.field(static=True)
     time_end: float = eqx.field(static=True)
@@ -636,9 +643,10 @@ class ActivityLatentSDE(eqx.Module):
         solver_name: Literal[
             "geometric_euler_heun",
             "cg2",
-            "cfees25",
+            "cf_cosine_ees",
             "srkmk_general_shark",
         ] = "geometric_euler_heun",
+        reversible_order: int = 5,
         adjoint_name: Literal[
             "auto",
             "direct",
@@ -657,10 +665,12 @@ class ActivityLatentSDE(eqx.Module):
         key: Array,
     ) -> None:
         k1, k2, k3, k4 = jax.random.split(key, 4)
-        solver = build_solver(solver_name)
+        solver = build_solver(
+            solver_name, reversible_order=reversible_order, adaptive=adaptive
+        )
         if nfe_budget is None:
             nfe_budget = int(num_timepoints) - 1
-        nfe_per_step = SOLVER_NFE_PER_STEP[solver_name]
+        nfe_per_step = solver_nfe_per_step(solver_name, reversible_order)
         if nfe_budget <= 0:
             raise ValueError("nfe_budget must be positive.")
         if nfe_budget % nfe_per_step != 0:
@@ -701,7 +711,12 @@ class ActivityLatentSDE(eqx.Module):
         self.num_timepoints = int(num_timepoints)
         self.nfe_budget = int(nfe_budget)
         self.nfe_per_step = int(nfe_per_step)
-        self.diffusion_nfe_per_step = SOLVER_DIFFUSION_NFE_PER_STEP[solver_name]
+        self.diffusion_nfe_per_step = solver_nfe_per_step(
+            solver_name, reversible_order, diffusion=True
+        )
+        self.embedded_nfe_per_step = int(
+            isinstance(solver, CFCosineEES) and solver.embedded
+        )
         self.solve_n_steps = solve_n_steps
         self.solve_num_timepoints = self.solve_n_steps + 1
         self.time_end = 0.99
@@ -768,8 +783,11 @@ class ActivityLatentSDE(eqx.Module):
                         "num_rejected_steps",
                     )
                 },
-                "forward_drift_evaluations": sol.stats["num_steps"] * self.nfe_per_step,
+                "forward_drift_evaluations": sol.stats["num_steps"]
+                * (self.nfe_per_step + self.embedded_nfe_per_step),
                 "forward_diffusion_evaluations": sol.stats["num_steps"]
-                * self.diffusion_nfe_per_step,
+                * (self.diffusion_nfe_per_step + self.embedded_nfe_per_step),
+                "embedded_generator_evaluations": sol.stats["num_steps"]
+                * self.embedded_nfe_per_step,
             },
         )

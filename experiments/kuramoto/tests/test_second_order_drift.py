@@ -7,7 +7,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 from diffrax import RecursiveCheckpointAdjoint, ReversibleAdjoint
-from georax import CFEES25
+from georax import CFCosineEES
 
 from experiments.kuramoto.experiment.config import ExperimentConfig
 from experiments.kuramoto.experiment.factories import make_model
@@ -97,6 +97,6 @@ def test_structured_adaptive_reconstruction_gradient():
 def test_active_model_keeps_ordinary_reversible_adjoint():
     config = ExperimentConfig(adaptive=True, N=3, hidden_dim=8)
     model = make_model(config, {"N": 3, "n_obs": 100, "T": 5.0}, jax.random.key(0))
-    assert type(model.solver) is CFEES25
+    assert type(model.solver) is CFCosineEES
     assert type(model.adjoint) is ReversibleAdjoint
     assert hasattr(model.drift_field, "damping_logit")

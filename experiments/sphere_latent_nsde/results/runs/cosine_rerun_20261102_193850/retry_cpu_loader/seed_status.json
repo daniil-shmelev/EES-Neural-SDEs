@@ -1,0 +1,74 @@
+[
+  {
+    "method": "cf_cosine_ees_p5_reversible",
+    "seed": 2,
+    "status": "complete",
+    "output": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/timing_repeat_20261103_155649_980786/training",
+    "experiment": "sphere",
+    "metrics": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/timing_repeat_20261103_155649_980786/training/activity__cf_cosine_ees_p5_reversible__seed2__20261103_155651_282142/metrics.json",
+    "checkpoint": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/timing_repeat_20261103_155649_980786/training/activity__cf_cosine_ees_p5_reversible__seed2__20261103_155651_282142/nsde.eqx"
+  },
+  {
+    "method": "cf_cosine_ees_p5_adaptive_reversible",
+    "seed": 2,
+    "status": "complete",
+    "output": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/training/01_cf_cosine_ees_p5_adaptive_reversible_seed2_restart_20261103_025401_724662",
+    "experiment": "sphere",
+    "metrics": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/training/01_cf_cosine_ees_p5_adaptive_reversible_seed2_restart_20261103_025401_724662/activity__cf_cosine_ees_p5_adaptive_reversible__seed2__20261103_025402_517552/metrics.json",
+    "checkpoint": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/training/01_cf_cosine_ees_p5_adaptive_reversible_seed2_restart_20261103_025401_724662/activity__cf_cosine_ees_p5_adaptive_reversible__seed2__20261103_025402_517552/nsde.eqx"
+  },
+  {
+    "method": "cf_cosine_ees_p5_reversible",
+    "seed": 0,
+    "status": "complete",
+    "output": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/00_cf_cosine_ees_p5_reversible_seed0",
+    "experiment": "kuramoto",
+    "metrics": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/00_cf_cosine_ees_p5_reversible_seed0/000_cf_cosine_ees_p5_reversible_seed0/metrics.json",
+    "checkpoint": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/00_cf_cosine_ees_p5_reversible_seed0/000_cf_cosine_ees_p5_reversible_seed0/model_best.eqx"
+  },
+  {
+    "method": "cf_cosine_ees_p5_adaptive_reversible",
+    "seed": 0,
+    "status": "complete",
+    "output": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/01_cf_cosine_ees_p5_adaptive_reversible_seed0",
+    "experiment": "kuramoto",
+    "metrics": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/01_cf_cosine_ees_p5_adaptive_reversible_seed0/001_cf_cosine_ees_p5_adaptive_reversible_seed0/metrics.json",
+    "checkpoint": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/01_cf_cosine_ees_p5_adaptive_reversible_seed0/001_cf_cosine_ees_p5_adaptive_reversible_seed0/model_best.eqx"
+  },
+  {
+    "method": "cf_cosine_ees_p5_reversible",
+    "seed": 1,
+    "status": "complete",
+    "output": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/02_cf_cosine_ees_p5_reversible_seed1",
+    "experiment": "kuramoto",
+    "metrics": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/02_cf_cosine_ees_p5_reversible_seed1/002_cf_cosine_ees_p5_reversible_seed1/metrics.json",
+    "checkpoint": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/02_cf_cosine_ees_p5_reversible_seed1/002_cf_cosine_ees_p5_reversible_seed1/model_best.eqx"
+  },
+  {
+    "method": "cf_cosine_ees_p5_adaptive_reversible",
+    "seed": 1,
+    "status": "complete",
+    "output": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/timing_repeat_20261103_155649_980786/training",
+    "experiment": "kuramoto",
+    "metrics": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/timing_repeat_20261103_155649_980786/training/003_cf_cosine_ees_p5_adaptive_reversible_seed1/metrics.json",
+    "checkpoint": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/timing_repeat_20261103_155649_980786/training/003_cf_cosine_ees_p5_adaptive_reversible_seed1/model_best.eqx"
+  },
+  {
+    "method": "cf_cosine_ees_p5_reversible",
+    "seed": 2,
+    "status": "complete",
+    "output": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/04_cf_cosine_ees_p5_reversible_seed2",
+    "experiment": "kuramoto",
+    "metrics": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/04_cf_cosine_ees_p5_reversible_seed2/004_cf_cosine_ees_p5_reversible_seed2/metrics.json",
+    "checkpoint": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/04_cf_cosine_ees_p5_reversible_seed2/004_cf_cosine_ees_p5_reversible_seed2/model_best.eqx"
+  },
+  {
+    "method": "cf_cosine_ees_p5_adaptive_reversible",
+    "seed": 2,
+    "status": "complete",
+    "output": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/05_cf_cosine_ees_p5_adaptive_reversible_seed2",
+    "experiment": "kuramoto",
+    "metrics": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/05_cf_cosine_ees_p5_adaptive_reversible_seed2/005_cf_cosine_ees_p5_adaptive_reversible_seed2/metrics.json",
+    "checkpoint": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/05_cf_cosine_ees_p5_adaptive_reversible_seed2/005_cf_cosine_ees_p5_adaptive_reversible_seed2/model_best.eqx"
+  }
+]

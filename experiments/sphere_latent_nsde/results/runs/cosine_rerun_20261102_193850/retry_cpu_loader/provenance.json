@@ -1,0 +1,11 @@
+{
+  "created_at": "2026-11-02T19:38:50.046865+11:00",
+  "source_config": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/config.toml",
+  "source_sha256": "52844dece6c13a70f9fea0fee3d68ebd050068b056f37dba762bcfac03660a3f",
+  "georax_revision": "20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
+  "selection": "All cf_cosine_ees entries only; all other settings preserved.",
+  "git_head": "e49c8ec9037cc0e745e47c97ac7f87a4cc86bc47",
+  "launch_backends": "cuda,cpu",
+  "allocation_policy": "XLA_PYTHON_CLIENT_PREALLOCATE=false",
+  "gpu": "NVIDIA GeForce RTX 5080, 16303 MiB"
+}

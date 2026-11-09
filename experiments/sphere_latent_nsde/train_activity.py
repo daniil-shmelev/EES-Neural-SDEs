@@ -324,6 +324,13 @@ def _metrics_payload(
         },
         "solver_work_unit": "mean per batched solve; includes rejected attempts",
         "solver": config.solver,
+        "reversible_order": config.reversible_order
+        if config.solver == "cf_cosine_ees"
+        else None,
+        "embedded": config.embedded,
+        "embedded_nfe_per_step": int(config.embedded),
+        "nfe_counting_convention": "source-level field calls, including the embedded companion; JIT may share the initial-stage evaluation",
+        "georax_revision": "20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
         "adjoint": config.adjoint,
     }
 

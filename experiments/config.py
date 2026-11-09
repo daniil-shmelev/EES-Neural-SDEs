@@ -10,7 +10,19 @@ ADJOINTS = {
 }
 
 
-def method_label(solver, adjoint, adaptive=False):
+def cosine_stage_count(reversible_order):
+    if (
+        type(reversible_order) is not int
+        or reversible_order < 3
+        or reversible_order % 2 != 1
+    ):
+        raise ValueError("reversible_order must be an odd integer >= 3.")
+    return (reversible_order + 1) // 2
+
+
+def method_label(solver, adjoint, adaptive=False, *, reversible_order=5):
+    if solver == "cf_cosine_ees":
+        solver = f"{solver}_p{reversible_order}"
     names = {value: key for key, value in ADJOINTS.items()}
     names["recursive_checkpoint"] = "recursive"
     return f"{solver}_{'adaptive_' if adaptive else ''}{names.get(adjoint, adjoint)}"

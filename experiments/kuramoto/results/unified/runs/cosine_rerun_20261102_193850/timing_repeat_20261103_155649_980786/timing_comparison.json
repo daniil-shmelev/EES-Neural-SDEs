@@ -1,0 +1,15 @@
+{
+  "experiment": "kuramoto",
+  "method": "cf_cosine_ees_p5_adaptive_reversible",
+  "seed": 1,
+  "epochs": 15,
+  "previous_training_time_s": 924.4652814969886,
+  "new_training_time_s": 527.9414667609963,
+  "time_change_pct": -42.89223431883785,
+  "score_metric": "final_test_loss",
+  "previous_score": 342.3083227539062,
+  "new_score": 342.3256486002604,
+  "old_metrics_file": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/training/03_cf_cosine_ees_p5_adaptive_reversible_seed1/003_cf_cosine_ees_p5_adaptive_reversible_seed1/metrics.json",
+  "new_metrics_file": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/timing_repeat_20261103_155649_980786/training/003_cf_cosine_ees_p5_adaptive_reversible_seed1/metrics.json",
+  "gpu_telemetry": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/timing_repeat_20261103_155649_980786/gpu_telemetry.csv"
+}

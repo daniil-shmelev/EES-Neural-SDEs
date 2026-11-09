@@ -477,8 +477,15 @@ def solver_work(model, config):
         split="val", model_checkpoint="model_best.eqx", brownian_seed=config.seed + 731
     )
     summary["forward_generator_evaluations"] = (
-        np.asarray(stats["num_steps"]) * model.solver.recurrence.num_stages
+        np.asarray(stats["num_steps"])
+        * (model.solver.recurrence.num_stages + int(model.solver.embedded))
     ).tolist()
+    summary["embedded_generator_evaluations"] = (
+        np.asarray(stats["num_steps"]) * int(model.solver.embedded)
+    ).tolist()
+    summary["counting_convention"] = (
+        "source-level field calls; JIT may share the embedded companion's initial-stage evaluation"
+    )
     return summary
 
 
@@ -531,9 +538,7 @@ def main() -> int:
         n_samples=config.loss_n_samples,
     )
 
-    tag = f"N{config.N}_{config.model.value}_{config.solver.value}_{config.adjoint}_seed{config.seed}"
-    if config.adaptive:
-        tag += "_adaptive"
+    tag = f"N{config.N}_{config.model.value}_{config.method}_seed{config.seed}"
     output_dir = args.output_dir or make_output_dir(tag)
     if output_dir.exists() and any(output_dir.iterdir()):
         raise FileExistsError(f"Use a fresh output directory: {output_dir}")
@@ -590,6 +595,7 @@ def main() -> int:
         output_dir / "metrics.json",
         {
             "train_walltime_s": train_walltime_s,
+            "georax_revision": "20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
             "peak_gpu_memory_bytes": peak_memory,
             "adaptive_solver_work": solver_work(best_model, config)
             if config.adaptive

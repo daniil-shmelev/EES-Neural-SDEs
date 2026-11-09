@@ -8,7 +8,7 @@ from dataclasses import asdict, dataclass
 from enum import StrEnum
 from pathlib import Path
 
-from experiments.config import expand_integrators, method_label
+from experiments.config import cosine_stage_count, expand_integrators, method_label
 
 
 class Devices(StrEnum):
@@ -17,7 +17,7 @@ class Devices(StrEnum):
 
 
 class Solvers(StrEnum):
-    CFEES25 = "cfees25"
+    CF_COSINE_EES = "cf_cosine_ees"
     CG2 = "cg2"
     GEOMETRIC_EULER_HEUN = "geometric_euler_heun"
     SRKMK_GENERAL_SHARK = "srkmk_general_shark"
@@ -36,7 +36,7 @@ COMPARISON_METHODS = (
         Solvers.SRKMK_GENERAL_SHARK,
         "checkpoint_recursive",
     ),
-    ("cfees25_reversible", Solvers.CFEES25, "reversible"),
+    ("cf_cosine_ees_p5_reversible", Solvers.CF_COSINE_EES, "reversible"),
     ("geometric_euler_heun_full", Solvers.GEOMETRIC_EULER_HEUN, "checkpoint_full"),
     (
         "geometric_euler_heun_recursive",
@@ -48,13 +48,17 @@ COMPARISON_METHODS = (
 
 def validate_method(solver, adjoint, *, adaptive=False):
     """Keep fixed-step comparisons restricted; allow checkpointed adaptive training."""
-    if adaptive and solver == Solvers.CFEES25 and adjoint == "checkpoint_recursive":
+    if (
+        adaptive
+        and solver == Solvers.CF_COSINE_EES
+        and adjoint == "checkpoint_recursive"
+    ):
         return
     if (solver, adjoint) not in {(s, a) for _, s, a in COMPARISON_METHODS}:
         raise ValueError(
             "Kuramoto supports only CG2, Geometric Euler–Heun or SRKMK–GeneralShARK with checkpoint_full "
             "or checkpoint_recursive, "
-            "and CF-EES(2,5) with reversible."
+            "and cosine EES with reversible."
         )
 
 
@@ -79,7 +83,8 @@ class ExperimentConfig:
     drift_kind: str = "second_order_mean_field"
 
     # SDE integrator
-    solver: Solvers = Solvers.CFEES25
+    solver: Solvers = Solvers.CF_COSINE_EES
+    reversible_order: int = 5
     n_steps: int = 50
     adjoint: str = "reversible"
     adaptive: bool = False
@@ -102,11 +107,14 @@ class ExperimentConfig:
     skip_plots: bool = False
 
     def __post_init__(self):
+        cosine_stage_count(self.reversible_order)
         if type(self.n_steps) is not int or self.n_steps <= 0:
             raise ValueError("n_steps must be a positive integer.")
         if self.adaptive:
-            if self.solver != Solvers.CFEES25:
-                raise ValueError("Adaptive stepping requires a CF-EES embedded pair.")
+            if self.solver != Solvers.CF_COSINE_EES:
+                raise ValueError(
+                    "Adaptive stepping requires a cosine EES embedded pair."
+                )
             if self.adaptive_atol <= 0 or self.adaptive_dtmin <= 0:
                 raise ValueError(
                     "Adaptive tolerance and minimum step must be positive."
@@ -122,11 +130,20 @@ class ExperimentConfig:
 
     @property
     def method(self):
-        return method_label(self.solver, self.adjoint, self.adaptive)
+        return method_label(
+            self.solver,
+            self.adjoint,
+            self.adaptive,
+            reversible_order=self.reversible_order,
+        )
+
+    @property
+    def embedded(self):
+        return self.solver == Solvers.CF_COSINE_EES and self.adaptive
 
 
 DEFAULT_CONFIG = Path(__file__).resolve().parents[1] / "config.toml"
-PROTOCOL = "kuramoto_second_order_mean_field_georaxbf5c355_v4"
+PROTOCOL = "kuramoto_second_order_mean_field_cosine_georax20b401c_v5"
 
 
 def make_config(**overrides) -> ExperimentConfig:
@@ -149,16 +166,20 @@ def load_runs(path: Path) -> list[ExperimentConfig]:
 
 def _build_config(data) -> ExperimentConfig:
     data = dict(data)
+    embedded = data.pop("embedded", None)
     method = data.pop("method", None)
     if method is not None:
         methods = {
             label: (solver, adjoint) for label, solver, adjoint in COMPARISON_METHODS
         }
-        methods["cfees25_adaptive_reversible"] = (Solvers.CFEES25, "reversible")
+        methods["cf_cosine_ees_p5_adaptive_reversible"] = (
+            Solvers.CF_COSINE_EES,
+            "reversible",
+        )
         if method not in methods:
             raise ValueError(f"Unknown Kuramoto method: {method!r}")
         data["solver"], data["adjoint"] = methods[method]
-        data["adaptive"] = method == "cfees25_adaptive_reversible"
+        data["adaptive"] = method == "cf_cosine_ees_p5_adaptive_reversible"
     if "device" in data:
         data["device"] = Devices(data["device"])
     if "solver" in data:
@@ -167,12 +188,20 @@ def _build_config(data) -> ExperimentConfig:
         data["model"] = ModelKind(data["model"])
     if "loss_horizons" in data:
         data["loss_horizons"] = tuple(float(x) for x in data["loss_horizons"])
-    return ExperimentConfig(**data)
+    config = ExperimentConfig(**data)
+    if embedded is not None and (
+        type(embedded) is not bool or embedded != config.embedded
+    ):
+        raise ValueError(
+            "embedded must match whether cosine EES uses adaptive stepping."
+        )
+    return config
 
 
 def serialize_config(config: ExperimentConfig) -> str:
     """JSON-serialise the config (StrEnums become strings, tuples become lists)."""
     payload = asdict(config)
+    payload["embedded"] = config.embedded
     for k, v in payload.items():
         if isinstance(v, StrEnum):
             payload[k] = v.value

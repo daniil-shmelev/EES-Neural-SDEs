@@ -4,6 +4,8 @@ The geometric convergence code and saved figures used by SIAM and NeurIPS remain
 
 `results/so3_reversibility_results.json` is a separate CF-EES(2,5) recovery diagnostic, not the raw data behind the manuscript's 12-panel figure. The current `scripts/so3_reversibility_verify.py` tests a nonlinear matrix-polynomial problem with three driver components; it must not be presented as reproducing the manuscript's two-component rotation experiment.
 
+New recovery and local-order runs use `CFCosineEES(reversible_order=5, embedded=False)` from Georax `20b401c9ffc83dc449c0340f4bc7b1289761c2b1`. Their JSON identifies the cosine solver and embedding policy. Historical arrays and symbolic CF-EES checks keep their original provenance; the recovery plotter selects its default solver label from the input records.
+
 Run `./run convergence-fbm --so3` from the repository root for the recovery diagnostic. It selects the required dependencies and creates a fresh directory under `results/runs/`. The local-order verifier and page compositor remain in `scripts/`.
 
 Euclidean convergence code and saved pages are now in [`../../neurips/convergence_fbm/`](../../neurips/convergence_fbm/README.md); `./run convergence-fbm` selects that NeurIPS experiment. The compositor reads its two source directories separately, with `--results-dir` for SO(3) and `--euclidean-results-dir` for Euclidean panels and combined output.

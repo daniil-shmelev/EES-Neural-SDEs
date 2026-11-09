@@ -1,0 +1,23 @@
+{
+  "config": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/config.toml",
+  "cells": [
+    {
+      "label": "geometric_euler_heun_full",
+      "seed": 1,
+      "solver": "geometric_euler_heun",
+      "adjoint": "checkpoint_full",
+      "n_steps": 150,
+      "exit_code": 0,
+      "wall_clock_s": 1010.28422331,
+      "out_dir": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/20261029_035817_684347/008_geometric_euler_heun_full_seed1",
+      "best_val_loss": 342.41557047526044,
+      "final_train_loss": 341.75536026493194,
+      "final_val_loss": 342.4429626464844,
+      "final_test_loss": 342.31852376302083,
+      "final_test_theta_mae_mean": 0.33030596375465393,
+      "final_test_omega_mae_mean": 0.17954450845718384,
+      "train_walltime_s": 999.1678598710005,
+      "peak_gpu_memory_bytes": 3813485056
+    }
+  ]
+}

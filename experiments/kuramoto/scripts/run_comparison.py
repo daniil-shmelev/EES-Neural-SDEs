@@ -72,6 +72,10 @@ def _run_cell(
         "label": label,
         "seed": seed,
         "solver": solver,
+        "reversible_order": config.reversible_order
+        if solver == "cf_cosine_ees"
+        else None,
+        "embedded": config.embedded,
         "adjoint": adjoint,
         "n_steps": n_steps,
         "exit_code": proc.returncode,

@@ -16,7 +16,7 @@ from diffrax import (
     RecursiveCheckpointAdjoint,
     ReversibleAdjoint,
 )
-from georax import CFEES25, CG2, SRKMK, GeometricEulerHeun
+from georax import CG2, SRKMK, CFCosineEES, GeometricEulerHeun
 
 from experiments.kuramoto.datasets.kuramoto_dataset import (
     KuramotoDataset,
@@ -30,13 +30,16 @@ from experiments.kuramoto.experiment.config import (
 )
 
 _GEORAX_SOLVERS: dict[Solvers, type[AbstractSolver]] = {
-    Solvers.CFEES25: CFEES25,
     Solvers.CG2: CG2,
     Solvers.GEOMETRIC_EULER_HEUN: GeometricEulerHeun,
 }
 
 
-def build_solver(name: Solvers) -> AbstractSolver:
+def build_solver(
+    name: Solvers, *, reversible_order=5, adaptive=False
+) -> AbstractSolver:
+    if name == Solvers.CF_COSINE_EES:
+        return CFCosineEES(reversible_order=reversible_order, embedded=adaptive)
     if name == Solvers.SRKMK_GENERAL_SHARK:
         return SRKMK(GeneralShARK())
     cls = _GEORAX_SOLVERS[name]
@@ -100,7 +103,11 @@ def make_model(
             n_steps=config.n_steps,
             dt=dt,
             n_obs=n_obs,
-            solver=build_solver(config.solver),
+            solver=build_solver(
+                config.solver,
+                reversible_order=config.reversible_order,
+                adaptive=config.adaptive,
+            ),
             diffusion_scale=config.diffusion_scale,
             adjoint=adjoint,
             activation=config.activation,

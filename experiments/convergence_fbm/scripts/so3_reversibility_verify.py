@@ -1,52 +1,6 @@
-"""Convergence verification for CF-EES(2,5;1/10) on SO(3) driven by fBm.
+"""Cosine EES recovery on SO(3) driven by fractional Brownian motion.
 
-Purpose
--------
-SO(3) is a non-abelian linear Lie group. Its natural flat Cartan
-connection has *non-zero* torsion T(f,g) = -[f,g]_so(3). So the
-intrinsic MKW Lie--Butcher series of CF-EES(2,5;1/10) does NOT have
-planar-permutation-symmetric elementary differentials, and the MKW
-antisymmetric order of the scheme on SO(3) is only 3 (verified
-tree-by-tree in scheme_a_tree_algebraic_verify.py, with
-D([o,[o]]) = +1/8 and D([[o],o]) = -1/8 at weight 4).
-
-If the scheme's reversibility rate on SO(3) were governed by the
-intrinsic MKW order, we would see fitted slope 4H - 1:
-  H = 0.4  ->  slope 0.6
-  H = 0.5  ->  slope 1.0
-  H = 0.6  ->  slope 1.4
-
-If instead it is governed by the AMBIENT BCK order (via the embedding
-SO(3) subset GL(3,R) subset R^{3x3} and the ambient flat torsion-free
-connection, per scheme_a_order_preservation.tex Lemma 2.3), the rate
-is 6H - 1:
-  H = 0.4  ->  slope 1.4
-  H = 0.5  ->  slope 2.0
-  H = 0.6  ->  slope 2.6
-
-These predictions are well-separated. We fit the empirical slope.
-
-Experiment design
------------------
-- d = 3 independent fBm drivers of Hurst H (Davies-Harte sampler).
-- Three vector fields xi_m : SO(3) -> so(3), constructed as degree-4
-  matrix polynomials in Y projected to so(3) via antisym(M)=(M-M^T)/2.
-  The polynomial degree ensures that the elementary differentials
-  through weight 5 are non-trivial (a linear xi would make trees with
-  >= 3 children at the root trivially vanish).
-- CF-EES(2,5;1/10) with beta_1 = (1/3,0,0), beta_2 = (-7/16,15/16,0),
-  beta_3 = (49/240,-7/16,2/5), using the pinned Georax solver and SO(3) chart.
-- Step sizes h = T/2^k for k = 6, 7, 8, 9, 10, 11 (six grids).
-- n_trials independent fBm realisations per Hurst; the coarser grids
-  sub-sample the finest grid so all step sizes see the SAME sample
-  path (Wong--Zakai-consistent -- isolates discretisation error from
-  path variation).
-- Global reversibility error E(h) = || Y_back - Y_0 ||_F, averaged
-  over trials, slope fitted in log-log.
-
-Usage
------
-  uv run --extra convergence-fbm python -m experiments.convergence_fbm.scripts.so3_reversibility_verify
+Use Georax's three-stage cosine method (reversible order 5) with three nonlinear matrix-polynomial vector fields. Coarser grids subsample one shared fine driver path per trial; forward and reverse integration use the same increments in opposite order. Saved measurements identify the cosine solver separately from historical CF-EES results.
 """
 
 from __future__ import annotations
@@ -59,7 +13,7 @@ from pathlib import Path
 
 import jax
 import jax.numpy as jnp
-from georax import CFEES25, SO, GeometricTerm
+from georax import SO, CFCosineEES, GeometricTerm
 
 jax.config.update("jax_enable_x64", True)
 
@@ -144,7 +98,7 @@ def _stepper(vfs: tuple):
         return omega[jnp.triu_indices(3, k=1)]
 
     term = GeometricTerm(coeffs, SO(3))
-    solver = CFEES25()
+    solver = CFCosineEES(reversible_order=5)
 
     @jax.jit
     def step(rotation, increment):
@@ -157,8 +111,8 @@ def _stepper(vfs: tuple):
     return step
 
 
-def cfees25_step(Y: np.ndarray, vfs: list[callable], dX: np.ndarray) -> np.ndarray:
-    """Apply the library CF-EES(2,5;1/10) step to a driver increment."""
+def cosine_ees_step(Y: np.ndarray, vfs: list[callable], dX: np.ndarray) -> np.ndarray:
+    """Apply the library cosine EES (p=5) step to a driver increment."""
     return np.asarray(_stepper(tuple(vfs))(jnp.asarray(Y), jnp.asarray(dX)))
 
 
@@ -253,11 +207,14 @@ def run(
         [math.exp(x) for x in log_err],
     )
     return {
+        "solver": "cf_cosine_ees",
+        "reversible_order": 5,
+        "embedded": False,
+        "georax_revision": "20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
         "H": H,
         "fitted_slope": slope,
         "intercept": intercept,
-        "predict_bck5": 6 * H - 1,
-        "predict_mkw3": 4 * H - 1,
+        "reference_slope": 6 * H - 1,
         "per_grid": per_grid_errs,
     }
 
@@ -273,7 +230,7 @@ def main():
     ap.add_argument("--t_final", type=float, default=1.0)
     ap.add_argument("--vf_seed", type=int, default=42)
     ap.add_argument("--base_seed", type=int, default=2026)
-    ap.add_argument("--output_json", default="so3_reversibility_results.json")
+    ap.add_argument("--output_json", default="cosine_so3_reversibility_results.json")
     args = ap.parse_args()
 
     # Y_0 = a generic rotation near but not equal to the identity.
@@ -282,7 +239,7 @@ def main():
     Y0 = expm(V0)
 
     print("=" * 78)
-    print("  CF-EES(2,5; 1/10) reversibility convergence on SO(3) (non-abelian)")
+    print("  Cosine EES (p=5) reversibility convergence on SO(3)")
     print("  Group: SO(3) (matrix embedding in R^{3x3}, non-zero intrinsic torsion)")
     print(f"  Driver: {args.d} independent fBm paths (Davies-Harte)")
     print(f"  Step sizes: h = T / 2^k, k in {args.step_exponents}, T = {args.t_final}")
@@ -290,17 +247,6 @@ def main():
     print("  Vector fields: degree-4 matrix polynomials projected to so(3)")
     print("=" * 78)
     print()
-    print("  Prediction table:")
-    print("  +--------+-----------------------+----------------------+")
-    print("  |   H    |  BCK order-5 (6H-1)   |  MKW order-3 (4H-1)  |")
-    print("  +--------+-----------------------+----------------------+")
-    for H in args.hursts:
-        print(
-            f"  |  {H:.2f}  |        {6 * H - 1:>5.2f}          |        {4 * H - 1:>5.2f}         |"
-        )
-    print("  +--------+-----------------------+----------------------+")
-    print()
-
     results = []
     for H in args.hursts:
         print(f"[Hurst H = {H:.2f}]")
@@ -317,34 +263,12 @@ def main():
         results.append(res)
         print(
             f"  ==> fitted slope = {res['fitted_slope']:.3f}  "
-            f"(predict BCK 6H-1 = {res['predict_bck5']:.2f}, "
-            f"MKW 4H-1 = {res['predict_mkw3']:.2f})"
+            f"(reference 6H-1 = {res['reference_slope']:.2f})"
         )
         print()
 
-    print("=" * 78)
-    print("  SUMMARY")
-    print("=" * 78)
-    print(
-        f"  {'H':>6}  {'fitted slope':>13}  {'6H-1 (BCK q=5)':>16}  {'4H-1 (MKW q=3)':>16}  {'verdict':>24}"
-    )
-    for res in results:
-        fit = res["fitted_slope"]
-        p5 = res["predict_bck5"]
-        p3 = res["predict_mkw3"]
-        d5 = abs(fit - p5)
-        d3 = abs(fit - p3)
-        if d5 < d3 and d5 < 0.35:
-            verdict = "matches BCK order 5"
-        elif d3 < d5 and d3 < 0.35:
-            verdict = "matches MKW order 3"
-        else:
-            verdict = "inconclusive"
-        print(
-            f"  {res['H']:>6.2f}  {fit:>13.3f}  {p5:>16.2f}  {p3:>16.2f}  {verdict:>24}"
-        )
-
     outp = Path(args.output_json)
+    outp.parent.mkdir(parents=True, exist_ok=True)
     outp.write_text(json.dumps(results, indent=2))
     print(f"\nWrote: {outp.resolve()}")
 

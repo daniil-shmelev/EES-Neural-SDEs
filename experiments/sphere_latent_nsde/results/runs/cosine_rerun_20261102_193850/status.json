@@ -1,0 +1,59 @@
+{
+  "experiment": "sphere",
+  "root": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850",
+  "config": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/config.toml",
+  "output": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/training",
+  "status": "failed",
+  "cells": [
+    {
+      "index": 0,
+      "method": "cf_cosine_ees_p5_reversible",
+      "seed": 2,
+      "epochs": 200,
+      "status": "failed",
+      "started_at": "2026-11-02T19:40:03.846082+11:00",
+      "command": [
+        "/home/luke/EES-Neural-SDEs/run",
+        "sphere",
+        "--config",
+        "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/config.toml",
+        "--index",
+        "0",
+        "--output-dir",
+        "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/training/00_cf_cosine_ees_p5_reversible_seed2"
+      ],
+      "output": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/training/00_cf_cosine_ees_p5_reversible_seed2",
+      "log": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/00_cf_cosine_ees_p5_reversible_seed2.log",
+      "pid": 64071,
+      "exit_code": 1,
+      "finished_at": "2026-11-02T19:40:06.562044+11:00",
+      "wall_time_s": 2.715784702988458
+    },
+    {
+      "index": 1,
+      "method": "cf_cosine_ees_p5_adaptive_reversible",
+      "seed": 2,
+      "epochs": 200,
+      "status": "failed",
+      "started_at": "2026-11-02T19:40:06.562488+11:00",
+      "command": [
+        "/home/luke/EES-Neural-SDEs/run",
+        "sphere",
+        "--config",
+        "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/config.toml",
+        "--index",
+        "1",
+        "--output-dir",
+        "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/training/01_cf_cosine_ees_p5_adaptive_reversible_seed2"
+      ],
+      "output": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/training/01_cf_cosine_ees_p5_adaptive_reversible_seed2",
+      "log": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/01_cf_cosine_ees_p5_adaptive_reversible_seed2.log",
+      "pid": 64144,
+      "exit_code": 1,
+      "finished_at": "2026-11-02T19:40:08.832012+11:00",
+      "wall_time_s": 2.2693501970061334
+    }
+  ],
+  "started_at": "2026-11-02T19:40:03.846043+11:00",
+  "finished_at": "2026-11-02T19:40:08.832636+11:00"
+}

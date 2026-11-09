@@ -7,8 +7,14 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import pytest
-from diffrax import RecursiveCheckpointAdjoint, ReversibleAdjoint, SaveAt, StepTo
-from georax import CFEES25
+from diffrax import (
+    RecursiveCheckpointAdjoint,
+    ReversibleAdjoint,
+    SaveAt,
+    StepTo,
+    SubSaveAt,
+)
+from georax import CFCosineEES
 
 from experiments.sphere_latent_nsde.config import (
     ActivityConfig,
@@ -34,7 +40,12 @@ from experiments.sphere_latent_nsde.models import PathEncoder, sphere_error_norm
     ],
 )
 def test_invalid_adaptive_settings(override, match):
-    settings = {"solver": "cfees25", "adaptive": True, "nfe_budget": 12, **override}
+    settings = {
+        "solver": "cf_cosine_ees",
+        "adaptive": True,
+        "nfe_budget": 12,
+        **override,
+    }
     with pytest.raises(ValueError, match=match):
         ActivityConfig(**settings)
 
@@ -45,8 +56,10 @@ def test_sweep_and_serialisation_keep_adaptive_distinct(tmp_path):
     adaptive = [c for c in configs if c.adaptive]
     assert len(adaptive) == 1
     config = adaptive[0]
-    assert config.method == "cfees25_adaptive_reversible"
-    assert any(c.method == "cfees25_reversible" and not c.adaptive for c in configs)
+    assert config.method == "cf_cosine_ees_p5_adaptive_reversible"
+    assert any(
+        c.method == "cf_cosine_ees_p5_reversible" and not c.adaptive for c in configs
+    )
     output = tmp_path / "config.toml"
     output.write_text(to_toml(config))
     assert load_config(output) == config
@@ -76,7 +89,7 @@ def test_adaptive_rejections_replay_and_reversible_gradients():
             z0,
             key,
             times=times,
-            solver=CFEES25(),
+            solver=CFCosineEES(reversible_order=5, embedded=True),
             adjoint=adjoint,
             adaptive=True,
             adaptive_atol=1e-5,
@@ -87,21 +100,32 @@ def test_adaptive_rejections_replay_and_reversible_gradients():
 
     reference_adjoint = RecursiveCheckpointAdjoint()
     mesh = eqx.filter_jit(
-        lambda m: solve(m, reference_adjoint, saveat=SaveAt(t0=True, steps=True))
+        lambda m: solve(
+            m,
+            reference_adjoint,
+            saveat=SaveAt(
+                subs={
+                    "mesh": SubSaveAt(t0=True, steps=True),
+                    "grid": SubSaveAt(ts=times),
+                }
+            ),
+        )
     )(model)
     assert int(mesh.stats["num_rejected_steps"]) > 0
-    accepted = mesh.ts[np.isfinite(np.asarray(mesh.ts))]
+    accepted = mesh.ts["mesh"][np.isfinite(np.asarray(mesh.ts["mesh"]))]
     assert np.ptp(np.diff(accepted)) > 1e-4
     np.testing.assert_allclose(accepted[-1], times[-1])
     assert np.min(np.abs(np.asarray(accepted) - float(times[1]))) < 1e-7
 
-    reference = eqx.filter_jit(lambda m: solve(m, reference_adjoint))(model)
+    # Compare against values saved by the same adaptive solve as this mesh.
+    # A separately compiled SaveAt can change float32 roundoff and its mesh.
+    reference = mesh.ys["grid"]
     replay = eqx.filter_jit(
         lambda m: solve(m, reference_adjoint, stepsize_controller=StepTo(ts=accepted))
     )(model)
-    np.testing.assert_allclose(replay.ys, reference.ys, atol=2e-6, rtol=0)
+    np.testing.assert_allclose(replay.ys, reference, atol=2e-6, rtol=0)
     # Hundreds of float32 chart actions accumulate small radial roundoff.
-    np.testing.assert_allclose(jnp.linalg.norm(reference.ys, axis=-1), 1.0, atol=2e-5)
+    np.testing.assert_allclose(jnp.linalg.norm(reference, axis=-1), 1.0, atol=2e-5)
 
     @eqx.filter_jit
     def value_grad(m, adjoint):

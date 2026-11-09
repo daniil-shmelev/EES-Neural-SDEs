@@ -1,0 +1,17 @@
+[
+  {
+    "final_test_loss": 342.3256486002604,
+    "best_val_loss": 342.3981437174479,
+    "training_time_s": 527.9414667609963,
+    "epochs": 15,
+    "experiment": "kuramoto",
+    "method": "cf_cosine_ees_p5_adaptive_reversible",
+    "seed": 1,
+    "peak_gpu_memory_mib": 3410.183349609375,
+    "metrics_file": "/home/luke/EES-Neural-SDEs/experiments/kuramoto/results/unified/runs/cosine_rerun_20261102_193850/timing_repeat_20261103_155649_980786/training/003_cf_cosine_ees_p5_adaptive_reversible_seed1/metrics.json",
+    "solver": "cf_cosine_ees",
+    "reversible_order": 5,
+    "embedded": true,
+    "georax_revision": "20b401c9ffc83dc449c0340f4bc7b1289761c2b1"
+  }
+]

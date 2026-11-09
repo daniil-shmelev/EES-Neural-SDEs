@@ -1,0 +1,22 @@
+{
+  "experiment": "sphere",
+  "method": "cf_cosine_ees_p5_adaptive_reversible",
+  "seed": 2,
+  "index": 1,
+  "epochs": 200,
+  "config": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/config.toml",
+  "interrupted_output": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/training/01_cf_cosine_ees_p5_adaptive_reversible_seed2",
+  "restart_required": false,
+  "restart_note": "Restart this cell from epoch 1 in a fresh output directory; preserve the completed sphere fixed-step seed 2 and all six Kuramoto cells.",
+  "stopped_pids": [
+    126955,
+    129912,
+    129913,
+    129916
+  ],
+  "stopped_at": "2026-11-02T21:06:49.327022+11:00",
+  "status": "complete",
+  "restarted_at": "2026-11-03T02:54:01.725697+11:00",
+  "current_output": "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/retry_cpu_loader/training/01_cf_cosine_ees_p5_adaptive_reversible_seed2_restart_20261103_025401_724662",
+  "finished_at": "2026-11-03T03:07:48.440015+11:00"
+}

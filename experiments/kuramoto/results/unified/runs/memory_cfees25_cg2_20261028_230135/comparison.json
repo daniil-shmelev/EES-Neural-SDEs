@@ -1,0 +1,41 @@
+{
+  "config": "experiments/kuramoto/results/unified/runs/memory_cfees25_cg2_20261028_230135/config.toml",
+  "cells": [
+    {
+      "label": "cfees25_reversible",
+      "seed": 0,
+      "solver": "cfees25",
+      "adjoint": "reversible",
+      "n_steps": 50,
+      "exit_code": 0,
+      "wall_clock_s": 103.03571026900318,
+      "out_dir": "experiments/kuramoto/results/unified/runs/memory_cfees25_cg2_20261028_230135/000_cfees25_reversible_seed0",
+      "best_val_loss": 946.7302107747396,
+      "final_train_loss": 1096.8485996412194,
+      "final_val_loss": 946.7302107747396,
+      "final_test_loss": 947.8449894205729,
+      "final_test_theta_mae_mean": 0.6263017058372498,
+      "final_test_omega_mae_mean": 0.3233531415462494,
+      "train_walltime_s": 89.0597736100026,
+      "peak_gpu_memory_bytes": 4705083904
+    },
+    {
+      "label": "cg2_full",
+      "seed": 0,
+      "solver": "cg2",
+      "adjoint": "checkpoint_full",
+      "n_steps": 75,
+      "exit_code": 0,
+      "wall_clock_s": 94.32125105999876,
+      "out_dir": "experiments/kuramoto/results/unified/runs/memory_cfees25_cg2_20261028_230135/001_cg2_full_seed0",
+      "best_val_loss": 948.490478515625,
+      "final_train_loss": 1097.346584154212,
+      "final_val_loss": 948.490478515625,
+      "final_test_loss": 949.6387027994791,
+      "final_test_theta_mae_mean": 0.6275224089622498,
+      "final_test_omega_mae_mean": 0.3238446116447449,
+      "train_walltime_s": 81.56236434000311,
+      "peak_gpu_memory_bytes": 5358500352
+    }
+  ]
+}

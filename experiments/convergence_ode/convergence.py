@@ -1,4 +1,4 @@
-"""CF-EES ODE convergence on SO(3), using Diffrax/georax and shared plots.
+"""Cosine EES ODE convergence on SO(3), using Diffrax/georax and shared plots.
 
 Run from the repository root:
     python -m experiments.convergence_ode.convergence
@@ -11,6 +11,7 @@ import csv
 import json
 import os
 import platform
+from datetime import datetime
 from pathlib import Path
 
 os.environ.setdefault("JAX_PLATFORMS", "cpu")
@@ -26,7 +27,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from georax import CFEES25, CFEES27, SO, GeometricTerm
+from georax import SO, CFCosineEES, GeometricTerm
 from scipy.linalg import expm
 
 from ees_core.convergence_plotting import plot_error_curve
@@ -91,6 +92,8 @@ def make_runner(solver, steps, terminal_time):
 
 
 def single_step_diagnostics(solver, h, y0):
+    # Only this diagnostic needs the companion; fixed-step solves omit it.
+    solver = CFCosineEES(reversible_order=solver.reversible_order, embedded=True)
     term = GeometricTerm(frame_coeffs, geometry=SO(3))
     state = solver.init(term, 0.0, h, y0, None)
     y1, discrepancy, _, state, result = solver.step(
@@ -135,11 +138,9 @@ def plot_results(rows, output_dir):
                 reference_mask=errors > 100 * np.finfo(float).eps,
             )
             symbol = r"\overleftarrow{\mathcal{E}}(h)" if col else r"\mathcal{E}(h)"
-            axes[index, col].set_title(
-                rf"${symbol}$ for $\mathrm{{CF\text{{-}}EES}}(2,{order})$"
-            )
+            axes[index, col].set_title(rf"${symbol}$ for cosine EES, $p={order}$")
     fig.tight_layout()
-    fig.savefig(output_dir / "cfees_ode_convergence.pdf")
+    fig.savefig(output_dir / "cf_cosine_ees_ode_convergence.pdf")
     plt.close(fig)
 
 
@@ -152,13 +153,23 @@ def main():
         "--plot-only", action="store_true", help="Redraw the saved CSV without solving."
     )
     parser.add_argument(
-        "--output-dir", type=Path, default=Path(__file__).parent / "results"
+        "--output-dir",
+        type=Path,
+        default=Path(__file__).parent
+        / "results"
+        / "runs"
+        / datetime.now().astimezone().strftime("cosine_%Y%m%d_%H%M%S_%f"),
     )
     args = parser.parse_args()
     if args.min_power < 0 or args.max_power < args.min_power or args.terminal_time <= 0:
         parser.error("Use 0 <= min-power <= max-power and a positive terminal time.")
     args.output_dir.mkdir(parents=True, exist_ok=True)
     if args.plot_only:
+        metadata = json.loads((args.output_dir / "ode_validation.json").read_text())
+        if metadata.get("solver") != "cf_cosine_ees":
+            parser.error(
+                "This plotter requires cosine EES measurements; historical CF-EES data retain their original labels."
+            )
         with (args.output_dir / "ode_convergence.csv").open(newline="") as stream:
             rows = [
                 {
@@ -180,7 +191,7 @@ def main():
         atol=2e-15,
     )
     rows, methods = [], {}
-    for solver in [CFEES25(), CFEES27()]:
+    for solver in [CFCosineEES(reversible_order=5), CFCosineEES(reversible_order=7)]:
         order = solver.antisymmetric_order(None)
         method_rows = []
         for power in range(args.min_power, args.max_power + 1):
@@ -215,12 +226,17 @@ def main():
             for key in ["forward", "recovery", "local_recovery", "embedded"]
         }
         methods[str(order)] = fits
-        print(f"CF-EES(2,{order}): {json.dumps(fits)}", flush=True)
+        print(f"Cosine EES p={order}: {json.dumps(fits)}", flush=True)
     with (args.output_dir / "ode_convergence.csv").open("w", newline="") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
     summary = {
+        "solver": "cf_cosine_ees",
+        "reversible_orders": [5, 7],
+        "embedded": False,
+        "embedded_diagnostic": "Lie-Euler companion enabled only for single-step diagnostics",
+        "georax_revision": "20b401c9ffc83dc449c0340f4bc7b1289761c2b1",
         "terminal_time": args.terminal_time,
         "powers": [args.min_power, args.max_power],
         "arithmetic": "float64",

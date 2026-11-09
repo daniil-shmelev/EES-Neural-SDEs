@@ -217,9 +217,10 @@ dependencies = [
 [[package]]
 name = "diffrax-lowstorage"
 version = "0.1.0"
-source = { git = "https://github.com/luke-a-thompson/diffrax-lowstorage.git?rev=3f72fe75660ed325bfc35086239950c73c3e98c8#3f72fe75660ed325bfc35086239950c73c3e98c8" }
+source = { git = "https://github.com/luke-a-thompson/diffrax-lowstorage.git?rev=a5659e83322f9c76bd72fb84387c2a30162d798d#a5659e83322f9c76bd72fb84387c2a30162d798d" }
 dependencies = [
     { name = "diffrax" },
+    { name = "equinox" },
     { name = "jax" },
     { name = "typing-extensions" },
 ]
@@ -360,7 +361,7 @@ torus-memory = [
 requires-dist = [
     { name = "cyreal", marker = "extra == 'jax-base'", git = "https://github.com/luke-a-thompson/cyreal_dynamics.git?rev=88f02657989fc4f9c85df0afb1452085fc3f2f8b" },
     { name = "diffrax", marker = "extra == 'jax-base'", git = "https://github.com/sammccallum/diffrax.git?rev=aeb1335b5a6278e85a270231e0f97b8db4453ae6" },
-    { name = "diffrax-lowstorage", marker = "extra == 'stochastic-volatility'", git = "https://github.com/luke-a-thompson/diffrax-lowstorage.git?rev=3f72fe75660ed325bfc35086239950c73c3e98c8" },
+    { name = "diffrax-lowstorage", marker = "extra == 'stochastic-volatility'", git = "https://github.com/luke-a-thompson/diffrax-lowstorage.git?rev=a5659e83322f9c76bd72fb84387c2a30162d798d" },
     { name = "ees-neural-sdes", extras = ["algebra"], marker = "extra == 'order-verification'" },
     { name = "ees-neural-sdes", extras = ["algebra"], marker = "extra == 'stability-ode'" },
     { name = "ees-neural-sdes", extras = ["convergence-fbm", "order-verification", "stability-ode", "torus-memory", "sphere", "stochastic-volatility", "stiff-gbm", "ou"], marker = "extra == 'all'" },
@@ -372,7 +373,7 @@ requires-dist = [
     { name = "ees-neural-sdes", extras = ["torchsde"], marker = "extra == 'stiff-gbm'" },
     { name = "equinox", marker = "extra == 'jax-base'", specifier = ">=0.13.6" },
     { name = "fbm", specifier = ">=0.3.0" },
-    { name = "georax", marker = "extra == 'jax-base'", git = "https://github.com/luke-a-thompson/georax.git?rev=bf5c3554bfa8199427d4a3200fa58b69b657aa98" },
+    { name = "georax", marker = "extra == 'jax-base'", git = "https://github.com/luke-a-thompson/georax.git?rev=20b401c9ffc83dc449c0340f4bc7b1289761c2b1" },
     { name = "jax", marker = "sys_platform != 'linux' and extra == 'jax-base'", specifier = ">=0.10.0" },
     { name = "jax", extras = ["cuda12"], marker = "sys_platform == 'linux' and extra == 'jax-base'", specifier = ">=0.10.0" },
     { name = "jaxtyping", marker = "extra == 'jax-base'", specifier = ">=0.2.36" },
@@ -498,7 +499,7 @@ wheels = [
 [[package]]
 name = "georax"
 version = "0.1.0"
-source = { git = "https://github.com/luke-a-thompson/georax.git?rev=bf5c3554bfa8199427d4a3200fa58b69b657aa98#bf5c3554bfa8199427d4a3200fa58b69b657aa98" }
+source = { git = "https://github.com/luke-a-thompson/georax.git?rev=20b401c9ffc83dc449c0340f4bc7b1289761c2b1#20b401c9ffc83dc449c0340f4bc7b1289761c2b1" }
 dependencies = [
     { name = "diffrax" },
     { name = "diffrax-lowstorage" },

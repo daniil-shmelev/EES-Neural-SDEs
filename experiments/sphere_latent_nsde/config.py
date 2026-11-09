@@ -8,7 +8,7 @@ from dataclasses import asdict, dataclass, fields
 from pathlib import Path
 from typing import Any, Literal
 
-from experiments.config import expand_integrators, method_label
+from experiments.config import cosine_stage_count, expand_integrators, method_label
 from experiments.sphere_latent_nsde.dataset import NUM_TIMEPOINTS
 
 DEFAULT_CONFIG = Path(__file__).resolve().parent / "config.toml"
@@ -27,8 +27,8 @@ METHODS = {
         "geometric_euler_heun",
         "recursive_checkpoint",
     ),
-    "cfees25_reversible": ("cfees25", "reversible"),
-    "cfees25_adaptive_reversible": ("cfees25", "reversible"),
+    "cf_cosine_ees_p5_reversible": ("cf_cosine_ees", "reversible"),
+    "cf_cosine_ees_p5_adaptive_reversible": ("cf_cosine_ees", "reversible"),
     "cg2_direct": ("cg2", "direct"),
     "srkmk_general_shark_direct": ("srkmk_general_shark", "direct"),
     "srkmk_general_shark_full": ("srkmk_general_shark", "checkpoint_full"),
@@ -38,21 +38,25 @@ METHODS = {
 SOLVER_NFE_PER_STEP = {
     "geometric_euler_heun": 1,
     "cg2": 2,
-    "cfees25": 3,
     "srkmk_general_shark": 2,
 }
 SOLVER_DIFFUSION_NFE_PER_STEP = {
     "geometric_euler_heun": 2,
     "cg2": 2,
-    "cfees25": 3,
     "srkmk_general_shark": 3,
 }
-COMMON_NFE_GRANULARITY = math.lcm(*SOLVER_NFE_PER_STEP.values())
+
+
+def solver_nfe_per_step(solver, reversible_order=5, *, diffusion=False):
+    if solver == "cf_cosine_ees":
+        return cosine_stage_count(reversible_order)
+    counts = SOLVER_DIFFUSION_NFE_PER_STEP if diffusion else SOLVER_NFE_PER_STEP
+    return counts[solver]
 
 
 def validate_adaptive_settings(solver, n_steps, atol, dtmin, max_steps):
-    if solver != "cfees25":
-        raise ValueError("Adaptive sphere solves require the CF-EES embedded pair.")
+    if solver != "cf_cosine_ees":
+        raise ValueError("Adaptive sphere solves require the cosine EES embedded pair.")
     if not math.isfinite(atol) or atol <= 0:
         raise ValueError("adaptive_atol must be finite and positive.")
     if not math.isfinite(dtmin) or not 0 < dtmin <= 0.99 / n_steps:
@@ -82,9 +86,10 @@ class ActivityConfig:
     solver: Literal[
         "geometric_euler_heun",
         "cg2",
-        "cfees25",
+        "cf_cosine_ees",
         "srkmk_general_shark",
     ] = "geometric_euler_heun"
+    reversible_order: int = 5
     adjoint: Literal[
         "auto",
         "direct",
@@ -115,6 +120,11 @@ class ActivityConfig:
     max_eval_batches: int | None = None
 
     def __post_init__(self):
+        if self.solver not in (*SOLVER_NFE_PER_STEP, "cf_cosine_ees"):
+            raise ValueError(
+                f"Unsupported solver {self.solver!r}; use cf_cosine_ees for new EES runs."
+            )
+        cosine_stage_count(self.reversible_order)
         if self.n_steps is not None:
             if type(self.n_steps) is not int or self.n_steps <= 0:
                 raise ValueError("n_steps must be a positive integer.")
@@ -136,15 +146,24 @@ class ActivityConfig:
 
     @property
     def method(self) -> str:
-        return method_label(self.solver, self.adjoint, self.adaptive)
+        return method_label(
+            self.solver,
+            self.adjoint,
+            self.adaptive,
+            reversible_order=self.reversible_order,
+        )
+
+    @property
+    def embedded(self) -> bool:
+        return self.solver == "cf_cosine_ees" and self.adaptive
 
     @property
     def nfe_per_step(self) -> int:
-        return SOLVER_NFE_PER_STEP[self.solver]
+        return solver_nfe_per_step(self.solver, self.reversible_order)
 
     @property
     def diffusion_nfe_per_step(self) -> int:
-        return SOLVER_DIFFUSION_NFE_PER_STEP[self.solver]
+        return solver_nfe_per_step(self.solver, self.reversible_order, diffusion=True)
 
     @property
     def effective_nfe_budget(self) -> int:
@@ -153,7 +172,10 @@ class ActivityConfig:
         if self.nfe_budget is not None:
             return int(self.nfe_budget)
         output_intervals = int(self.num_timepoints) - 1
-        budget = output_intervals - (output_intervals % COMMON_NFE_GRANULARITY)
+        granularity = math.lcm(
+            *SOLVER_NFE_PER_STEP.values(), cosine_stage_count(self.reversible_order)
+        )
+        budget = output_intervals - (output_intervals % granularity)
         if budget <= 0:
             raise ValueError(
                 "num_timepoints must provide at least one common NFE interval; "
@@ -226,6 +248,7 @@ def to_toml(config: ActivityConfig) -> str:
         "nfe_budget",
         "n_steps",
         "solver",
+        "reversible_order",
         "adjoint",
         "adaptive",
         "adaptive_atol",
@@ -251,17 +274,19 @@ def to_toml(config: ActivityConfig) -> str:
         if value is None:
             continue
         lines.append(f"{name} = {_toml_value(value)}")
+    lines.append(f"embedded = {_toml_value(config.embedded)}")
     return "\n".join(lines) + "\n"
 
 
 def _build_config(data: dict[str, Any]) -> ActivityConfig:
     data = dict(data)
+    embedded = data.pop("embedded", None)
     method = data.pop("method", None)
     if method is not None:
         if method not in METHODS:
             raise ValueError(f"Unknown activity method: {method!r}")
         data["solver"], data["adjoint"] = METHODS[method]
-        data["adaptive"] = method == "cfees25_adaptive_reversible"
+        data["adaptive"] = method == "cf_cosine_ees_p5_adaptive_reversible"
     if "data_dir" in data:
         data["data_dir"] = Path(data["data_dir"])
 
@@ -269,7 +294,14 @@ def _build_config(data: dict[str, Any]) -> ActivityConfig:
     unknown = sorted(set(data) - valid)
     if unknown:
         raise KeyError(f"Unknown activity config keys: {unknown}")
-    return ActivityConfig(**data)
+    config = ActivityConfig(**data)
+    if embedded is not None and (
+        type(embedded) is not bool or embedded != config.embedded
+    ):
+        raise ValueError(
+            "embedded must match whether cosine EES uses adaptive stepping."
+        )
+    return config
 
 
 def _toml_value(value: Any) -> str:

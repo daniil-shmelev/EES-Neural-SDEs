@@ -1,0 +1,38 @@
+Configuration: /home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/config.toml
+Outputs: /home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/training/00_cf_cosine_ees_p5_reversible_seed2
+running sweep_index=0
+Traceback (most recent call last):
+  File "<frozen runpy>", line 203, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/train_activity.py", line 470, in <module>
+    raise SystemExit(main())
+                     ~~~~^^
+  File "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/train_activity.py", line 437, in main
+    return _run_single_config(
+        _configure_runtime(sweep_config_at(args.config, args.index)),
+        args.output_base,
+    )
+  File "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/train_activity.py", line 354, in _run_single_config
+    train_dataset = make_dataset(config, "train")
+  File "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/factories.py", line 20, in make_dataset
+    return HumanActivityDataset(
+        split=split,
+    ...<4 lines>...
+        output_num_timepoints=config.num_timepoints,
+    )
+  File "<string>", line 9, in __init__
+  File "/home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/dataset.py", line 337, in __post_init__
+    self._obs = to_host_jax_array(obs)
+                ~~~~~~~~~~~~~~~~~^^^^^
+  File "/home/luke/EES-Neural-SDEs/.venv/lib/python3.13/site-packages/cyreal/datasets/utils.py", line 122, in to_host_jax_array
+    cpu_devices = jax.devices("cpu")
+  File "/home/luke/EES-Neural-SDEs/.venv/lib/python3.13/site-packages/jax/_src/xla_bridge.py", line 1025, in devices
+    return get_backend(backend).devices()
+           ~~~~~~~~~~~^^^^^^^^^
+  File "/home/luke/EES-Neural-SDEs/.venv/lib/python3.13/site-packages/jax/_src/xla_bridge.py", line 959, in get_backend
+    return _get_backend_uncached(platform)
+  File "/home/luke/EES-Neural-SDEs/.venv/lib/python3.13/site-packages/jax/_src/xla_bridge.py", line 947, in _get_backend_uncached
+    raise RuntimeError(
+        f"Unknown backend {platform}. Available backends are {list(bs)}")
+RuntimeError: Unknown backend cpu. Available backends are ['cuda']
+Experiment failed (exit 1). Outputs: /home/luke/EES-Neural-SDEs/experiments/sphere_latent_nsde/results/runs/cosine_rerun_20261102_193850/training/00_cf_cosine_ees_p5_reversible_seed2
