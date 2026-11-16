@@ -19,7 +19,7 @@ dependencies = [
 
 # Symbolic Butcher / Hopf-algebra verification
 algebra = [
-    "kauri @ git+https://github.com/daniil-shmelev/kauri.git@0af3219a40249d33efc45591669cc6415e6270e2",
+    "kauri @ git+https://github.com/daniil-shmelev/kauri.git@c76ca984b81040027372c931820bf03b2f524896",
     "sympy>=1.13",
 ]
 
