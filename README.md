@@ -42,7 +42,7 @@ Install `uv`, then run experiments from this repository root. `./run` selects th
 | `./run ou` | OU comparison: Reversible Heun and EES(2,5), then plot |
 | `./run stiff-gbm` | GBM comparison: Reversible Heun, EES(2,5), EES(2,7), then plot |
 | `./run torus-memory` | Seven-torus benchmark |
-| `./run order-verification --manuscript /path/to/SIAM/ees_simods.tex` | Exact order and printed-coefficient checks (read-only) |
+| `./run order-verification` | Exact kauri order checks of the cosine schemes (s = 3, 4, 5) and printed-coefficient checks |
 
 Use `./run <experiment> --help` for settings and setup locations, or `--dry-run` to inspect the commands without installing dependencies or running computations. Training sweeps accept `--config PATH`; `--output-dir PATH` selects a new output directory. Kuramoto and sphere each have one `config.toml` directly in their experiment directory: `[base]` holds shared settings, `[sweep]` selects seeds, and `[integrators.<name>]` lists adjoints, step counts and stepping modes. Edit that file to change run parameters; `--index N` selects one sweep entry. Other experiments forward additional options to their entrypoint. OU/GBM accept `--method`, `--epochs` and `--seed`; their remaining settings are in the training scripts linked by `--help`.
 
